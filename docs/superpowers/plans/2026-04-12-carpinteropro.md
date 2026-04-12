@@ -14,7 +14,7 @@
 
 | Fase | Estado | Completada |
 |------|--------|-----------|
-| **Fase 0** — Scaffolding + deploy pipeline | 🔄 En progreso | - |
+| **Fase 0** — Scaffolding + deploy pipeline | ✅ Completa | 2026-04-12 |
 | **Fase 1** — Inventario + historial de precios | ⏳ Pendiente | - |
 | **Fase 2** — Recetas (BOM) | ⏳ Pendiente | - |
 | **Fase 3** — Presupuestos + Contratos + Plantillas | ⏳ Pendiente | - |
