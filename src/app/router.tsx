@@ -5,6 +5,17 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
+    errorElement: (
+      <div className="flex h-screen flex-col items-center justify-center gap-4 p-8">
+        <p className="text-lg font-medium text-destructive">Error al cargar la página</p>
+        <button
+          className="text-sm text-muted-foreground underline"
+          onClick={() => window.location.reload()}
+        >
+          Recargar
+        </button>
+      </div>
+    ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       {

@@ -18,7 +18,7 @@ export function AppLayout() {
         <div className="flex h-14 items-center px-4 border-b">
           <span className="font-bold text-lg text-primary">CarpinteroPro</span>
         </div>
-        <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+        <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto p-2 space-y-1">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
@@ -51,7 +51,11 @@ export function AppLayout() {
         </main>
 
         {/* Bottom tab bar — visible solo en mobile */}
-        <nav className="fixed bottom-0 left-0 right-0 flex md:hidden border-t bg-card z-10">
+        <nav
+          aria-label="Navegación principal"
+          className="fixed bottom-0 left-0 right-0 flex md:hidden border-t bg-card z-10"
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        >
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
