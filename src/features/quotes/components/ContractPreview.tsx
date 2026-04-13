@@ -93,7 +93,7 @@ export function ContractPreview() {
   }
 
   function handleDownloadPDF() {
-    generateQuotePDF({ quote, settings: settings ?? null })
+    generateQuotePDF({ quote: quote!, settings: settings ?? null })
   }
 
   function markdownToHtml(md: string): string {
