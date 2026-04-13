@@ -47,7 +47,12 @@ All feature routes are lazy-loaded via React Router's `lazy()`. The root renders
 
 **Supabase:** The typed client is at `@/shared/lib/supabase`. All DB queries go in `src/features/<name>/api/`. After running migrations, regenerate `database.ts` (see command above).
 
+> **Manual types:** Until a personal access token (`sbp_...`) is available, `database.ts` is maintained by hand. Each table definition **must** include `Relationships: []` (or the real FK array) — supabase-js v2 requires it to infer row types correctly; omitting it causes all columns to resolve to `never`.
+> **RHF + Zod coerce:** When using `z.coerce.number()` in a form schema, cast the resolver: `zodResolver(schema) as Resolver<FormValues>`. This avoids the `unknown` type mismatch that `z.coerce` introduces with `useForm`.
+
 **shadcn components:** Install with `npx shadcn add <component>` — they land in `src/shared/ui/`. Do not edit them manually. The `react-refresh/only-export-components` ESLint rule is disabled for `src/shared/ui/**` because shadcn exports multiple things per file.
+
+> **Known bug:** `npx shadcn add` writes files to `@/shared/ui/` literally instead of resolving to `src/shared/ui/`. After installing, move files manually: `cp @/shared/ui/*.tsx src/shared/ui/ && rm -rf @/`
 
 **`vite.config.ts` imports from `vitest/config`**, not `vite` — this is intentional so Vitest globals work with the path alias.
 
