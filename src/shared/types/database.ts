@@ -89,6 +89,69 @@ export type Database = {
           }
         ]
       }
+      furniture_templates: {
+        Row: {
+          id: string
+          workshop_id: string
+          name: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          workshop_id: string
+          name: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          workshop_id?: string
+          name?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      recipe_items: {
+        Row: {
+          id: string
+          furniture_template_id: string
+          material_id: string
+          quantity: number
+        }
+        Insert: {
+          id?: string
+          furniture_template_id: string
+          material_id: string
+          quantity: number
+        }
+        Update: {
+          id?: string
+          furniture_template_id?: string
+          material_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_items_furniture_template_id_fkey'
+            columns: ['furniture_template_id']
+            isOneToOne: false
+            referencedRelation: 'furniture_templates'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'recipe_items_material_id_fkey'
+            columns: ['material_id']
+            isOneToOne: false
+            referencedRelation: 'materials'
+            referencedColumns: ['id']
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
