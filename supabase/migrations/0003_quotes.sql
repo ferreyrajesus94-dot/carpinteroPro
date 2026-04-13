@@ -24,7 +24,8 @@ CREATE TABLE clients (
   email        TEXT,
   source       client_source NOT NULL DEFAULT 'otro',
   notes        TEXT,
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX clients_workshop_id_idx ON clients (workshop_id);
@@ -90,7 +91,8 @@ CREATE TABLE contract_templates (
   name            TEXT NOT NULL,
   body_markdown   TEXT NOT NULL DEFAULT '',
   is_default      BOOLEAN NOT NULL DEFAULT false,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE INDEX contract_templates_workshop_id_idx ON contract_templates (workshop_id);
@@ -116,6 +118,14 @@ CREATE TRIGGER quotes_updated_at
 
 CREATE TRIGGER workshop_settings_updated_at
   BEFORE UPDATE ON workshop_settings
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER clients_updated_at
+  BEFORE UPDATE ON clients
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+CREATE TRIGGER contract_templates_updated_at
+  BEFORE UPDATE ON contract_templates
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- RLS (permisivo, igual que fases anteriores)
