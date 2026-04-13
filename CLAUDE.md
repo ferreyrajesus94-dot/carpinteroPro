@@ -18,6 +18,12 @@ npx vitest run src/features/inventory/hooks/useMaterials.test.ts
 SUPABASE_ACCESS_TOKEN=<token> npx supabase gen types typescript --project-id revbbzqjglqnphjrasvv > src/shared/types/database.ts
 ```
 
+## Fases completadas
+
+- **Fase 0** — Scaffolding + deploy pipeline (Vite + React + TS + Tailwind + shadcn + Supabase + Vercel)
+- **Fase 1** — Inventario: CRUD de materiales, historial de precios con chart Recharts
+- **Fase 2** — Muebles (BOM): CRUD de plantillas de muebles con lista de materiales y costo calculado en vivo
+
 ## Architecture
 
 Feature-sliced: each module lives under `src/features/<name>/` and is self-contained. Shared code lives under `src/shared/` only (no cross-feature imports).

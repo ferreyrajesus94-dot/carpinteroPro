@@ -65,8 +65,8 @@ carpinteroPro/
 │   │   │   └── routes.tsx
 │   │   ├── recipes/
 │   │   │   ├── components/
-│   │   │   │   ├── RecipeList.tsx
-│   │   │   │   ├── RecipeForm.tsx
+│   │   │   │   ├── MuebleList.tsx
+│   │   │   │   ├── MuebleForm.tsx
 │   │   │   │   └── RecipeCostPreview.tsx
 │   │   │   ├── hooks/
 │   │   │   │   └── useRecipes.ts
@@ -129,7 +129,7 @@ carpinteroPro/
 ├── supabase/
 │   ├── migrations/
 │   │   ├── 0001_init.sql                    # Schema completo con workshop_id
-│   │   └── 0002_price_history_trigger.sql   # Trigger auditoría de precios
+│   │   └── 0002_recipes.sql                 # furniture_templates + recipe_items (Fase 2)
 │   └── seed.sql                             # Datos demo
 ├── public/
 │   ├── icons/                               # Iconos PWA (generados)
