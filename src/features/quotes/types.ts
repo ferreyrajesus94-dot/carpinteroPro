@@ -54,6 +54,20 @@ export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
   cancelado: 'bg-red-100 text-red-700',
 }
 
+// Form shape for QuoteForm — used by QuoteExtrasFieldArray and QuoteLivePreview
+export interface QuoteFormValues {
+  furniture_template_id: string
+  furniture_name: string
+  recipe_cost: number
+  client_id: string
+  client_name_search: string
+  margin_mode: 'on_cost' | 'on_price'
+  margin_pct: number
+  status: QuoteStatus
+  notes: string
+  extras: { description: string; amount: number; show_in_quote: boolean }[]
+}
+
 // Formatea números al estilo argentino: 1234567.89 → "$1.234.567,89"
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('es-AR', {
