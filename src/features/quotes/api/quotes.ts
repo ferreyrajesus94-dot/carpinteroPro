@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { Quote, QuoteInsert, QuoteUpdate, QuoteExtraInsert, QuoteWithExtras } from '../types'
+import type { QuoteInsert, QuoteUpdate, QuoteExtraInsert, QuoteWithExtras } from '../types'
 
 const QUOTE_SELECT = `
   *,
