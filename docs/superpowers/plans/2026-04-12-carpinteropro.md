@@ -16,7 +16,7 @@
 |------|--------|-----------|
 | **Fase 0** — Scaffolding + deploy pipeline | ✅ Completa | 2026-04-12 |
 | **Fase 1** — Inventario + historial de precios | ✅ Completa | 2026-04-12 |
-| **Fase 2** — Recetas (BOM) | ⏳ Pendiente | - |
+| **Fase 2** — Recetas (BOM) | ✅ Completa | 2026-04-13 |
 | **Fase 3** — Presupuestos + Contratos + Plantillas | ⏳ Pendiente | - |
 | **Fase 4** — CRM + Kanban | ⏳ Pendiente | - |
 | **Fase 5** — Dashboard | ⏳ Pendiente | - |

@@ -5,7 +5,7 @@ import { cn } from '@/shared/lib/utils'
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/inventory', label: 'Inventario', icon: Package },
-  { to: '/recipes', label: 'Recetas', icon: BookOpen },
+  { to: '/recipes', label: 'Muebles', icon: BookOpen },
   { to: '/quotes', label: 'Presupuestos', icon: FileText },
   { to: '/crm', label: 'Clientes', icon: Users },
 ]
