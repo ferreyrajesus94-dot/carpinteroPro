@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, BookOpen, FileText, Users } from 'lucide-react'
+import { LayoutDashboard, Package, BookOpen, FileText, Users, Settings } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/recipes', label: 'Muebles', icon: BookOpen },
   { to: '/quotes', label: 'Presupuestos', icon: FileText },
   { to: '/crm', label: 'Clientes', icon: Users },
+  { to: '/settings', label: 'Ajustes', icon: Settings },
 ]
 
 export function AppLayout() {
