@@ -23,6 +23,7 @@ SUPABASE_ACCESS_TOKEN=<token> npx supabase gen types typescript --project-id rev
 - **Fase 0** — Scaffolding + deploy pipeline (Vite + React + TS + Tailwind + shadcn + Supabase + Vercel)
 - **Fase 1** — Inventario: CRUD de materiales, historial de precios con chart Recharts
 - **Fase 2** — Muebles (BOM): CRUD de plantillas de muebles con lista de materiales y costo calculado en vivo
+- **Fase 3** — Presupuestos + Contratos: motor de cálculo (on_cost/on_price), formulario con live preview, plantillas de contrato editables, export WhatsApp/PDF, ajustes del taller
 
 ## Architecture
 

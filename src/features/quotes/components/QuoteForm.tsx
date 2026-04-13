@@ -248,7 +248,7 @@ export function QuoteForm() {
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Margen</h2>
             <RadioGroup
               value={marginModeWatch}
-              onValueChange={(v) => setValue('margin_mode', v as MarginMode)}
+              onValueChange={(v: string) => setValue('margin_mode', v as MarginMode)}
               className="flex gap-4"
             >
               <div className="flex items-center gap-2">

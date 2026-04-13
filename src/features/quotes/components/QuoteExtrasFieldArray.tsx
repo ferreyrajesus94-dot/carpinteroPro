@@ -45,7 +45,7 @@ export function QuoteExtrasFieldArray({ control, errors }: QuoteExtrasFieldArray
             <Label className="text-xs text-muted-foreground">Visible</Label>
             <Switch
               checked={field.show_in_quote}
-              onCheckedChange={(v) => update(index, { ...field, show_in_quote: v })}
+              onCheckedChange={(v: boolean) => update(index, { ...field, show_in_quote: v })}
             />
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
