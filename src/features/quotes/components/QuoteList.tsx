@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Pencil, Trash2, FileText } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useQuotes, useDeleteQuote } from '../hooks/useQuotes'
@@ -12,13 +14,16 @@ import { calculateQuote } from '../lib/calculator'
 export function QuoteList() {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
-  const { data: quotes = [], isLoading } = useQuotes(workshopId)
+  const { data: quotes = [], isLoading, isError } = useQuotes(workshopId)
   const deleteMutation = useDeleteQuote(workshopId)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; quoteNumber: string } | null>(null)
 
-  function handleDelete(id: string, quoteNumber: string) {
-    if (confirm(`¿Eliminar el presupuesto ${quoteNumber}?`)) {
-      deleteMutation.mutate(id)
-    }
+  if (isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        Error al cargar los presupuestos. Revisá tu conexión e intentá de nuevo.
+      </p>
+    )
   }
 
   if (isLoading) {
@@ -35,6 +40,18 @@ export function QuoteList() {
 
   return (
     <div className="space-y-4 p-4">
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Eliminar presupuesto"
+        description={`¿Seguro que querés eliminar el presupuesto ${deleteTarget?.quoteNumber}? Esta acción no se puede deshacer.`}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
+        isPending={deleteMutation.isPending}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Presupuestos</h1>
         <Button asChild disabled={!isOnline}>
@@ -81,7 +98,7 @@ export function QuoteList() {
                         variant="ghost"
                         size="icon"
                         disabled={!isOnline}
-                        onClick={() => handleDelete(q.id, q.quote_number)}
+                        onClick={() => setDeleteTarget({ id: q.id, quoteNumber: q.quote_number })}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -132,7 +149,7 @@ export function QuoteList() {
                             variant="ghost"
                             size="icon"
                             disabled={!isOnline}
-                            onClick={() => handleDelete(q.id, q.quote_number)}
+                            onClick={() => setDeleteTarget({ id: q.id, quoteNumber: q.quote_number })}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -9,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui/table'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { useFurnitureTemplates, useDeleteFurnitureTemplate } from '../hooks/useRecipes'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
@@ -25,6 +27,7 @@ export function MuebleList({ onEdit }: MuebleListProps) {
   const isOnline = useOnlineStatus()
   const { data: templates = [], isLoading } = useFurnitureTemplates(workshopId)
   const deleteMutation = useDeleteFurnitureTemplate(workshopId)
+  const [deleteTarget, setDeleteTarget] = useState<FurnitureTemplateWithItems | null>(null)
 
   if (isLoading) {
     return (
@@ -44,6 +47,18 @@ export function MuebleList({ onEdit }: MuebleListProps) {
 
   return (
     <>
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Eliminar mueble"
+        description={`¿Seguro que querés eliminar "${deleteTarget?.name}"? Esta acción no se puede deshacer.`}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
+        isPending={deleteMutation.isPending}
+      />
+
       {/* Mobile: cards */}
       <div className="sm:hidden space-y-2">
         {templates.map((template) => {
@@ -65,9 +80,7 @@ export function MuebleList({ onEdit }: MuebleListProps) {
                   variant="ghost"
                   size="icon"
                   disabled={!isOnline}
-                  onClick={() => {
-                    if (confirm(`¿Eliminar "${template.name}"?`)) deleteMutation.mutate(template.id)
-                  }}
+                  onClick={() => setDeleteTarget(template)}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
@@ -113,11 +126,7 @@ export function MuebleList({ onEdit }: MuebleListProps) {
                         variant="ghost"
                         size="icon"
                         disabled={!isOnline}
-                        onClick={() => {
-                          if (confirm(`¿Eliminar "${template.name}"?`)) {
-                            deleteMutation.mutate(template.id)
-                          }
-                        }}
+                        onClick={() => setDeleteTarget(template)}
                         title="Eliminar"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />

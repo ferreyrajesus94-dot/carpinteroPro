@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import {
   useContractTemplates,
@@ -32,6 +33,7 @@ export function TemplateEditor() {
   const [editName, setEditName] = useState('')
   const [editBody, setEditBody] = useState('')
   const [newName, setNewName] = useState('')
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
 
   function handleSelect(t: ContractTemplate) {
     setSelected(t)
@@ -77,13 +79,22 @@ export function TemplateEditor() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('¿Eliminar esta plantilla?')) return
     await deleteMutation.mutateAsync(id)
     if (selected?.id === id) setSelected(null)
+    setDeleteTargetId(null)
   }
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
+      <ConfirmDialog
+        open={deleteTargetId !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTargetId(null) }}
+        title="Eliminar plantilla"
+        description="¿Seguro que querés eliminar esta plantilla? Esta acción no se puede deshacer."
+        onConfirm={() => { if (deleteTargetId) handleDelete(deleteTargetId) }}
+        isPending={deleteMutation.isPending}
+      />
+
       <h1 className="text-2xl font-bold">Plantillas de contrato</h1>
 
       <div className="flex flex-col lg:flex-row gap-4">
@@ -96,7 +107,7 @@ export function TemplateEditor() {
             >
               <span className="truncate">{t.name}{t.is_default ? ' ★' : ''}</span>
               <button
-                onClick={(e) => { e.stopPropagation(); handleDelete(t.id) }}
+                onClick={(e) => { e.stopPropagation(); setDeleteTargetId(t.id) }}
                 className="text-destructive text-xs ml-2 opacity-60 hover:opacity-100"
               >
                 ✕
