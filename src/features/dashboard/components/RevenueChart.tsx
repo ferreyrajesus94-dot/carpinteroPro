@@ -10,13 +10,15 @@ function formatYAxis(value: number): string {
   return value.toString()
 }
 
-function CustomTooltip({ active, payload, label }: {
+interface CustomTooltipProps {
   active?: boolean
-  payload?: { value: number }[]
+  payload?: Array<{ value: number }>
   label?: string
-}) {
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
-  const value = payload[0].value
+  const value = payload[0].value as number
   const formatted = new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
