@@ -21,8 +21,27 @@ export function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <p className="text-sm text-muted-foreground">Cargando...</p>
+      <div className="space-y-6 p-4 md:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="h-8 w-32 animate-pulse rounded-md bg-muted" />
+          <div className="h-9 w-64 animate-pulse rounded-lg bg-muted" />
+        </div>
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="rounded-lg border border-t-2 border-t-muted bg-card p-5 shadow-sm space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+                <div className="h-8 w-8 animate-pulse rounded-md bg-muted" />
+              </div>
+              <div className="h-7 w-20 animate-pulse rounded bg-muted" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-2 h-64 animate-pulse rounded-lg bg-muted" />
+          <div className="h-64 animate-pulse rounded-lg bg-muted" />
+        </div>
+        <div className="h-48 animate-pulse rounded-lg bg-muted" />
       </div>
     )
   }
