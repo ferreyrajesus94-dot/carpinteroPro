@@ -16,7 +16,7 @@ export interface DashboardStats {
   activeQuotes: QuoteWithExtras[]
 }
 
-function getSalePrice(quote: QuoteWithExtras): number {
+export function getSalePrice(quote: QuoteWithExtras): number {
   return calculateQuote({
     recipeCost: quote.recipe_cost,
     extras: quote.extras.map(e => ({ amount: e.amount, show_in_quote: e.show_in_quote })),

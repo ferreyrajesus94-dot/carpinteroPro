@@ -1,20 +1,10 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { QUOTE_STATUS_LABELS, formatCurrency } from '@/features/quotes/types'
+import { QUOTE_STATUS_LABELS, QUOTE_STATUS_HEX_COLORS, formatCurrency } from '@/features/quotes/types'
 import type { QuoteStatus } from '@/features/quotes/types'
 import type { DashboardStats } from '../hooks/useDashboardStats'
 
 interface Props {
   data: DashboardStats['byStatus']
-}
-
-// Hex equivalents matching QUOTE_STATUS_COLORS palette
-const STATUS_FILL_COLORS: Record<QuoteStatus, string> = {
-  presupuesto: '#9ca3af',   // gray-400
-  enviado: '#60a5fa',       // blue-400
-  aprobado: '#4ade80',      // green-400
-  en_produccion: '#facc15', // yellow-400
-  entregado: '#34d399',     // emerald-400
-  cancelado: '#f87171',     // red-400
 }
 
 type ByStatusEntry = DashboardStats['byStatus'][0]
@@ -46,7 +36,7 @@ function CustomLegend({ payload }: { payload?: { value: string }[] }) {
           <li key={status} className="flex items-center gap-2">
             <span
               className="inline-block h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: STATUS_FILL_COLORS[status] }}
+              style={{ backgroundColor: QUOTE_STATUS_HEX_COLORS[status] }}
             />
             {QUOTE_STATUS_LABELS[status]}
           </li>
@@ -80,7 +70,7 @@ export function StatusPieChart({ data }: Props) {
             outerRadius={90}
           >
             {data.map(entry => (
-              <Cell key={entry.status} fill={STATUS_FILL_COLORS[entry.status]} />
+              <Cell key={entry.status} fill={QUOTE_STATUS_HEX_COLORS[entry.status]} />
             ))}
           </Pie>
           <Tooltip content={<CustomTooltip />} />

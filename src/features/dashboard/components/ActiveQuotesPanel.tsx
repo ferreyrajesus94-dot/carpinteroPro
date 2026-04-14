@@ -6,21 +6,10 @@ import {
   QUOTE_STATUS_COLORS,
   formatCurrency,
 } from '@/features/quotes/types'
-import { calculateQuote } from '@/features/quotes/lib/calculator'
-import type { QuoteWithExtras } from '@/features/quotes/types'
-import type { DashboardStats } from '../hooks/useDashboardStats'
+import { getSalePrice, type DashboardStats } from '../hooks/useDashboardStats'
 
 interface Props {
   quotes: DashboardStats['activeQuotes']
-}
-
-function getSalePrice(quote: QuoteWithExtras): number {
-  return calculateQuote({
-    recipeCost: quote.recipe_cost,
-    extras: quote.extras.map(e => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
-    marginMode: quote.margin_mode,
-    marginPct: quote.margin_pct,
-  }).salePrice
 }
 
 export function ActiveQuotesPanel({ quotes }: Props) {

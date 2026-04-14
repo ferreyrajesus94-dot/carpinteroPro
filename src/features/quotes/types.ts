@@ -45,6 +45,15 @@ export const QUOTE_STATUS_COLORS: Record<QuoteStatus, string> = {
   cancelado: 'bg-red-100 text-red-700',
 }
 
+export const QUOTE_STATUS_HEX_COLORS: Record<QuoteStatus, string> = {
+  presupuesto: '#9ca3af',   // gray-400
+  enviado: '#60a5fa',       // blue-400
+  aprobado: '#4ade80',      // green-400
+  en_produccion: '#facc15', // yellow-400
+  entregado: '#34d399',     // emerald-400
+  cancelado: '#f87171',     // red-400
+}
+
 // Form shape for QuoteForm — used by QuoteExtrasFieldArray and QuoteLivePreview
 export interface QuoteFormValues {
   client_id?: string
