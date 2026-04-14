@@ -24,6 +24,7 @@ SUPABASE_ACCESS_TOKEN=<token> npx supabase gen types typescript --project-id rev
 - **Fase 1** — Inventario: CRUD de materiales, historial de precios con chart Recharts
 - **Fase 2** — Muebles (BOM): CRUD de plantillas de muebles con lista de materiales y costo calculado en vivo
 - **Fase 3** — Presupuestos + Contratos: motor de cálculo (on_cost/on_price), formulario con live preview, plantillas de contrato editables, export WhatsApp/PDF, ajustes del taller
+- **Fase 4** — CRM: Kanban de presupuestos por estado (6 columnas), lista de clientes con stats, detalle de cliente con historial; tipos/api/hooks de clientes migrados de `quotes/` a `crm/` con re-exports
 
 ## Architecture
 
