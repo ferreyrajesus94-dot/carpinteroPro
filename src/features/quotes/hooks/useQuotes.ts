@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
   fetchQuotes,
+  fetchQuotesPaginated,
   fetchQuote,
   createQuote,
   updateQuote,
@@ -17,6 +18,15 @@ export function useQuotes(workshopId: string) {
     queryKey: [QUOTES_KEY, workshopId],
     queryFn: () => fetchQuotes(workshopId),
     enabled: Boolean(workshopId),
+  })
+}
+
+export function useQuotesPaginated(workshopId: string, page: number) {
+  return useQuery({
+    queryKey: [QUOTES_KEY, workshopId, 'page', page],
+    queryFn: () => fetchQuotesPaginated(workshopId, page),
+    enabled: Boolean(workshopId),
+    placeholderData: (prev) => prev,
   })
 }
 

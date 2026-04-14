@@ -49,6 +49,16 @@ describe('useClients', () => {
     expect(clientsApi.fetchClients).toHaveBeenCalledWith(WORKSHOP_ID)
   })
 
+  it('returns empty array when no clients exist', async () => {
+    vi.mocked(clientsApi.fetchClients).mockResolvedValue([])
+
+    const { useClients } = await import('./useClients')
+    const { result } = renderHook(() => useClients(WORKSHOP_ID), { wrapper: makeWrapper() })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toEqual([])
+  })
+
   it('returns error when API fails', async () => {
     vi.mocked(clientsApi.fetchClients).mockRejectedValue(new Error('Network error'))
 
@@ -57,5 +67,13 @@ describe('useClients', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error).toBeInstanceOf(Error)
+  })
+
+  it('does not fetch when workshopId is empty', async () => {
+    const { useClients } = await import('./useClients')
+    const { result } = renderHook(() => useClients(''), { wrapper: makeWrapper() })
+
+    expect(result.current.isPending).toBe(true)
+    expect(clientsApi.fetchClients).not.toHaveBeenCalled()
   })
 })
