@@ -19,7 +19,7 @@ export function ClientList() {
   const workshopId = useWorkshopId()
   const navigate = useNavigate()
   const isOnline = useOnlineStatus()
-  const { data: clients = [], isLoading } = useClients(workshopId)
+  const { data: clients = [], isLoading, isError } = useClients(workshopId)
   const { data: quotes = [] } = useQuotes(workshopId)
   const [formOpen, setFormOpen] = useState(false)
 
@@ -35,6 +35,14 @@ export function ClientList() {
     },
     {}
   )
+
+  if (isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        Error al cargar los clientes. Revisá tu conexión e intentá de nuevo.
+      </p>
+    )
+  }
 
   if (isLoading) {
     return (

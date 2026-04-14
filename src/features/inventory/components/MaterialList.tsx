@@ -9,6 +9,7 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/shared/ui/select'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { useMaterials, useDeleteMaterial } from '../hooks/useMaterials'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
@@ -27,12 +28,21 @@ export function MaterialList({ onEdit, onViewHistory }: MaterialListProps) {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
   const [categoryFilter, setCategoryFilter] = useState<MaterialCategory | 'all'>('all')
+  const [deleteTarget, setDeleteTarget] = useState<Material | null>(null)
 
-  const { data: materials = [], isLoading } = useMaterials(
+  const { data: materials = [], isLoading, isError } = useMaterials(
     workshopId,
     categoryFilter !== 'all' ? { category: categoryFilter } : undefined
   )
   const deleteMutation = useDeleteMaterial(workshopId)
+
+  if (isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        Error al cargar los materiales. Revisá tu conexión e intentá de nuevo.
+      </p>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -58,9 +68,7 @@ export function MaterialList({ onEdit, onViewHistory }: MaterialListProps) {
           variant="ghost"
           size="icon"
           disabled={!isOnline}
-          onClick={() => {
-            if (confirm(`¿Eliminar "${material.name}"?`)) deleteMutation.mutate(material.id)
-          }}
+          onClick={() => setDeleteTarget(material)}
           title="Eliminar"
         >
           <Trash2 className="h-4 w-4 text-destructive" />
@@ -77,6 +85,18 @@ export function MaterialList({ onEdit, onViewHistory }: MaterialListProps) {
 
   return (
     <div className="space-y-4">
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Eliminar material"
+        description={`¿Seguro que querés eliminar "${deleteTarget?.name}"? Esta acción no se puede deshacer.`}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
+        isPending={deleteMutation.isPending}
+      />
+
       <div className="flex items-center gap-3">
         <span className="text-sm text-muted-foreground">Categoría:</span>
         <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v as MaterialCategory | 'all')}>

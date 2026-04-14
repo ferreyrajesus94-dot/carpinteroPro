@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   fetchWorkshopSettings,
   upsertWorkshopSettings,
@@ -20,7 +21,10 @@ export function useUpsertWorkshopSettings(workshopId: string) {
   return useMutation({
     mutationFn: (settings: Omit<WorkshopSettingsInsert, 'workshop_id'>) =>
       upsertWorkshopSettings({ ...settings, workshop_id: workshopId }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [SETTINGS_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SETTINGS_KEY, workshopId] })
+      toast.success('Configuración guardada')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }

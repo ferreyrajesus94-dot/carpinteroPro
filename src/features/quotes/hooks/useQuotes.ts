@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   fetchQuotes,
   fetchQuote,
@@ -48,7 +49,9 @@ export function useCreateQuote(workshopId: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] })
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, 'next_number', workshopId] })
+      toast.success('Presupuesto creado')
     },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -65,7 +68,9 @@ export function useUpdateQuote(workshopId: string) {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] })
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, variables.id] })
+      toast.success('Presupuesto actualizado')
     },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -73,6 +78,10 @@ export function useDeleteQuote(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => deleteQuote(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] })
+      toast.success('Presupuesto eliminado')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }

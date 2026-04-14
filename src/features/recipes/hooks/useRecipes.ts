@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   fetchFurnitureTemplates,
   fetchFurnitureTemplate,
@@ -36,8 +37,11 @@ export function useCreateFurnitureTemplate(workshopId: string) {
   return useMutation({
     mutationFn: ({ template, items }: CreatePayload) =>
       createFurnitureTemplate(template, items),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
+      toast.success('Mueble guardado')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -55,7 +59,9 @@ export function useUpdateFurnitureTemplate(workshopId: string) {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
       queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, variables.id] })
+      toast.success('Mueble actualizado')
     },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -63,7 +69,10 @@ export function useDeleteFurnitureTemplate(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => deleteFurnitureTemplate(id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
+      toast.success('Mueble eliminado')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }

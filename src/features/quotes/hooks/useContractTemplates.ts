@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   fetchContractTemplates,
   createContractTemplate,
@@ -22,8 +23,11 @@ export function useCreateContractTemplate(workshopId: string) {
   return useMutation({
     mutationFn: (t: Omit<ContractTemplateInsert, 'id' | 'created_at'>) =>
       createContractTemplate(t),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
+      toast.success('Plantilla creada')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -32,8 +36,11 @@ export function useUpdateContractTemplate(workshopId: string) {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: ContractTemplateUpdate }) =>
       updateContractTemplate(id, data),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
+      toast.success('Plantilla actualizada')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -41,7 +48,10 @@ export function useDeleteContractTemplate(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => deleteContractTemplate(id),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
+      toast.success('Plantilla eliminada')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
