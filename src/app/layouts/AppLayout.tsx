@@ -1,6 +1,7 @@
 import { Outlet, NavLink } from 'react-router-dom'
 import { LayoutDashboard, Package, BookOpen, FileText, Users, Settings } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
+import { OfflineBanner } from '@/shared/components/OfflineBanner'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -42,6 +43,7 @@ export function AppLayout() {
 
       {/* Contenido principal */}
       <div className="flex flex-1 flex-col overflow-hidden">
+        <OfflineBanner />
         {/* Header mobile */}
         <header className="flex h-14 items-center px-4 border-b md:hidden">
           <span className="font-bold text-lg text-primary">CarpinteroPro</span>
