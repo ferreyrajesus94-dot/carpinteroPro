@@ -1,9 +1,8 @@
 import type { Database } from '@/shared/types/database'
+import type { Client } from '@/features/crm/types'
 
-export type Client = Database['public']['Tables']['clients']['Row']
-export type ClientInsert = Database['public']['Tables']['clients']['Insert']
-export type ClientUpdate = Database['public']['Tables']['clients']['Update']
-export type ClientSource = Database['public']['Enums']['client_source']
+export type { Client, ClientInsert, ClientUpdate, ClientSource } from '@/features/crm/types'
+export { CLIENT_SOURCE_LABELS } from '@/features/crm/types'
 
 export type Quote = Database['public']['Tables']['quotes']['Row']
 export type QuoteInsert = Database['public']['Tables']['quotes']['Insert']
@@ -26,14 +25,6 @@ export type WorkshopSettingsUpdate = Database['public']['Tables']['workshop_sett
 export type QuoteWithExtras = Quote & {
   extras: QuoteExtra[]
   client: Client | null
-}
-
-export const CLIENT_SOURCE_LABELS: Record<ClientSource, string> = {
-  mercadolibre: 'MercadoLibre',
-  tiendanube: 'TiendaNube',
-  instagram: 'Instagram',
-  facebook: 'Facebook',
-  otro: 'Otro',
 }
 
 export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {

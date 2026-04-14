@@ -1,3 +1,14 @@
+import { Routes, Route } from 'react-router-dom'
+import { KanbanBoard } from './components/KanbanBoard'
+import { ClientList } from './components/ClientList'
+import { ClientDetail } from './components/ClientDetail'
+
 export function CrmRoutes() {
-  return <div className="p-4"><h1 className="text-2xl font-bold">Clientes</h1><p className="text-muted-foreground">Próximamente</p></div>
+  return (
+    <Routes>
+      <Route index element={<KanbanBoard />} />
+      <Route path="clientes" element={<ClientList />} />
+      <Route path="clientes/:id" element={<ClientDetail />} />
+    </Routes>
+  )
 }
