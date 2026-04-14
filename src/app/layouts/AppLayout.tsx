@@ -1,16 +1,15 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, BookOpen, FileText, Users, Settings, Hammer, Sun, Moon } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/inventory', label: 'Inventario', icon: Package },
-  { to: '/recipes', label: 'Muebles', icon: BookOpen },
-  { to: '/quotes', label: 'Presupuestos', icon: FileText },
-  { to: '/crm', label: 'Clientes', icon: Users },
-  { to: '/settings', label: 'Ajustes', icon: Settings },
+  { to: '/dashboard', label: 'Dashboard',      icon: 'fi-rr-apps'          },
+  { to: '/inventory', label: 'Inventario',     icon: 'fi-rr-box-open'      },
+  { to: '/recipes',   label: 'Muebles',        icon: 'fi-rr-couch'         },
+  { to: '/quotes',    label: 'Presupuestos',   icon: 'fi-rr-file-invoice'  },
+  { to: '/crm',       label: 'Clientes',       icon: 'fi-rr-users'         },
+  { to: '/settings',  label: 'Ajustes',        icon: 'fi-rr-settings'      },
 ]
 
 export function AppLayout() {
@@ -22,12 +21,12 @@ export function AppLayout() {
       <aside className="hidden md:flex md:w-56 md:flex-col border-r bg-card">
         <div className="flex h-14 items-center gap-2 px-4 border-b">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-            <Hammer className="h-4 w-4 text-primary-foreground" />
+            <i className="fi fi-br-hammer text-sm text-primary-foreground" />
           </div>
           <span className="font-bold text-base text-foreground tracking-tight">CarpinteroPro</span>
         </div>
         <nav aria-label="Navegación principal" className="flex-1 overflow-y-auto p-2 space-y-0.5">
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {navItems.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -40,7 +39,7 @@ export function AppLayout() {
                 )
               }
             >
-              <Icon className="h-4 w-4 shrink-0" />
+              <i className={`fi ${icon} text-base leading-none shrink-0`} />
               {label}
             </NavLink>
           ))}
@@ -52,7 +51,7 @@ export function AppLayout() {
             aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
             className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground cursor-pointer"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
+            <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none shrink-0`} />
             {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
           </button>
         </div>
@@ -64,7 +63,7 @@ export function AppLayout() {
         {/* Header mobile */}
         <header className="flex h-14 items-center gap-2 px-4 border-b bg-card md:hidden">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
-            <Hammer className="h-4 w-4 text-primary-foreground" />
+            <i className="fi fi-br-hammer text-sm text-primary-foreground" />
           </div>
           <span className="font-bold text-base text-foreground tracking-tight flex-1">CarpinteroPro</span>
           <button
@@ -73,7 +72,7 @@ export function AppLayout() {
             aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
             className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors duration-150 cursor-pointer"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none`} />
           </button>
         </header>
 
@@ -87,7 +86,7 @@ export function AppLayout() {
           className="fixed bottom-0 left-0 right-0 flex md:hidden border-t bg-card z-10"
           style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
-          {navItems.map(({ to, label, icon: Icon }) => (
+          {navItems.map(({ to, label, icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -98,7 +97,7 @@ export function AppLayout() {
                 )
               }
             >
-              <Icon className="h-5 w-5" />
+              <i className={`fi ${icon} text-xl leading-none`} />
               <span className="text-[10px]">{label}</span>
             </NavLink>
           ))}
