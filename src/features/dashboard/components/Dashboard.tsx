@@ -36,6 +36,7 @@ export function Dashboard() {
           {PERIOD_OPTIONS.map(opt => (
             <button
               key={opt.value}
+              type="button"
               onClick={() => setPeriod(opt.value)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 period === opt.value
