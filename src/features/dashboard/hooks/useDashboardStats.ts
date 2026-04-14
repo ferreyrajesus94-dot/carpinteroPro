@@ -79,6 +79,7 @@ export function computeDashboardStats(quotes: QuoteWithExtras[], period: Period)
 
   const activeQuotes = quotes
     .filter(q => q.status === 'enviado' || q.status === 'en_produccion')
+    .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .slice(0, 20)
 
   return { totalRevenue, quoteCount, averageTicket, conversionRate, revenueByMonth, byStatus, activeQuotes }
