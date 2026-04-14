@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { TrendingUp, FileText, Calculator, CheckCircle } from 'lucide-react'
 import { formatCurrency } from '@/features/quotes/types'
 import type { DashboardStats } from '../hooks/useDashboardStats'
@@ -9,7 +10,7 @@ interface Props {
 interface CardConfig {
   label: string
   value: string
-  icon: React.ReactNode
+  icon: ReactNode
 }
 
 export function KPICards({ stats }: Props) {
