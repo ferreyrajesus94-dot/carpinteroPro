@@ -3,10 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useClients, useDeleteClient } from '@/features/crm/hooks/useClients'
 import { useQuotes } from '@/features/quotes/hooks/useQuotes'
-import { formatCurrency, QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS } from '@/features/quotes/types'
+import { Link } from 'react-router-dom'
+import { formatCurrency } from '@/features/quotes/types'
 import { calculateQuote } from '@/features/quotes/lib/calculator'
 import { CLIENT_SOURCE_LABELS } from '@/features/crm/types'
 import { Button } from '@/shared/ui/button'
+import { QuoteStatusBadge } from '@/features/quotes/components/QuoteStatusBadge'
 import { ClientForm } from './ClientForm'
 
 export function ClientDetail() {
@@ -84,17 +86,9 @@ export function ClientDetail() {
         {clientQuotes.length === 0 ? (
           <p className="p-4 text-sm text-muted-foreground">Sin presupuestos aún.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
-              <tr>
-                <th className="px-4 py-2 text-left">Nº</th>
-                <th className="px-4 py-2 text-left">Mueble</th>
-                <th className="px-4 py-2 text-right">Total</th>
-                <th className="px-4 py-2 text-left">Estado</th>
-                <th className="px-4 py-2 text-right">Fecha</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
+          <>
+            {/* Mobile: cards */}
+            <div className="sm:hidden divide-y divide-border">
               {clientQuotes.map((q) => {
                 const { salePrice } = calculateQuote({
                   recipeCost: q.recipe_cost,
@@ -103,25 +97,63 @@ export function ClientDetail() {
                   marginPct: q.margin_pct,
                 })
                 return (
-                  <tr
+                  <Link
                     key={q.id}
-                    className="hover:bg-muted/30 cursor-pointer"
-                    onClick={() => navigate(`/quotes/${q.id}`)}
+                    to={`/quotes/${q.id}`}
+                    className="block p-4 hover:bg-muted/30"
                   >
-                    <td className="px-4 py-2 font-mono text-xs">{q.quote_number}</td>
-                    <td className="px-4 py-2">{q.furniture_name}</td>
-                    <td className="px-4 py-2 text-right font-medium">{formatCurrency(salePrice)}</td>
-                    <td className="px-4 py-2">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${QUOTE_STATUS_COLORS[q.status]}`}>
-                        {QUOTE_STATUS_LABELS[q.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-right text-muted-foreground">{formatDate(q.created_at)}</td>
-                  </tr>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-mono text-xs font-medium">{q.quote_number}</span>
+                      <QuoteStatusBadge status={q.status} />
+                    </div>
+                    <p className="text-sm font-medium">{q.furniture_name}</p>
+                    <div className="flex items-center justify-between mt-1 text-sm">
+                      <span className="text-muted-foreground">{formatDate(q.created_at)}</span>
+                      <span className="font-medium">{formatCurrency(salePrice)}</span>
+                    </div>
+                  </Link>
                 )
               })}
-            </tbody>
-          </table>
+            </div>
+
+            {/* Desktop: table */}
+            <div className="hidden sm:block">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-2 text-left">Nº</th>
+                    <th className="px-4 py-2 text-left">Mueble</th>
+                    <th className="px-4 py-2 text-right">Total</th>
+                    <th className="px-4 py-2 text-left">Estado</th>
+                    <th className="px-4 py-2 text-right">Fecha</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {clientQuotes.map((q) => {
+                    const { salePrice } = calculateQuote({
+                      recipeCost: q.recipe_cost,
+                      extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
+                      marginMode: q.margin_mode,
+                      marginPct: q.margin_pct,
+                    })
+                    return (
+                      <tr
+                        key={q.id}
+                        className="hover:bg-muted/30 cursor-pointer"
+                        onClick={() => navigate(`/quotes/${q.id}`)}
+                      >
+                        <td className="px-4 py-2 font-mono text-xs">{q.quote_number}</td>
+                        <td className="px-4 py-2">{q.furniture_name}</td>
+                        <td className="px-4 py-2 text-right font-medium">{formatCurrency(salePrice)}</td>
+                        <td className="px-4 py-2"><QuoteStatusBadge status={q.status} /></td>
+                        <td className="px-4 py-2 text-right text-muted-foreground">{formatDate(q.created_at)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
 
