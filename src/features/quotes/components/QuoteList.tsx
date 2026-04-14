@@ -1,20 +1,17 @@
 import { Link } from 'react-router-dom'
 import { Plus, Pencil, Trash2, FileText } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/ui/table'
+import { Skeleton } from '@/shared/ui/skeleton'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
+import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useQuotes, useDeleteQuote } from '../hooks/useQuotes'
-import { QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS, formatCurrency } from '../types'
+import { formatCurrency } from '../types'
+import { QuoteStatusBadge } from './QuoteStatusBadge'
+import { calculateQuote } from '../lib/calculator'
 
 export function QuoteList() {
   const workshopId = useWorkshopId()
+  const isOnline = useOnlineStatus()
   const { data: quotes = [], isLoading } = useQuotes(workshopId)
   const deleteMutation = useDeleteQuote(workshopId)
 
@@ -24,13 +21,23 @@ export function QuoteList() {
     }
   }
 
-  if (isLoading) return <div className="p-4 text-muted-foreground">Cargando...</div>
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-4">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-9 w-24" />
+        </div>
+        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Presupuestos</h1>
-        <Button asChild>
+        <Button asChild disabled={!isOnline}>
           <Link to="/quotes/new">
             <Plus className="h-4 w-4 mr-2" />
             Nuevo
@@ -43,69 +50,101 @@ export function QuoteList() {
           No hay presupuestos aún. ¡Creá el primero!
         </p>
       ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>N°</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Mueble</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {quotes.map((q) => {
-                const totalExtras = q.extras.reduce((acc, e) => acc + e.amount, 0)
-                const costBase = q.recipe_cost + totalExtras
-                const salePrice =
-                  q.margin_mode === 'on_cost'
-                    ? costBase * (1 + q.margin_pct / 100)
-                    : q.margin_pct < 100
-                    ? costBase / (1 - q.margin_pct / 100)
-                    : costBase
+        <>
+          {/* Mobile: cards */}
+          <div className="sm:hidden space-y-2">
+            {quotes.map((q) => {
+              const { salePrice } = calculateQuote({
+                recipeCost: q.recipe_cost,
+                extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
+                marginMode: q.margin_mode,
+                marginPct: q.margin_pct,
+              })
+              return (
+                <div key={q.id} className="rounded-md border p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-medium text-sm">{q.quote_number}</span>
+                    <QuoteStatusBadge status={q.status} />
+                  </div>
+                  <p className="text-sm font-medium">{q.furniture_name}</p>
+                  <p className="text-xs text-muted-foreground">{q.client?.name ?? 'Sin cliente'}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{formatCurrency(salePrice)}</span>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="icon" asChild>
+                        <Link to={`/quotes/${q.id}/contract`}><FileText className="h-4 w-4" /></Link>
+                      </Button>
+                      <Button variant="ghost" size="icon" asChild disabled={!isOnline}>
+                        <Link to={`/quotes/${q.id}`}><Pencil className="h-4 w-4" /></Link>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={!isOnline}
+                        onClick={() => handleDelete(q.id, q.quote_number)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
 
-                return (
-                  <TableRow key={q.id}>
-                    <TableCell className="font-mono font-medium">{q.quote_number}</TableCell>
-                    <TableCell>{q.client?.name ?? <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell>{q.furniture_name}</TableCell>
-                    <TableCell className="text-right font-medium">
-                      {formatCurrency(salePrice)}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${QUOTE_STATUS_COLORS[q.status]}`}>
-                        {QUOTE_STATUS_LABELS[q.status]}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link to={`/quotes/${q.id}/contract`}>
-                            <FileText className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link to={`/quotes/${q.id}`}>
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(q.id, q.quote_number)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </div>
+          {/* Desktop: table */}
+          <div className="hidden sm:block rounded-md border">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
+                <tr>
+                  <th className="px-4 py-3 text-left">N°</th>
+                  <th className="px-4 py-3 text-left">Cliente</th>
+                  <th className="px-4 py-3 text-left">Mueble</th>
+                  <th className="px-4 py-3 text-right">Total</th>
+                  <th className="px-4 py-3 text-left">Estado</th>
+                  <th className="px-4 py-3 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {quotes.map((q) => {
+                  const { salePrice } = calculateQuote({
+                    recipeCost: q.recipe_cost,
+                    extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
+                    marginMode: q.margin_mode,
+                    marginPct: q.margin_pct,
+                  })
+                  return (
+                    <tr key={q.id}>
+                      <td className="px-4 py-3 font-mono font-medium">{q.quote_number}</td>
+                      <td className="px-4 py-3">{q.client?.name ?? <span className="text-muted-foreground">—</span>}</td>
+                      <td className="px-4 py-3">{q.furniture_name}</td>
+                      <td className="px-4 py-3 text-right font-medium">{formatCurrency(salePrice)}</td>
+                      <td className="px-4 py-3"><QuoteStatusBadge status={q.status} /></td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link to={`/quotes/${q.id}/contract`}><FileText className="h-4 w-4" /></Link>
+                          </Button>
+                          <Button variant="ghost" size="icon" asChild disabled={!isOnline}>
+                            <Link to={`/quotes/${q.id}`}><Pencil className="h-4 w-4" /></Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            disabled={!isOnline}
+                            onClick={() => handleDelete(q.id, q.quote_number)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   )
