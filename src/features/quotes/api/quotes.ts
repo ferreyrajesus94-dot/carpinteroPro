@@ -10,21 +10,21 @@ const QUOTE_SELECT = `
 export async function fetchQuotes(workshopId: string): Promise<QuoteWithExtras[]> {
   const { data, error } = await supabase
     .from('quotes')
-    .select(QUOTE_SELECT)
+    .select<typeof QUOTE_SELECT, QuoteWithExtras>(QUOTE_SELECT)
     .eq('workshop_id', workshopId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as unknown as QuoteWithExtras[]
+  return data ?? []
 }
 
 export async function fetchQuote(id: string): Promise<QuoteWithExtras> {
   const { data, error } = await supabase
     .from('quotes')
-    .select(QUOTE_SELECT)
+    .select<typeof QUOTE_SELECT, QuoteWithExtras>(QUOTE_SELECT)
     .eq('id', id)
     .single()
   if (error) throw error
-  return data as unknown as QuoteWithExtras
+  return data
 }
 
 export async function generateQuoteNumber(workshopId: string): Promise<string> {

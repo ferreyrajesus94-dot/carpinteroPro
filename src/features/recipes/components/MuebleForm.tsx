@@ -2,22 +2,16 @@ import { useEffect } from 'react'
 import { useForm, useFieldArray, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select'
 import { useMaterials } from '@/features/inventory/hooks/useMaterials'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useCreateFurnitureTemplate, useUpdateFurnitureTemplate } from '../hooks/useRecipes'
 import { RecipeCostPreview } from './RecipeCostPreview'
+import { WoodItemsSection } from './WoodItemsSection'
+import { ExtraItemsSection } from './ExtraItemsSection'
 import type { FurnitureTemplateWithItems } from '../types'
 
 const itemSchema = z.object({
@@ -73,7 +67,6 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
     name: 'extra_items',
   })
 
-  // Poblar el formulario cuando se edita
   useEffect(() => {
     if (template) {
       const woodItems = template.recipe_items
@@ -118,173 +111,47 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* Nombre */}
       <div className="space-y-1">
         <Label htmlFor="name">Nombre del mueble</Label>
         <Input id="name" {...register('name')} placeholder="Ej: Ropero 2 puertas" />
         {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
       </div>
 
-      {/* Notas */}
       <div className="space-y-1">
         <Label htmlFor="notes">Notas (opcional)</Label>
         <Textarea id="notes" {...register('notes')} placeholder="Medidas, variantes, etc." rows={2} />
       </div>
 
-      {/* Sección Maderas */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold">Maderas</h3>
-        {woodFields.map((field, index) => {
-          const mat = allMaterials.find((m) => m.id === woodItemsWatch[index]?.material_id)
-          return (
-            <div key={field.id} className="flex items-end gap-2">
-              <div className="flex-1 space-y-1">
-                <Label className="text-xs text-muted-foreground">Material</Label>
-                <Select
-                  value={woodItemsWatch[index]?.material_id ?? ''}
-                  onValueChange={(v) => setValue(`wood_items.${index}.material_id`, v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccioná madera" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {woodMaterials.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.wood_items?.[index]?.material_id && (
-                  <p className="text-destructive text-xs">
-                    {errors.wood_items[index]?.material_id?.message}
-                  </p>
-                )}
-              </div>
-              <div className="w-28 space-y-1">
-                <Label className="text-xs text-muted-foreground">
-                  Cantidad {mat ? `(${mat.unit})` : ''}
-                </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  {...register(`wood_items.${index}.quantity`)}
-                  placeholder="0"
-                />
-                {errors.wood_items?.[index]?.quantity && (
-                  <p className="text-destructive text-xs">
-                    {errors.wood_items[index]?.quantity?.message}
-                  </p>
-                )}
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeWood(index)}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          )
-        })}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => appendWood({ material_id: '', quantity: 0 })}
-          disabled={woodMaterials.length === 0}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Agregar madera
-        </Button>
-        {woodMaterials.length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            No hay maderas en el inventario. Agregá materiales de categoría "Madera" primero.
-          </p>
-        )}
-      </div>
+      <WoodItemsSection
+        fields={woodFields}
+        woodItemsWatch={woodItemsWatch}
+        woodMaterials={woodMaterials}
+        allMaterials={allMaterials}
+        register={register}
+        errors={errors}
+        setValue={setValue}
+        onAppend={appendWood}
+        onRemove={removeWood}
+      />
 
-      {/* Sección Gastos extras */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-semibold">Gastos extras</h3>
-        {extraFields.map((field, index) => {
-          const mat = allMaterials.find((m) => m.id === extraItemsWatch[index]?.material_id)
-          return (
-            <div key={field.id} className="flex items-end gap-2">
-              <div className="flex-1 space-y-1">
-                <Label className="text-xs text-muted-foreground">Material</Label>
-                <Select
-                  value={extraItemsWatch[index]?.material_id ?? ''}
-                  onValueChange={(v) => setValue(`extra_items.${index}.material_id`, v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccioná extra" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {extraMaterials.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>{m.name} ({m.category})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.extra_items?.[index]?.material_id && (
-                  <p className="text-destructive text-xs">
-                    {errors.extra_items[index]?.material_id?.message}
-                  </p>
-                )}
-              </div>
-              <div className="w-28 space-y-1">
-                <Label className="text-xs text-muted-foreground">
-                  Cantidad {mat ? `(${mat.unit})` : ''}
-                </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  {...register(`extra_items.${index}.quantity`)}
-                  placeholder="0"
-                />
-                {errors.extra_items?.[index]?.quantity && (
-                  <p className="text-destructive text-xs">
-                    {errors.extra_items[index]?.quantity?.message}
-                  </p>
-                )}
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => removeExtra(index)}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          )
-        })}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => appendExtra({ material_id: '', quantity: 0 })}
-          disabled={extraMaterials.length === 0}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Agregar gasto extra
-        </Button>
-        {extraMaterials.length === 0 && (
-          <p className="text-xs text-muted-foreground">
-            No hay extras en el inventario. Agregá materiales de otra categoría primero.
-          </p>
-        )}
-      </div>
+      <ExtraItemsSection
+        fields={extraFields}
+        extraItemsWatch={extraItemsWatch}
+        extraMaterials={extraMaterials}
+        allMaterials={allMaterials}
+        register={register}
+        errors={errors}
+        setValue={setValue}
+        onAppend={appendExtra}
+        onRemove={removeExtra}
+      />
 
-      {/* Preview de costo */}
       <RecipeCostPreview
         woodItems={woodItemsWatch}
         extraItems={extraItemsWatch}
         materials={allMaterials}
       />
 
-      {/* Acciones */}
       <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancelar
