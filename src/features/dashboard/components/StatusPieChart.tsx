@@ -36,19 +36,22 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   )
 }
 
-function CustomLegend({ payload }: { payload?: { value: QuoteStatus }[] }) {
+function CustomLegend({ payload }: { payload?: { value: string }[] }) {
   if (!payload?.length) return null
   return (
     <ul className="flex flex-col gap-1 text-xs">
-      {payload.map(entry => (
-        <li key={entry.value} className="flex items-center gap-2">
-          <span
-            className="inline-block h-2.5 w-2.5 rounded-full"
-            style={{ backgroundColor: STATUS_FILL_COLORS[entry.value] }}
-          />
-          {QUOTE_STATUS_LABELS[entry.value]}
-        </li>
-      ))}
+      {payload.map(entry => {
+        const status = entry.value as QuoteStatus
+        return (
+          <li key={status} className="flex items-center gap-2">
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: STATUS_FILL_COLORS[status] }}
+            />
+            {QUOTE_STATUS_LABELS[status]}
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -56,7 +59,7 @@ function CustomLegend({ payload }: { payload?: { value: QuoteStatus }[] }) {
 export function StatusPieChart({ data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center rounded-lg border bg-card p-5 shadow-sm">
+      <div className="flex min-h-[220px] items-center justify-center rounded-lg border bg-card p-5 shadow-sm">
         <p className="text-sm text-muted-foreground">Sin datos en el período</p>
       </div>
     )
