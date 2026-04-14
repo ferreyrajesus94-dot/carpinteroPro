@@ -1,7 +1,8 @@
 import { Outlet, NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, BookOpen, FileText, Users, Settings, Hammer } from 'lucide-react'
+import { LayoutDashboard, Package, BookOpen, FileText, Users, Settings, Hammer, Sun, Moon } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
+import { useTheme } from '@/shared/hooks/useTheme'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -13,6 +14,8 @@ const navItems = [
 ]
 
 export function AppLayout() {
+  const { theme, toggle } = useTheme()
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar — visible solo en md+ */}
@@ -42,8 +45,16 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t px-4 py-3">
-          <p className="text-[11px] text-muted-foreground/60 font-medium uppercase tracking-wider">Taller</p>
+        <div className="border-t px-3 py-3">
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground cursor-pointer"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
+            {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+          </button>
         </div>
       </aside>
 
@@ -55,7 +66,15 @@ export function AppLayout() {
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
             <Hammer className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-bold text-base text-foreground tracking-tight">CarpinteroPro</span>
+          <span className="font-bold text-base text-foreground tracking-tight flex-1">CarpinteroPro</span>
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors duration-150 cursor-pointer"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4">
