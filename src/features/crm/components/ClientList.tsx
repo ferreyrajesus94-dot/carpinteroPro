@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
-import { useClients } from '@/features/crm/hooks/useClients'
+import { useClientsPaginated } from '@/features/crm/hooks/useClients'
 import { useQuotes } from '@/features/quotes/hooks/useQuotes'
+import { PAGE_SIZE } from '@/features/crm/api/clients'
 import { CLIENT_SOURCE_LABELS } from '@/features/crm/types'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
@@ -19,9 +21,14 @@ export function ClientList() {
   const workshopId = useWorkshopId()
   const navigate = useNavigate()
   const isOnline = useOnlineStatus()
-  const { data: clients = [], isLoading, isError } = useClients(workshopId)
+  const [page, setPage] = useState(0)
+  const { data: result, isLoading, isError } = useClientsPaginated(workshopId, page)
   const { data: quotes = [] } = useQuotes(workshopId)
   const [formOpen, setFormOpen] = useState(false)
+
+  const clients = result?.data ?? []
+  const totalCount = result?.count ?? 0
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
 
   const statsByClient = quotes.reduce<Record<string, { count: number; lastDate: string }>>(
     (acc, q) => {
@@ -44,7 +51,7 @@ export function ClientList() {
     )
   }
 
-  if (isLoading) {
+  if (isLoading && !result) {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-4 border-b">
@@ -67,7 +74,7 @@ export function ClientList() {
         </Button>
       </div>
 
-      {clients.length === 0 ? (
+      {clients.length === 0 && totalCount === 0 ? (
         <div className="p-8 text-center text-muted-foreground">Sin clientes todavía.</div>
       ) : (
         <>
@@ -137,6 +144,30 @@ export function ClientList() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground p-4 border-t">
+              <span>{totalCount} clientes — página {page + 1} de {totalPages}</span>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setPage((p) => p - 1)}
+                  disabled={page === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= totalPages - 1}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
 

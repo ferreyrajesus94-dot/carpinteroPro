@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { fetchClients, createClient, updateClient, deleteClient } from '@/features/crm/api/clients'
+import { fetchClients, fetchClientsPaginated, createClient, updateClient, deleteClient } from '@/features/crm/api/clients'
 import type { ClientInsert, ClientUpdate } from '@/features/crm/types'
 
 const CLIENTS_KEY = 'clients'
@@ -10,6 +10,15 @@ export function useClients(workshopId: string) {
     queryKey: [CLIENTS_KEY, workshopId],
     queryFn: () => fetchClients(workshopId),
     enabled: Boolean(workshopId),
+  })
+}
+
+export function useClientsPaginated(workshopId: string, page: number) {
+  return useQuery({
+    queryKey: [CLIENTS_KEY, workshopId, 'page', page],
+    queryFn: () => fetchClientsPaginated(workshopId, page),
+    enabled: Boolean(workshopId),
+    placeholderData: (prev) => prev,
   })
 }
 
