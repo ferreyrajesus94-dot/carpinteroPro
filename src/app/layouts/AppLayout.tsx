@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
@@ -15,8 +15,20 @@ const navItems = [
 
 export function AppLayout() {
   const { theme, toggle } = useTheme()
-  const { session, signOut } = useAuth()
+  const { session, loading, signOut } = useAuth()
   const navigate = useNavigate()
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return <Navigate to="/login" replace />
+  }
 
   async function handleSignOut() {
     await signOut()
