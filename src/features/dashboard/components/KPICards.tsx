@@ -43,7 +43,7 @@ export function KPICards({ stats }: Props) {
     {
       label: 'Tasa de conversión',
       value: `${stats.conversionRate.toFixed(1)}%`,
-      icon: 'fi-rr-circle-check',
+      icon: 'fi-rr-percentage',
       iconBg: 'bg-amber-50 dark:bg-amber-950/40',
       iconColor: 'text-amber-600',
       accentColor: 'border-t-amber-500',
