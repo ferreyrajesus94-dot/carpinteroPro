@@ -11,23 +11,41 @@ import { cn } from '@/shared/lib/utils'
 
 type Mode = 'login' | 'register'
 
+// ─── Requisitos de contraseña segura ────────────────────────────────────────
+const PASSWORD_RULES = [
+  { id: 'length',    label: 'Mínimo 8 caracteres',              test: (p: string) => p.length >= 8 },
+  { id: 'upper',     label: 'Al menos una mayúscula',           test: (p: string) => /[A-Z]/.test(p) },
+  { id: 'lower',     label: 'Al menos una minúscula',           test: (p: string) => /[a-z]/.test(p) },
+  { id: 'number',    label: 'Al menos un número',               test: (p: string) => /\d/.test(p) },
+  { id: 'special',   label: 'Al menos un carácter especial',    test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+]
+
+const STRENGTH_LABELS  = ['', 'Muy débil', 'Débil', 'Regular', 'Buena', 'Muy segura']
+const STRENGTH_COLORS  = ['', 'bg-destructive', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500']
+const STRENGTH_TEXT    = ['', 'text-destructive', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500']
+
 export function LoginPage() {
   const navigate = useNavigate()
   const { session, loading } = useAuth()
   const { theme, toggle } = useTheme()
-  const [mode, setMode] = useState<Mode>('login')
+  const [mode, setMode]               = useState<Mode>('login')
   const [showPassword, setShowPassword] = useState(false)
 
   // Campos compartidos
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
 
   // Solo registro
   const [workshopName, setWorkshopName] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [success, setSuccess]           = useState(false)
 
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError]         = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  // Cálculo de fuerza de contraseña (solo usado en registro)
+  const checks   = PASSWORD_RULES.map(r => ({ ...r, passed: r.test(password) }))
+  const strength = checks.filter(c => c.passed).length   // 0–5
+  const allPassed = strength === PASSWORD_RULES.length
 
   if (loading) {
     return (
@@ -37,14 +55,13 @@ export function LoginPage() {
     )
   }
 
-  if (session) {
-    return <Navigate to="/dashboard" replace />
-  }
+  if (session) return <Navigate to="/dashboard" replace />
 
   function switchMode(next: Mode) {
     setMode(next)
     setError(null)
     setSuccess(false)
+    setPassword('')
   }
 
   async function handleLogin(e: FormEvent) {
@@ -69,15 +86,14 @@ export function LoginPage() {
 
   async function handleRegister(e: FormEvent) {
     e.preventDefault()
+    if (!allPassed) return   // guard extra — el botón ya debería estar deshabilitado
     setError(null)
     setSubmitting(true)
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { workshop_name: workshopName || 'Mi Taller' },
-      },
+      options: { data: { workshop_name: workshopName || 'Mi Taller' } },
     })
 
     if (error) {
@@ -86,14 +102,38 @@ export function LoginPage() {
       return
     }
 
-    // Supabase envía un email de confirmación por defecto.
-    // Mostramos mensaje de éxito en lugar de redirigir.
     setSuccess(true)
     setSubmitting(false)
   }
 
+  // ─── Campo contraseña reutilizable ────────────────────────────────────────
+  function PasswordInput({ id, autoComplete }: { id: string; autoComplete: string }) {
+    return (
+      <div className="relative">
+        <Input
+          id={id}
+          type={showPassword ? 'text' : 'password'}
+          placeholder="••••••••"
+          autoComplete={autoComplete}
+          required
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="pr-10"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(v => !v)}
+          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-8">
       {/* Toggle modo oscuro */}
       <button
         type="button"
@@ -103,6 +143,7 @@ export function LoginPage() {
       >
         <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none`} />
       </button>
+
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
@@ -113,34 +154,26 @@ export function LoginPage() {
         </div>
 
         <Card>
-          {/* Tabs login / registro */}
+          {/* Tabs */}
           <div className="flex border-b">
-            <button
-              type="button"
-              onClick={() => switchMode('login')}
-              className={cn(
-                'flex-1 py-3 text-sm font-medium transition-colors',
-                mode === 'login'
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Iniciar sesión
-            </button>
-            <button
-              type="button"
-              onClick={() => switchMode('register')}
-              className={cn(
-                'flex-1 py-3 text-sm font-medium transition-colors',
-                mode === 'register'
-                  ? 'border-b-2 border-primary text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              Registrarse
-            </button>
+            {(['login', 'register'] as Mode[]).map(m => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => switchMode(m)}
+                className={cn(
+                  'flex-1 py-3 text-sm font-medium transition-colors',
+                  mode === m
+                    ? 'border-b-2 border-primary text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {m === 'login' ? 'Iniciar sesión' : 'Registrarse'}
+              </button>
+            ))}
           </div>
 
+          {/* ── LOGIN ── */}
           {mode === 'login' ? (
             <>
               <CardHeader className="space-y-1 pb-4">
@@ -164,26 +197,7 @@ export function LoginPage() {
 
                   <div className="space-y-1.5">
                     <Label htmlFor="password">Contraseña</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="••••••••"
-                        autoComplete="current-password"
-                        required
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        className="pr-10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(v => !v)}
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
-                      </button>
-                    </div>
+                    <PasswordInput id="password" autoComplete="current-password" />
                   </div>
 
                   {error && <p className="text-sm text-destructive">{error}</p>}
@@ -195,6 +209,8 @@ export function LoginPage() {
               </CardContent>
             </>
           ) : (
+
+          /* ── REGISTRO ── */
             <>
               <CardHeader className="space-y-1 pb-4">
                 <CardTitle className="text-lg">Crear cuenta</CardTitle>
@@ -215,11 +231,7 @@ export function LoginPage() {
                         Confirmá tu cuenta para poder ingresar.
                       </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => switchMode('login')}
-                    >
+                    <Button variant="outline" className="w-full" onClick={() => switchMode('login')}>
                       Ir al login
                     </Button>
                   </div>
@@ -251,32 +263,53 @@ export function LoginPage() {
 
                     <div className="space-y-1.5">
                       <Label htmlFor="reg-password">Contraseña</Label>
-                      <div className="relative">
-                      <Input
-                        id="reg-password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Mínimo 6 caracteres"
-                        autoComplete="new-password"
-                        required
-                        minLength={6}
-                        className="pr-10"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(v => !v)}
-                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
-                      </button>
-                      </div>
+                      <PasswordInput id="reg-password" autoComplete="new-password" />
+
+                      {/* Barra de fuerza */}
+                      {password.length > 0 && (
+                        <div className="space-y-2 pt-1">
+                          <div className="flex gap-1">
+                            {PASSWORD_RULES.map((_, i) => (
+                              <div
+                                key={i}
+                                className={cn(
+                                  'h-1 flex-1 rounded-full transition-all duration-300',
+                                  i < strength ? STRENGTH_COLORS[strength] : 'bg-muted'
+                                )}
+                              />
+                            ))}
+                          </div>
+                          <p className={cn('text-xs font-medium', STRENGTH_TEXT[strength])}>
+                            {STRENGTH_LABELS[strength]}
+                          </p>
+
+                          {/* Checklist de requisitos */}
+                          <ul className="space-y-1">
+                            {checks.map(c => (
+                              <li key={c.id} className="flex items-center gap-2 text-xs">
+                                <i className={cn(
+                                  'fi leading-none shrink-0',
+                                  c.passed
+                                    ? 'fi-rr-check text-green-500'
+                                    : 'fi-rr-cross text-muted-foreground'
+                                )} />
+                                <span className={c.passed ? 'text-foreground' : 'text-muted-foreground'}>
+                                  {c.label}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     {error && <p className="text-sm text-destructive">{error}</p>}
 
-                    <Button type="submit" className="w-full" disabled={submitting}>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={submitting || !allPassed}
+                    >
                       {submitting ? 'Creando cuenta...' : 'Crear cuenta'}
                     </Button>
                   </form>
