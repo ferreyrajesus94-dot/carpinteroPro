@@ -1,7 +1,15 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppLayout } from './layouts/AppLayout'
 
+// El guard de auth vive en AppLayout (rutas protegidas) y en LoginPage (ruta pública).
+// No se pueden usar hooks de contexto en componentes creados a nivel de módulo
+// (fuera del árbol de React), por eso el guard no va aquí.
+
 export const router = createBrowserRouter([
+  {
+    path: '/login',
+    lazy: () => import('@/features/auth/routes').then(m => ({ Component: m.AuthRoutes })),
+  },
   {
     path: '/',
     element: <AppLayout />,

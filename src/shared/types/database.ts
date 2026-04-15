@@ -12,6 +12,52 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      workshops: {
+        Row: {
+          id: string
+          name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          id: string
+          workshop_id: string
+          display_name: string | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          workshop_id: string
+          display_name?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workshop_id?: string
+          display_name?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_workshop_id_fkey'
+            columns: ['workshop_id']
+            referencedRelation: 'workshops'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       materials: {
         Row: {
           id: string

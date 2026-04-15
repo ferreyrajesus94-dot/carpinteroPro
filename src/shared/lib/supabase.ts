@@ -3,19 +3,26 @@ import type { Database } from '@/shared/types/database'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-const workshopId = import.meta.env.VITE_WORKSHOP_ID
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-// El header x-workshop-id es leído por la función get_current_workshop_id()
-// en las políticas RLS para aislar los datos por taller.
-// TODO (Fase 5 - Auth real): reemplazar por claims del JWT de Supabase Auth.
+// Objeto mutable: AuthProvider lo actualiza tras login con el workshop_id real.
+// El cliente supabase mantiene una referencia a este objeto, por lo que
+// cualquier mutación aplica a todas las requests futuras.
+const _headers: Record<string, string> = {}
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  global: {
-    headers: {
-      'x-workshop-id': workshopId ?? '',
-    },
-  },
+  global: { headers: _headers },
 })
+
+/** Llamar tras login exitoso para que las políticas RLS filtren por taller. */
+export function setWorkshopId(workshopId: string) {
+  _headers['x-workshop-id'] = workshopId
+}
+
+/** Llamar al hacer logout para limpiar el header. */
+export function clearWorkshopId() {
+  delete _headers['x-workshop-id']
+}

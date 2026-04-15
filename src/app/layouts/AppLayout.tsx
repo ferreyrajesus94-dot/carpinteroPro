@@ -1,7 +1,8 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
+import { useAuth } from '@/shared/providers/AuthProvider'
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard',      icon: 'fi-rr-apps'          },
@@ -14,6 +15,27 @@ const navItems = [
 
 export function AppLayout() {
   const { theme, toggle } = useTheme()
+  const { session, loading, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    )
+  }
+
+  if (!session) {
+    return <Navigate to="/login" replace />
+  }
+
+  async function handleSignOut() {
+    await signOut()
+    navigate('/login', { replace: true })
+  }
+
+  const userEmail = session?.user?.email ?? ''
 
   return (
     <div className="flex h-screen bg-background">
@@ -44,7 +66,14 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="border-t px-3 py-3">
+        <div className="border-t px-3 py-3 space-y-1">
+          {/* Email del usuario */}
+          {userEmail && (
+            <p className="truncate px-3 py-1 text-xs text-muted-foreground" title={userEmail}>
+              {userEmail}
+            </p>
+          )}
+          {/* Modo oscuro */}
           <button
             type="button"
             onClick={toggle}
@@ -53,6 +82,15 @@ export function AppLayout() {
           >
             <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none shrink-0`} />
             {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+          </button>
+          {/* Cerrar sesión */}
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-destructive cursor-pointer"
+          >
+            <i className="fi fi-rr-sign-out text-base leading-none shrink-0" />
+            Cerrar sesión
           </button>
         </div>
       </aside>
@@ -73,6 +111,14 @@ export function AppLayout() {
             className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors duration-150 cursor-pointer"
           >
             <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none`} />
+          </button>
+          <button
+            type="button"
+            onClick={handleSignOut}
+            aria-label="Cerrar sesión"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-destructive transition-colors duration-150 cursor-pointer"
+          >
+            <i className="fi fi-rr-sign-out text-base leading-none" />
           </button>
         </header>
 
