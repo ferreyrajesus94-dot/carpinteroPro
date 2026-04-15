@@ -16,6 +16,7 @@ export function LoginPage() {
   const { session, loading } = useAuth()
   const { theme, toggle } = useTheme()
   const [mode, setMode] = useState<Mode>('login')
+  const [showPassword, setShowPassword] = useState(false)
 
   // Campos compartidos
   const [email, setEmail] = useState('')
@@ -163,15 +164,26 @@ export function LoginPage() {
 
                   <div className="space-y-1.5">
                     <Label htmlFor="password">Contraseña</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      required
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        autoComplete="current-password"
+                        required
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(v => !v)}
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
+                      </button>
+                    </div>
                   </div>
 
                   {error && <p className="text-sm text-destructive">{error}</p>}
@@ -239,16 +251,27 @@ export function LoginPage() {
 
                     <div className="space-y-1.5">
                       <Label htmlFor="reg-password">Contraseña</Label>
+                      <div className="relative">
                       <Input
                         id="reg-password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Mínimo 6 caracteres"
                         autoComplete="new-password"
                         required
                         minLength={6}
+                        className="pr-10"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(v => !v)}
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
+                      </button>
+                      </div>
                     </div>
 
                     {error && <p className="text-sm text-destructive">{error}</p>}
