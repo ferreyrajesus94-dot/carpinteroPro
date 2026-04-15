@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   fetchMaterials,
   createMaterial,
@@ -25,7 +26,11 @@ export function useCreateMaterial(workshopId: string) {
   return useMutation({
     mutationFn: (data: Omit<MaterialInsert, 'workshop_id'>) =>
       createMaterial({ ...data, workshop_id: workshopId }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] })
+      toast.success('Material guardado')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -34,7 +39,11 @@ export function useUpdateMaterial(workshopId: string) {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: MaterialUpdate }) =>
       updateMaterial(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] })
+      toast.success('Material actualizado')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }
 
@@ -42,6 +51,10 @@ export function useDeleteMaterial(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: string) => deleteMaterial(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] })
+      toast.success('Material eliminado')
+    },
+    onError: (error: Error) => toast.error(error.message),
   })
 }

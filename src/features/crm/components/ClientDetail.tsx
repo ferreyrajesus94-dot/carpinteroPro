@@ -8,6 +8,7 @@ import { formatCurrency } from '@/features/quotes/types'
 import { calculateQuote } from '@/features/quotes/lib/calculator'
 import { CLIENT_SOURCE_LABELS } from '@/features/crm/types'
 import { Button } from '@/shared/ui/button'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { QuoteStatusBadge } from '@/features/quotes/components/QuoteStatusBadge'
 import { ClientForm } from './ClientForm'
 
@@ -19,6 +20,7 @@ export function ClientDetail() {
   const { data: quotes = [] } = useQuotes(workshopId)
   const deleteMutation = useDeleteClient(workshopId)
   const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const client = clients.find((c) => c.id === id)
   const clientQuotes = quotes
@@ -30,7 +32,6 @@ export function ClientDetail() {
   }
 
   async function handleDelete() {
-    if (!confirm(`¿Eliminar a ${client!.name}? Esta acción no se puede deshacer.`)) return
     await deleteMutation.mutateAsync(client!.id)
     navigate('/crm/clientes')
   }
@@ -41,6 +42,15 @@ export function ClientDetail() {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Eliminar cliente"
+        description={`¿Seguro que querés eliminar a ${client.name}? Esta acción no se puede deshacer.`}
+        onConfirm={handleDelete}
+        isPending={deleteMutation.isPending}
+      />
+
       <div className="flex items-center justify-between">
         <button
           className="text-sm text-muted-foreground hover:underline"
@@ -56,7 +66,7 @@ export function ClientDetail() {
             variant="destructive"
             size="sm"
             disabled={clientQuotes.length > 0}
-            onClick={handleDelete}
+            onClick={() => setDeleteOpen(true)}
           >
             Eliminar
           </Button>

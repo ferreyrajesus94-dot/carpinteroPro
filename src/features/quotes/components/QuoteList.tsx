@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, FileText } from 'lucide-react'
+import { Plus, Pencil, Trash2, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
+import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
-import { useQuotes, useDeleteQuote } from '../hooks/useQuotes'
+import { useQuotesPaginated, useDeleteQuote } from '../hooks/useQuotes'
+import { PAGE_SIZE } from '../api/quotes'
 import { formatCurrency } from '../types'
 import { QuoteStatusBadge } from './QuoteStatusBadge'
 import { calculateQuote } from '../lib/calculator'
@@ -12,16 +15,24 @@ import { calculateQuote } from '../lib/calculator'
 export function QuoteList() {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
-  const { data: quotes = [], isLoading } = useQuotes(workshopId)
+  const [page, setPage] = useState(0)
+  const { data: result, isLoading, isError } = useQuotesPaginated(workshopId, page)
   const deleteMutation = useDeleteQuote(workshopId)
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; quoteNumber: string } | null>(null)
 
-  function handleDelete(id: string, quoteNumber: string) {
-    if (confirm(`¿Eliminar el presupuesto ${quoteNumber}?`)) {
-      deleteMutation.mutate(id)
-    }
+  const quotes = result?.data ?? []
+  const totalCount = result?.count ?? 0
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+  if (isError) {
+    return (
+      <p className="py-8 text-center text-sm text-destructive">
+        Error al cargar los presupuestos. Revisá tu conexión e intentá de nuevo.
+      </p>
+    )
   }
 
-  if (isLoading) {
+  if (isLoading && !result) {
     return (
       <div className="space-y-4 p-4">
         <div className="flex items-center justify-between">
@@ -35,6 +46,18 @@ export function QuoteList() {
 
   return (
     <div className="space-y-4 p-4">
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
+        title="Eliminar presupuesto"
+        description={`¿Seguro que querés eliminar el presupuesto ${deleteTarget?.quoteNumber}? Esta acción no se puede deshacer.`}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id)
+          setDeleteTarget(null)
+        }}
+        isPending={deleteMutation.isPending}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Presupuestos</h1>
         <Button asChild disabled={!isOnline}>
@@ -45,7 +68,7 @@ export function QuoteList() {
         </Button>
       </div>
 
-      {quotes.length === 0 ? (
+      {quotes.length === 0 && totalCount === 0 ? (
         <p className="text-muted-foreground py-8 text-center">
           No hay presupuestos aún. ¡Creá el primero!
         </p>
@@ -81,7 +104,7 @@ export function QuoteList() {
                         variant="ghost"
                         size="icon"
                         disabled={!isOnline}
-                        onClick={() => handleDelete(q.id, q.quote_number)}
+                        onClick={() => setDeleteTarget({ id: q.id, quoteNumber: q.quote_number })}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -132,7 +155,7 @@ export function QuoteList() {
                             variant="ghost"
                             size="icon"
                             disabled={!isOnline}
-                            onClick={() => handleDelete(q.id, q.quote_number)}
+                            onClick={() => setDeleteTarget({ id: q.id, quoteNumber: q.quote_number })}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -144,6 +167,30 @@ export function QuoteList() {
               </tbody>
             </table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between text-sm text-muted-foreground pt-1">
+              <span>{totalCount} presupuestos — página {page + 1} de {totalPages}</span>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setPage((p) => p - 1)}
+                  disabled={page === 0}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setPage((p) => p + 1)}
+                  disabled={page >= totalPages - 1}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

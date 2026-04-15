@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
@@ -34,9 +34,20 @@ export function KanbanBoard() {
   const { data: quotes = [], isLoading } = useQuotes(workshopId)
   const [mobileStatus, setMobileStatus] = useState<QuoteStatus>('enviado')
 
-  const grouped = STATUS_ORDER.reduce<Record<QuoteStatus, QuoteWithExtras[]>>(
-    (acc, status) => { acc[status] = quotes.filter((q) => q.status === status); return acc },
-    {} as Record<QuoteStatus, QuoteWithExtras[]>
+  const grouped = useMemo(
+    () => STATUS_ORDER.reduce<Record<QuoteStatus, QuoteWithExtras[]>>(
+      (acc, status) => { acc[status] = quotes.filter((q) => q.status === status); return acc },
+      {} as Record<QuoteStatus, QuoteWithExtras[]>
+    ),
+    [quotes]
+  )
+
+  const columnTotals = useMemo(
+    () => STATUS_ORDER.reduce<Record<QuoteStatus, number>>(
+      (acc, status) => { acc[status] = columnTotal(grouped[status]); return acc },
+      {} as Record<QuoteStatus, number>
+    ),
+    [grouped]
   )
 
   if (isLoading) {
@@ -75,7 +86,7 @@ export function KanbanBoard() {
         ) : (
           <div className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              Total: {formatCurrency(columnTotal(grouped[mobileStatus]))}
+              Total: {formatCurrency(columnTotals[mobileStatus])}
             </p>
             {grouped[mobileStatus].map((q) => (
               <KanbanCard key={q.id} quote={q} />
@@ -97,7 +108,7 @@ export function KanbanBoard() {
                     <span className="text-xs bg-muted rounded-full px-2 py-0.5">{cards.length}</span>
                   </div>
                   {cards.length > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">{formatCurrency(columnTotal(cards))}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{formatCurrency(columnTotals[status])}</p>
                   )}
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-2">

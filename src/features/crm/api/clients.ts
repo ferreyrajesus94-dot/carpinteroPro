@@ -11,6 +11,23 @@ export async function fetchClients(workshopId: string): Promise<Client[]> {
   return data ?? []
 }
 
+export const PAGE_SIZE = 20
+
+export async function fetchClientsPaginated(
+  workshopId: string,
+  page: number
+): Promise<{ data: Client[]; count: number }> {
+  const from = page * PAGE_SIZE
+  const { data, error, count } = await supabase
+    .from('clients')
+    .select('*', { count: 'exact' })
+    .eq('workshop_id', workshopId)
+    .order('name')
+    .range(from, from + PAGE_SIZE - 1)
+  if (error) throw error
+  return { data: data ?? [], count: count ?? 0 }
+}
+
 export async function createClient(
   client: Omit<ClientInsert, 'id' | 'created_at'>
 ): Promise<Client> {

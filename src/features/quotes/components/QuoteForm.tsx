@@ -3,9 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { UserPlus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 import {
@@ -15,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useFurnitureTemplates } from '@/features/recipes/hooks/useRecipes'
 import { computeRecipeCost } from '@/features/recipes/types'
@@ -25,6 +22,9 @@ import { QUOTE_STATUS_LABELS, type QuoteStatus, type MarginMode, type QuoteFormV
 import { QuoteExtrasFieldArray } from './QuoteExtrasFieldArray'
 import { QuoteLivePreview } from './QuoteLivePreview'
 import { ClientDialog } from './ClientDialog'
+import { ClientSection } from './ClientSection'
+import { FurnitureSection } from './FurnitureSection'
+import { MarginSection } from './MarginSection'
 
 const extraSchema = z.object({
   description: z.string().min(1, 'La descripción es obligatoria'),
@@ -164,117 +164,32 @@ export function QuoteForm() {
       <div className="flex flex-col lg:flex-row gap-6">
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6">
 
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Cliente</h2>
-            <div className="flex gap-2">
-              <div className="flex-1 space-y-1">
-                <Label>Seleccionar cliente</Label>
-                <Select value={clientIdWatch ?? ''} onValueChange={(v) => setValue('client_id', v)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sin cliente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">Sin cliente</SelectItem>
-                    {clients.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}{c.phone ? ` — ${c.phone}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="self-end"
-                onClick={() => setClientDialogOpen(true)}
-                title="Nuevo cliente"
-              >
-                <UserPlus className="h-4 w-4" />
-              </Button>
-            </div>
-          </section>
+          <ClientSection
+            clients={clients}
+            clientIdWatch={clientIdWatch}
+            setValue={setValue}
+            onAddClient={() => setClientDialogOpen(true)}
+          />
 
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Mueble</h2>
-            <div className="space-y-1">
-              <Label>Plantilla de mueble (opcional)</Label>
-              <Select
-                value={templateIdWatch ?? ''}
-                onValueChange={(v) => setValue('furniture_template_id', v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sin plantilla — ingresá nombre y costo manualmente" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Sin plantilla</SelectItem>
-                  {templates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="furniture_name">Nombre del mueble *</Label>
-              <Input
-                id="furniture_name"
-                {...register('furniture_name')}
-                placeholder="Ej: Ropero 2 puertas"
-              />
-              {errors.furniture_name && (
-                <p className="text-destructive text-xs">{errors.furniture_name.message}</p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="recipe_cost">Costo base ($)</Label>
-              <Input
-                id="recipe_cost"
-                type="number"
-                min="0"
-                step="0.01"
-                {...register('recipe_cost')}
-                placeholder="0"
-              />
-            </div>
-          </section>
+          <FurnitureSection
+            templates={templates}
+            templateIdWatch={templateIdWatch}
+            register={register}
+            errors={errors}
+            setValue={setValue}
+          />
 
           <section className="space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Extras</h2>
             <QuoteExtrasFieldArray control={control} errors={errors} />
           </section>
 
-          <section className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Margen</h2>
-            <RadioGroup
-              value={marginModeWatch}
-              onValueChange={(v: string) => setValue('margin_mode', v as MarginMode)}
-              className="flex gap-4"
-            >
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="on_cost" id="on_cost" />
-                <Label htmlFor="on_cost">Sobre el costo</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <RadioGroupItem value="on_price" id="on_price" />
-                <Label htmlFor="on_price">Sobre el precio de venta</Label>
-              </div>
-            </RadioGroup>
-            <div className="w-28 space-y-1">
-              <Label htmlFor="margin_pct">Margen (%)</Label>
-              <Input
-                id="margin_pct"
-                type="number"
-                min="0"
-                max="99"
-                step="0.1"
-                {...register('margin_pct')}
-              />
-              {errors.margin_pct && (
-                <p className="text-destructive text-xs">{errors.margin_pct.message}</p>
-              )}
-            </div>
-          </section>
+          <MarginSection
+            marginModeWatch={marginModeWatch}
+            register={register}
+            errors={errors}
+            setValue={setValue}
+          />
 
           <section className="space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Estado</h2>

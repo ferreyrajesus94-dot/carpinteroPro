@@ -10,21 +10,38 @@ const QUOTE_SELECT = `
 export async function fetchQuotes(workshopId: string): Promise<QuoteWithExtras[]> {
   const { data, error } = await supabase
     .from('quotes')
-    .select(QUOTE_SELECT)
+    .select<typeof QUOTE_SELECT, QuoteWithExtras>(QUOTE_SELECT)
     .eq('workshop_id', workshopId)
     .order('created_at', { ascending: false })
   if (error) throw error
-  return (data ?? []) as unknown as QuoteWithExtras[]
+  return data ?? []
+}
+
+export const PAGE_SIZE = 20
+
+export async function fetchQuotesPaginated(
+  workshopId: string,
+  page: number
+): Promise<{ data: QuoteWithExtras[]; count: number }> {
+  const from = page * PAGE_SIZE
+  const { data, error, count } = await supabase
+    .from('quotes')
+    .select<typeof QUOTE_SELECT, QuoteWithExtras>(QUOTE_SELECT, { count: 'exact' })
+    .eq('workshop_id', workshopId)
+    .order('created_at', { ascending: false })
+    .range(from, from + PAGE_SIZE - 1)
+  if (error) throw error
+  return { data: data ?? [], count: count ?? 0 }
 }
 
 export async function fetchQuote(id: string): Promise<QuoteWithExtras> {
   const { data, error } = await supabase
     .from('quotes')
-    .select(QUOTE_SELECT)
+    .select<typeof QUOTE_SELECT, QuoteWithExtras>(QUOTE_SELECT)
     .eq('id', id)
     .single()
   if (error) throw error
-  return data as unknown as QuoteWithExtras
+  return data
 }
 
 export async function generateQuoteNumber(workshopId: string): Promise<string> {
