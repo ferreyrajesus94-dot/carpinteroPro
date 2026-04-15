@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { supabase } from '@/shared/lib/supabase'
 import { useAuth } from '@/shared/providers/AuthProvider'
+import { useTheme } from '@/shared/hooks/useTheme'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
@@ -13,6 +14,7 @@ type Mode = 'login' | 'register'
 export function LoginPage() {
   const navigate = useNavigate()
   const { session, loading } = useAuth()
+  const { theme, toggle } = useTheme()
   const [mode, setMode] = useState<Mode>('login')
 
   // Campos compartidos
@@ -90,7 +92,16 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4">
+      {/* Toggle modo oscuro */}
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
+        className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+      >
+        <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none`} />
+      </button>
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
