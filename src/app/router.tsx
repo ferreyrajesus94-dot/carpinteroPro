@@ -27,31 +27,31 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       {
-        path: 'dashboard',
+        path: 'dashboard/*',
         lazy: () => import('@/features/dashboard/routes').then(m => ({ Component: m.DashboardRoutes })),
       },
       {
-        path: 'inventory',
+        path: 'inventory/*',
         lazy: () => import('@/features/inventory/routes').then(m => ({ Component: m.InventoryRoutes })),
       },
       {
-        path: 'recipes',
+        path: 'recipes/*',
         lazy: () => import('@/features/recipes/routes').then(m => ({ Component: m.RecipesRoutes })),
       },
       {
-        path: 'quotes',
+        path: 'quotes/*',
         lazy: () => import('@/features/quotes/routes').then(m => ({ Component: m.QuotesRoutes })),
       },
       {
-        path: 'crm',
+        path: 'crm/*',
         lazy: () => import('@/features/crm/routes').then(m => ({ Component: m.CrmRoutes })),
       },
       {
-        path: 'settings',
+        path: 'settings/*',
         lazy: () => import('@/features/settings/routes').then(m => ({ Component: m.SettingsRoutes })),
       },
       {
-        path: 'profile',
+        path: 'profile/*',
         lazy: () => import('@/features/auth/routes').then(m => ({ Component: m.ProfileRoutes })),
       },
     ],

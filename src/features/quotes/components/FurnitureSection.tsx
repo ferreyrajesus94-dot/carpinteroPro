@@ -32,14 +32,14 @@ export function FurnitureSection({
       <div className="space-y-1">
         <Label>Plantilla de mueble (opcional)</Label>
         <Select
-          value={templateIdWatch ?? ''}
-          onValueChange={(v) => setValue('furniture_template_id', v)}
+          value={templateIdWatch ?? '__none__'}
+          onValueChange={(v) => setValue('furniture_template_id', v === '__none__' ? '' : v)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Sin plantilla — ingresá nombre y costo manualmente" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Sin plantilla</SelectItem>
+            <SelectItem value="__none__">Sin plantilla</SelectItem>
             {templates.map((t) => (
               <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
             ))}

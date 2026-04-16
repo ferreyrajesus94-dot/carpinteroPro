@@ -117,12 +117,12 @@ export function ContractPreview() {
 
       <div className="flex items-center gap-3">
         <span className="text-sm text-muted-foreground">Plantilla:</span>
-        <Select value={activeTemplateId} onValueChange={setSelectedTemplateId}>
+        <Select value={activeTemplateId || '__none__'} onValueChange={(v) => setSelectedTemplateId(v === '__none__' ? '' : v)}>
           <SelectTrigger className="w-64">
             <SelectValue placeholder="Sin contrato" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Sin contrato</SelectItem>
+            <SelectItem value="__none__">Sin contrato</SelectItem>
             {templates.map((t) => (
               <SelectItem key={t.id} value={t.id}>
                 {t.name}{t.is_default ? ' (predeterminada)' : ''}
