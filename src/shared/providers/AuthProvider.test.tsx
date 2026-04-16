@@ -20,12 +20,12 @@ import * as supabaseLib from '@/shared/lib/supabase'
 import { AuthProvider, useAuth } from './AuthProvider'
 
 // Typed aliases for convenience
-const mockAuth = supabaseLib.supabase.auth as {
+const mockAuth = supabaseLib.supabase.auth as unknown as {
   getSession: ReturnType<typeof vi.fn>
   onAuthStateChange: ReturnType<typeof vi.fn>
   signOut: ReturnType<typeof vi.fn>
 }
-const mockFrom = supabaseLib.supabase.from as ReturnType<typeof vi.fn>
+const mockFrom = supabaseLib.supabase.from as unknown as ReturnType<typeof vi.fn>
 
 const WORKSHOP_ID = '00000000-0000-0000-0000-000000000001'
 const USER_ID = 'user-abc-123'

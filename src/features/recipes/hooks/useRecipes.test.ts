@@ -28,8 +28,8 @@ function makeQueryWrapper() {
 const MOCK_MATERIAL = {
   id: 'mat-1',
   name: 'MDF 18mm',
-  category: 'madera',
-  unit: 'm2',
+  category: 'madera' as const,
+  unit: 'm2' as const,
   price_per_unit: 2500,
 }
 
@@ -37,7 +37,7 @@ const MOCK_TEMPLATE: FurnitureTemplateWithItems = {
   id: TEMPLATE_ID,
   workshop_id: WORKSHOP_ID,
   name: 'Ropero 2 puertas',
-  description: null,
+  notes: null,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
   recipe_items: [
@@ -162,7 +162,7 @@ describe('useCreateFurnitureTemplate', () => {
 
     await act(() =>
       result.current.mutate({
-        template: { workshop_id: WORKSHOP_ID, name: 'X', description: null },
+        template: { workshop_id: WORKSHOP_ID, name: 'X', notes: null },
         items: [],
       })
     )

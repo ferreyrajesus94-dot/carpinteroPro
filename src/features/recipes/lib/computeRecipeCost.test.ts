@@ -1,15 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { computeRecipeCost } from '../types'
 import type { RecipeItemWithMaterial } from '../types'
+import type { Material } from '@/features/inventory/types'
+
+type Category = Material['category']
 
 function makeItem(
-  overrides: Partial<RecipeItemWithMaterial> & { category: string; price_per_unit: number; quantity: number }
+  overrides: Partial<RecipeItemWithMaterial> & { category: Category; price_per_unit: number; quantity: number }
 ): RecipeItemWithMaterial {
   return {
     id: 'ri-1',
     furniture_template_id: 'tmpl-1',
     material_id: 'mat-1',
-    quantity: overrides.quantity,
     material: {
       id: 'mat-1',
       name: 'Material',
@@ -41,7 +43,7 @@ describe('computeRecipeCost', () => {
   it('accumulates non-madera items into extrasTotal', () => {
     const items = [
       makeItem({ category: 'herraje', price_per_unit: 150, quantity: 10 }),
-      makeItem({ id: 'ri-2', material_id: 'mat-2', category: 'acabado', price_per_unit: 500, quantity: 3 }),
+      makeItem({ id: 'ri-2', material_id: 'mat-2', category: 'otro', price_per_unit: 500, quantity: 3 }),
     ]
     const result = computeRecipeCost(items)
     expect(result.woodsTotal).toBe(0)
