@@ -1,4 +1,4 @@
-import { Outlet, NavLink, Navigate, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, Navigate, Link } from 'react-router-dom'
 import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
@@ -15,8 +15,7 @@ const navItems = [
 
 export function AppLayout() {
   const { theme, toggle } = useTheme()
-  const { session, loading, signOut } = useAuth()
-  const navigate = useNavigate()
+  const { session, loading } = useAuth()
 
   if (loading) {
     return (
@@ -30,12 +29,12 @@ export function AppLayout() {
     return <Navigate to="/login" replace />
   }
 
-  async function handleSignOut() {
-    await signOut()
-    navigate('/login', { replace: true })
-  }
-
   const userEmail = session?.user?.email ?? ''
+  const workshopName = session?.user?.user_metadata?.workshop_name ?? ''
+  const displayName = session?.user?.user_metadata?.full_name ?? ''
+  const initials = displayName
+    ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
+    : userEmail.slice(0, 2).toUpperCase()
 
   return (
     <div className="flex h-screen bg-background">
@@ -67,12 +66,19 @@ export function AppLayout() {
           ))}
         </nav>
         <div className="border-t px-3 py-3 space-y-1">
-          {/* Email del usuario */}
-          {userEmail && (
-            <p className="truncate px-3 py-1 text-xs text-muted-foreground" title={userEmail}>
-              {userEmail}
-            </p>
-          )}
+          {/* Perfil de usuario */}
+          <Link
+            to="/profile"
+            className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-foreground"
+          >
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+              {initials}
+            </div>
+            <div className="min-w-0">
+              {workshopName && <p className="truncate text-xs font-semibold text-foreground">{workshopName}</p>}
+              {userEmail && <p className="truncate text-xs text-muted-foreground">{userEmail}</p>}
+            </div>
+          </Link>
           {/* Modo oscuro */}
           <button
             type="button"
@@ -82,15 +88,6 @@ export function AppLayout() {
           >
             <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none shrink-0`} />
             {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-          </button>
-          {/* Cerrar sesión */}
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-destructive cursor-pointer"
-          >
-            <i className="fi fi-rr-sign-out text-base leading-none shrink-0" />
-            Cerrar sesión
           </button>
         </div>
       </aside>
@@ -112,14 +109,13 @@ export function AppLayout() {
           >
             <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none`} />
           </button>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            aria-label="Cerrar sesión"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-destructive transition-colors duration-150 cursor-pointer"
+          <Link
+            to="/profile"
+            aria-label="Mi perfil"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-opacity"
           >
-            <i className="fi fi-rr-sign-out text-base leading-none" />
-          </button>
+            {initials}
+          </Link>
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 pb-20 md:pb-4">

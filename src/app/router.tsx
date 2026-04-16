@@ -50,6 +50,10 @@ export const router = createBrowserRouter([
         path: 'settings',
         lazy: () => import('@/features/settings/routes').then(m => ({ Component: m.SettingsRoutes })),
       },
+      {
+        path: 'profile',
+        lazy: () => import('@/features/auth/routes').then(m => ({ Component: m.ProfileRoutes })),
+      },
     ],
   },
 ])
