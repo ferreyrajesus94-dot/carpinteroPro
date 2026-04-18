@@ -1,8 +1,12 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import {
+  DndContext, PointerSensor, useSensor, useSensors, useDroppable,
+  type DragEndEvent,
+} from '@dnd-kit/core'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
-import { useQuotes } from '@/features/quotes/hooks/useQuotes'
+import { useQuotes, useUpdateQuote } from '@/features/quotes/hooks/useQuotes'
 import { formatCurrency, QUOTE_STATUS_LABELS, type QuoteStatus } from '@/features/quotes/types'
 import { Skeleton } from '@/shared/ui/skeleton'
 import {
@@ -28,11 +32,44 @@ function columnTotal(quotes: QuoteWithExtras[]): number {
   }, 0)
 }
 
+function DroppableColumn({ status, children }: { status: QuoteStatus; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: status })
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex-1 overflow-y-auto p-2 space-y-2 rounded-b-lg transition-colors ${isOver ? 'bg-primary/10' : ''}`}
+    >
+      {children}
+    </div>
+  )
+}
+
 export function KanbanBoard() {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
   const { data: quotes = [], isLoading } = useQuotes(workshopId)
+  const updateMutation = useUpdateQuote(workshopId)
   const [mobileStatus, setMobileStatus] = useState<QuoteStatus>('enviado')
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over) return
+    const newStatus = over.id as QuoteStatus
+    const prevStatus = active.data.current?.status as QuoteStatus | undefined
+    if (!prevStatus || prevStatus === newStatus) return
+    const quote = quotes.find((q) => q.id === active.id)
+    if (!quote) return
+    updateMutation.mutate({
+      id: quote.id,
+      quote: { status: newStatus },
+      extras: quote.extras.map((e) => ({
+        description: e.description,
+        amount: e.amount,
+        show_in_quote: e.show_in_quote,
+      })),
+    })
+  }
 
   const grouped = useMemo(
     () => STATUS_ORDER.reduce<Record<QuoteStatus, QuoteWithExtras[]>>(
@@ -97,30 +134,32 @@ export function KanbanBoard() {
 
       {/* Desktop: columnas horizontales */}
       <div className="hidden sm:flex flex-1 overflow-x-auto p-4">
-        <div className="flex gap-4 h-full min-w-max">
-          {STATUS_ORDER.map((status) => {
-            const cards = grouped[status]
-            return (
-              <div key={status} className="flex flex-col w-64 bg-muted/40 rounded-lg">
-                <div className="p-3 border-b border-border">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm">{QUOTE_STATUS_LABELS[status]}</span>
-                    <span className="text-xs bg-muted rounded-full px-2 py-0.5">{cards.length}</span>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="flex gap-4 h-full min-w-max">
+            {STATUS_ORDER.map((status) => {
+              const cards = grouped[status]
+              return (
+                <div key={status} className="flex flex-col w-64 bg-muted/40 rounded-lg">
+                  <div className="p-3 border-b border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm">{QUOTE_STATUS_LABELS[status]}</span>
+                      <span className="text-xs bg-muted rounded-full px-2 py-0.5">{cards.length}</span>
+                    </div>
+                    {cards.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">{formatCurrency(columnTotals[status])}</p>
+                    )}
                   </div>
-                  {cards.length > 0 && (
-                    <p className="text-xs text-muted-foreground mt-1">{formatCurrency(columnTotals[status])}</p>
-                  )}
+                  <DroppableColumn status={status}>
+                    {cards.map((q) => <KanbanCard key={q.id} quote={q} draggable={isOnline} />)}
+                    {cards.length === 0 && (
+                      <p className="text-xs text-muted-foreground text-center py-4">Sin presupuestos</p>
+                    )}
+                  </DroppableColumn>
                 </div>
-                <div className="flex-1 overflow-y-auto p-2 space-y-2">
-                  {cards.map((q) => <KanbanCard key={q.id} quote={q} />)}
-                  {cards.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">Sin presupuestos</p>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        </DndContext>
       </div>
 
       {!isOnline && (
