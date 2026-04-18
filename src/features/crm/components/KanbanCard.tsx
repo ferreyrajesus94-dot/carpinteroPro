@@ -1,14 +1,22 @@
 import { useNavigate } from 'react-router-dom'
+import { useDraggable } from '@dnd-kit/core'
+import { CSS } from '@dnd-kit/utilities'
 import { calculateQuote } from '@/features/quotes/lib/calculator'
 import { formatCurrency, QUOTE_STATUS_COLORS } from '@/features/quotes/types'
 import type { QuoteWithExtras } from '@/features/quotes/types'
 
 interface KanbanCardProps {
   quote: QuoteWithExtras
+  draggable?: boolean
 }
 
-export function KanbanCard({ quote }: KanbanCardProps) {
+export function KanbanCard({ quote, draggable = false }: KanbanCardProps) {
   const navigate = useNavigate()
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: quote.id,
+    data: { status: quote.status },
+    disabled: !draggable,
+  })
 
   const { salePrice } = calculateQuote({
     recipeCost: quote.recipe_cost,
@@ -22,8 +30,12 @@ export function KanbanCard({ quote }: KanbanCardProps) {
 
   return (
     <div
-      className="bg-white rounded-lg border border-border p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow space-y-2"
-      onClick={() => navigate(`/quotes/${quote.id}`)}
+      ref={setNodeRef}
+      style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 }}
+      className={`bg-card text-card-foreground rounded-lg border border-border p-3 shadow-sm hover:shadow-md transition-shadow space-y-2 ${draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}`}
+      onClick={() => { if (!isDragging) navigate(`/quotes/${quote.id}`) }}
+      {...attributes}
+      {...listeners}
     >
       <div className="flex items-center justify-between">
         <span className="text-xs font-mono text-muted-foreground">{quote.quote_number}</span>
