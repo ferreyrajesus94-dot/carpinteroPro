@@ -74,6 +74,7 @@ export type Database = {
           width_cm: number | null
           thickness_cm: number | null
           volume_ml: number | null
+          pack_size: number | null
           created_at: string
           updated_at: string
         }
@@ -92,6 +93,7 @@ export type Database = {
           width_cm?: number | null
           thickness_cm?: number | null
           volume_ml?: number | null
+          pack_size?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -110,6 +112,7 @@ export type Database = {
           width_cm?: number | null
           thickness_cm?: number | null
           volume_ml?: number | null
+          pack_size?: number | null
           created_at?: string
           updated_at?: string
         }

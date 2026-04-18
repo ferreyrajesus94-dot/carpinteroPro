@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm, Controller, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -44,6 +44,14 @@ const materialSchema = z.object({
   width_cm: optionalPositiveNumber,
   thickness_cm: optionalPositiveNumber,
   volume_ml: optionalPositiveNumber,
+  pack_size: z.preprocess(
+    (v) => {
+      if (v === '' || v === null || v === undefined) return null
+      const n = Number(v)
+      return Number.isFinite(n) ? n : v
+    },
+    z.union([z.null(), z.number().int('Debe ser entero').min(2, 'Debe ser ≥ 2')]),
+  ),
 })
 
 type FormValues = z.infer<typeof materialSchema>
@@ -66,6 +74,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
     control,
     watch,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(materialSchema) as Resolver<FormValues>,
@@ -82,6 +91,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
       width_cm: null,
       thickness_cm: null,
       volume_ml: null,
+      pack_size: null,
     },
   })
 
@@ -101,6 +111,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
         width_cm: material.width_cm ?? null,
         thickness_cm: material.thickness_cm ?? null,
         volume_ml: material.volume_ml ?? null,
+        pack_size: material.pack_size ?? null,
       })
     }
   }, [material, reset])
@@ -116,6 +127,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
       width_cm: isWood ? values.width_cm ?? null : null,
       thickness_cm: isWood ? values.thickness_cm ?? null : null,
       volume_ml: isLiquid ? values.volume_ml ?? null : null,
+      pack_size: values.pack_size ?? null,
     }
     if (isEditing && material) {
       await updateMutation.mutateAsync({ id: material.id, data: payload })
@@ -128,6 +140,40 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
   const category = watch('category')
   const isWood = category === 'madera'
   const isLiquid = category === 'pintura' || category === 'adhesivo'
+
+  // Pack price sincronizado con price_per_unit × pack_size
+  const priceUnit = watch('price_per_unit')
+  const packSize = watch('pack_size')
+  const [packPriceStr, setPackPriceStr] = useState('')
+  const lastEdit = useRef<'unit' | 'pack' | null>(null)
+
+  useEffect(() => {
+    if (lastEdit.current === 'pack') {
+      lastEdit.current = null
+      return
+    }
+    const size = typeof packSize === 'number' ? packSize : Number(packSize)
+    const unit = typeof priceUnit === 'number' ? priceUnit : Number(priceUnit)
+    if (size && size >= 2 && Number.isFinite(unit)) {
+      const derived = Math.round(unit * size * 100) / 100
+      setPackPriceStr(derived ? String(derived) : '')
+    } else {
+      setPackPriceStr('')
+    }
+  }, [priceUnit, packSize])
+
+  const onPackPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const str = e.target.value
+    setPackPriceStr(str)
+    const num = Number(str)
+    const size = typeof packSize === 'number' ? packSize : Number(packSize)
+    if (size && size >= 2 && Number.isFinite(num)) {
+      lastEdit.current = 'pack'
+      // 4 decimales de precisión interna para evitar drift al redondear
+      const newUnit = Math.round((num / size) * 10000) / 10000
+      setValue('price_per_unit', newUnit, { shouldValidate: false, shouldDirty: true })
+    }
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -226,6 +272,48 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
           {errors.min_stock && (
             <p className="text-destructive text-xs">{errors.min_stock.message}</p>
           )}
+        </div>
+      </div>
+
+      {/* Sección presentación: pack opcional */}
+      <div className="space-y-3 rounded-md border border-border/60 p-3">
+        <p className="text-sm font-medium">Presentación (opcional)</p>
+        <p className="text-xs text-muted-foreground -mt-2">
+          Si el material se compra en pack (ej: listones de a 10), indicá cuántas unidades trae.
+          El stock se maneja siempre en unidades.
+        </p>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <Label htmlFor="pack_size">Unidades por pack</Label>
+            <Input
+              id="pack_size"
+              type="number"
+              min="2"
+              step="1"
+              placeholder="Ej: 10"
+              {...register('pack_size')}
+            />
+            {errors.pack_size && (
+              <p className="text-destructive text-xs">{errors.pack_size.message}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="pack_price">Precio por pack (ARS)</Label>
+            <Input
+              id="pack_price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder={packSize ? 'Se recalcula en vivo' : 'Cargá primero las unidades'}
+              value={packPriceStr}
+              onChange={onPackPriceChange}
+              disabled={!packSize || (typeof packSize === 'number' && packSize < 2)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Editar este campo recalcula el precio unitario automáticamente.
+            </p>
+          </div>
         </div>
       </div>
 

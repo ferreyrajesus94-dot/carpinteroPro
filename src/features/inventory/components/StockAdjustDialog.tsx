@@ -6,6 +6,7 @@ import { Textarea } from '@/shared/ui/textarea'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/shared/ui/select'
+import { Switch } from '@/shared/ui/switch'
 import { useApplyStockMovement } from '../hooks/useStockMovements'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import type { Material } from '../types'
@@ -38,13 +39,18 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
   const [amount, setAmount] = useState('')
   const [reason, setReason] = useState<StockMovementReason>('compra')
   const [note, setNote] = useState('')
+  const [usePackMode, setUsePackMode] = useState(false)
 
   const reasonsList = direction === 'in' ? REASONS_IN : REASONS_OUT
   const parsedAmount = Number(amount)
   const isValid = amount !== '' && parsedAmount > 0
 
+  const packSize = material.pack_size ?? null
+  const packModeActive = usePackMode && packSize != null && direction === 'in'
+  const effectiveAmount = packModeActive && packSize ? parsedAmount * packSize : parsedAmount
+
   const resultingStock =
-    isValid ? material.stock + (direction === 'in' ? parsedAmount : -parsedAmount) : null
+    isValid ? material.stock + (direction === 'in' ? effectiveAmount : -effectiveAmount) : null
   const wouldGoNegative = resultingStock !== null && resultingStock < 0
 
   function handleDirectionChange(next: Direction) {
@@ -56,7 +62,7 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
     e.preventDefault()
     if (!isValid || wouldGoNegative) return
 
-    const delta = direction === 'in' ? parsedAmount : -parsedAmount
+    const delta = direction === 'in' ? effectiveAmount : -effectiveAmount
     mutation.mutate(
       {
         materialId: material.id,
@@ -94,8 +100,23 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
         </Button>
       </div>
 
+      {packSize != null && direction === 'in' && (
+        <div className="flex items-center justify-between rounded-md border p-3">
+          <Label htmlFor="pack-mode" className="text-sm font-normal">
+            Cargar por packs de {packSize}
+          </Label>
+          <Switch
+            id="pack-mode"
+            checked={usePackMode}
+            onCheckedChange={setUsePackMode}
+          />
+        </div>
+      )}
+
       <div className="space-y-1.5">
-        <Label htmlFor="stock-amount">Cantidad</Label>
+        <Label htmlFor="stock-amount">
+          Cantidad {packModeActive ? '(packs)' : ''}
+        </Label>
         <Input
           id="stock-amount"
           type="number"
@@ -107,6 +128,11 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
           placeholder="0"
           required
         />
+        {packModeActive && isValid && (
+          <p className="text-muted-foreground text-xs">
+            ≈ {effectiveAmount} {material.unit}
+          </p>
+        )}
       </div>
 
       <div className="space-y-1.5">
