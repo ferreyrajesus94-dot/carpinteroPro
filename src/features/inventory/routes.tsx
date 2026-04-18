@@ -12,6 +12,7 @@ import { MaterialForm } from './components/MaterialForm'
 import { PriceHistoryChart } from './components/PriceHistoryChart'
 import { StockAdjustDialog } from './components/StockAdjustDialog'
 import { StockHistoryDialog } from './components/StockHistoryDialog'
+import { InventoryStats } from './components/InventoryStats'
 import type { Material } from './types'
 
 type ActiveDialog = 'form' | 'priceHistory' | 'stockAdjust' | 'stockHistory' | null
@@ -44,6 +45,8 @@ export function InventoryRoutes() {
           Nuevo material
         </Button>
       </div>
+
+      <InventoryStats />
 
       <MaterialList
         onEdit={(m) => openFor('form', m)}
