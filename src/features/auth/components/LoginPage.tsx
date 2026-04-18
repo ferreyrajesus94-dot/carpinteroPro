@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
 import { supabase } from '@/shared/lib/supabase'
 import { useAuth } from '@/shared/providers/AuthProvider'
@@ -45,6 +45,16 @@ export function LoginPage() {
   // Campos compartidos
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(true)
+
+  // Pre-llenar email si fue guardado previamente
+  useEffect(() => {
+    const saved = localStorage.getItem('carpinteroPro.rememberedEmail')
+    if (saved) {
+      setEmail(saved)
+      setRememberMe(true)
+    }
+  }, [])
 
   // Solo registro
   const [workshopName, setWorkshopName] = useState('')
@@ -99,6 +109,12 @@ export function LoginPage() {
       )
       setSubmitting(false)
       return
+    }
+
+    if (rememberMe) {
+      localStorage.setItem('carpinteroPro.rememberedEmail', email)
+    } else {
+      localStorage.removeItem('carpinteroPro.rememberedEmail')
     }
 
     navigate('/dashboard', { replace: true })
@@ -219,6 +235,16 @@ export function LoginPage() {
                     <Label htmlFor="password">Contraseña</Label>
                     <PasswordInput id="password" autoComplete="current-password" />
                   </div>
+
+                  <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={e => setRememberMe(e.target.checked)}
+                      className="h-4 w-4 rounded border-input accent-primary cursor-pointer"
+                    />
+                    Recordarme en este equipo
+                  </label>
 
                   {error && <p className="text-sm text-destructive">{error}</p>}
 

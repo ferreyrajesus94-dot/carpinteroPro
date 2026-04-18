@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Download, Share2, Copy } from 'lucide-react'
+import { ArrowLeft, Download, Share2, Copy, Pencil, Check } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { Textarea } from '@/shared/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -28,6 +29,8 @@ export function ContractPreview() {
   const { data: settings } = useWorkshopSettings(workshopId)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [copied, setCopied] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editedContract, setEditedContract] = useState<string | null>(null)
 
   const defaultTemplate = templates.find((t) => t.is_default)
   const activeTemplateId = selectedTemplateId || defaultTemplate?.id || ''
@@ -51,9 +54,15 @@ export function ContractPreview() {
     date: format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: es }),
   }
 
-  const renderedContract = activeTemplate
+  const baseContract = activeTemplate
     ? renderContract(activeTemplate.body_markdown, vars)
     : ''
+  const renderedContract = editedContract ?? baseContract
+
+  useEffect(() => {
+    setEditedContract(null)
+    setIsEditing(false)
+  }, [activeTemplateId])
 
   function buildWhatsAppText(): string {
     const lines: string[] = [
@@ -148,10 +157,47 @@ export function ContractPreview() {
       </div>
 
       {renderedContract ? (
-        <div className="rounded-lg border p-6 bg-white text-sm leading-relaxed">
-          <div
-            dangerouslySetInnerHTML={{ __html: markdownToHtml(renderedContract) }}
-          />
+        <div className="space-y-2">
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (isEditing) {
+                  setIsEditing(false)
+                } else {
+                  setEditedContract(renderedContract)
+                  setIsEditing(true)
+                }
+              }}
+            >
+              {isEditing ? <Check className="h-4 w-4 mr-1" /> : <Pencil className="h-4 w-4 mr-1" />}
+              {isEditing ? 'Listo' : 'Editar'}
+            </Button>
+            {editedContract !== null && !isEditing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setEditedContract(null)}
+              >
+                Restaurar plantilla
+              </Button>
+            )}
+          </div>
+          {isEditing ? (
+            <Textarea
+              value={editedContract ?? ''}
+              onChange={(e) => setEditedContract(e.target.value)}
+              rows={14}
+              className="font-mono text-sm"
+            />
+          ) : (
+            <div className="rounded-lg border p-6 bg-card text-card-foreground text-sm leading-relaxed">
+              <div
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(renderedContract) }}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-muted-foreground text-sm">

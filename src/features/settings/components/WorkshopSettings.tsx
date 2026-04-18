@@ -6,6 +6,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Switch } from '@/shared/ui/switch'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useWorkshopSettings, useUpsertWorkshopSettings } from '../hooks/useWorkshopSettings'
 
@@ -15,6 +16,7 @@ const schema = z.object({
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().optional(),
   logo_url: z.string().optional(),
+  auto_stock_discount: z.boolean(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -29,11 +31,14 @@ export function WorkshopSettings() {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', phone: '', email: '', address: '', logo_url: '' },
+    defaultValues: { name: '', phone: '', email: '', address: '', logo_url: '', auto_stock_discount: false },
   })
+
+  const autoStockDiscount = watch('auto_stock_discount')
 
   useEffect(() => {
     if (settings) {
@@ -43,6 +48,7 @@ export function WorkshopSettings() {
         email: settings.email ?? '',
         address: settings.address ?? '',
         logo_url: settings.logo_url ?? '',
+        auto_stock_discount: settings.auto_stock_discount ?? false,
       })
     }
   }, [settings, reset])
@@ -62,6 +68,7 @@ export function WorkshopSettings() {
       email: values.email || null,
       address: values.address || null,
       logo_url: values.logo_url || null,
+      auto_stock_discount: values.auto_stock_discount,
     })
   }
 
@@ -111,6 +118,26 @@ export function WorkshopSettings() {
               <p className="text-xs text-muted-foreground">
                 La imagen se guarda en el dispositivo y aparece en el PDF.
               </p>
+            </div>
+
+            <div className="rounded-md border p-3 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto-stock-discount" className="cursor-pointer">
+                    Descontar stock automáticamente al aprobar presupuestos
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Cuando marques un presupuesto como Aprobado, los materiales que componen
+                    el mueble se restarán del stock automáticamente. Podés revertir el movimiento
+                    manualmente desde el inventario.
+                  </p>
+                </div>
+                <Switch
+                  id="auto-stock-discount"
+                  checked={autoStockDiscount}
+                  onCheckedChange={(v) => setValue('auto_stock_discount', v, { shouldDirty: true })}
+                />
+              </div>
             </div>
 
             <div className="flex justify-end pt-2">

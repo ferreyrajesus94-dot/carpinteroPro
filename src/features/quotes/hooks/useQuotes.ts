@@ -10,6 +10,8 @@ import {
   generateQuoteNumber,
 } from '../api/quotes'
 import type { QuoteInsert, QuoteUpdate, QuoteExtraInsert } from '../types'
+import { supabase } from '@/shared/lib/supabase'
+import { applyStockMovement } from '@/features/inventory/api/stockMovements'
 
 const QUOTES_KEY = 'quotes'
 
@@ -71,13 +73,66 @@ interface UpdatePayload {
   extras: Omit<QuoteExtraInsert, 'id' | 'quote_id'>[]
 }
 
+async function maybeAutoDiscountStock(
+  workshopId: string,
+  quoteId: string,
+  newStatus: string | null | undefined,
+): Promise<void> {
+  if (newStatus !== 'aprobado') return
+
+  const { data: prev } = await supabase
+    .from('quotes')
+    .select('status, furniture_template_id, quote_number')
+    .eq('id', quoteId)
+    .maybeSingle()
+  if (!prev || prev.status === 'aprobado' || !prev.furniture_template_id) return
+
+  const { data: settings } = await supabase
+    .from('workshop_settings')
+    .select('auto_stock_discount')
+    .eq('workshop_id', workshopId)
+    .maybeSingle()
+  if (!settings?.auto_stock_discount) return
+
+  const { data: items } = await supabase
+    .from('recipe_items')
+    .select('material_id, quantity')
+    .eq('furniture_template_id', prev.furniture_template_id)
+  if (!items || items.length === 0) return
+
+  const note = `Aprobación presupuesto ${prev.quote_number ?? ''}`.trim()
+  let ok = 0
+  const errors: string[] = []
+  for (const it of items) {
+    try {
+      await applyStockMovement({
+        materialId: it.material_id,
+        delta: -Number(it.quantity),
+        reason: 'descuento_presupuesto',
+        note,
+        quoteId,
+      })
+      ok++
+    } catch (e) {
+      errors.push((e as Error).message)
+    }
+  }
+  if (ok > 0) toast.success(`Descontados ${ok} material${ok === 1 ? '' : 'es'} del stock`)
+  if (errors.length > 0) toast.error(`No se pudo descontar ${errors.length} material(es): ${errors[0]}`)
+}
+
 export function useUpdateQuote(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, quote, extras }: UpdatePayload) => updateQuote(id, quote, extras),
+    mutationFn: async ({ id, quote, extras }: UpdatePayload) => {
+      await maybeAutoDiscountStock(workshopId, id, quote.status)
+      return updateQuote(id, quote, extras)
+    },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] })
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, variables.id] })
+      queryClient.invalidateQueries({ queryKey: ['materials'] })
+      queryClient.invalidateQueries({ queryKey: ['stock_movements'] })
       toast.success('Presupuesto actualizado')
     },
     onError: (error: Error) => toast.error(error.message),

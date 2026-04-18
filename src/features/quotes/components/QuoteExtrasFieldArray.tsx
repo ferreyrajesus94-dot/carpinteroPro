@@ -1,4 +1,4 @@
-import { type Control, type FieldErrors, useFieldArray } from 'react-hook-form'
+import { Controller, type Control, type FieldErrors, type UseFormRegister, useFieldArray } from 'react-hook-form'
 import { Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -8,11 +8,12 @@ import type { QuoteFormValues } from '../types'
 
 interface QuoteExtrasFieldArrayProps {
   control: Control<QuoteFormValues>
+  register: UseFormRegister<QuoteFormValues>
   errors: FieldErrors<QuoteFormValues>
 }
 
-export function QuoteExtrasFieldArray({ control, errors }: QuoteExtrasFieldArrayProps) {
-  const { fields, append, remove, update } = useFieldArray({ control, name: 'extras' })
+export function QuoteExtrasFieldArray({ control, register, errors }: QuoteExtrasFieldArrayProps) {
+  const { fields, append, remove } = useFieldArray({ control, name: 'extras' })
 
   return (
     <div className="space-y-3">
@@ -22,8 +23,7 @@ export function QuoteExtrasFieldArray({ control, errors }: QuoteExtrasFieldArray
           <div className="flex-1 space-y-1">
             <Label className="text-xs text-muted-foreground">Descripción</Label>
             <Input
-              value={field.description}
-              onChange={(e) => update(index, { ...field, description: e.target.value })}
+              {...register(`extras.${index}.description`)}
               placeholder="Ej: Mano de obra, traslado..."
             />
             {errors.extras?.[index]?.description && (
@@ -36,16 +36,18 @@ export function QuoteExtrasFieldArray({ control, errors }: QuoteExtrasFieldArray
               type="number"
               min="0"
               step="0.01"
-              value={field.amount}
-              onChange={(e) => update(index, { ...field, amount: parseFloat(e.target.value) || 0 })}
+              {...register(`extras.${index}.amount`, { valueAsNumber: true })}
               placeholder="0"
             />
           </div>
           <div className="flex flex-col items-center gap-1 pb-1">
             <Label className="text-xs text-muted-foreground">Visible</Label>
-            <Switch
-              checked={field.show_in_quote}
-              onCheckedChange={(v: boolean) => update(index, { ...field, show_in_quote: v })}
+            <Controller
+              control={control}
+              name={`extras.${index}.show_in_quote`}
+              render={({ field: f }) => (
+                <Switch checked={f.value} onCheckedChange={f.onChange} />
+              )}
             />
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
