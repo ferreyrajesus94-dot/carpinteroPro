@@ -31,6 +31,10 @@ const MOCK_MATERIAL = {
   category: 'madera' as const,
   unit: 'm2' as const,
   price_per_unit: 2500,
+  wood_subtype: null,
+  length_cm: null,
+  width_cm: null,
+  thickness_cm: null,
 }
 
 const MOCK_TEMPLATE: FurnitureTemplateWithItems = {

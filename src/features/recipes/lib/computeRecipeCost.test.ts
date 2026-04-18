@@ -18,6 +18,10 @@ function makeItem(
       unit: 'un',
       category: overrides.category,
       price_per_unit: overrides.price_per_unit,
+      wood_subtype: null,
+      length_cm: null,
+      width_cm: null,
+      thickness_cm: null,
     },
     ...overrides,
   }
