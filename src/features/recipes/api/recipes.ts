@@ -15,7 +15,8 @@ const RECIPE_SELECT = `
     material_id,
     quantity,
     material:materials (
-      id, name, category, unit, price_per_unit
+      id, name, category, unit, price_per_unit,
+      wood_subtype, length_cm, width_cm, thickness_cm
     )
   )
 ` as const

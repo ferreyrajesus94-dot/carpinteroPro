@@ -6,6 +6,14 @@ export type MaterialUpdate = Database['public']['Tables']['materials']['Update']
 export type PriceHistory = Database['public']['Tables']['price_history']['Row']
 export type MaterialCategory = Database['public']['Enums']['material_category']
 export type UnitOfMeasure = Database['public']['Enums']['unit_of_measure']
+export type WoodSubtype = Database['public']['Enums']['wood_subtype']
+
+export const WOOD_SUBTYPES: { value: WoodSubtype; label: string }[] = [
+  { value: 'placa', label: 'Placa' },
+  { value: 'liston', label: 'Listón' },
+  { value: 'tirante', label: 'Tirante' },
+  { value: 'columna', label: 'Columna' },
+]
 
 export const MATERIAL_CATEGORIES: { value: MaterialCategory; label: string }[] = [
   { value: 'madera', label: 'Madera' },

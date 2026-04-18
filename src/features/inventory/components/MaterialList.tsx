@@ -14,7 +14,7 @@ import { useMaterials, useDeleteMaterial } from '../hooks/useMaterials'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import type { Material, MaterialCategory } from '../types'
-import { MATERIAL_CATEGORIES } from '../types'
+import { MATERIAL_CATEGORIES, WOOD_SUBTYPES } from '../types'
 
 interface MaterialListProps {
   onEdit: (material: Material) => void
@@ -23,6 +23,28 @@ interface MaterialListProps {
 
 const formatARS = (n: number) =>
   new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(n)
+
+const formatNum = (n: number) =>
+  new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(n)
+
+function formatExtraInfo(m: Material): string | null {
+  if (m.category === 'madera') {
+    const dims = [m.length_cm, m.width_cm, m.thickness_cm]
+    const hasAnyDim = dims.some((d) => d != null)
+    const subtypeLabel = m.wood_subtype
+      ? WOOD_SUBTYPES.find((w) => w.value === m.wood_subtype)?.label
+      : null
+    if (!hasAnyDim && !subtypeLabel) return null
+    const dimsStr = hasAnyDim
+      ? dims.map((d) => (d != null ? formatNum(d) : '—')).join(' × ') + ' cm'
+      : null
+    return [subtypeLabel, dimsStr].filter(Boolean).join(' · ')
+  }
+  if ((m.category === 'pintura' || m.category === 'adhesivo') && m.volume_ml != null) {
+    return `Envase ${formatNum(m.volume_ml)} ml`
+  }
+  return null
+}
 
 export function MaterialList({ onEdit, onViewHistory }: MaterialListProps) {
   const workshopId = useWorkshopId()
@@ -124,6 +146,9 @@ export function MaterialList({ onEdit, onViewHistory }: MaterialListProps) {
                   <span className="font-medium">{material.name}</span>
                   <span className="text-xs text-muted-foreground capitalize">{material.category}</span>
                 </div>
+                {formatExtraInfo(material) && (
+                  <p className="text-xs text-muted-foreground">{formatExtraInfo(material)}</p>
+                )}
                 <div className="flex items-center justify-between text-sm">
                   <span>{formatARS(material.price_per_unit)} / {material.unit}</span>
                   <span className={material.stock <= material.min_stock ? 'text-destructive font-medium' : 'text-muted-foreground'}>
@@ -163,6 +188,11 @@ export function MaterialList({ onEdit, onViewHistory }: MaterialListProps) {
                             </Badge>
                           )}
                         </div>
+                        {formatExtraInfo(material) && (
+                          <p className="text-xs text-muted-foreground font-normal">
+                            {formatExtraInfo(material)}
+                          </p>
+                        )}
                       </TableCell>
                       <TableCell className="capitalize">{material.category}</TableCell>
                       <TableCell>{formatARS(material.price_per_unit)}</TableCell>

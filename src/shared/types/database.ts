@@ -69,6 +69,11 @@ export type Database = {
           stock: number
           min_stock: number
           notes: string | null
+          wood_subtype: Database['public']['Enums']['wood_subtype'] | null
+          length_cm: number | null
+          width_cm: number | null
+          thickness_cm: number | null
+          volume_ml: number | null
           created_at: string
           updated_at: string
         }
@@ -82,6 +87,11 @@ export type Database = {
           stock?: number
           min_stock?: number
           notes?: string | null
+          wood_subtype?: Database['public']['Enums']['wood_subtype'] | null
+          length_cm?: number | null
+          width_cm?: number | null
+          thickness_cm?: number | null
+          volume_ml?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -95,6 +105,11 @@ export type Database = {
           stock?: number
           min_stock?: number
           notes?: string | null
+          wood_subtype?: Database['public']['Enums']['wood_subtype'] | null
+          length_cm?: number | null
+          width_cm?: number | null
+          thickness_cm?: number | null
+          volume_ml?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -442,6 +457,11 @@ export type Database = {
       margin_mode:
         | 'on_cost'
         | 'on_price'
+      wood_subtype:
+        | 'placa'
+        | 'liston'
+        | 'tirante'
+        | 'columna'
     }
   }
 }

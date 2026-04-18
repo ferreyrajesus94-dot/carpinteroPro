@@ -1,5 +1,6 @@
 import type { Database } from '@/shared/types/database'
 import type { Material } from '@/features/inventory/types'
+import { computeWoodUsage } from './lib/computeWoodUsage'
 
 export type FurnitureTemplate = Database['public']['Tables']['furniture_templates']['Row']
 export type FurnitureTemplateInsert = Database['public']['Tables']['furniture_templates']['Insert']
@@ -7,13 +8,26 @@ export type FurnitureTemplateUpdate = Database['public']['Tables']['furniture_te
 export type RecipeItem = Database['public']['Tables']['recipe_items']['Row']
 export type RecipeItemInsert = Database['public']['Tables']['recipe_items']['Insert']
 
-// RecipeItem enriquecido con datos del material (viene del JOIN en la API)
+// RecipeItem enriquecido con datos del material (viene del JOIN en la API).
+// Para madera se incluyen las medidas porque el cálculo de costo las usa
+// (ver computeWoodUsage).
 export type RecipeItemWithMaterial = {
   id: string
   furniture_template_id: string
   material_id: string
   quantity: number
-  material: Pick<Material, 'id' | 'name' | 'category' | 'unit' | 'price_per_unit'>
+  material: Pick<
+    Material,
+    | 'id'
+    | 'name'
+    | 'category'
+    | 'unit'
+    | 'price_per_unit'
+    | 'wood_subtype'
+    | 'length_cm'
+    | 'width_cm'
+    | 'thickness_cm'
+  >
 }
 
 // Template completo con todos sus items
@@ -35,11 +49,10 @@ export function computeRecipeCost(items: RecipeItemWithMaterial[]): RecipeCost {
   let woodsTotal = 0
   let extrasTotal = 0
   for (const item of items) {
-    const subtotal = item.quantity * item.material.price_per_unit
     if (item.material.category === 'madera') {
-      woodsTotal += subtotal
+      woodsTotal += computeWoodUsage(item.material, item.quantity).subtotal
     } else {
-      extrasTotal += subtotal
+      extrasTotal += item.quantity * item.material.price_per_unit
     }
   }
   return { woodsTotal, extrasTotal, total: woodsTotal + extrasTotal }
