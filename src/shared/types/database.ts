@@ -385,6 +385,7 @@ export type Database = {
           phone: string | null
           email: string | null
           address: string | null
+          auto_stock_discount: boolean
           created_at: string
           updated_at: string
         }
@@ -395,6 +396,7 @@ export type Database = {
           phone?: string | null
           email?: string | null
           address?: string | null
+          auto_stock_discount?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -405,10 +407,62 @@ export type Database = {
           phone?: string | null
           email?: string | null
           address?: string | null
+          auto_stock_discount?: boolean
           created_at?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          id: string
+          workshop_id: string
+          material_id: string
+          delta: number
+          reason: Database['public']['Enums']['stock_movement_reason']
+          note: string | null
+          quote_id: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          workshop_id: string
+          material_id: string
+          delta: number
+          reason: Database['public']['Enums']['stock_movement_reason']
+          note?: string | null
+          quote_id?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          workshop_id?: string
+          material_id?: string
+          delta?: number
+          reason?: Database['public']['Enums']['stock_movement_reason']
+          note?: string | null
+          quote_id?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'stock_movements_material_id_fkey'
+            columns: ['material_id']
+            isOneToOne: false
+            referencedRelation: 'materials'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'stock_movements_quote_id_fkey'
+            columns: ['quote_id']
+            isOneToOne: false
+            referencedRelation: 'quotes'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: {
@@ -418,6 +472,16 @@ export type Database = {
       generate_quote_number: {
         Args: { p_workshop_id: string }
         Returns: string
+      }
+      apply_stock_movement: {
+        Args: {
+          p_material_id: string
+          p_delta: number
+          p_reason: Database['public']['Enums']['stock_movement_reason']
+          p_note?: string | null
+          p_quote_id?: string | null
+        }
+        Returns: number
       }
     }
     Enums: {
@@ -462,6 +526,12 @@ export type Database = {
         | 'liston'
         | 'tirante'
         | 'columna'
+      stock_movement_reason:
+        | 'compra'
+        | 'consumo'
+        | 'merma'
+        | 'ajuste'
+        | 'descuento_presupuesto'
     }
   }
 }

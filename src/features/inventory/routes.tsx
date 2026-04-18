@@ -10,31 +10,28 @@ import {
 import { MaterialList } from './components/MaterialList'
 import { MaterialForm } from './components/MaterialForm'
 import { PriceHistoryChart } from './components/PriceHistoryChart'
+import { StockAdjustDialog } from './components/StockAdjustDialog'
+import { StockHistoryDialog } from './components/StockHistoryDialog'
 import type { Material } from './types'
 
+type ActiveDialog = 'form' | 'priceHistory' | 'stockAdjust' | 'stockHistory' | null
+
 export function InventoryRoutes() {
-  const [formOpen, setFormOpen] = useState(false)
-  const [historyOpen, setHistoryOpen] = useState(false)
+  const [active, setActive] = useState<ActiveDialog>(null)
   const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null)
 
-  function handleEdit(material: Material) {
+  function openFor(dialog: Exclude<ActiveDialog, null>, material: Material | null) {
     setSelectedMaterial(material)
-    setFormOpen(true)
+    setActive(dialog)
   }
 
-  function handleViewHistory(material: Material) {
-    setSelectedMaterial(material)
-    setHistoryOpen(true)
-  }
-
-  function handleFormClose() {
-    setFormOpen(false)
+  function close() {
+    setActive(null)
     setSelectedMaterial(null)
   }
 
   return (
     <div className="space-y-4">
-      {/* Encabezado */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Inventario</h1>
@@ -42,17 +39,20 @@ export function InventoryRoutes() {
             Materiales del taller con control de stock y precios.
           </p>
         </div>
-        <Button onClick={() => { setSelectedMaterial(null); setFormOpen(true) }}>
+        <Button onClick={() => openFor('form', null)}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo material
         </Button>
       </div>
 
-      {/* Lista de materiales */}
-      <MaterialList onEdit={handleEdit} onViewHistory={handleViewHistory} />
+      <MaterialList
+        onEdit={(m) => openFor('form', m)}
+        onViewHistory={(m) => openFor('priceHistory', m)}
+        onAdjustStock={(m) => openFor('stockAdjust', m)}
+        onViewStockHistory={(m) => openFor('stockHistory', m)}
+      />
 
-      {/* Dialog: crear / editar material */}
-      <Dialog open={formOpen} onOpenChange={(open: boolean) => !open && handleFormClose()}>
+      <Dialog open={active === 'form'} onOpenChange={(open) => !open && close()}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
@@ -61,23 +61,42 @@ export function InventoryRoutes() {
           </DialogHeader>
           <MaterialForm
             material={selectedMaterial}
-            onSuccess={handleFormClose}
-            onCancel={handleFormClose}
+            onSuccess={close}
+            onCancel={close}
           />
         </DialogContent>
       </Dialog>
 
-      {/* Dialog: historial de precios */}
-      <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
+      <Dialog open={active === 'priceHistory'} onOpenChange={(open) => !open && close()}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
               Historial de precios — {selectedMaterial?.name}
             </DialogTitle>
           </DialogHeader>
+          {selectedMaterial && <PriceHistoryChart material={selectedMaterial} />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={active === 'stockAdjust'} onOpenChange={(open) => !open && close()}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ajustar stock</DialogTitle>
+          </DialogHeader>
           {selectedMaterial && (
-            <PriceHistoryChart material={selectedMaterial} />
+            <StockAdjustDialog material={selectedMaterial} onSuccess={close} onCancel={close} />
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={active === 'stockHistory'} onOpenChange={(open) => !open && close()}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              Movimientos de stock — {selectedMaterial?.name}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedMaterial && <StockHistoryDialog material={selectedMaterial} />}
         </DialogContent>
       </Dialog>
     </div>

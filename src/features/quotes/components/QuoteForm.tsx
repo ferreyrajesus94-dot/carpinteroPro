@@ -181,7 +181,7 @@ export function QuoteForm() {
 
           <section className="space-y-3">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Extras</h2>
-            <QuoteExtrasFieldArray control={control} errors={errors} />
+            <QuoteExtrasFieldArray control={control} register={register} errors={errors} />
           </section>
 
           <MarginSection
