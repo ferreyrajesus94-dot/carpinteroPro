@@ -8,59 +8,22 @@ interface Props {
 interface CardConfig {
   label: string
   value: string
-  icon: string
-  iconBg: string
-  iconColor: string
-  accentColor: string
 }
 
 export function KPICards({ stats }: Props) {
   const cards: CardConfig[] = [
-    {
-      label: 'Total facturado',
-      value: formatCurrency(stats.totalRevenue),
-      icon: 'fi-rr-chart-line-up',
-      iconBg: 'bg-emerald-50 dark:bg-emerald-950/40',
-      iconColor: 'text-emerald-600',
-      accentColor: 'border-t-emerald-500',
-    },
-    {
-      label: 'Presupuestos emitidos',
-      value: stats.quoteCount.toString(),
-      icon: 'fi-rr-file-invoice',
-      iconBg: 'bg-blue-50 dark:bg-blue-950/40',
-      iconColor: 'text-blue-600',
-      accentColor: 'border-t-blue-500',
-    },
-    {
-      label: 'Ticket promedio',
-      value: formatCurrency(stats.averageTicket),
-      icon: 'fi-rr-calculator',
-      iconBg: 'bg-violet-50 dark:bg-violet-950/40',
-      iconColor: 'text-violet-600',
-      accentColor: 'border-t-violet-500',
-    },
-    {
-      label: 'Tasa de conversión',
-      value: `${stats.conversionRate.toFixed(1)}%`,
-      icon: 'fi-rr-percentage',
-      iconBg: 'bg-amber-50 dark:bg-amber-950/40',
-      iconColor: 'text-amber-600',
-      accentColor: 'border-t-amber-500',
-    },
+    { label: 'Presupuestos', value: stats.quoteCount.toString() },
+    { label: 'Conversión', value: `${stats.conversionRate.toFixed(1)}%` },
+    { label: 'Ticket promedio', value: formatCurrency(stats.averageTicket) },
+    { label: 'Facturado total', value: formatCurrency(stats.totalRevenue) },
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {cards.map(({ label, value, icon, iconBg, iconColor, accentColor }) => (
-        <div key={label} className={`rounded-lg border border-t-2 ${accentColor} bg-card p-5 shadow-sm`}>
-          <div className="flex items-start justify-between">
-            <p className="text-sm font-medium text-muted-foreground leading-snug">{label}</p>
-            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${iconBg}`}>
-              <i className={`fi ${icon} text-base leading-none ${iconColor}`} />
-            </div>
-          </div>
-          <p className="mt-3 text-2xl font-bold tracking-tight">{value}</p>
+    <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+      {cards.map(({ label, value }) => (
+        <div key={label} className="bg-surface border border-line rounded-xl p-3.5 min-w-0">
+          <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium truncate">{label}</div>
+          <div className="mt-2 font-display text-[22px] leading-[1.05] font-semibold text-ink truncate">{value}</div>
         </div>
       ))}
     </div>

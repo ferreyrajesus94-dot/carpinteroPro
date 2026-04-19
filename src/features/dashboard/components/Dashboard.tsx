@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AlertTriangle, Clock, FileText, Package, Armchair, Users } from 'lucide-react'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useQuotes } from '@/features/quotes/hooks/useQuotes'
-import { useDashboardStats, type Period } from '../hooks/useDashboardStats'
+import { useMaterials } from '@/features/inventory/hooks/useMaterials'
+import { formatCurrency, QUOTE_STATUS_LABELS } from '@/features/quotes/types'
+import { SectionHowto } from '@/shared/ui/section-howto'
 import { KPICards } from './KPICards'
 import { RevenueChart } from './RevenueChart'
-import { StatusPieChart } from './StatusPieChart'
 import { ActiveQuotesPanel } from './ActiveQuotesPanel'
+import { useDashboardStats, type Period } from '../hooks/useDashboardStats'
 
 const PERIOD_OPTIONS: { value: Period; label: string }[] = [
   { value: 'current_month', label: 'Mes actual' },
@@ -13,45 +17,43 @@ const PERIOD_OPTIONS: { value: Period; label: string }[] = [
   { value: 'last_3_months', label: 'Últimos 3 meses' },
 ]
 
+const ALL_STATUSES = ['presupuesto', 'enviado', 'aprobado', 'en_produccion', 'entregado', 'cancelado'] as const
+
 export function Dashboard() {
+  const navigate = useNavigate()
   const workshopId = useWorkshopId()
   const { data: quotes = [], isLoading } = useQuotes(workshopId)
+  const { data: materials = [] } = useMaterials(workshopId)
   const [period, setPeriod] = useState<Period>('current_month')
   const stats = useDashboardStats(quotes, period)
 
+  const lowStockMaterials = materials.filter(m => m.stock <= m.min_stock)
+  const staleQuotes = quotes.filter(q => {
+    if (q.status !== 'enviado') return false
+    const diffDays = (Date.now() - new Date(q.created_at).getTime()) / 86_400_000
+    return diffDays > 5
+  })
+
+  const totalDist = stats.byStatus.reduce((a, b) => a + b.count, 0)
+
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 md:p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="h-8 w-32 animate-pulse rounded-md bg-muted" />
-          <div className="h-9 w-64 animate-pulse rounded-lg bg-muted" />
-        </div>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="rounded-lg border border-t-2 border-t-muted bg-card p-5 shadow-sm space-y-3">
-              <div className="flex items-start justify-between">
-                <div className="h-4 w-28 animate-pulse rounded bg-muted" />
-                <div className="h-8 w-8 animate-pulse rounded-md bg-muted" />
-              </div>
-              <div className="h-7 w-20 animate-pulse rounded bg-muted" />
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2 h-64 animate-pulse rounded-lg bg-muted" />
-          <div className="h-64 animate-pulse rounded-lg bg-muted" />
-        </div>
-        <div className="h-48 animate-pulse rounded-lg bg-muted" />
+      <div className="space-y-4 p-4 md:p-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
+        ))}
       </div>
     )
   }
 
+  const maxRev = Math.max(...stats.revenueByMonth.map(d => d.total), 1)
+
   return (
-    <div className="space-y-6 p-4 md:p-6">
-      {/* Header + Period selector */}
+    <div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6">
+      {/* Period selector */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <div className="flex rounded-lg border bg-muted p-1 gap-1">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">Dashboard</h1>
+        <div className="flex rounded-lg border border-line bg-cp-bg2 p-1 gap-1">
           {PERIOD_OPTIONS.map(opt => (
             <button
               key={opt.value}
@@ -59,8 +61,8 @@ export function Dashboard() {
               onClick={() => setPeriod(opt.value)}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 period === opt.value
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-surface text-ink shadow-sm'
+                  : 'text-ink3 hover:text-ink'
               }`}
             >
               {opt.label}
@@ -69,21 +71,176 @@ export function Dashboard() {
         </div>
       </div>
 
-      {/* Row 1: KPI Cards */}
+      <SectionHowto
+        storageKey="dashboard"
+        steps={[
+          'En esta pantalla ves los números clave: facturación, presupuestos, conversión.',
+          'Tocá una tarjeta para ir al detalle de esa sección.',
+          'El gráfico compara los últimos 12 meses de ingresos aprobados.',
+        ]}
+      />
+
+      {/* Hero KPI — facturación del período */}
+      <div className="rounded-xl border border-line bg-surface overflow-hidden">
+        <div className="p-4 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="text-[10.5px] uppercase tracking-[0.1em] text-ink3 font-medium">
+              Facturado — {PERIOD_OPTIONS.find(o => o.value === period)?.label}
+            </div>
+          </div>
+          <div className="mt-2 font-display font-semibold text-[40px] leading-none text-ink">
+            {formatCurrency(stats.totalRevenue)}
+          </div>
+          <div className="mt-1 text-[12px] text-ink3">
+            {stats.quoteCount} presupuesto{stats.quoteCount !== 1 ? 's' : ''} emitido{stats.quoteCount !== 1 ? 's' : ''} · ticket promedio {formatCurrency(stats.averageTicket)}
+          </div>
+        </div>
+        {/* Mini bar chart */}
+        <div className="px-4 pb-4">
+          <div className="flex items-end gap-1.5 h-16">
+            {stats.revenueByMonth.map((d, i) => {
+              const isLast = i === stats.revenueByMonth.length - 1
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    className="w-full rounded-[3px] transition-all"
+                    style={{
+                      height: `${Math.max((d.total / maxRev) * 100, 4)}%`,
+                      background: isLast ? 'var(--cp-accent)' : 'var(--line-2)',
+                    }}
+                  />
+                  <span className={`text-[9px] font-mono ${isLast ? 'text-cp-accent font-semibold' : 'text-ink3'}`}>
+                    {d.month}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        {/* Progress bar */}
+        <div className="h-1 bg-cp-accent opacity-70" style={{ width: `${Math.min(stats.conversionRate, 100)}%` }} />
+      </div>
+
+      {/* KPI grid 2×2 mobile / 4×1 desktop */}
       <KPICards stats={stats} />
 
-      {/* Row 2: Revenue Chart + Status Pie */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <RevenueChart data={stats.revenueByMonth} />
+      {/* Pipeline snapshot */}
+      {stats.byStatus.length > 0 && (
+        <div className="rounded-xl border border-line bg-surface p-4">
+          <p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-3">
+            Pipeline · presupuestos activos
+          </p>
+          <div className="space-y-2">
+            {ALL_STATUSES.map(status => {
+              const entry = stats.byStatus.find(s => s.status === status)
+              if (!entry) return null
+              const pct = totalDist > 0 ? Math.round((entry.count / totalDist) * 100) : 0
+              return (
+                <div key={status} className="flex items-center gap-3">
+                  <div className="w-28 shrink-0">
+                    <span className={`chip-${status} inline-flex items-center gap-1 rounded-full text-[11px] px-2 py-0.5 font-medium`}>
+                      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                      {QUOTE_STATUS_LABELS[status]}
+                    </span>
+                  </div>
+                  <div className="flex-1 h-2 rounded-full bg-cp-bg2 overflow-hidden">
+                    <div className="h-full rounded-full bg-cp-accent" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="font-mono text-[12px] text-ink2 w-6 text-right">{entry.count}</div>
+                </div>
+              )
+            })}
+          </div>
         </div>
-        <div>
-          <StatusPieChart data={stats.byStatus} />
+      )}
+
+      {/* Shortcuts */}
+      <div>
+        <p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-2">Accesos rápidos</p>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { icon: FileText, title: 'Nuevo presupuesto', hint: 'En 4 pasos', path: '/quotes/new' },
+            { icon: Package,  title: 'Ajustar stock',     hint: 'Entrada / salida', path: '/inventory' },
+            { icon: Armchair, title: 'Crear mueble',      hint: 'Plantilla BOM', path: '/recipes/new' },
+            { icon: Users,    title: 'Alta cliente',      hint: 'Con contacto', path: '/crm' },
+          ].map(s => (
+            <button
+              key={s.path}
+              onClick={() => navigate(s.path)}
+              className="text-left bg-surface border border-line rounded-xl p-3 hover:border-line2 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="w-8 h-8 rounded-md bg-cp-accent-soft text-cp-accent grid place-items-center">
+                  <s.icon size={16} />
+                </div>
+              </div>
+              <div className="mt-2 font-display font-semibold text-[14px] text-ink">{s.title}</div>
+              <div className="text-[11px] text-ink3">{s.hint}</div>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Row 3: Active Quotes Panel */}
-      <ActiveQuotesPanel quotes={stats.activeQuotes} />
+      {/* Needs attention */}
+      {(lowStockMaterials.length > 0 || staleQuotes.length > 0) && (
+        <div>
+          <p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-2">Requiere atención</p>
+          <div className="space-y-2">
+            {lowStockMaterials.length > 0 && (
+              <div
+                className="bg-surface border border-line rounded-xl p-3 flex items-start gap-3"
+                style={{ borderLeftWidth: 4, borderLeftColor: 'var(--cp-warn)' }}
+              >
+                <AlertTriangle size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--cp-warn)' }} />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-[13.5px] text-ink">
+                    {lowStockMaterials.length} material{lowStockMaterials.length !== 1 ? 'es' : ''} en stock bajo
+                  </div>
+                  <div className="text-[12px] text-ink3 truncate">
+                    {lowStockMaterials.slice(0, 3).map(m => m.name).join(' · ')}
+                  </div>
+                </div>
+                <button
+                  onClick={() => navigate('/inventory')}
+                  className="text-xs text-ink2 hover:text-ink px-2 py-1 rounded-md hover:bg-cp-bg2 transition-colors shrink-0"
+                >
+                  Ver
+                </button>
+              </div>
+            )}
+            {staleQuotes.length > 0 && (
+              <div className="bg-surface border border-line rounded-xl p-3 flex items-start gap-3">
+                <Clock size={16} className="mt-0.5 text-ink2 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-[13.5px] text-ink">
+                    {staleQuotes.length} presupuesto{staleQuotes.length !== 1 ? 's' : ''} sin respuesta hace más de 5 días
+                  </div>
+                  <div className="text-[12px] text-ink3">Enviá un recordatorio por WhatsApp</div>
+                </div>
+                <button
+                  onClick={() => navigate('/quotes')}
+                  className="text-xs text-ink2 hover:text-ink px-2 py-1 rounded-md hover:bg-cp-bg2 transition-colors shrink-0"
+                >
+                  Ver
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Revenue chart — desktop bonus */}
+      <div className="hidden lg:grid lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <RevenueChart data={stats.revenueByMonth} />
+        </div>
+        <ActiveQuotesPanel quotes={stats.activeQuotes} />
+      </div>
+
+      {/* Active quotes — mobile */}
+      <div className="lg:hidden">
+        <ActiveQuotesPanel quotes={stats.activeQuotes} />
+      </div>
     </div>
   )
 }
