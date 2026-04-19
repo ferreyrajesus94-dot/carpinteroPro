@@ -12,6 +12,7 @@ function makeItem(
     id: 'ri-1',
     furniture_template_id: 'tmpl-1',
     material_id: 'mat-1',
+    waste_pct: 0,
     material: {
       id: 'mat-1',
       name: 'Material',
@@ -30,7 +31,21 @@ function makeItem(
 describe('computeRecipeCost', () => {
   it('returns zeros for empty items list', () => {
     const result = computeRecipeCost([])
-    expect(result).toEqual({ woodsTotal: 0, extrasTotal: 0, total: 0 })
+    expect(result).toEqual({ woodsTotal: 0, extrasTotal: 0, laborTotal: 0, total: 0 })
+  })
+
+  it('applies waste_pct to quantity', () => {
+    const items = [
+      makeItem({ category: 'madera', price_per_unit: 1_000, quantity: 10, waste_pct: 10 }),
+    ]
+    const result = computeRecipeCost(items)
+    expect(result.woodsTotal).toBe(11_000)
+  })
+
+  it('accumulates labor hours × rate into laborTotal', () => {
+    const result = computeRecipeCost([], [{ hours: 4, rate: 2_500 }])
+    expect(result.laborTotal).toBe(10_000)
+    expect(result.total).toBe(10_000)
   })
 
   it('accumulates madera items into woodsTotal', () => {

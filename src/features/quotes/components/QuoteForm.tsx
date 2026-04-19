@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -15,7 +15,7 @@ import {
 } from '@/shared/ui/select'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useFurnitureTemplates } from '@/features/recipes/hooks/useRecipes'
-import { computeRecipeCost } from '@/features/recipes/types'
+import { computeRecipeCost, resolveItemQuantity } from '@/features/recipes/types'
 import { useClients } from '../hooks/useClients'
 import { useQuote, useCreateQuote, useUpdateQuote, useGenerateQuoteNumber } from '../hooks/useQuotes'
 import { QUOTE_STATUS_LABELS, type QuoteStatus, type MarginMode, type QuoteFormValues } from '../types'
@@ -47,8 +47,10 @@ const quoteSchema = z.object({
 export function QuoteForm() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const workshopId = useWorkshopId()
   const isEditing = Boolean(id)
+  const prefillTemplateId = searchParams.get('template')
 
   const [clientDialogOpen, setClientDialogOpen] = useState(false)
 
@@ -71,7 +73,7 @@ export function QuoteForm() {
     resolver: zodResolver(quoteSchema) as Resolver<QuoteFormValues>,
     defaultValues: {
       client_id: '',
-      furniture_template_id: '',
+      furniture_template_id: prefillTemplateId ?? '',
       furniture_name: '',
       recipe_cost: 0,
       extras: [],
@@ -108,7 +110,8 @@ export function QuoteForm() {
     const tpl = templates.find((t) => t.id === templateIdWatch)
     if (!tpl) return
     setValue('furniture_name', tpl.name)
-    const cost = computeRecipeCost(tpl.recipe_items)
+    const paramValues = Object.fromEntries((tpl.params ?? []).map((p) => [p.name, p.default]))
+    const cost = computeRecipeCost(tpl.recipe_items, tpl.labor_items, paramValues)
     setValue('recipe_cost', cost.total)
   }, [templateIdWatch, templates, setValue])
 
@@ -145,10 +148,35 @@ export function QuoteForm() {
       show_in_quote: e.show_in_quote,
     }))
 
+    const tpl = values.furniture_template_id
+      ? templates.find((t) => t.id === values.furniture_template_id)
+      : null
+    const paramValues = tpl
+      ? Object.fromEntries((tpl.params ?? []).map((p) => [p.name, p.default]))
+      : {}
+    const recipeSnapshots = tpl
+      ? tpl.recipe_items.map((ri) => ({
+          material_id: ri.material_id,
+          material_name: ri.material.name,
+          material_unit: ri.material.unit,
+          material_category: ri.material.category,
+          quantity: resolveItemQuantity(ri, paramValues),
+          waste_pct: ri.waste_pct ?? 0,
+          price_per_unit: ri.material.price_per_unit,
+        }))
+      : []
+    const laborSnapshots = tpl
+      ? (tpl.labor_items ?? []).map((l) => ({
+          description: l.description,
+          hours: l.hours,
+          rate: l.rate,
+        }))
+      : []
+
     if (isEditing && id) {
-      await updateMutation.mutateAsync({ id, quote: quoteData, extras: extrasData })
+      await updateMutation.mutateAsync({ id, quote: quoteData, extras: extrasData, recipeSnapshots, laborSnapshots })
     } else {
-      await createMutation.mutateAsync({ quote: quoteData, extras: extrasData })
+      await createMutation.mutateAsync({ quote: quoteData, extras: extrasData, recipeSnapshots, laborSnapshots })
     }
     navigate('/quotes')
   }
@@ -157,9 +185,19 @@ export function QuoteForm() {
 
   return (
     <div className="max-w-5xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">
-        {isEditing ? `Editar ${quoteNumber}` : `Nuevo presupuesto ${nextNumber ? `— ${nextNumber}` : ''}`}
-      </h1>
+      <div className="mb-6 flex items-center gap-3 flex-wrap">
+        <h1 className="text-2xl font-bold">
+          {isEditing ? `Editar ${quoteNumber}` : `Nuevo presupuesto ${nextNumber ? `— ${nextNumber}` : ''}`}
+        </h1>
+        {isEditing && (existingQuote?.recipe_snapshots?.length ?? 0) > 0 && (
+          <span
+            className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-700 dark:text-blue-400"
+            title="La receta quedó congelada al crear este presupuesto; cambios futuros en la plantilla no lo afectan."
+          >
+            Versión congelada
+          </span>
+        )}
+      </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 space-y-6">

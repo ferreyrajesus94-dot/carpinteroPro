@@ -10,6 +10,7 @@ import {
   generateQuoteNumber,
 } from '../api/quotes'
 import type { QuoteInsert, QuoteUpdate, QuoteExtraInsert } from '../types'
+import type { RecipeSnapshotInput, LaborSnapshotInput } from '../api/quotes'
 import { supabase } from '@/shared/lib/supabase'
 import { applyStockMovement } from '@/features/inventory/api/stockMovements'
 
@@ -52,12 +53,15 @@ export function useGenerateQuoteNumber(workshopId: string) {
 interface CreatePayload {
   quote: Omit<QuoteInsert, 'id' | 'created_at' | 'updated_at'>
   extras: Omit<QuoteExtraInsert, 'id' | 'quote_id'>[]
+  recipeSnapshots?: RecipeSnapshotInput[]
+  laborSnapshots?: LaborSnapshotInput[]
 }
 
 export function useCreateQuote(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ quote, extras }: CreatePayload) => createQuote(quote, extras),
+    mutationFn: ({ quote, extras, recipeSnapshots, laborSnapshots }: CreatePayload) =>
+      createQuote(quote, extras, recipeSnapshots, laborSnapshots),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] })
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, 'next_number', workshopId] })
@@ -71,6 +75,8 @@ interface UpdatePayload {
   id: string
   quote: QuoteUpdate
   extras: Omit<QuoteExtraInsert, 'id' | 'quote_id'>[]
+  recipeSnapshots?: RecipeSnapshotInput[]
+  laborSnapshots?: LaborSnapshotInput[]
 }
 
 async function maybeAutoDiscountStock(
@@ -124,9 +130,9 @@ async function maybeAutoDiscountStock(
 export function useUpdateQuote(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, quote, extras }: UpdatePayload) => {
+    mutationFn: async ({ id, quote, extras, recipeSnapshots, laborSnapshots }: UpdatePayload) => {
       await maybeAutoDiscountStock(workshopId, id, quote.status)
-      return updateQuote(id, quote, extras)
+      return updateQuote(id, quote, extras, recipeSnapshots, laborSnapshots)
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUOTES_KEY, workshopId] })

@@ -16,13 +16,35 @@ import type { Material } from '@/features/inventory/types'
 interface ItemValue {
   material_id: string
   quantity: number
+  waste_pct?: number
+  quantity_formula?: string
+}
+
+interface ParamValue {
+  name: string
+  default: number
+}
+
+interface LaborValue {
+  description: string
+  hours: number
+  rate: number
 }
 
 interface FormValues {
   name: string
   notes?: string
+  category?: string
+  tags_csv?: string
+  height_cm?: number
+  width_cm?: number
+  depth_cm?: number
+  photo_url?: string
+  suggested_margin_pct?: number
+  params: ParamValue[]
   wood_items: ItemValue[]
   extra_items: ItemValue[]
+  labor_items: LaborValue[]
 }
 
 interface ExtraItemsSectionProps {
@@ -76,7 +98,7 @@ export function ExtraItemsSection({
                 </p>
               )}
             </div>
-            <div className="w-28 space-y-1">
+            <div className="w-24 space-y-1">
               <Label className="text-xs text-muted-foreground">
                 Cantidad {mat ? `(${mat.unit})` : ''}
               </Label>
@@ -93,9 +115,25 @@ export function ExtraItemsSection({
                 </p>
               )}
             </div>
+            <div className="w-20 space-y-1">
+              <Label className="text-xs text-muted-foreground">Merma %</Label>
+              <Input
+                type="number"
+                min="0"
+                max="99"
+                step="1"
+                {...register(`extra_items.${index}.waste_pct`)}
+                placeholder="0"
+              />
+            </div>
             <Button type="button" variant="ghost" size="icon" onClick={() => onRemove(index)}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
+            <Input
+              className="col-span-full text-xs"
+              placeholder="Fórmula opcional (ej: largo_cm / 100)"
+              {...register(`extra_items.${index}.quantity_formula` as const)}
+            />
           </div>
         )
       })}
@@ -103,7 +141,7 @@ export function ExtraItemsSection({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => onAppend({ material_id: '', quantity: 0 })}
+        onClick={() => onAppend({ material_id: '', quantity: 0, waste_pct: 0, quantity_formula: '' })}
         disabled={extraMaterials.length === 0}
       >
         <Plus className="h-4 w-4 mr-1" />

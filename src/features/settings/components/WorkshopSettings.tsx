@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/shared/ui/button'
@@ -17,6 +17,8 @@ const schema = z.object({
   address: z.string().optional(),
   logo_url: z.string().optional(),
   auto_stock_discount: z.boolean(),
+  stock_alert_enabled: z.boolean(),
+  default_labor_rate: z.coerce.number().min(0).optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -34,11 +36,21 @@ export function WorkshopSettings() {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: '', phone: '', email: '', address: '', logo_url: '', auto_stock_discount: false },
+    resolver: zodResolver(schema) as Resolver<FormValues>,
+    defaultValues: {
+      name: '',
+      phone: '',
+      email: '',
+      address: '',
+      logo_url: '',
+      auto_stock_discount: false,
+      stock_alert_enabled: false,
+      default_labor_rate: undefined,
+    },
   })
 
   const autoStockDiscount = watch('auto_stock_discount')
+  const stockAlertEnabled = watch('stock_alert_enabled')
 
   useEffect(() => {
     if (settings) {
@@ -49,6 +61,8 @@ export function WorkshopSettings() {
         address: settings.address ?? '',
         logo_url: settings.logo_url ?? '',
         auto_stock_discount: settings.auto_stock_discount ?? false,
+        stock_alert_enabled: settings.stock_alert_enabled ?? false,
+        default_labor_rate: settings.default_labor_rate ?? undefined,
       })
     }
   }, [settings, reset])
@@ -69,6 +83,8 @@ export function WorkshopSettings() {
       address: values.address || null,
       logo_url: values.logo_url || null,
       auto_stock_discount: values.auto_stock_discount,
+      stock_alert_enabled: values.stock_alert_enabled,
+      default_labor_rate: values.default_labor_rate ?? null,
     })
   }
 
@@ -120,6 +136,21 @@ export function WorkshopSettings() {
               </p>
             </div>
 
+            <div className="space-y-1">
+              <Label htmlFor="default_labor_rate">Tarifa por hora de mano de obra (opcional)</Label>
+              <Input
+                id="default_labor_rate"
+                type="number"
+                min="0"
+                step="1"
+                {...register('default_labor_rate')}
+                placeholder="Ej: 3500"
+              />
+              <p className="text-xs text-muted-foreground">
+                Se usa como valor inicial al agregar ítems de mano de obra a un mueble.
+              </p>
+            </div>
+
             <div className="rounded-md border p-3 space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-0.5">
@@ -136,6 +167,25 @@ export function WorkshopSettings() {
                   id="auto-stock-discount"
                   checked={autoStockDiscount}
                   onCheckedChange={(v) => setValue('auto_stock_discount', v, { shouldDirty: true })}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-md border p-3 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <Label htmlFor="stock-alert-enabled" className="cursor-pointer">
+                    Alertar stock insuficiente al abrir un mueble
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Cruza la lista de materiales del mueble contra el stock del inventario
+                    y muestra un aviso si falta algo. Desactivalo si trabajás bajo demanda.
+                  </p>
+                </div>
+                <Switch
+                  id="stock-alert-enabled"
+                  checked={stockAlertEnabled}
+                  onCheckedChange={(v) => setValue('stock_alert_enabled', v, { shouldDirty: true })}
                 />
               </div>
             </div>
