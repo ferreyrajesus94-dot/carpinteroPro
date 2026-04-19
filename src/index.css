@@ -4,14 +4,14 @@
 
 @layer base {
   :root {
-    /* Warm amber/wood palette — CarpinteroPro brand */
+    /* === Legacy shadcn HSL tokens (consumed by shared/ui/*) === */
     --background: 30 30% 98%;
     --foreground: 25 15% 10%;
     --card: 0 0% 100%;
     --card-foreground: 25 15% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 25 15% 10%;
-    --primary: 27 90% 37%;          /* amber-700 #b45309 */
+    --primary: 27 90% 37%;
     --primary-foreground: 0 0% 98%;
     --secondary: 30 25% 94%;
     --secondary-foreground: 25 15% 10%;
@@ -25,6 +25,67 @@
     --input: 25 20% 88%;
     --ring: 27 90% 37%;
     --radius: 0.625rem;
+
+    /* === Redesign tokens — Sawdust (default) === */
+    --bg:         oklch(97.5% 0.008 70);
+    --bg-2:       oklch(94.8% 0.012 70);
+    --surface:    oklch(99% 0.004 70);
+    --ink:        oklch(22% 0.018 50);
+    --ink-2:      oklch(38% 0.014 55);
+    --ink-3:      oklch(55% 0.010 60);
+    --line:       oklch(89% 0.010 60);
+    --line-2:     oklch(82% 0.012 60);
+    --cp-accent:  oklch(62% 0.18 48);
+    --cp-accent-ink:  oklch(99% 0 0);
+    --cp-accent-soft: oklch(94% 0.04 55);
+    --cp-success: oklch(58% 0.14 155);
+    --cp-warn:    oklch(72% 0.16 75);
+    --cp-danger:  oklch(58% 0.19 25);
+    --cp-info:    oklch(60% 0.12 230);
+
+    --cp-radius:    10px;
+    --cp-radius-sm: 6px;
+    --cp-radius-lg: 14px;
+
+    --pad-y: 16px;
+    --pad-x: 16px;
+    --row-y: 12px;
+    --gap:   12px;
+  }
+
+  .dense {
+    --pad-y: 10px;
+    --pad-x: 12px;
+    --row-y: 8px;
+    --gap:   8px;
+  }
+
+  .theme-workshop {
+    --bg:        oklch(98% 0.002 90);
+    --bg-2:      oklch(95% 0.003 90);
+    --surface:   oklch(100% 0 0);
+    --ink:       oklch(15% 0.005 60);
+    --ink-2:     oklch(32% 0.005 60);
+    --ink-3:     oklch(52% 0.005 60);
+    --line:      oklch(88% 0.004 60);
+    --line-2:    oklch(78% 0.006 60);
+    --cp-accent:      oklch(78% 0.18 90);
+    --cp-accent-ink:  oklch(15% 0.005 60);
+    --cp-accent-soft: oklch(94% 0.06 92);
+  }
+
+  .theme-graphite {
+    --bg:        oklch(96% 0.005 50);
+    --bg-2:      oklch(92% 0.006 50);
+    --surface:   oklch(99% 0.003 50);
+    --ink:       oklch(22% 0.010 50);
+    --ink-2:     oklch(38% 0.010 50);
+    --ink-3:     oklch(55% 0.008 55);
+    --line:      oklch(88% 0.006 55);
+    --line-2:    oklch(78% 0.008 55);
+    --cp-accent:      oklch(58% 0.12 45);
+    --cp-accent-ink:  oklch(99% 0 0);
+    --cp-accent-soft: oklch(93% 0.03 50);
   }
 
   .dark {
@@ -34,7 +95,7 @@
     --card-foreground: 30 20% 94%;
     --popover: 20 12% 11%;
     --popover-foreground: 30 20% 94%;
-    --primary: 27 90% 50%;          /* brighter amber in dark mode */
+    --primary: 27 90% 50%;
     --primary-foreground: 20 14% 8%;
     --secondary: 20 10% 18%;
     --secondary-foreground: 30 20% 94%;
@@ -47,6 +108,25 @@
     --border: 20 10% 20%;
     --input: 20 10% 20%;
     --ring: 27 90% 50%;
+
+    --bg:        oklch(16% 0.012 55);
+    --bg-2:      oklch(20% 0.014 55);
+    --surface:   oklch(22% 0.014 55);
+    --ink:       oklch(96% 0.008 70);
+    --ink-2:     oklch(80% 0.008 70);
+    --ink-3:     oklch(62% 0.008 70);
+    --line:      oklch(28% 0.014 55);
+    --line-2:    oklch(36% 0.014 55);
+    --cp-accent:      oklch(72% 0.17 48);
+    --cp-accent-ink:  oklch(16% 0.012 55);
+    --cp-accent-soft: oklch(28% 0.05 48);
+  }
+  .dark.theme-workshop {
+    --cp-accent:      oklch(82% 0.18 90);
+    --cp-accent-ink:  oklch(14% 0.004 60);
+  }
+  .dark.theme-graphite {
+    --cp-accent: oklch(68% 0.12 45);
   }
 }
 
@@ -56,7 +136,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
@@ -64,4 +145,25 @@
   .h-screen {
     height: 100dvh;
   }
+
+  /* Redesign typography helpers */
+  .font-display { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.01em; }
+  .font-mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum"; }
+
+  /* Redesign surface/text/border tokens */
+  .bg-cp-bg       { background: var(--bg); }
+  .bg-cp-bg2      { background: var(--bg-2); }
+  .bg-cp-surface  { background: var(--surface); }
+  .text-ink       { color: var(--ink); }
+  .text-ink2      { color: var(--ink-2); }
+  .text-ink3      { color: var(--ink-3); }
+  .border-line    { border-color: var(--line); }
+  .border-line2   { border-color: var(--line-2); }
+  .bg-cp-accent   { background: var(--cp-accent); color: var(--cp-accent-ink); }
+  .text-cp-accent { color: var(--cp-accent); }
+  .bg-cp-accent-soft { background: var(--cp-accent-soft); color: var(--cp-accent); }
+  .ring-cp-accent { --tw-ring-color: var(--cp-accent); }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
 }

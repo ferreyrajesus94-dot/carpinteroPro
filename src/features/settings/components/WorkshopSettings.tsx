@@ -8,7 +8,78 @@ import { Label } from '@/shared/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Switch } from '@/shared/ui/switch'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
+import { useTheme, type Palette } from '@/shared/hooks/useTheme'
 import { useWorkshopSettings, useUpsertWorkshopSettings } from '../hooks/useWorkshopSettings'
+
+const PALETTE_OPTIONS: { value: Palette; label: string; hint: string; swatch: string }[] = [
+  { value: 'sawdust', label: 'Sawdust', hint: 'Tierra + naranja quemado', swatch: 'oklch(62% 0.18 48)' },
+  { value: 'workshop', label: 'Workshop', hint: 'Blanco/negro + amarillo cinta', swatch: 'oklch(78% 0.18 90)' },
+  { value: 'graphite', label: 'Graphite', hint: 'Gris cálido + cobre', swatch: 'oklch(58% 0.12 45)' },
+]
+
+function AppearanceCard() {
+  const { theme, toggle, palette, setPalette, density, setDensity } = useTheme()
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base font-display">Apariencia</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="space-y-2">
+          <Label>Paleta</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {PALETTE_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setPalette(opt.value)}
+                className={`flex flex-col items-start gap-2 rounded-md border p-3 text-left transition ${
+                  palette === opt.value ? 'border-line2 ring-2 ring-cp-accent' : 'border-line hover:bg-cp-bg2'
+                }`}
+              >
+                <span
+                  className="h-6 w-6 rounded-full border border-line"
+                  style={{ background: opt.swatch }}
+                  aria-hidden
+                />
+                <span className="text-sm font-medium">{opt.label}</span>
+                <span className="text-[11px] text-ink3 leading-tight">{opt.hint}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-start justify-between gap-3 rounded-md border p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="density-switch" className="cursor-pointer">Densidad compacta</Label>
+            <p className="text-xs text-muted-foreground">
+              Reduce el padding de listas y cards para ver más en pantalla.
+            </p>
+          </div>
+          <Switch
+            id="density-switch"
+            checked={density === 'dense'}
+            onCheckedChange={v => setDensity(v ? 'dense' : 'comfort')}
+          />
+        </div>
+
+        <div className="flex items-start justify-between gap-3 rounded-md border p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="dark-switch" className="cursor-pointer">Modo oscuro</Label>
+            <p className="text-xs text-muted-foreground">
+              Fondo oscuro para trabajar de noche o con poca luz.
+            </p>
+          </div>
+          <Switch
+            id="dark-switch"
+            checked={theme === 'dark'}
+            onCheckedChange={toggle}
+          />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 const schema = z.object({
   name: z.string().min(1, 'El nombre es obligatorio'),
@@ -92,7 +163,9 @@ export function WorkshopSettings() {
 
   return (
     <div className="max-w-lg mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-bold">Ajustes del taller</h1>
+      <h1 className="text-2xl font-display font-semibold">Ajustes del taller</h1>
+
+      <AppearanceCard />
 
       <Card>
         <CardHeader>
