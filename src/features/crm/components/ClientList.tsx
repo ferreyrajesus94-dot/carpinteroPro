@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useFabAction } from '@/shared/lib/fab'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useClientsPaginated } from '@/features/crm/hooks/useClients'
@@ -25,6 +26,7 @@ export function ClientList() {
   const { data: result, isLoading, isError } = useClientsPaginated(workshopId, page)
   const { data: quotes = [] } = useQuotes(workshopId)
   const [formOpen, setFormOpen] = useState(false)
+  useFabAction('crm:new', useCallback(() => setFormOpen(true), [setFormOpen]))
 
   const clients = result?.data ?? []
   const totalCount = result?.count ?? 0

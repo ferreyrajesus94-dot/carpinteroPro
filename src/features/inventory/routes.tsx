@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { useFabAction } from '@/shared/lib/fab'
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,8 @@ export function InventoryRoutes() {
     setSelectedMaterial(material)
     setActive(dialog)
   }
+
+  useFabAction('inventory:new', useCallback(() => openFor('form', null), []))
 
   function close() {
     setActive(null)
