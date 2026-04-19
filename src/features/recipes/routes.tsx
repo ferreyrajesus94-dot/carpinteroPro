@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { useFabAction } from '@/shared/lib/fab'
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,8 @@ export function RecipesRoutes() {
     setFormOpen(false)
     setSelectedTemplate(null)
   }
+
+  useFabAction('recipes:new', useCallback(() => { setSelectedTemplate(null); setFormOpen(true) }, []))
 
   return (
     <div className="space-y-4">
