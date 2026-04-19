@@ -4,9 +4,10 @@ import type {
   FurnitureTemplateUpdate,
   FurnitureTemplateWithItems,
   RecipeItemInsert,
+  LaborItemInsert,
 } from '../types'
 
-// Selección con JOIN: template + items + material de cada item
+// Selección con JOIN: template + items de material + items de mano de obra
 const RECIPE_SELECT = `
   *,
   recipe_items (
@@ -14,10 +15,15 @@ const RECIPE_SELECT = `
     furniture_template_id,
     material_id,
     quantity,
+    waste_pct,
+    quantity_formula,
     material:materials (
       id, name, category, unit, price_per_unit,
       wood_subtype, length_cm, width_cm, thickness_cm
     )
+  ),
+  labor_items (
+    id, furniture_template_id, description, hours, rate, created_at
   )
 ` as const
 
@@ -41,9 +47,28 @@ export async function fetchFurnitureTemplate(id: string): Promise<FurnitureTempl
   return data as unknown as FurnitureTemplateWithItems
 }
 
+export type RecipeItemDraft = Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>
+export type LaborItemDraft = Omit<LaborItemInsert, 'id' | 'furniture_template_id' | 'created_at'>
+
+async function replaceLaborItems(templateId: string, laborItems: LaborItemDraft[]) {
+  const { error: deleteError } = await supabase
+    .from('labor_items')
+    .delete()
+    .eq('furniture_template_id', templateId)
+  if (deleteError) throw deleteError
+
+  if (laborItems.length > 0) {
+    const { error } = await supabase
+      .from('labor_items')
+      .insert(laborItems.map((l) => ({ ...l, furniture_template_id: templateId })))
+    if (error) throw error
+  }
+}
+
 export async function createFurnitureTemplate(
   template: Omit<FurnitureTemplateInsert, 'id' | 'created_at' | 'updated_at'>,
-  items: Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>[]
+  items: RecipeItemDraft[],
+  laborItems: LaborItemDraft[] = []
 ): Promise<string> {
   const { data, error } = await supabase
     .from('furniture_templates')
@@ -59,13 +84,18 @@ export async function createFurnitureTemplate(
     if (itemsError) throw itemsError
   }
 
+  if (laborItems.length > 0) {
+    await replaceLaborItems(data.id, laborItems)
+  }
+
   return data.id
 }
 
 export async function updateFurnitureTemplate(
   id: string,
   template: FurnitureTemplateUpdate,
-  items: Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>[]
+  items: RecipeItemDraft[],
+  laborItems: LaborItemDraft[] = []
 ): Promise<void> {
   const { error } = await supabase
     .from('furniture_templates')
@@ -73,7 +103,6 @@ export async function updateFurnitureTemplate(
     .eq('id', id)
   if (error) throw error
 
-  // Reemplazar todos los items: borrar los existentes e insertar los nuevos
   const { error: deleteError } = await supabase
     .from('recipe_items')
     .delete()
@@ -86,6 +115,8 @@ export async function updateFurnitureTemplate(
       .insert(items.map((item) => ({ ...item, furniture_template_id: id })))
     if (insertError) throw insertError
   }
+
+  await replaceLaborItems(id, laborItems)
 }
 
 export async function deleteFurnitureTemplate(id: string): Promise<void> {
@@ -94,4 +125,47 @@ export async function deleteFurnitureTemplate(id: string): Promise<void> {
     .delete()
     .eq('id', id)
   if (error) throw error
+}
+
+export async function duplicateFurnitureTemplate(id: string): Promise<string> {
+  const original = await fetchFurnitureTemplate(id)
+  const {
+    id: _id,
+    created_at: _c,
+    updated_at: _u,
+    recipe_items,
+    labor_items,
+    ...rest
+  } = original
+  return createFurnitureTemplate(
+    { ...rest, name: `${original.name} (copia)` },
+    recipe_items.map((it) => ({
+      material_id: it.material_id,
+      quantity: it.quantity,
+      waste_pct: it.waste_pct,
+      quantity_formula: it.quantity_formula ?? null,
+    })),
+    (labor_items ?? []).map((l) => ({
+      description: l.description,
+      hours: l.hours,
+      rate: l.rate,
+    }))
+  )
+}
+
+export async function fetchTemplateUsageCounts(
+  workshopId: string
+): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from('quotes')
+    .select('furniture_template_id')
+    .eq('workshop_id', workshopId)
+    .not('furniture_template_id', 'is', null)
+  if (error) throw error
+  const counts: Record<string, number> = {}
+  for (const row of data ?? []) {
+    const tid = (row as { furniture_template_id: string | null }).furniture_template_id
+    if (tid) counts[tid] = (counts[tid] ?? 0) + 1
+  }
+  return counts
 }

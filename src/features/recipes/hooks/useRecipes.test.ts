@@ -42,6 +42,13 @@ const MOCK_TEMPLATE: FurnitureTemplateWithItems = {
   workshop_id: WORKSHOP_ID,
   name: 'Ropero 2 puertas',
   notes: null,
+  category: null,
+  tags: [],
+  height_cm: null,
+  width_cm: null,
+  depth_cm: null,
+  photo_url: null,
+  suggested_margin_pct: null,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
   recipe_items: [
@@ -50,9 +57,12 @@ const MOCK_TEMPLATE: FurnitureTemplateWithItems = {
       furniture_template_id: TEMPLATE_ID,
       material_id: 'mat-1',
       quantity: 4,
+      waste_pct: 0,
       material: MOCK_MATERIAL,
     },
   ],
+  labor_items: [],
+  params: [],
 }
 
 // ── useFurnitureTemplates ──────────────────────────────────────────────────
@@ -151,7 +161,8 @@ describe('useCreateFurnitureTemplate', () => {
 
     expect(recipesApi.createFurnitureTemplate).toHaveBeenCalledWith(
       payload.template,
-      payload.items
+      payload.items,
+      undefined
     )
   })
 
@@ -199,7 +210,8 @@ describe('useUpdateFurnitureTemplate', () => {
     expect(recipesApi.updateFurnitureTemplate).toHaveBeenCalledWith(
       TEMPLATE_ID,
       payload.template,
-      payload.items
+      payload.items,
+      undefined
     )
   })
 })

@@ -159,6 +159,14 @@ export type Database = {
           workshop_id: string
           name: string
           notes: string | null
+          category: string | null
+          tags: string[]
+          height_cm: number | null
+          width_cm: number | null
+          depth_cm: number | null
+          photo_url: string | null
+          suggested_margin_pct: number | null
+          params: { name: string; default: number }[]
           created_at: string
           updated_at: string
         }
@@ -167,6 +175,14 @@ export type Database = {
           workshop_id: string
           name: string
           notes?: string | null
+          category?: string | null
+          tags?: string[]
+          height_cm?: number | null
+          width_cm?: number | null
+          depth_cm?: number | null
+          photo_url?: string | null
+          suggested_margin_pct?: number | null
+          params?: { name: string; default: number }[]
           created_at?: string
           updated_at?: string
         }
@@ -175,6 +191,14 @@ export type Database = {
           workshop_id?: string
           name?: string
           notes?: string | null
+          category?: string | null
+          tags?: string[]
+          height_cm?: number | null
+          width_cm?: number | null
+          depth_cm?: number | null
+          photo_url?: string | null
+          suggested_margin_pct?: number | null
+          params?: { name: string; default: number }[]
           created_at?: string
           updated_at?: string
         }
@@ -186,18 +210,24 @@ export type Database = {
           furniture_template_id: string
           material_id: string
           quantity: number
+          waste_pct: number
+          quantity_formula: string | null
         }
         Insert: {
           id?: string
           furniture_template_id: string
           material_id: string
           quantity: number
+          waste_pct?: number
+          quantity_formula?: string | null
         }
         Update: {
           id?: string
           furniture_template_id?: string
           material_id?: string
           quantity?: number
+          waste_pct?: number
+          quantity_formula?: string | null
         }
         Relationships: [
           {
@@ -212,6 +242,41 @@ export type Database = {
             columns: ['material_id']
             isOneToOne: false
             referencedRelation: 'materials'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      labor_items: {
+        Row: {
+          id: string
+          furniture_template_id: string
+          description: string
+          hours: number
+          rate: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          furniture_template_id: string
+          description: string
+          hours: number
+          rate: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          furniture_template_id?: string
+          description?: string
+          hours?: number
+          rate?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'labor_items_furniture_template_id_fkey'
+            columns: ['furniture_template_id']
+            isOneToOne: false
+            referencedRelation: 'furniture_templates'
             referencedColumns: ['id']
           }
         ]
@@ -350,6 +415,72 @@ export type Database = {
           }
         ]
       }
+      quote_recipe_snapshots: {
+        Row: {
+          id: string
+          quote_id: string
+          material_id: string | null
+          material_name: string
+          material_unit: string
+          material_category: string
+          quantity: number
+          waste_pct: number
+          price_per_unit: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          quote_id: string
+          material_id?: string | null
+          material_name: string
+          material_unit: string
+          material_category: string
+          quantity: number
+          waste_pct?: number
+          price_per_unit: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          quote_id?: string
+          material_id?: string | null
+          material_name?: string
+          material_unit?: string
+          material_category?: string
+          quantity?: number
+          waste_pct?: number
+          price_per_unit?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      quote_labor_snapshots: {
+        Row: {
+          id: string
+          quote_id: string
+          description: string
+          hours: number
+          rate: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          quote_id: string
+          description: string
+          hours: number
+          rate: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          quote_id?: string
+          description?: string
+          hours?: number
+          rate?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       contract_templates: {
         Row: {
           id: string
@@ -389,6 +520,8 @@ export type Database = {
           email: string | null
           address: string | null
           auto_stock_discount: boolean
+          default_labor_rate: number | null
+          stock_alert_enabled: boolean
           created_at: string
           updated_at: string
         }
@@ -400,6 +533,8 @@ export type Database = {
           email?: string | null
           address?: string | null
           auto_stock_discount?: boolean
+          default_labor_rate?: number | null
+          stock_alert_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -411,6 +546,8 @@ export type Database = {
           email?: string | null
           address?: string | null
           auto_stock_discount?: boolean
+          default_labor_rate?: number | null
+          stock_alert_enabled?: boolean
           created_at?: string
           updated_at?: string
         }

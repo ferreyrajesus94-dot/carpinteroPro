@@ -21,10 +21,17 @@ export type WorkshopSettings = Database['public']['Tables']['workshop_settings']
 export type WorkshopSettingsInsert = Database['public']['Tables']['workshop_settings']['Insert']
 export type WorkshopSettingsUpdate = Database['public']['Tables']['workshop_settings']['Update']
 
+export type QuoteRecipeSnapshot = Database['public']['Tables']['quote_recipe_snapshots']['Row']
+export type QuoteRecipeSnapshotInsert = Database['public']['Tables']['quote_recipe_snapshots']['Insert']
+export type QuoteLaborSnapshot = Database['public']['Tables']['quote_labor_snapshots']['Row']
+export type QuoteLaborSnapshotInsert = Database['public']['Tables']['quote_labor_snapshots']['Insert']
+
 // Quote completo con cliente y extras (viene del JOIN en la API)
 export type QuoteWithExtras = Quote & {
   extras: QuoteExtra[]
   client: Client | null
+  recipe_snapshots?: QuoteRecipeSnapshot[]
+  labor_snapshots?: QuoteLaborSnapshot[]
 }
 
 export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {
