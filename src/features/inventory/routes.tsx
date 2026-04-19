@@ -13,7 +13,6 @@ import { MaterialForm } from './components/MaterialForm'
 import { PriceHistoryChart } from './components/PriceHistoryChart'
 import { StockAdjustDialog } from './components/StockAdjustDialog'
 import { StockHistoryDialog } from './components/StockHistoryDialog'
-import { InventoryStats } from './components/InventoryStats'
 import type { Material } from './types'
 
 type ActiveDialog = 'form' | 'priceHistory' | 'stockAdjust' | 'stockHistory' | null
@@ -35,21 +34,14 @@ export function InventoryRoutes() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 md:p-6 pb-24 md:pb-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Inventario</h1>
-          <p className="text-muted-foreground text-sm">
-            Materiales del taller con control de stock y precios.
-          </p>
-        </div>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">Inventario</h1>
         <Button onClick={() => openFor('form', null)}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo material
         </Button>
       </div>
-
-      <InventoryStats />
 
       <MaterialList
         onEdit={(m) => openFor('form', m)}
