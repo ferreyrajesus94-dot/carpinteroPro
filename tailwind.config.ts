@@ -7,10 +7,18 @@ const config: Config = {
     './index.html',
     './src/**/*.{ts,tsx}',
   ],
+  safelist: [
+    'theme-sawdust',
+    'theme-workshop',
+    'theme-graphite',
+    'dense',
+  ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
         border: 'hsl(var(--border))',
