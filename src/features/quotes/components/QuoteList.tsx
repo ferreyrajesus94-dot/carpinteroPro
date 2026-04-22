@@ -1,21 +1,30 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, FileText, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, FileText, ChevronLeft, ChevronRight, LayoutList, LayoutGrid } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
+import { SectionHowto } from '@/shared/ui/section-howto'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
-import { useQuotesPaginated, useDeleteQuote } from '../hooks/useQuotes'
+import { useQuotes, useQuotesPaginated, useDeleteQuote } from '../hooks/useQuotes'
 import { PAGE_SIZE } from '../api/quotes'
-import { formatCurrency } from '../types'
+import { formatCurrency, QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS, type QuoteStatus } from '../types'
 import { QuoteStatusBadge } from './QuoteStatusBadge'
 import { calculateQuote } from '../lib/calculator'
+import type { QuoteWithExtras } from '../types'
+
+const STATUS_ORDER: QuoteStatus[] = [
+  'presupuesto', 'enviado', 'aprobado', 'en_produccion', 'entregado', 'cancelado',
+]
 
 export function QuoteList() {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
+  const [view, setView] = useState<'lista' | 'pipeline'>('lista')
   const [page, setPage] = useState(0)
+  const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'all'>('all')
+  const { data: allQuotes = [] } = useQuotes(workshopId)
   const { data: result, isLoading, isError } = useQuotesPaginated(workshopId, page)
   const deleteMutation = useDeleteQuote(workshopId)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; quoteNumber: string } | null>(null)
@@ -23,6 +32,28 @@ export function QuoteList() {
   const quotes = result?.data ?? []
   const totalCount = result?.count ?? 0
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
+
+  // Grouped by status para Pipeline
+  const grouped = useMemo(
+    () => STATUS_ORDER.reduce<Record<QuoteStatus, QuoteWithExtras[]>>(
+      (acc, status) => { acc[status] = allQuotes.filter((q) => q.status === status); return acc },
+      {} as Record<QuoteStatus, QuoteWithExtras[]>
+    ),
+    [allQuotes]
+  )
+
+  // Status chips con counts para Lista
+  const statusChips = useMemo(() => [
+    { value: 'all' as const, label: 'Todos', count: allQuotes.length },
+    ...STATUS_ORDER.map(s => ({
+      value: s,
+      label: QUOTE_STATUS_LABELS[s],
+      count: grouped[s].length,
+    })),
+  ], [allQuotes.length, grouped])
+
+  // Filtered quotes para Pipeline view
+  const listaQuotes = statusFilter === 'all' ? quotes : quotes.filter(q => q.status === statusFilter)
 
   if (isError) {
     return (
@@ -68,15 +99,62 @@ export function QuoteList() {
         </Button>
       </div>
 
-      {quotes.length === 0 && totalCount === 0 ? (
+      <SectionHowto
+        storageKey="presupuestos"
+        steps={[
+          'Cada presupuesto pasa por etapas: Presupuesto → Enviado → Aprobado → Producción → Entregado.',
+          'En vista Pipeline, arrastrás tarjetas entre columnas para cambiar estado (en desktop).',
+          'Al aprobar un presupuesto, se genera automáticamente el contrato listo para firmar.'
+        ]}
+      />
+
+      {/* View toggle */}
+      <div className="flex items-center gap-1 p-1 bg-cp-bg2 border border-line rounded-lg w-fit">
+        {(['lista', 'pipeline'] as const).map((v) => (
+          <button
+            key={v}
+            onClick={() => setView(v)}
+            className={`h-8 px-3 rounded-md text-xs font-medium capitalize transition-colors flex items-center gap-2 ${
+              view === v ? 'bg-surface text-ink shadow-sm' : 'text-ink3'
+            }`}
+          >
+            {v === 'lista' ? <LayoutList className="h-3.5 w-3.5" /> : <LayoutGrid className="h-3.5 w-3.5" />}
+            {v}
+          </button>
+        ))}
+      </div>
+
+      {allQuotes.length === 0 ? (
         <p className="text-muted-foreground py-8 text-center">
           No hay presupuestos aún. ¡Creá el primero!
         </p>
-      ) : (
+      ) : view === 'lista' ? (
+        // LISTA VIEW
         <>
+          {/* Status chips */}
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+            {statusChips.map(({ value, label, count }) => (
+              <button
+                key={value}
+                onClick={() => setStatusFilter(value)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
+                  statusFilter === value
+                    ? 'bg-cp-accent text-white'
+                    : 'bg-cp-bg2 text-ink2 hover:bg-cp-accent/10'
+                }`}
+              >
+                {label} <span className="ml-1 text-[10px] opacity-75">({count})</span>
+              </button>
+            ))}
+          </div>
+
+          {listaQuotes.length === 0 && (
+            <p className="py-6 text-center text-sm text-muted-foreground">Sin resultados en este estado.</p>
+          )}
+
           {/* Mobile: cards */}
           <div className="sm:hidden space-y-2">
-            {quotes.map((q) => {
+            {listaQuotes.map((q) => {
               const { salePrice } = calculateQuote({
                 recipeCost: q.recipe_cost,
                 extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
@@ -84,20 +162,20 @@ export function QuoteList() {
                 marginPct: q.margin_pct,
               })
               return (
-                <div key={q.id} className="rounded-md border p-3 space-y-2">
+                <div key={q.id} className="rounded-md border border-line bg-surface/50 p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono font-medium text-sm">{q.quote_number}</span>
+                    <span className="font-mono font-medium text-sm text-ink2">{q.quote_number}</span>
                     <QuoteStatusBadge status={q.status} />
                   </div>
-                  <p className="text-sm font-medium">{q.furniture_name}</p>
+                  <p className="text-sm font-medium line-clamp-2">{q.furniture_name}</p>
                   <p className="text-xs text-muted-foreground">{q.client?.name ?? 'Sin cliente'}</p>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">{formatCurrency(salePrice)}</span>
+                    <span className="font-display font-semibold text-base">{formatCurrency(salePrice)}</span>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" asChild>
+                      <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                         <Link to={`/quotes/${q.id}/contract`}><FileText className="h-4 w-4" /></Link>
                       </Button>
-                      <Button variant="ghost" size="icon" asChild disabled={!isOnline}>
+                      <Button variant="ghost" size="icon" asChild disabled={!isOnline} className="h-8 w-8">
                         <Link to={`/quotes/${q.id}`}><Pencil className="h-4 w-4" /></Link>
                       </Button>
                       <Button
@@ -105,6 +183,7 @@ export function QuoteList() {
                         size="icon"
                         disabled={!isOnline}
                         onClick={() => setDeleteTarget({ id: q.id, quoteNumber: q.quote_number })}
+                        className="h-8 w-8"
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
@@ -116,9 +195,9 @@ export function QuoteList() {
           </div>
 
           {/* Desktop: table */}
-          <div className="hidden sm:block rounded-md border">
+          <div className="hidden sm:block rounded-lg border border-line overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-muted/50 text-muted-foreground text-xs uppercase">
+              <thead className="bg-cp-bg2 text-ink2 text-xs uppercase font-medium border-b border-line">
                 <tr>
                   <th className="px-4 py-3 text-left">N°</th>
                   <th className="px-4 py-3 text-left">Cliente</th>
@@ -128,8 +207,8 @@ export function QuoteList() {
                   <th className="px-4 py-3 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
-                {quotes.map((q) => {
+              <tbody className="divide-y divide-line">
+                {listaQuotes.map((q) => {
                   const { salePrice } = calculateQuote({
                     recipeCost: q.recipe_cost,
                     extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
@@ -137,18 +216,18 @@ export function QuoteList() {
                     marginPct: q.margin_pct,
                   })
                   return (
-                    <tr key={q.id}>
-                      <td className="px-4 py-3 font-mono font-medium">{q.quote_number}</td>
+                    <tr key={q.id} className="hover:bg-cp-bg2/40 transition-colors">
+                      <td className="px-4 py-3 font-mono font-medium text-ink2">{q.quote_number}</td>
                       <td className="px-4 py-3">{q.client?.name ?? <span className="text-muted-foreground">—</span>}</td>
                       <td className="px-4 py-3">{q.furniture_name}</td>
-                      <td className="px-4 py-3 text-right font-medium">{formatCurrency(salePrice)}</td>
+                      <td className="px-4 py-3 text-right font-display font-semibold">{formatCurrency(salePrice)}</td>
                       <td className="px-4 py-3"><QuoteStatusBadge status={q.status} /></td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1">
-                          <Button variant="ghost" size="icon" asChild>
+                          <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                             <Link to={`/quotes/${q.id}/contract`}><FileText className="h-4 w-4" /></Link>
                           </Button>
-                          <Button variant="ghost" size="icon" asChild disabled={!isOnline}>
+                          <Button variant="ghost" size="icon" asChild disabled={!isOnline} className="h-8 w-8">
                             <Link to={`/quotes/${q.id}`}><Pencil className="h-4 w-4" /></Link>
                           </Button>
                           <Button
@@ -156,6 +235,7 @@ export function QuoteList() {
                             size="icon"
                             disabled={!isOnline}
                             onClick={() => setDeleteTarget({ id: q.id, quoteNumber: q.quote_number })}
+                            className="h-8 w-8"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -177,6 +257,7 @@ export function QuoteList() {
                   size="icon"
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 0}
+                  className="h-8 w-8"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -185,6 +266,7 @@ export function QuoteList() {
                   size="icon"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= totalPages - 1}
+                  className="h-8 w-8"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -192,6 +274,66 @@ export function QuoteList() {
             </div>
           )}
         </>
+      ) : (
+        // PIPELINE VIEW
+        <div className="overflow-x-auto -mx-4 px-4 pb-4 no-scrollbar">
+          <div className="flex gap-3 min-w-max">
+            {STATUS_ORDER.map((status) => {
+              const cards = grouped[status]
+              return (
+                <div key={status} className="w-72 flex-shrink-0">
+                  {/* Column header */}
+                  <div className="mb-2 pb-2 border-b border-line">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${QUOTE_STATUS_COLORS[status]}`}>
+                          {QUOTE_STATUS_LABELS[status]}
+                        </span>
+                        <span className="text-xs font-mono text-ink2">{cards.length}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Column content */}
+                  <div className="space-y-2 min-h-[120px]">
+                    {cards.length === 0 ? (
+                      <div className="text-center py-6 text-xs text-muted-foreground">Vacío</div>
+                    ) : (
+                      cards.map((q) => {
+                        const { salePrice } = calculateQuote({
+                          recipeCost: q.recipe_cost,
+                          extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
+                          marginMode: q.margin_mode,
+                          marginPct: q.margin_pct,
+                        })
+                        return (
+                          <div
+                            key={q.id}
+                            className="bg-surface border border-line rounded-md p-3 hover:border-cp-accent transition-colors cursor-move"
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="font-mono text-xs text-ink2">{q.quote_number}</span>
+                              <button
+                                onClick={() => setStatusFilter(status)}
+                                className="text-muted-foreground hover:text-foreground text-xs"
+                                title="Ver detalles"
+                              >
+                                ↗
+                              </button>
+                            </div>
+                            <p className="text-sm font-medium line-clamp-2 mb-1">{q.furniture_name}</p>
+                            <p className="text-xs text-muted-foreground truncate mb-2">{q.client?.name ?? 'Sin cliente'}</p>
+                            <p className="font-display font-semibold text-base">{formatCurrency(salePrice)}</p>
+                          </div>
+                        )
+                      })
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
       )}
     </div>
   )
