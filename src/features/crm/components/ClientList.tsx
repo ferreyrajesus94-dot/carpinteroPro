@@ -14,6 +14,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { SectionHowto } from '@/shared/ui/section-howto'
+import { EmptyState } from '@/shared/ui/empty-state'
 import { ClientForm } from './ClientForm'
 import type { Client } from '@/features/crm/types'
 
@@ -137,16 +138,16 @@ export function ClientList() {
       </div>
 
       {totalCount === 0 ? (
-        <div className="rounded-xl border border-line bg-cp-bg2 p-8 text-center">
-          <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-cp-accent-soft">
-            <Users className="h-5 w-5 text-cp-accent" />
-          </div>
-          <p className="font-medium text-ink">Sin clientes todavía</p>
-          <p className="mt-1 text-[13px] text-ink3">Agregá tu primer cliente para empezar a armar presupuestos.</p>
-          <Button className="mt-4" size="sm" disabled={!isOnline} onClick={() => setFormOpen(true)}>
-            + Nuevo cliente
-          </Button>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="Sin clientes todavía"
+          description="Agregá tu primer cliente para empezar a armar presupuestos."
+          action={
+            <Button size="sm" disabled={!isOnline} onClick={() => setFormOpen(true)}>
+              + Nuevo cliente
+            </Button>
+          }
+        />
       ) : (
         <>
           <div className="grid gap-2 md:grid-cols-2">

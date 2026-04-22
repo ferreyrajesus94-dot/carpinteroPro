@@ -5,6 +5,7 @@ import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { SectionHowto } from '@/shared/ui/section-howto'
+import { EmptyState } from '@/shared/ui/empty-state'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useQuotes, useQuotesPaginated, useDeleteQuote } from '../hooks/useQuotes'
@@ -125,9 +126,16 @@ export function QuoteList() {
       </div>
 
       {allQuotes.length === 0 ? (
-        <p className="text-muted-foreground py-8 text-center">
-          No hay presupuestos aún. ¡Creá el primero!
-        </p>
+        <EmptyState
+          icon={FileText}
+          title="Sin presupuestos todavía"
+          description="Armá el primer presupuesto desde una plantilla de mueble o a medida."
+          action={
+            <Button asChild size="sm" disabled={!isOnline}>
+              <Link to="/quotes/new">+ Nuevo presupuesto</Link>
+            </Button>
+          }
+        />
       ) : view === 'lista' ? (
         // LISTA VIEW
         <>

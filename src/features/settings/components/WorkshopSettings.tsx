@@ -159,17 +159,23 @@ export function WorkshopSettings() {
     })
   }
 
-  if (isLoading) return <div className="p-4 text-muted-foreground">Cargando...</div>
+  if (isLoading) return <div className="p-4 text-ink3">Cargando…</div>
 
   return (
-    <div className="max-w-lg mx-auto p-4 space-y-6">
-      <h1 className="text-2xl font-display font-semibold">Ajustes del taller</h1>
+    <div className="max-w-lg mx-auto p-4 md:p-6 space-y-6 pb-24 md:pb-6">
+      <div>
+        <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink3">Configuración</div>
+        <h1 className="font-display text-2xl md:text-[32px] font-semibold tracking-tight text-ink mt-1">
+          Ajustes
+        </h1>
+        <p className="text-[13px] text-ink3 mt-1">Apariencia, taller y datos de facturación.</p>
+      </div>
 
       <AppearanceCard />
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Información del taller</CardTitle>
+          <CardTitle className="text-base font-display">Taller</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
