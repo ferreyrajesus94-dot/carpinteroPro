@@ -13,6 +13,7 @@ import {
 import { Skeleton } from '@/shared/ui/skeleton'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { SectionHowto } from '@/shared/ui/section-howto'
+import { EmptyState } from '@/shared/ui/empty-state'
 import {
   useFurnitureTemplates,
   useDeleteFurnitureTemplate,
@@ -81,10 +82,11 @@ export function MuebleList({ onEdit }: MuebleListProps) {
 
   if (templates.length === 0) {
     return (
-      <div className="py-8 text-center">
-        <Package className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-40" />
-        <p className="text-sm text-muted-foreground">No hay muebles. Creá el primero con el botón de arriba.</p>
-      </div>
+      <EmptyState
+        icon={Package}
+        title="Sin muebles todavía"
+        description="Creá tu primer mueble para usarlo como plantilla en presupuestos."
+      />
     )
   }
 

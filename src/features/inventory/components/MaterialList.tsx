@@ -7,6 +7,7 @@ import { Skeleton } from '@/shared/ui/skeleton'
 import { Switch } from '@/shared/ui/switch'
 import { Label } from '@/shared/ui/label'
 import { SectionHowto } from '@/shared/ui/section-howto'
+import { EmptyState } from '@/shared/ui/empty-state'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/shared/ui/table'
@@ -392,19 +393,15 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
       </Dialog>
 
       {visibleMaterials.length === 0 ? (
-        <div className="py-12 text-center">
-          <div className="mx-auto w-10 h-10 rounded-full bg-cp-accent-soft grid place-items-center text-cp-accent mb-3">
-            <Search size={18} />
-          </div>
-          <p className="font-medium text-ink">
-            {materials.length === 0 ? 'Sin materiales todavía' : 'Nada coincide'}
-          </p>
-          <p className="text-sm text-ink3 mt-1">
-            {materials.length === 0
+        <EmptyState
+          icon={materials.length === 0 ? PackagePlus : Search}
+          title={materials.length === 0 ? 'Sin materiales todavía' : 'Nada coincide'}
+          description={
+            materials.length === 0
               ? 'Agregá el primero con el botón Nuevo material.'
-              : 'Probá cambiar los filtros o limpiar la búsqueda.'}
-          </p>
-        </div>
+              : 'Probá cambiar los filtros o limpiar la búsqueda.'
+          }
+        />
       ) : (
         <>
           {/* Mobile: cards densas */}
