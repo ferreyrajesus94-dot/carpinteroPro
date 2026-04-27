@@ -87,11 +87,26 @@ export function LoginPage() {
 
   async function handleGoogleAuth() {
     setError(null)
-    await supabase.auth.signInWithOAuth({
+    // Pre-check: Supabase expone /auth/v1/settings con los providers habilitados.
+    // signInWithOAuth no valida esto antes de redirigir, así que si no pre-chequeamos
+    // el usuario ve una pantalla de error JSON crudo de Supabase en vez de un mensaje útil.
+    try {
+      const url = import.meta.env.VITE_SUPABASE_URL
+      const key = import.meta.env.VITE_SUPABASE_ANON_KEY
+      const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
+      const settings = await res.json()
+      if (!settings?.external?.google) {
+        setError('El login con Google todavía no está habilitado. Ingresá con email y contraseña, o pedile al admin que lo active en Supabase → Authentication → Providers → Google.')
+        return
+      }
+    } catch {
+      // Si el pre-check falla, seguimos igual — mejor intentar que bloquear.
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/dashboard` },
     })
-    // Supabase redirige al proveedor — cuando vuelve, AuthProvider carga la sesión.
+    if (error) setError(`No se pudo iniciar sesión con Google: ${error.message}`)
   }
 
   async function handleLogin(e: FormEvent) {

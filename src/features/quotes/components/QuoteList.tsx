@@ -1,14 +1,19 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Pencil, Trash2, FileText, ChevronLeft, ChevronRight, LayoutList, LayoutGrid } from 'lucide-react'
+import {
+  DndContext, MouseSensor, useSensor, useSensors, useDroppable, useDraggable,
+  type DragEndEvent,
+} from '@dnd-kit/core'
 import { Button } from '@/shared/ui/button'
 import { Skeleton } from '@/shared/ui/skeleton'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
-import { useQuotes, useQuotesPaginated, useDeleteQuote } from '../hooks/useQuotes'
+import { useQuotes, useQuotesPaginated, useDeleteQuote, useUpdateQuote } from '../hooks/useQuotes'
 import { PAGE_SIZE } from '../api/quotes'
 import { formatCurrency, QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS, type QuoteStatus } from '../types'
 import { QuoteStatusBadge } from './QuoteStatusBadge'
@@ -19,6 +24,76 @@ const STATUS_ORDER: QuoteStatus[] = [
   'presupuesto', 'enviado', 'aprobado', 'en_produccion', 'entregado', 'cancelado',
 ]
 
+function DroppableColumn({ status, children }: { status: QuoteStatus; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: status })
+  return (
+    <div
+      ref={setNodeRef}
+      className={`space-y-2 min-h-[120px] rounded-md p-1 transition-colors ${isOver ? 'bg-cp-accent/10 ring-1 ring-cp-accent' : ''}`}
+    >
+      {children}
+    </div>
+  )
+}
+
+function DraggableCard({
+  quote, status, salePrice, isOnline, onChangeStatus,
+}: {
+  quote: QuoteWithExtras
+  status: QuoteStatus
+  salePrice: number
+  isOnline: boolean
+  onChangeStatus: (id: string, next: QuoteStatus) => void
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: quote.id,
+    data: { status },
+  })
+  return (
+    <div
+      ref={setNodeRef}
+      className={`bg-surface border border-line rounded-md p-3 hover:border-cp-accent transition-colors ${isDragging ? 'opacity-40' : ''}`}
+    >
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-mono text-xs text-ink2">{quote.quote_number}</span>
+        <Link to={`/quotes/${quote.id}`} className="text-muted-foreground hover:text-foreground text-xs" title="Editar">
+          ↗
+        </Link>
+      </div>
+      {/* Desktop drag handle: toda la card arrastrable */}
+      <div className="hidden sm:block cursor-move" {...attributes} {...listeners}>
+        <p className="text-sm font-medium line-clamp-2 mb-1">{quote.furniture_name}</p>
+        <p className="text-xs text-muted-foreground truncate mb-2">{quote.client?.name ?? 'Sin cliente'}</p>
+        <p className="font-display font-semibold text-base">{formatCurrency(salePrice)}</p>
+      </div>
+      {/* Mobile: sin drag, selector de estado */}
+      <div className="sm:hidden">
+        <p className="text-sm font-medium line-clamp-2 mb-1">{quote.furniture_name}</p>
+        <p className="text-xs text-muted-foreground truncate mb-2">{quote.client?.name ?? 'Sin cliente'}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-display font-semibold text-base">{formatCurrency(salePrice)}</p>
+          <Select
+            value={status}
+            onValueChange={(v) => onChangeStatus(quote.id, v as QuoteStatus)}
+            disabled={!isOnline}
+          >
+            <SelectTrigger className="h-8 w-36 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_ORDER.map((s) => (
+                <SelectItem key={s} value={s} className="text-xs">
+                  {QUOTE_STATUS_LABELS[s]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function QuoteList() {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
@@ -28,7 +103,31 @@ export function QuoteList() {
   const { data: allQuotes = [] } = useQuotes(workshopId)
   const { data: result, isLoading, isError } = useQuotesPaginated(workshopId, page)
   const deleteMutation = useDeleteQuote(workshopId)
+  const updateMutation = useUpdateQuote(workshopId)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; quoteNumber: string } | null>(null)
+  const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 6 } }))
+
+  function moveQuoteToStatus(id: string, next: QuoteStatus) {
+    const quote = allQuotes.find((q) => q.id === id)
+    if (!quote || quote.status === next) return
+    updateMutation.mutate({
+      id: quote.id,
+      quote: { status: next },
+      extras: quote.extras.map((e) => ({
+        description: e.description,
+        amount: e.amount,
+        show_in_quote: e.show_in_quote,
+      })),
+    })
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over) return
+    const next = over.id as QuoteStatus
+    const prev = active.data.current?.status as QuoteStatus | undefined
+    if (prev && prev !== next) moveQuoteToStatus(active.id as string, next)
+  }
 
   const quotes = result?.data ?? []
   const totalCount = result?.count ?? 0
@@ -104,7 +203,7 @@ export function QuoteList() {
         storageKey="presupuestos"
         steps={[
           'Cada presupuesto pasa por etapas: Presupuesto → Enviado → Aprobado → Producción → Entregado.',
-          'En vista Pipeline, arrastrás tarjetas entre columnas para cambiar estado (en desktop).',
+          'En vista Pipeline, arrastrás las tarjetas entre columnas (desktop) o usás el selector de estado dentro de cada tarjeta (mobile).',
           'Al aprobar un presupuesto, se genera automáticamente el contrato listo para firmar.'
         ]}
       />
@@ -284,15 +383,14 @@ export function QuoteList() {
         </>
       ) : (
         // PIPELINE VIEW
-        <div className="overflow-x-auto -mx-4 px-4 pb-4 no-scrollbar">
-          <div className="flex gap-3 min-w-max">
-            {STATUS_ORDER.map((status) => {
-              const cards = grouped[status]
-              return (
-                <div key={status} className="w-72 flex-shrink-0">
-                  {/* Column header */}
-                  <div className="mb-2 pb-2 border-b border-line">
-                    <div className="flex items-center justify-between">
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="overflow-x-auto -mx-4 px-4 pb-4 no-scrollbar">
+            <div className="flex gap-3 min-w-max">
+              {STATUS_ORDER.map((status) => {
+                const cards = grouped[status]
+                return (
+                  <div key={status} className="w-72 flex-shrink-0">
+                    <div className="mb-2 pb-2 border-b border-line">
                       <div className="flex items-center gap-2">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${QUOTE_STATUS_COLORS[status]}`}>
                           {QUOTE_STATUS_LABELS[status]}
@@ -300,48 +398,37 @@ export function QuoteList() {
                         <span className="text-xs font-mono text-ink2">{cards.length}</span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Column content */}
-                  <div className="space-y-2 min-h-[120px]">
-                    {cards.length === 0 ? (
-                      <div className="text-center py-6 text-xs text-muted-foreground">Vacío</div>
-                    ) : (
-                      cards.map((q) => {
-                        const { salePrice } = calculateQuote({
-                          recipeCost: q.recipe_cost,
-                          extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
-                          marginMode: q.margin_mode,
-                          marginPct: q.margin_pct,
+                    <DroppableColumn status={status}>
+                      {cards.length === 0 ? (
+                        <div className="text-center py-6 text-xs text-muted-foreground">Vacío</div>
+                      ) : (
+                        cards.map((q) => {
+                          const { salePrice } = calculateQuote({
+                            recipeCost: q.recipe_cost,
+                            extras: q.extras.map((e) => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
+                            marginMode: q.margin_mode,
+                            marginPct: q.margin_pct,
+                          })
+                          return (
+                            <DraggableCard
+                              key={q.id}
+                              quote={q}
+                              status={status}
+                              salePrice={salePrice}
+                              isOnline={isOnline}
+                              onChangeStatus={moveQuoteToStatus}
+                            />
+                          )
                         })
-                        return (
-                          <div
-                            key={q.id}
-                            className="bg-surface border border-line rounded-md p-3 hover:border-cp-accent transition-colors cursor-move"
-                          >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-mono text-xs text-ink2">{q.quote_number}</span>
-                              <button
-                                onClick={() => setStatusFilter(status)}
-                                className="text-muted-foreground hover:text-foreground text-xs"
-                                title="Ver detalles"
-                              >
-                                ↗
-                              </button>
-                            </div>
-                            <p className="text-sm font-medium line-clamp-2 mb-1">{q.furniture_name}</p>
-                            <p className="text-xs text-muted-foreground truncate mb-2">{q.client?.name ?? 'Sin cliente'}</p>
-                            <p className="font-display font-semibold text-base">{formatCurrency(salePrice)}</p>
-                          </div>
-                        )
-                      })
-                    )}
+                      )}
+                    </DroppableColumn>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
-        </div>
+        </DndContext>
       )}
     </div>
   )
