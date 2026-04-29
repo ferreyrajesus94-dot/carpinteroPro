@@ -317,6 +317,48 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          id: string
+          workshop_id: string
+          title: string
+          notes: string | null
+          due_date: string | null
+          priority: Database['public']['Enums']['task_priority']
+          category: Database['public']['Enums']['task_category']
+          status: Database['public']['Enums']['task_status']
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          workshop_id: string
+          title: string
+          notes?: string | null
+          due_date?: string | null
+          priority?: Database['public']['Enums']['task_priority']
+          category?: Database['public']['Enums']['task_category']
+          status?: Database['public']['Enums']['task_status']
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          workshop_id?: string
+          title?: string
+          notes?: string | null
+          due_date?: string | null
+          priority?: Database['public']['Enums']['task_priority']
+          category?: Database['public']['Enums']['task_category']
+          status?: Database['public']['Enums']['task_status']
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quotes: {
         Row: {
           id: string
@@ -672,6 +714,18 @@ export type Database = {
         | 'merma'
         | 'ajuste'
         | 'descuento_presupuesto'
+      task_priority:
+        | 'alta'
+        | 'normal'
+        | 'baja'
+      task_status:
+        | 'pendiente'
+        | 'hecha'
+      task_category:
+        | 'compras'
+        | 'produccion'
+        | 'administrativo'
+        | 'otros'
     }
   }
 }

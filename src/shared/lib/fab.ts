@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-export type FabAction = 'inventory:new' | 'recipes:new' | 'crm:new'
+export type FabAction = 'inventory:new' | 'recipes:new' | 'crm:new' | 'tasks:new'
 
 const EVENT = 'cp:fab'
 

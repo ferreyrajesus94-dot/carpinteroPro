@@ -18,4 +18,5 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/recipes',   label: 'Muebles',       icon: 'fi-rr-couch',        fabLabel: 'Mueble',       fabAction: 'recipes:new' },
   { to: '/quotes',    label: 'Presupuestos',  icon: 'fi-rr-file-invoice', fabLabel: 'Presupuesto',  fabHref: '/quotes/new' },
   { to: '/crm',       label: 'Clientes',      icon: 'fi-rr-users',        fabLabel: 'Cliente',      fabAction: 'crm:new' },
+  { to: '/tareas',    label: 'Tareas',        icon: 'fi-rr-checkbox',     fabLabel: 'Tarea',        fabAction: 'tasks:new' },
 ]

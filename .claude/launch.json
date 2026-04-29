@@ -8,6 +8,12 @@
       "port": 5175
     },
     {
+      "name": "Dev Server worktree",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "5176", "--strictPort"],
+      "port": 5176
+    },
+    {
       "name": "Preview (Vite build)",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "preview"],

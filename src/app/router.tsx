@@ -47,6 +47,10 @@ export const router = createBrowserRouter([
         lazy: () => import('@/features/crm/routes').then(m => ({ Component: m.CrmRoutes })),
       },
       {
+        path: 'tareas/*',
+        lazy: () => import('@/features/tasks/routes').then(m => ({ Component: m.TasksRoutes })),
+      },
+      {
         path: 'settings/*',
         lazy: () => import('@/features/settings/routes').then(m => ({ Component: m.SettingsRoutes })),
       },
