@@ -35,18 +35,21 @@ export type Database = {
           id: string
           workshop_id: string
           display_name: string | null
+          onboarded_at: string | null
           created_at: string
         }
         Insert: {
           id: string
           workshop_id: string
           display_name?: string | null
+          onboarded_at?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           workshop_id?: string
           display_name?: string | null
+          onboarded_at?: string | null
           created_at?: string
         }
         Relationships: [

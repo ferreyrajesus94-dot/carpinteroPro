@@ -11,6 +11,10 @@ export const router = createBrowserRouter([
     lazy: () => import('@/features/auth/routes').then(m => ({ Component: m.AuthRoutes })),
   },
   {
+    path: '/onboarding',
+    lazy: () => import('@/features/onboarding/components/OnboardingWizard').then(m => ({ Component: m.OnboardingWizard })),
+  },
+  {
     path: '/',
     element: <AppLayout />,
     errorElement: (
