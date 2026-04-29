@@ -100,7 +100,7 @@ describe('computeDashboardStats', () => {
         status: 'aprobado',
         recipe_cost: 1000,
         margin_pct: 0,
-        extras: [{ id: 'e1', quote_id: 'q1', description: 'Extra', amount: 500, show_in_quote: true, sort_order: 0 }],
+        extras: [{ id: 'e1', workshop_id: 'w1', quote_id: 'q1', description: 'Extra', amount: 500, show_in_quote: true, sort_order: 0 }],
         created_at: now.toISOString(),
       }),
     ]

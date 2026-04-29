@@ -58,7 +58,7 @@ const MOCK_QUOTES: QuoteWithExtras[] = [
     created_at: '2026-01-02T00:00:00Z',
     updated_at: '2026-01-02T00:00:00Z',
     extras: [
-      { id: 'ex-1', quote_id: 'q-2', description: 'Barniz', amount: 2000, show_in_quote: true, sort_order: 0 },
+      { id: 'ex-1', workshop_id: '00000000-0000-0000-0000-000000000001', quote_id: 'q-2', description: 'Barniz', amount: 2000, show_in_quote: true, sort_order: 0 },
     ],
     client: null,
   },
