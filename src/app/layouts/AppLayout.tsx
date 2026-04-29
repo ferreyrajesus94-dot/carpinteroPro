@@ -17,7 +17,7 @@ function activeNav(pathname: string): NavItem | undefined {
 
 export function AppLayout() {
   const { theme, toggle } = useTheme()
-  const { session, loading } = useAuth()
+  const { session, loading, onboardedAt } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -29,6 +29,7 @@ export function AppLayout() {
     )
   }
   if (!session) return <Navigate to="/login" replace />
+  if (!onboardedAt) return <Navigate to="/onboarding" replace />
 
   const userEmail = session?.user?.email ?? ''
   const workshopName = session?.user?.user_metadata?.workshop_name ?? ''

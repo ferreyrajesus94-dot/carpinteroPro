@@ -10,6 +10,7 @@ import { Switch } from '@/shared/ui/switch'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useTheme, type Palette } from '@/shared/hooks/useTheme'
 import { useWorkshopSettings, useUpsertWorkshopSettings } from '../hooks/useWorkshopSettings'
+import { useResetOnboarding } from '@/features/onboarding/hooks/useOnboarding'
 
 const PALETTE_OPTIONS: { value: Palette; label: string; hint: string; swatch: string }[] = [
   { value: 'sawdust', label: 'Sawdust', hint: 'Tierra + naranja quemado', swatch: 'oklch(62% 0.18 48)' },
@@ -98,6 +99,7 @@ export function WorkshopSettings() {
   const workshopId = useWorkshopId()
   const { data: settings, isLoading } = useWorkshopSettings(workshopId)
   const upsertMutation = useUpsertWorkshopSettings(workshopId)
+  const resetOnboarding = useResetOnboarding()
 
   const {
     register,
@@ -172,6 +174,30 @@ export function WorkshopSettings() {
       </div>
 
       <AppearanceCard />
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-display">Onboarding</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-start justify-between gap-4">
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium text-ink">Ver el wizard de configuración inicial</p>
+            <p className="text-xs text-ink3">
+              Volvé a ver los pasos de bienvenida para configurar tu taller y cargar materiales.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={resetOnboarding.isPending}
+            onClick={() => resetOnboarding.mutate()}
+            className="shrink-0"
+          >
+            {resetOnboarding.isPending ? 'Redirigiendo…' : 'Reiniciar'}
+          </Button>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

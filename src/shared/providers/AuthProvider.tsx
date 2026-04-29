@@ -11,9 +11,11 @@ import { supabase, setWorkshopId, clearWorkshopId } from '@/shared/lib/supabase'
 interface AuthContextValue {
   session: Session | null
   workshopId: string | null
+  onboardedAt: string | null
   /** true mientras se restaura la sesión inicial */
   loading: boolean
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -21,18 +23,26 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [workshopId, setWorkshopIdState] = useState<string | null>(null)
+  const [onboardedAt, setOnboardedAt] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   async function loadProfile(userId: string) {
     const { data } = await supabase
       .from('profiles')
-      .select('workshop_id')
+      .select('workshop_id, onboarded_at')
       .eq('id', userId)
       .single()
 
     if (data?.workshop_id) {
       setWorkshopId(data.workshop_id)
       setWorkshopIdState(data.workshop_id)
+    }
+    setOnboardedAt(data?.onboarded_at ?? null)
+  }
+
+  async function refreshProfile() {
+    if (session?.user?.id) {
+      await loadProfile(session.user.id)
     }
   }
 
@@ -56,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           clearWorkshopId()
           setWorkshopIdState(null)
+          setOnboardedAt(null)
         }
       }
     )
@@ -68,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ session, workshopId, loading, signOut }}>
+    <AuthContext.Provider value={{ session, workshopId, onboardedAt, loading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
