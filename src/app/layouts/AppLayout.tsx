@@ -118,6 +118,10 @@ export function AppLayout() {
               {userEmail && <p className="truncate text-[11px] text-ink3">{userEmail}</p>}
             </div>
           </Link>
+          <div className="flex gap-3 px-2 pt-1 pb-0.5">
+            <Link to="/terms" target="_blank" className="text-[10.5px] text-ink3 hover:text-ink2 transition-colors">Términos</Link>
+            <Link to="/privacy" target="_blank" className="text-[10.5px] text-ink3 hover:text-ink2 transition-colors">Privacidad</Link>
+          </div>
         </div>
       </aside>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
-import { supabase } from '@/shared/lib/supabase'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
+import { checkGoogleEnabled, signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/features/auth/api'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -19,6 +19,46 @@ function GoogleIcon() {
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
     </svg>
+  )
+}
+
+// ─── Campo contraseña con toggle show/hide ────────────────────────────────────
+function PasswordInput({
+  id,
+  autoComplete,
+  value,
+  onChange,
+  showPassword,
+  onToggleShow,
+}: {
+  id: string
+  autoComplete: string
+  value: string
+  onChange: (v: string) => void
+  showPassword: boolean
+  onToggleShow: () => void
+}) {
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={showPassword ? 'text' : 'password'}
+        placeholder="••••••••"
+        autoComplete={autoComplete}
+        required
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="pr-10"
+      />
+      <button
+        type="button"
+        onClick={onToggleShow}
+        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
+      </button>
+    </div>
   )
 }
 
@@ -57,8 +97,9 @@ export function LoginPage() {
   }, [])
 
   // Solo registro
-  const [workshopName, setWorkshopName] = useState('')
-  const [success, setSuccess]           = useState(false)
+  const [workshopName, setWorkshopName]   = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [success, setSuccess]             = useState(false)
 
   const [error, setError]         = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -83,29 +124,17 @@ export function LoginPage() {
     setError(null)
     setSuccess(false)
     setPassword('')
+    setAcceptedTerms(false)
   }
 
   async function handleGoogleAuth() {
     setError(null)
-    // Pre-check: Supabase expone /auth/v1/settings con los providers habilitados.
-    // signInWithOAuth no valida esto antes de redirigir, así que si no pre-chequeamos
-    // el usuario ve una pantalla de error JSON crudo de Supabase en vez de un mensaje útil.
-    try {
-      const url = import.meta.env.VITE_SUPABASE_URL
-      const key = import.meta.env.VITE_SUPABASE_ANON_KEY
-      const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
-      const settings = await res.json()
-      if (!settings?.external?.google) {
-        setError('El login con Google todavía no está habilitado. Ingresá con email y contraseña, o pedile al admin que lo active en Supabase → Authentication → Providers → Google.')
-        return
-      }
-    } catch {
-      // Si el pre-check falla, seguimos igual — mejor intentar que bloquear.
+    const googleEnabled = await checkGoogleEnabled()
+    if (!googleEnabled) {
+      setError('El login con Google todavía no está habilitado. Ingresá con email y contraseña, o pedile al admin que lo active en Supabase → Authentication → Providers → Google.')
+      return
     }
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    })
+    const { error } = await signInWithGoogle(`${window.location.origin}/dashboard`)
     if (error) setError(`No se pudo iniciar sesión con Google: ${error.message}`)
   }
 
@@ -114,7 +143,7 @@ export function LoginPage() {
     setError(null)
     setSubmitting(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await signInWithEmail(email, password)
 
     if (error) {
       setError(
@@ -137,14 +166,15 @@ export function LoginPage() {
 
   async function handleRegister(e: FormEvent) {
     e.preventDefault()
-    if (!allPassed) return   // guard extra — el botón ya debería estar deshabilitado
+    if (!allPassed || !acceptedTerms) return
     setError(null)
     setSubmitting(true)
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { workshop_name: workshopName || 'Mi Taller' } },
+    const now = new Date().toISOString()
+    const { error } = await signUpWithEmail(email, password, {
+      workshop_name: workshopName || 'Mi Taller',
+      terms_accepted_at: now,
+      privacy_accepted_at: now,
     })
 
     if (error) {
@@ -155,32 +185,6 @@ export function LoginPage() {
 
     setSuccess(true)
     setSubmitting(false)
-  }
-
-  // ─── Campo contraseña reutilizable ────────────────────────────────────────
-  function PasswordInput({ id, autoComplete }: { id: string; autoComplete: string }) {
-    return (
-      <div className="relative">
-        <Input
-          id={id}
-          type={showPassword ? 'text' : 'password'}
-          placeholder="••••••••"
-          autoComplete={autoComplete}
-          required
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          className="pr-10"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(v => !v)}
-          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
-        </button>
-      </div>
-    )
   }
 
   return (
@@ -248,7 +252,14 @@ export function LoginPage() {
 
                   <div className="space-y-1.5">
                     <Label htmlFor="password">Contraseña</Label>
-                    <PasswordInput id="password" autoComplete="current-password" />
+                    <PasswordInput
+                      id="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={setPassword}
+                      showPassword={showPassword}
+                      onToggleShow={() => setShowPassword(v => !v)}
+                    />
                   </div>
 
                   <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
@@ -335,7 +346,14 @@ export function LoginPage() {
 
                     <div className="space-y-1.5">
                       <Label htmlFor="reg-password">Contraseña</Label>
-                      <PasswordInput id="reg-password" autoComplete="new-password" />
+                      <PasswordInput
+                        id="reg-password"
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={setPassword}
+                        showPassword={showPassword}
+                        onToggleShow={() => setShowPassword(v => !v)}
+                      />
 
                       {/* Barra de fuerza */}
                       {password.length > 0 && (
@@ -375,12 +393,32 @@ export function LoginPage() {
                       )}
                     </div>
 
+                    <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={acceptedTerms}
+                        onChange={e => setAcceptedTerms(e.target.checked)}
+                        required
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary cursor-pointer"
+                      />
+                      <span>
+                        Acepto los{' '}
+                        <Link to="/terms" target="_blank" className="underline text-foreground hover:text-primary">
+                          Términos y Condiciones
+                        </Link>{' '}
+                        y la{' '}
+                        <Link to="/privacy" target="_blank" className="underline text-foreground hover:text-primary">
+                          Política de Privacidad
+                        </Link>
+                      </span>
+                    </label>
+
                     {error && <p className="text-sm text-destructive">{error}</p>}
 
                     <Button
                       type="submit"
                       className="w-full"
-                      disabled={submitting || !allPassed}
+                      disabled={submitting || !allPassed || !acceptedTerms}
                     >
                       {submitting ? 'Creando cuenta...' : 'Crear cuenta'}
                     </Button>
@@ -401,6 +439,11 @@ export function LoginPage() {
             </>
           )}
         </Card>
+        <p className="text-center text-xs text-muted-foreground">
+          <Link to="/terms" target="_blank" className="hover:text-foreground transition-colors">Términos</Link>
+          {' · '}
+          <Link to="/privacy" target="_blank" className="hover:text-foreground transition-colors">Privacidad</Link>
+        </p>
       </div>
     </div>
   )

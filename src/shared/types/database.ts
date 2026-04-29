@@ -36,6 +36,8 @@ export type Database = {
           workshop_id: string
           display_name: string | null
           onboarded_at: string | null
+          terms_accepted_at: string | null
+          privacy_accepted_at: string | null
           created_at: string
         }
         Insert: {
@@ -43,6 +45,8 @@ export type Database = {
           workshop_id: string
           display_name?: string | null
           onboarded_at?: string | null
+          terms_accepted_at?: string | null
+          privacy_accepted_at?: string | null
           created_at?: string
         }
         Update: {
@@ -50,6 +54,8 @@ export type Database = {
           workshop_id?: string
           display_name?: string | null
           onboarded_at?: string | null
+          terms_accepted_at?: string | null
+          privacy_accepted_at?: string | null
           created_at?: string
         }
         Relationships: [
@@ -210,6 +216,7 @@ export type Database = {
       recipe_items: {
         Row: {
           id: string
+          workshop_id: string
           furniture_template_id: string
           material_id: string
           quantity: number
@@ -218,6 +225,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          workshop_id?: string
           furniture_template_id: string
           material_id: string
           quantity: number
@@ -226,6 +234,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          workshop_id?: string
           furniture_template_id?: string
           material_id?: string
           quantity?: number
@@ -252,6 +261,7 @@ export type Database = {
       labor_items: {
         Row: {
           id: string
+          workshop_id: string
           furniture_template_id: string
           description: string
           hours: number
@@ -260,6 +270,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          workshop_id?: string
           furniture_template_id: string
           description: string
           hours: number
@@ -268,6 +279,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          workshop_id?: string
           furniture_template_id?: string
           description?: string
           hours?: number
@@ -428,6 +440,7 @@ export type Database = {
       quote_extras: {
         Row: {
           id: string
+          workshop_id: string
           quote_id: string
           description: string
           amount: number
@@ -436,6 +449,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          workshop_id?: string
           quote_id: string
           description: string
           amount?: number
@@ -444,6 +458,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          workshop_id?: string
           quote_id?: string
           description?: string
           amount?: number
@@ -463,6 +478,7 @@ export type Database = {
       quote_recipe_snapshots: {
         Row: {
           id: string
+          workshop_id: string
           quote_id: string
           material_id: string | null
           material_name: string
@@ -475,6 +491,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          workshop_id?: string
           quote_id: string
           material_id?: string | null
           material_name: string
@@ -487,6 +504,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          workshop_id?: string
           quote_id?: string
           material_id?: string | null
           material_name?: string
@@ -502,6 +520,7 @@ export type Database = {
       quote_labor_snapshots: {
         Row: {
           id: string
+          workshop_id: string
           quote_id: string
           description: string
           hours: number
@@ -510,6 +529,7 @@ export type Database = {
         }
         Insert: {
           id?: string
+          workshop_id?: string
           quote_id: string
           description: string
           hours: number
@@ -518,6 +538,7 @@ export type Database = {
         }
         Update: {
           id?: string
+          workshop_id?: string
           quote_id?: string
           description?: string
           hours?: number
