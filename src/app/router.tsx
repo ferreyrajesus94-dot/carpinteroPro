@@ -15,6 +15,14 @@ export const router = createBrowserRouter([
     lazy: () => import('@/features/onboarding/components/OnboardingWizard').then(m => ({ Component: m.OnboardingWizard })),
   },
   {
+    path: '/terms',
+    lazy: () => import('@/features/legal/pages/TermsPage').then(m => ({ Component: m.TermsPage })),
+  },
+  {
+    path: '/privacy',
+    lazy: () => import('@/features/legal/pages/PrivacyPage').then(m => ({ Component: m.PrivacyPage })),
+  },
+  {
     path: '/',
     element: <AppLayout />,
     errorElement: (
