@@ -225,7 +225,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          workshop_id: string
+          workshop_id?: string
           furniture_template_id: string
           material_id: string
           quantity: number
@@ -270,7 +270,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          workshop_id: string
+          workshop_id?: string
           furniture_template_id: string
           description: string
           hours: number
@@ -449,7 +449,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          workshop_id: string
+          workshop_id?: string
           quote_id: string
           description: string
           amount?: number
@@ -491,7 +491,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          workshop_id: string
+          workshop_id?: string
           quote_id: string
           material_id?: string | null
           material_name: string
@@ -529,7 +529,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          workshop_id: string
+          workshop_id?: string
           quote_id: string
           description: string
           hours: number

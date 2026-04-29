@@ -11,7 +11,7 @@ import { useWorkshopId } from './useWorkshopId'
 const mockUseAuth = vi.mocked(authProvider.useAuth)
 
 function makeAuthValue(workshopId: string | null) {
-  return { session: null, workshopId, loading: false, signOut: vi.fn() }
+  return { session: null, workshopId, onboardedAt: null, loading: false, signOut: vi.fn(), refreshProfile: vi.fn() }
 }
 
 describe('useWorkshopId', () => {
