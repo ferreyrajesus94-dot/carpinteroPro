@@ -6,10 +6,10 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
-import { useMaterials } from '@/features/inventory/hooks/useMaterials'
+import { useMaterials } from '@/shared/hooks/useMaterials'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useCreateFurnitureTemplate, useUpdateFurnitureTemplate } from '../hooks/useRecipes'
-import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
+import { useWorkshopSettings } from '@/shared/hooks/useWorkshopSettings'
 import { RecipeCostPreview } from './RecipeCostPreview'
 import { StockAlertBanner } from './StockAlertBanner'
 import { useStockCheck } from '../hooks/useStockCheck'
@@ -18,11 +18,19 @@ import { ExtraItemsSection } from './ExtraItemsSection'
 import { LaborItemsSection } from './LaborItemsSection'
 import type { FurnitureTemplateWithItems } from '../types'
 
+const cutPieceSchema = z.object({
+  name: z.string().optional(),
+  length_cm: z.coerce.number().min(0),
+  width_cm: z.coerce.number().min(0),
+  quantity: z.coerce.number().int().min(1),
+})
+
 const itemSchema = z.object({
   material_id: z.string().min(1, 'Seleccioná un material'),
-  quantity: z.coerce.number().positive('La cantidad debe ser mayor a 0'),
+  quantity: z.coerce.number().min(0),
   waste_pct: z.coerce.number().min(0).max(99).optional(),
   quantity_formula: z.string().optional(),
+  cut_pieces: z.array(cutPieceSchema).optional(),
 })
 
 const paramSchema = z.object({
@@ -94,7 +102,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
       photo_url: '',
       suggested_margin_pct: undefined,
       params: [],
-      wood_items: [],
+      wood_items: [] as { material_id: string; quantity: number; waste_pct?: number; quantity_formula?: string; cut_pieces?: { name?: string; length_cm: number; width_cm: number; quantity: number }[] }[],
       extra_items: [],
       labor_items: [],
     },
@@ -126,6 +134,12 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
           quantity: i.quantity,
           waste_pct: i.waste_pct,
           quantity_formula: i.quantity_formula ?? '',
+          cut_pieces: (i.cut_pieces ?? []).map((cp) => ({
+            name: cp.name ?? '',
+            length_cm: cp.length_cm,
+            width_cm: cp.width_cm,
+            quantity: cp.quantity,
+          })),
         }))
       const extraItems = template.recipe_items
         .filter((i) => i.material.category !== 'madera')
@@ -191,6 +205,14 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
         quantity: i.quantity,
         waste_pct: i.waste_pct ?? 0,
         quantity_formula: i.quantity_formula?.trim() || null,
+        cut_pieces: (i.cut_pieces ?? [])
+          .filter((cp) => cp.length_cm > 0 && cp.width_cm > 0 && cp.quantity > 0)
+          .map((cp) => ({
+            name: cp.name?.trim() || null,
+            length_cm: cp.length_cm,
+            width_cm: cp.width_cm,
+            quantity: cp.quantity,
+          })),
       })),
       ...values.extra_items.map((i) => ({
         material_id: i.material_id,

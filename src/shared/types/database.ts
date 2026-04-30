@@ -213,6 +213,47 @@ export type Database = {
         }
         Relationships: []
       }
+      cut_pieces: {
+        Row: {
+          id: string
+          recipe_item_id: string
+          workshop_id: string
+          name: string | null
+          length_cm: number
+          width_cm: number
+          quantity: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recipe_item_id: string
+          workshop_id?: string
+          name?: string | null
+          length_cm: number
+          width_cm: number
+          quantity?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recipe_item_id?: string
+          workshop_id?: string
+          name?: string | null
+          length_cm?: number
+          width_cm?: number
+          quantity?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'cut_pieces_recipe_item_id_fkey'
+            columns: ['recipe_item_id']
+            isOneToOne: false
+            referencedRelation: 'recipe_items'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       recipe_items: {
         Row: {
           id: string

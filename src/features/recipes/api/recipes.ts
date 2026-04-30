@@ -7,7 +7,14 @@ import type {
   LaborItemInsert,
 } from '../types'
 
-// Selección con JOIN: template + items de material + items de mano de obra
+type CutPieceDraft = {
+  name?: string | null
+  length_cm: number
+  width_cm: number
+  quantity: number
+}
+
+// Selección con JOIN: template + items de material + piezas de corte + items de mano de obra
 const RECIPE_SELECT = `
   *,
   recipe_items (
@@ -20,6 +27,9 @@ const RECIPE_SELECT = `
     material:materials (
       id, name, category, unit, price_per_unit,
       wood_subtype, length_cm, width_cm, thickness_cm
+    ),
+    cut_pieces (
+      id, name, length_cm, width_cm, quantity
     )
   ),
   labor_items (
@@ -47,8 +57,25 @@ export async function fetchFurnitureTemplate(id: string): Promise<FurnitureTempl
   return data as unknown as FurnitureTemplateWithItems
 }
 
-export type RecipeItemDraft = Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>
+export type RecipeItemDraft = Omit<RecipeItemInsert, 'id' | 'furniture_template_id'> & {
+  cut_pieces?: CutPieceDraft[]
+}
 export type LaborItemDraft = Omit<LaborItemInsert, 'id' | 'furniture_template_id' | 'created_at'>
+
+async function replaceCutPieces(recipeItemId: string, pieces: CutPieceDraft[]) {
+  const { error: delErr } = await supabase
+    .from('cut_pieces')
+    .delete()
+    .eq('recipe_item_id', recipeItemId)
+  if (delErr) throw delErr
+
+  if (pieces.length > 0) {
+    const { error } = await supabase
+      .from('cut_pieces')
+      .insert(pieces.map((p) => ({ ...p, recipe_item_id: recipeItemId })))
+    if (error) throw error
+  }
+}
 
 async function replaceLaborItems(templateId: string, laborItems: LaborItemDraft[]) {
   const { error: deleteError } = await supabase
@@ -78,10 +105,18 @@ export async function createFurnitureTemplate(
   if (error) throw error
 
   if (items.length > 0) {
-    const { error: itemsError } = await supabase
+    const { data: insertedItems, error: itemsError } = await supabase
       .from('recipe_items')
-      .insert(items.map((item) => ({ ...item, furniture_template_id: data.id })))
+      .insert(items.map(({ cut_pieces: _cp, ...item }) => ({ ...item, furniture_template_id: data.id })))
+      .select('id')
     if (itemsError) throw itemsError
+
+    for (let i = 0; i < (insertedItems ?? []).length; i++) {
+      const cp = items[i].cut_pieces
+      if (cp && cp.length > 0) {
+        await replaceCutPieces(insertedItems![i].id, cp)
+      }
+    }
   }
 
   if (laborItems.length > 0) {
@@ -110,10 +145,18 @@ export async function updateFurnitureTemplate(
   if (deleteError) throw deleteError
 
   if (items.length > 0) {
-    const { error: insertError } = await supabase
+    const { data: insertedItems, error: insertError } = await supabase
       .from('recipe_items')
-      .insert(items.map((item) => ({ ...item, furniture_template_id: id })))
+      .insert(items.map(({ cut_pieces: _cp, ...item }) => ({ ...item, furniture_template_id: id })))
+      .select('id')
     if (insertError) throw insertError
+
+    for (let i = 0; i < (insertedItems ?? []).length; i++) {
+      const cp = items[i].cut_pieces
+      if (cp && cp.length > 0) {
+        await replaceCutPieces(insertedItems![i].id, cp)
+      }
+    }
   }
 
   await replaceLaborItems(id, laborItems)
@@ -144,6 +187,12 @@ export async function duplicateFurnitureTemplate(id: string): Promise<string> {
       quantity: it.quantity,
       waste_pct: it.waste_pct,
       quantity_formula: it.quantity_formula ?? null,
+      cut_pieces: (it.cut_pieces ?? []).map((cp) => ({
+        name: cp.name,
+        length_cm: cp.length_cm,
+        width_cm: cp.width_cm,
+        quantity: cp.quantity,
+      })),
     })),
     (labor_items ?? []).map((l) => ({
       description: l.description,

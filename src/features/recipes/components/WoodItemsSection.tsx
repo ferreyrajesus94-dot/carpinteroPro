@@ -10,9 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 import { computeWoodUsage } from '../lib/computeWoodUsage'
+import { totalPieceAreaM2 } from '@/shared/lib/computeNesting'
 import { formatARS } from '@/shared/lib/utils'
+import { CutPiecesSection } from './CutPiecesSection'
+import type { CutPieceDraft } from './CutPiecesSection'
 
 function labelFor(mode: string, unit: string): string {
   if (mode === 'placa-pieces' || mode === 'placa-area') return 'Área (m²)'
@@ -33,11 +36,12 @@ function hintFor(u: { mode: string; piecesNeeded: number | null; pieceLabel: str
 }
 
 // Local form shape used by MuebleForm
-interface ItemValue {
+export interface ItemValue {
   material_id: string
   quantity: number
   waste_pct?: number
   quantity_formula?: string
+  cut_pieces?: CutPieceDraft[]
 }
 
 interface ParamValue {
@@ -95,10 +99,19 @@ export function WoodItemsSection({
       <h3 className="text-sm font-semibold">Maderas</h3>
       {fields.map((field, index) => {
         const mat = allMaterials.find((m) => m.id === woodItemsWatch[index]?.material_id)
-        const qty = Number(woodItemsWatch[index]?.quantity) || 0
+        const isPlaca = mat?.wood_subtype === 'placa' && mat?.unit === 'un'
+        const cutPieces = woodItemsWatch[index]?.cut_pieces ?? []
+        const hasCutPieces = isPlaca && cutPieces.length > 0
+
+        // Si hay piezas definidas, la cantidad se auto-calcula desde ellas
+        const qty = hasCutPieces
+          ? totalPieceAreaM2(cutPieces.filter((p) => p.length_cm > 0 && p.width_cm > 0 && p.quantity > 0))
+          : Number(woodItemsWatch[index]?.quantity) || 0
+
         const waste = Number(woodItemsWatch[index]?.waste_pct) || 0
         const qtyWithWaste = qty * (1 + waste / 100)
         const usage = mat ? computeWoodUsage(mat, qtyWithWaste) : null
+
         return (
           <div key={field.id} className="space-y-1">
             <div className="flex items-end gap-2">
@@ -123,23 +136,28 @@ export function WoodItemsSection({
                   </p>
                 )}
               </div>
-              <div className="w-24 space-y-1">
-                <Label className="text-xs text-muted-foreground">
-                  {usage ? labelFor(usage.mode, usage.inputUnitLabel) : 'Cantidad'}
-                </Label>
-                <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  {...register(`wood_items.${index}.quantity`)}
-                  placeholder="0"
-                />
-                {errors.wood_items?.[index]?.quantity && (
-                  <p className="text-destructive text-xs">
-                    {errors.wood_items[index]?.quantity?.message}
-                  </p>
-                )}
-              </div>
+
+              {/* Campo de cantidad: visible solo si NO hay piezas definidas */}
+              {!hasCutPieces && (
+                <div className="w-24 space-y-1">
+                  <Label className="text-xs text-muted-foreground">
+                    {usage ? labelFor(usage.mode, usage.inputUnitLabel) : 'Cantidad'}
+                  </Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    {...register(`wood_items.${index}.quantity`)}
+                    placeholder="0"
+                  />
+                  {errors.wood_items?.[index]?.quantity && (
+                    <p className="text-destructive text-xs">
+                      {errors.wood_items[index]?.quantity?.message}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="w-20 space-y-1">
                 <Label className="text-xs text-muted-foreground">Merma %</Label>
                 <Input
@@ -155,16 +173,38 @@ export function WoodItemsSection({
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
             </div>
+
             {usage && qty > 0 && usage.mode !== 'flat' && (
               <p className="text-xs text-muted-foreground pl-1">
-                {hintFor(usage)} · {formatARS(usage.subtotal)}
+                {hasCutPieces
+                  ? `${qty.toFixed(3)} m² calculado desde piezas`
+                  : hintFor(usage)}{' '}
+                · {formatARS(usage.subtotal)}
               </p>
             )}
+
             <Input
               className="text-xs"
               placeholder="Fórmula opcional (ej: largo_cm / 100)"
               {...register(`wood_items.${index}.quantity_formula` as const)}
             />
+
+            {/* Sección de piezas a cortar: solo para placas con unidad 'un' */}
+            {isPlaca && (
+              <CutPiecesSection
+                pieces={cutPieces}
+                boardLength={mat?.length_cm ?? null}
+                boardWidth={mat?.width_cm ?? null}
+                onChange={(newPieces) => {
+                  setValue(`wood_items.${index}.cut_pieces`, newPieces)
+                  // Sincronizar cantidad con el área total de las piezas
+                  const area = totalPieceAreaM2(
+                    newPieces.filter((p) => p.length_cm > 0 && p.width_cm > 0 && p.quantity > 0),
+                  )
+                  if (area > 0) setValue(`wood_items.${index}.quantity`, area)
+                }}
+              />
+            )}
           </div>
         )
       })}
@@ -172,7 +212,7 @@ export function WoodItemsSection({
         type="button"
         variant="outline"
         size="sm"
-        onClick={() => onAppend({ material_id: '', quantity: 0, waste_pct: 0, quantity_formula: '' })}
+        onClick={() => onAppend({ material_id: '', quantity: 0, waste_pct: 0, quantity_formula: '', cut_pieces: [] })}
         disabled={woodMaterials.length === 0}
       >
         <Plus className="h-4 w-4 mr-1" />
