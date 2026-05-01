@@ -4,6 +4,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement } from 'react'
 import type { QuoteWithExtras } from '../types'
 
+vi.mock('../api/stockDiscount', () => ({
+  maybeAutoDiscountStock: vi.fn().mockResolvedValue({ ok: 0, errors: [] }),
+}))
+
 vi.mock('../api/quotes', () => ({
   fetchQuotes: vi.fn(),
   fetchQuote: vi.fn(),
@@ -173,7 +177,7 @@ describe('useCreateQuote', () => {
 
     await act(() => result.current.mutateAsync(payload))
 
-    expect(quotesApi.createQuote).toHaveBeenCalledWith(payload.quote, payload.extras)
+    expect(quotesApi.createQuote).toHaveBeenCalledWith(payload.quote, payload.extras, [], [])
   })
 
   it('sets isError when API fails', async () => {
@@ -231,6 +235,8 @@ describe('useUpdateQuote', () => {
     expect(quotesApi.updateQuote).toHaveBeenCalledWith(
       'q-1',
       { status: 'enviado' },
+      [],
+      [],
       []
     )
   })
@@ -250,7 +256,7 @@ describe('useUpdateQuote', () => {
       result.current.mutateAsync({ id: 'q-1', quote: { margin_pct: 35 }, extras: newExtras })
     )
 
-    expect(quotesApi.updateQuote).toHaveBeenCalledWith('q-1', { margin_pct: 35 }, newExtras)
+    expect(quotesApi.updateQuote).toHaveBeenCalledWith('q-1', { margin_pct: 35 }, newExtras, [], [])
   })
 
   it('sets isError when API fails', async () => {

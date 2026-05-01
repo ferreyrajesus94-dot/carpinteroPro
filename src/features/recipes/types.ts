@@ -1,5 +1,5 @@
 import type { Database } from '@/shared/types/database'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 import { computeWoodUsage } from './lib/computeWoodUsage'
 import { safeEvalFormula } from './lib/evalFormula'
 
@@ -10,6 +10,8 @@ export type RecipeItem = Database['public']['Tables']['recipe_items']['Row']
 export type RecipeItemInsert = Database['public']['Tables']['recipe_items']['Insert']
 export type LaborItem = Database['public']['Tables']['labor_items']['Row']
 export type LaborItemInsert = Database['public']['Tables']['labor_items']['Insert']
+export type CutPiece = Database['public']['Tables']['cut_pieces']['Row']
+export type CutPieceInsert = Database['public']['Tables']['cut_pieces']['Insert']
 
 // RecipeItem enriquecido con datos del material (viene del JOIN en la API).
 // Para madera se incluyen las medidas porque el cálculo de costo las usa
@@ -21,6 +23,8 @@ export type RecipeItemWithMaterial = {
   quantity: number
   waste_pct: number
   quantity_formula?: string | null
+  /** Piezas a cortar definidas para este ítem (solo aplica a placa). */
+  cut_pieces?: Pick<CutPiece, 'id' | 'name' | 'length_cm' | 'width_cm' | 'quantity'>[]
   material: Pick<
     Material,
     | 'id'

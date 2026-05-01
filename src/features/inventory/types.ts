@@ -1,12 +1,8 @@
 import type { Database } from '@/shared/types/database'
+import type { MaterialCategory, UnitOfMeasure, WoodSubtype } from '@/shared/types/material'
 
-export type Material = Database['public']['Tables']['materials']['Row']
-export type MaterialInsert = Database['public']['Tables']['materials']['Insert']
-export type MaterialUpdate = Database['public']['Tables']['materials']['Update']
+export type { Material, MaterialInsert, MaterialUpdate, MaterialCategory, UnitOfMeasure, WoodSubtype } from '@/shared/types/material'
 export type PriceHistory = Database['public']['Tables']['price_history']['Row']
-export type MaterialCategory = Database['public']['Enums']['material_category']
-export type UnitOfMeasure = Database['public']['Enums']['unit_of_measure']
-export type WoodSubtype = Database['public']['Enums']['wood_subtype']
 
 export const WOOD_SUBTYPES: { value: WoodSubtype; label: string }[] = [
   { value: 'placa', label: 'Placa' },

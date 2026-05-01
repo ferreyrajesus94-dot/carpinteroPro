@@ -1,13 +1,23 @@
 import { formatARS } from '@/shared/lib/utils'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 import { computeWoodUsage } from '../lib/computeWoodUsage'
+import { computeNesting, totalPieceAreaM2 } from '@/shared/lib/computeNesting'
+import type { CutPieceInput } from '@/shared/lib/computeNesting'
 import { safeEvalFormula } from '../lib/evalFormula'
+
+interface CutPieceDraft {
+  name?: string | null
+  length_cm: number
+  width_cm: number
+  quantity: number
+}
 
 interface ItemDraft {
   material_id: string
   quantity: number
   waste_pct?: number
   quantity_formula?: string
+  cut_pieces?: CutPieceDraft[]
 }
 
 interface LaborDraft {
@@ -39,11 +49,32 @@ export function RecipeCostPreview({ woodItems, extraItems, laborItems = [], mate
   const woodLines = woodItems
     .map((item) => {
       const mat = materialMap.get(item.material_id)
-      const qty = resolveQty(item)
-      if (!mat || qty <= 0) return null
+      if (!mat) return null
+
+      const validPieces: CutPieceInput[] = (item.cut_pieces ?? []).filter(
+        (p) => p.length_cm > 0 && p.width_cm > 0 && p.quantity > 0,
+      )
+      const hasCutPieces = validPieces.length > 0
+
+      const qty = hasCutPieces
+        ? totalPieceAreaM2(validPieces)
+        : resolveQty(item)
+
+      if (qty <= 0) return null
+
       const waste = Number(item.waste_pct) || 0
       const qtyWithWaste = qty * (1 + waste / 100)
-      return { mat, qty, waste, usage: computeWoodUsage(mat, qtyWithWaste) }
+      const usage = computeWoodUsage(mat, qtyWithWaste)
+
+      const nesting =
+        hasCutPieces &&
+        mat.wood_subtype === 'placa' &&
+        mat.length_cm != null &&
+        mat.width_cm != null
+          ? computeNesting(validPieces, mat.length_cm, mat.width_cm)
+          : null
+
+      return { mat, qty, waste, usage, nesting, hasCutPieces, validPieces }
     })
     .filter((x): x is NonNullable<typeof x> => x !== null)
 
@@ -73,17 +104,34 @@ export function RecipeCostPreview({ woodItems, extraItems, laborItems = [], mate
       <h3 className="text-sm font-semibold text-muted-foreground">Costo estimado</h3>
 
       {woodLines.length > 0 && (
-        <div className="space-y-1 border-b pb-2">
-          {woodLines.map(({ mat, qty, waste, usage }) => (
-            <div key={mat.id} className="flex justify-between text-xs text-muted-foreground gap-2">
-              <span className="truncate">
-                {mat.name}: {formatNum(qty)} {usage.inputUnitLabel}
-                {waste > 0 && ` (+${waste}% merma)`}
-                {usage.piecesNeeded != null && (
-                  ` → ${usage.piecesNeeded} pieza${usage.piecesNeeded === 1 ? '' : 's'}`
-                )}
-              </span>
-              <span className="shrink-0">{formatARS(usage.subtotal)}</span>
+        <div className="space-y-1.5 border-b pb-2">
+          {woodLines.map(({ mat, qty, waste, usage, nesting, hasCutPieces, validPieces }) => (
+            <div key={mat.id} className="text-xs text-muted-foreground space-y-0.5">
+              <div className="flex justify-between gap-2">
+                <span className="truncate">
+                  {mat.name}: {formatNum(qty)} {usage.inputUnitLabel}
+                  {waste > 0 && ` (+${waste}% merma)`}
+                  {!hasCutPieces && usage.piecesNeeded != null && (
+                    ` → ${usage.piecesNeeded} pieza${usage.piecesNeeded === 1 ? '' : 's'}`
+                  )}
+                </span>
+                <span className="shrink-0">{formatARS(usage.subtotal)}</span>
+              </div>
+              {hasCutPieces && nesting && (
+                <p className="pl-2 text-foreground/70">
+                  {validPieces.reduce((s, p) => s + p.quantity, 0)} piezas cortadas
+                  {' → '}
+                  <span className="font-medium text-foreground">
+                    {nesting.boardsNeeded} placa{nesting.boardsNeeded !== 1 ? 's' : ''}
+                  </span>
+                  {' · '}{(nesting.efficiency * 100).toFixed(0)}% aprovechamiento
+                </p>
+              )}
+              {hasCutPieces && !nesting && (
+                <p className="pl-2">
+                  {validPieces.reduce((s, p) => s + p.quantity, 0)} piezas · sin medidas de placa para calcular nesting
+                </p>
+              )}
             </div>
           ))}
         </div>
