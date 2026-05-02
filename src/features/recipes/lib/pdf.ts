@@ -1,9 +1,9 @@
 import jsPDF from 'jspdf'
 import { formatARS } from '@/shared/lib/utils'
-import { computeRecipeCost } from '../types'
+import { computeRecipeCost } from '@/shared/lib/recipeCalc'
 import { computeWoodUsage } from './computeWoodUsage'
 import type { FurnitureTemplateWithItems } from '../types'
-import type { WorkshopSettings } from '@/features/quotes/types'
+import type { WorkshopSettings } from '@/shared/types/workshop'
 
 export interface TechnicalSheetData {
   template: FurnitureTemplateWithItems
@@ -148,6 +148,68 @@ export function generateTechnicalSheetPDF({ template, settings }: TechnicalSheet
     y += rowH
   }
 
+  // ── Despiece (cortes) ───────────────────────────────────────────
+  const pieces = (template.recipe_pieces ?? []).slice().sort((a, b) => a.sort_order - b.sort_order)
+
+  if (pieces.length > 0) {
+    y += 4
+    if (y > pageHeight - 40) {
+      doc.addPage()
+      y = margin
+    }
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Despiece (cortes)', margin, y)
+    y += 5
+
+    // Cabecera de tabla de despiece
+    const dPieceCol = margin
+    const dLargo = margin + 65
+    const dAncho = margin + 90
+    const dEsp = margin + 115
+    const dCant = margin + 140
+    const dMat = margin + 160
+
+    doc.setFillColor(245, 245, 245)
+    doc.rect(dPieceCol, y, contentWidth, rowH, 'F')
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Pieza', dPieceCol + 2, y + 4.8)
+    doc.text('Largo', dLargo, y + 4.8)
+    doc.text('Ancho', dAncho, y + 4.8)
+    doc.text('Esp.', dEsp, y + 4.8)
+    doc.text('Cant.', dCant, y + 4.8)
+    doc.text('Material', dMat, y + 4.8)
+    y += rowH
+
+    doc.setFont('helvetica', 'normal')
+    for (const p of pieces) {
+      if (y > pageHeight - 30) {
+        doc.addPage()
+        y = margin
+      }
+      const matName = p.material?.name ?? 'Sin material'
+      doc.text(p.piece_name, dPieceCol + 2, y + 4.8)
+      doc.text(`${Number(p.length_cm).toFixed(1)} cm`, dLargo, y + 4.8)
+      doc.text(`${Number(p.width_cm).toFixed(1)} cm`, dAncho, y + 4.8)
+      doc.text(p.thickness_mm != null ? `${Number(p.thickness_mm)} mm` : '—', dEsp, y + 4.8)
+      doc.text(String(p.quantity), dCant, y + 4.8)
+      doc.text(doc.splitTextToSize(matName, pageWidth - margin - dMat - 2)[0], dMat, y + 4.8)
+      doc.setDrawColor(230, 230, 230)
+      doc.line(dPieceCol, y + rowH, dPieceCol + contentWidth, y + rowH)
+      y += rowH
+    }
+  } else {
+    y += 4
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'italic')
+    doc.setTextColor(120, 120, 120)
+    doc.text('Despiece no cargado para este mueble.', margin, y)
+    doc.setTextColor(0, 0, 0)
+    doc.setFont('helvetica', 'normal')
+    y += 5
+  }
+
   // ── Mano de obra ────────────────────────────────────────────────
   const laborItems = template.labor_items ?? []
   if (laborItems.length > 0) {
@@ -211,4 +273,146 @@ export function generateTechnicalSheetPDF({ template, settings }: TechnicalSheet
   doc.text(formatARS(total), colSubtotal, y, { align: 'right' })
 
   doc.save(`ficha-${template.name.toLowerCase().replace(/\s+/g, '-')}.pdf`)
+}
+
+export function generateTemplateWorkshopSheetPDF({ template, settings }: TechnicalSheetData): void {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const margin = 15
+  const pageWidth = 210
+  const pageHeight = 297
+  const contentWidth = pageWidth - margin * 2
+  let y = margin
+
+  // Header
+  if (settings?.logo_url?.startsWith('data:')) {
+    try {
+      const imgFormat = settings.logo_url.includes('data:image/png') ? 'PNG' : 'JPEG'
+      doc.addImage(settings.logo_url, imgFormat, margin, y, 20, 20)
+    } catch (_) {}
+  }
+  doc.setFontSize(16)
+  doc.setFont('helvetica', 'bold')
+  doc.text(settings?.name ?? 'CarpinteroPro', margin + 25, y + 7)
+  doc.setFontSize(9)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(100, 100, 100)
+  if (settings?.phone) doc.text(settings.phone, margin + 25, y + 13)
+  if (settings?.address) doc.text(settings.address, margin + 25, y + 18)
+  doc.setTextColor(0, 0, 0)
+  y += 30
+
+  doc.setDrawColor(200, 200, 200)
+  doc.line(margin, y, pageWidth - margin, y)
+  y += 6
+
+  // Título
+  doc.setFontSize(14)
+  doc.setFont('helvetica', 'bold')
+  doc.text(`Hoja de taller — ${template.name}`, margin, y)
+  doc.setFontSize(10)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(100, 100, 100)
+  doc.text(new Date().toLocaleDateString('es-AR'), pageWidth - margin, y, { align: 'right' })
+  doc.setTextColor(0, 0, 0)
+  y += 8
+
+  // Metadata
+  doc.setFontSize(10)
+  const dims = [template.height_cm, template.width_cm, template.depth_cm]
+  if (dims.every((v) => v != null)) {
+    doc.setFont('helvetica', 'bold')
+    doc.text('Medidas:', margin, y)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`${template.height_cm} × ${template.width_cm} × ${template.depth_cm} cm (A×An×P)`, margin + 22, y)
+    y += 6
+  }
+  if (template.notes) {
+    doc.setFont('helvetica', 'bold')
+    doc.text('Notas:', margin, y)
+    doc.setFont('helvetica', 'normal')
+    const noteLines = doc.splitTextToSize(template.notes, contentWidth - 22)
+    doc.text(noteLines, margin + 22, y)
+    y += 6 * noteLines.length
+  }
+
+  y += 4
+  doc.setDrawColor(200, 200, 200)
+  doc.line(margin, y, pageWidth - margin, y)
+  y += 6
+
+  // Tabla de despiece
+  const pieces = (template.recipe_pieces ?? []).slice().sort((a, b) => a.sort_order - b.sort_order)
+
+  doc.setFontSize(12)
+  doc.setFont('helvetica', 'bold')
+  doc.text('Despiece (cortes a realizar)', margin, y)
+  y += 6
+
+  const rowH = 7
+  if (pieces.length === 0) {
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'italic')
+    doc.setTextColor(120, 120, 120)
+    doc.text('No hay despiece cargado para este mueble. Editá la plantilla para agregar las piezas.', margin, y)
+    doc.setTextColor(0, 0, 0)
+    doc.setFont('helvetica', 'normal')
+    y += 6
+  } else {
+    const dPieceCol = margin
+    const dLargo = margin + 70
+    const dAncho = margin + 100
+    const dEsp = margin + 130
+    const dCant = margin + 155
+
+    // Table header
+    doc.setFillColor(245, 245, 245)
+    doc.rect(dPieceCol, y, contentWidth, rowH, 'F')
+    doc.setFontSize(9)
+    doc.setFont('helvetica', 'bold')
+    doc.text('Pieza', dPieceCol + 2, y + 4.8)
+    doc.text('Largo', dLargo, y + 4.8)
+    doc.text('Ancho', dAncho, y + 4.8)
+    doc.text('Esp.', dEsp, y + 4.8)
+    doc.text('Cant.', dCant, y + 4.8)
+    y += rowH
+
+    // Group pieces by material
+    const groups = new Map<string, typeof pieces>()
+    for (const p of pieces) {
+      const key = p.material?.name ?? 'Sin material asignado'
+      if (!groups.has(key)) groups.set(key, [])
+      groups.get(key)!.push(p)
+    }
+
+    doc.setFont('helvetica', 'normal')
+    for (const [matName, groupPieces] of groups) {
+      // Material group header
+      if (y > pageHeight - 30) { doc.addPage(); y = margin }
+      doc.setFillColor(230, 240, 255)
+      doc.rect(dPieceCol, y, contentWidth, rowH - 1, 'F')
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bolditalic')
+      doc.setTextColor(50, 80, 160)
+      doc.text(matName, dPieceCol + 2, y + 4)
+      doc.setTextColor(0, 0, 0)
+      doc.setFont('helvetica', 'normal')
+      y += rowH
+
+      // Pieces in this group
+      doc.setFontSize(9)
+      for (const p of groupPieces) {
+        if (y > pageHeight - 30) { doc.addPage(); y = margin }
+        doc.text(p.piece_name, dPieceCol + 4, y + 4.8)
+        doc.text(`${Number(p.length_cm).toFixed(1)} cm`, dLargo, y + 4.8)
+        doc.text(`${Number(p.width_cm).toFixed(1)} cm`, dAncho, y + 4.8)
+        doc.text(p.thickness_mm != null ? `${Number(p.thickness_mm)} mm` : '—', dEsp, y + 4.8)
+        doc.text(String(p.quantity), dCant, y + 4.8)
+        doc.setDrawColor(230, 230, 230)
+        doc.line(dPieceCol, y + rowH, dPieceCol + contentWidth, y + rowH)
+        y += rowH
+      }
+    }
+  }
+
+  doc.save(`taller-${template.name.toLowerCase().replace(/\s+/g, '-')}.pdf`)
 }

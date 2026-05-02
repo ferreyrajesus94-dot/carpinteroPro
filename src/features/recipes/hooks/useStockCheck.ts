@@ -1,5 +1,5 @@
-import { useMaterials } from '@/features/inventory/hooks/useMaterials'
-import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
+import { useMaterials } from '@/shared/hooks/useMaterials'
+import { useWorkshopSettings } from '@/shared/hooks/useWorkshopSettings'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { computeStockShortages, type StockCheckItem, type StockShortage } from '../lib/stockCheck'
 

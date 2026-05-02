@@ -1,54 +1,20 @@
 import { supabase } from '@/shared/lib/supabase'
+import { fetchFurnitureTemplate } from '@/shared/api/furnitureTemplates'
 import type {
   FurnitureTemplateInsert,
   FurnitureTemplateUpdate,
   FurnitureTemplateWithItems,
   RecipeItemInsert,
   LaborItemInsert,
+  RecipePieceInsert,
 } from '../types'
-
-// Selección con JOIN: template + items de material + items de mano de obra
-const RECIPE_SELECT = `
-  *,
-  recipe_items (
-    id,
-    furniture_template_id,
-    material_id,
-    quantity,
-    waste_pct,
-    quantity_formula,
-    material:materials (
-      id, name, category, unit, price_per_unit,
-      wood_subtype, length_cm, width_cm, thickness_cm
-    )
-  ),
-  labor_items (
-    id, furniture_template_id, description, hours, rate, created_at
-  )
-` as const
-
-export async function fetchFurnitureTemplates(workshopId: string): Promise<FurnitureTemplateWithItems[]> {
-  const { data, error } = await supabase
-    .from('furniture_templates')
-    .select(RECIPE_SELECT)
-    .eq('workshop_id', workshopId)
-    .order('name')
-  if (error) throw error
-  return (data ?? []) as unknown as FurnitureTemplateWithItems[]
-}
-
-export async function fetchFurnitureTemplate(id: string): Promise<FurnitureTemplateWithItems> {
-  const { data, error } = await supabase
-    .from('furniture_templates')
-    .select(RECIPE_SELECT)
-    .eq('id', id)
-    .single()
-  if (error) throw error
-  return data as unknown as FurnitureTemplateWithItems
-}
 
 export type RecipeItemDraft = Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>
 export type LaborItemDraft = Omit<LaborItemInsert, 'id' | 'furniture_template_id' | 'created_at'>
+export type RecipePieceDraft = Omit<
+  RecipePieceInsert,
+  'id' | 'furniture_template_id' | 'workshop_id' | 'created_at' | 'updated_at'
+>
 
 async function replaceLaborItems(templateId: string, laborItems: LaborItemDraft[]) {
   const { error: deleteError } = await supabase
@@ -65,10 +31,32 @@ async function replaceLaborItems(templateId: string, laborItems: LaborItemDraft[
   }
 }
 
+async function replaceRecipePieces(templateId: string, pieces: RecipePieceDraft[]) {
+  const { error: deleteError } = await supabase
+    .from('recipe_pieces')
+    .delete()
+    .eq('furniture_template_id', templateId)
+  if (deleteError) throw deleteError
+
+  if (pieces.length > 0) {
+    const { error } = await supabase
+      .from('recipe_pieces')
+      .insert(
+        pieces.map((p, idx) => ({
+          ...p,
+          furniture_template_id: templateId,
+          sort_order: p.sort_order ?? idx,
+        }))
+      )
+    if (error) throw error
+  }
+}
+
 export async function createFurnitureTemplate(
   template: Omit<FurnitureTemplateInsert, 'id' | 'created_at' | 'updated_at'>,
   items: RecipeItemDraft[],
-  laborItems: LaborItemDraft[] = []
+  laborItems: LaborItemDraft[] = [],
+  pieces: RecipePieceDraft[] = []
 ): Promise<string> {
   const { data, error } = await supabase
     .from('furniture_templates')
@@ -88,6 +76,8 @@ export async function createFurnitureTemplate(
     await replaceLaborItems(data.id, laborItems)
   }
 
+  await replaceRecipePieces(data.id, pieces)
+
   return data.id
 }
 
@@ -95,7 +85,8 @@ export async function updateFurnitureTemplate(
   id: string,
   template: FurnitureTemplateUpdate,
   items: RecipeItemDraft[],
-  laborItems: LaborItemDraft[] = []
+  laborItems: LaborItemDraft[] = [],
+  pieces: RecipePieceDraft[] = []
 ): Promise<void> {
   const { error } = await supabase
     .from('furniture_templates')
@@ -117,6 +108,7 @@ export async function updateFurnitureTemplate(
   }
 
   await replaceLaborItems(id, laborItems)
+  await replaceRecipePieces(id, pieces)
 }
 
 export async function deleteFurnitureTemplate(id: string): Promise<void> {
@@ -135,6 +127,7 @@ export async function duplicateFurnitureTemplate(id: string): Promise<string> {
     updated_at: _u,
     recipe_items,
     labor_items,
+    recipe_pieces,
     ...rest
   } = original
   return createFurnitureTemplate(
@@ -149,6 +142,16 @@ export async function duplicateFurnitureTemplate(id: string): Promise<string> {
       description: l.description,
       hours: l.hours,
       rate: l.rate,
+    })),
+    (recipe_pieces ?? []).map((p) => ({
+      material_id: p.material_id,
+      piece_name: p.piece_name,
+      length_cm: p.length_cm,
+      width_cm: p.width_cm,
+      thickness_mm: p.thickness_mm,
+      quantity: p.quantity,
+      notes: p.notes,
+      sort_order: p.sort_order,
     }))
   )
 }

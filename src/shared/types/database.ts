@@ -258,6 +258,69 @@ export type Database = {
           }
         ]
       }
+      recipe_pieces: {
+        Row: {
+          id: string
+          workshop_id: string
+          furniture_template_id: string
+          material_id: string | null
+          piece_name: string
+          length_cm: number
+          width_cm: number
+          thickness_mm: number | null
+          quantity: number
+          notes: string | null
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          workshop_id?: string
+          furniture_template_id: string
+          material_id?: string | null
+          piece_name: string
+          length_cm: number
+          width_cm: number
+          thickness_mm?: number | null
+          quantity?: number
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          workshop_id?: string
+          furniture_template_id?: string
+          material_id?: string | null
+          piece_name?: string
+          length_cm?: number
+          width_cm?: number
+          thickness_mm?: number | null
+          quantity?: number
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'recipe_pieces_furniture_template_id_fkey'
+            columns: ['furniture_template_id']
+            isOneToOne: false
+            referencedRelation: 'furniture_templates'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'recipe_pieces_material_id_fkey'
+            columns: ['material_id']
+            isOneToOne: false
+            referencedRelation: 'materials'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       labor_items: {
         Row: {
           id: string
@@ -513,6 +576,51 @@ export type Database = {
           quantity?: number
           waste_pct?: number
           price_per_unit?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      quote_piece_snapshots: {
+        Row: {
+          id: string
+          workshop_id: string
+          quote_id: string
+          piece_name: string
+          length_cm: number
+          width_cm: number
+          thickness_mm: number | null
+          material_name: string | null
+          quantity: number
+          notes: string | null
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workshop_id?: string
+          quote_id: string
+          piece_name: string
+          length_cm: number
+          width_cm: number
+          thickness_mm?: number | null
+          material_name?: string | null
+          quantity?: number
+          notes?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workshop_id?: string
+          quote_id?: string
+          piece_name?: string
+          length_cm?: number
+          width_cm?: number
+          thickness_mm?: number | null
+          material_name?: string | null
+          quantity?: number
+          notes?: string | null
+          sort_order?: number
           created_at?: string
         }
         Relationships: []

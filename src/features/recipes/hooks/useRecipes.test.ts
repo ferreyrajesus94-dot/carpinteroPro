@@ -62,6 +62,7 @@ const MOCK_TEMPLATE: FurnitureTemplateWithItems = {
     },
   ],
   labor_items: [],
+  recipe_pieces: [],
   params: [],
 }
 
@@ -162,6 +163,7 @@ describe('useCreateFurnitureTemplate', () => {
     expect(recipesApi.createFurnitureTemplate).toHaveBeenCalledWith(
       payload.template,
       payload.items,
+      undefined,
       undefined
     )
   })
@@ -211,6 +213,7 @@ describe('useUpdateFurnitureTemplate', () => {
       TEMPLATE_ID,
       payload.template,
       payload.items,
+      undefined,
       undefined
     )
   })

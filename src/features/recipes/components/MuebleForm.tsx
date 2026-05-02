@@ -6,16 +6,17 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
-import { useMaterials } from '@/features/inventory/hooks/useMaterials'
+import { useMaterials } from '@/shared/hooks/useMaterials'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useCreateFurnitureTemplate, useUpdateFurnitureTemplate } from '../hooks/useRecipes'
-import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
+import { useWorkshopSettings } from '@/shared/hooks/useWorkshopSettings'
 import { RecipeCostPreview } from './RecipeCostPreview'
 import { StockAlertBanner } from './StockAlertBanner'
 import { useStockCheck } from '../hooks/useStockCheck'
 import { WoodItemsSection } from './WoodItemsSection'
 import { ExtraItemsSection } from './ExtraItemsSection'
 import { LaborItemsSection } from './LaborItemsSection'
+import { PiecesSection } from './PiecesSection'
 import type { FurnitureTemplateWithItems } from '../types'
 
 const itemSchema = z.object({
@@ -36,6 +37,16 @@ const laborSchema = z.object({
   rate: z.coerce.number().min(0, 'Tarifa ≥ 0'),
 })
 
+const pieceSchema = z.object({
+  material_id: z.string().nullable().optional(),
+  piece_name: z.string().min(1, 'Nombre obligatorio'),
+  length_cm: z.coerce.number().positive('Largo > 0'),
+  width_cm: z.coerce.number().positive('Ancho > 0'),
+  thickness_mm: z.coerce.number().nullable().optional(),
+  quantity: z.coerce.number().int().positive('Cantidad ≥ 1'),
+  notes: z.string().nullable().optional(),
+})
+
 const muebleSchema = z.object({
   name: z.string().min(1, 'El nombre es obligatorio').max(120),
   notes: z.string().optional(),
@@ -50,6 +61,7 @@ const muebleSchema = z.object({
   wood_items: z.array(itemSchema),
   extra_items: z.array(itemSchema),
   labor_items: z.array(laborSchema),
+  pieces: z.array(pieceSchema),
 })
 
 type FormValues = z.infer<typeof muebleSchema>
@@ -97,6 +109,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
       wood_items: [],
       extra_items: [],
       labor_items: [],
+      pieces: [],
     },
   })
 
@@ -115,6 +128,10 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
   const { fields: laborFields, append: appendLabor, remove: removeLabor } = useFieldArray({
     control,
     name: 'labor_items',
+  })
+  const { fields: pieceFields, append: appendPiece, remove: removePiece } = useFieldArray({
+    control,
+    name: 'pieces',
   })
 
   useEffect(() => {
@@ -140,6 +157,18 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
         hours: l.hours,
         rate: l.rate,
       }))
+      const pieces = (template.recipe_pieces ?? [])
+        .slice()
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((p) => ({
+          material_id: p.material_id ?? null,
+          piece_name: p.piece_name,
+          length_cm: p.length_cm,
+          width_cm: p.width_cm,
+          thickness_mm: p.thickness_mm ?? null,
+          quantity: p.quantity,
+          notes: p.notes ?? '',
+        }))
 
       reset({
         name: template.name,
@@ -155,6 +184,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
         wood_items: woodItems,
         extra_items: extraItems,
         labor_items: laborItems,
+        pieces,
       })
     }
   }, [template, reset])
@@ -162,6 +192,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
   const woodItemsWatch = watch('wood_items')
   const extraItemsWatch = watch('extra_items')
   const laborItemsWatch = watch('labor_items')
+  const piecesWatch = watch('pieces')
   const photoUrlWatch = watch('photo_url')
   const suggestedMarginWatch = watch('suggested_margin_pct')
   const paramsWatch = watch('params')
@@ -205,6 +236,17 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
       rate: l.rate,
     }))
 
+    const pieces = values.pieces.map((p, idx) => ({
+      material_id: p.material_id?.toString().trim() ? p.material_id : null,
+      piece_name: p.piece_name,
+      length_cm: p.length_cm,
+      width_cm: p.width_cm,
+      thickness_mm: p.thickness_mm ?? null,
+      quantity: p.quantity,
+      notes: p.notes?.toString().trim() || null,
+      sort_order: idx,
+    }))
+
     const tags = (values.tags_csv ?? '')
       .split(',')
       .map((t) => t.trim())
@@ -215,9 +257,9 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
       notes: values.notes || null,
       category: values.category?.trim() || null,
       tags,
-      height_cm: values.height_cm ?? null,
-      width_cm: values.width_cm ?? null,
-      depth_cm: values.depth_cm ?? null,
+      height_cm: values.height_cm || null,
+      width_cm: values.width_cm || null,
+      depth_cm: values.depth_cm || null,
       photo_url: values.photo_url || null,
       suggested_margin_pct: values.suggested_margin_pct ?? null,
       params: values.params.map((p) => ({ name: p.name, default: p.default })),
@@ -229,12 +271,14 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
         template: baseFields,
         items,
         laborItems,
+        pieces,
       })
     } else {
       await createMutation.mutateAsync({
         template: { ...baseFields, workshop_id: workshopId },
         items,
         laborItems,
+        pieces,
       })
     }
     onSuccess()
@@ -378,6 +422,16 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
         onAppend={appendLabor}
         onRemove={removeLabor}
         defaultRate={defaultLaborRate}
+      />
+
+      <PiecesSection
+        fields={pieceFields}
+        piecesWatch={piecesWatch}
+        materials={allMaterials}
+        register={register}
+        errors={errors}
+        onAppend={appendPiece}
+        onRemove={removePiece}
       />
 
       <StockAlertBanner check={stockCheck} showOk />

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Trash2, Copy, FileText, Search, AlertTriangle, FileDown, Package } from 'lucide-react'
+import { Pencil, Trash2, Copy, FileText, Search, AlertTriangle, FileDown, Package, ClipboardList } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import {
@@ -22,13 +22,14 @@ import {
 } from '../hooks/useRecipes'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
-import { useMaterials } from '@/features/inventory/hooks/useMaterials'
-import { useAllPriceHistory } from '@/features/inventory/hooks/useAllPriceHistory'
-import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
+import { useMaterials } from '@/shared/hooks/useMaterials'
+import { useAllPriceHistory } from '@/shared/hooks/useAllPriceHistory'
+import { useWorkshopSettings } from '@/shared/hooks/useWorkshopSettings'
 import { FurnitureCostSparkline } from './FurnitureCostSparkline'
+import { WorkshopSheetPreview } from './WorkshopSheetPreview'
 import { computeStockShortages } from '../lib/stockCheck'
 import { generateTechnicalSheetPDF } from '../lib/pdf'
-import { computeRecipeCost } from '../types'
+import { computeRecipeCost } from '@/shared/lib/recipeCalc'
 import { formatARS } from '@/shared/lib/utils'
 import type { FurnitureTemplateWithItems } from '../types'
 
@@ -48,6 +49,7 @@ export function MuebleList({ onEdit }: MuebleListProps) {
   const deleteMutation = useDeleteFurnitureTemplate(workshopId)
   const duplicateMutation = useDuplicateFurnitureTemplate(workshopId)
   const [deleteTarget, setDeleteTarget] = useState<FurnitureTemplateWithItems | null>(null)
+  const [workshopSheetTarget, setWorkshopSheetTarget] = useState<FurnitureTemplateWithItems | null>(null)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('__all__')
 
@@ -92,6 +94,15 @@ export function MuebleList({ onEdit }: MuebleListProps) {
 
   return (
     <>
+      {workshopSheetTarget && (
+        <WorkshopSheetPreview
+          template={workshopSheetTarget}
+          settings={settings ?? null}
+          open={workshopSheetTarget !== null}
+          onOpenChange={(open) => { if (!open) setWorkshopSheetTarget(null) }}
+        />
+      )}
+
       <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null) }}
@@ -233,8 +244,8 @@ export function MuebleList({ onEdit }: MuebleListProps) {
                   </Button>
                 </div>
 
-                {/* Additional actions dropdown */}
-                <div className="grid grid-cols-3 gap-1 mt-2">
+                {/* Additional actions */}
+                <div className="grid grid-cols-4 gap-1 mt-2">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -249,10 +260,19 @@ export function MuebleList({ onEdit }: MuebleListProps) {
                     variant="ghost"
                     size="icon"
                     onClick={() => generateTechnicalSheetPDF({ template, settings: settings ?? null })}
-                    title="Exportar PDF"
+                    title="Ficha técnica (con costos)"
                     className="h-8"
                   >
                     <FileDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setWorkshopSheetTarget(template)}
+                    title="Hoja de taller (cortes)"
+                    className="h-8"
+                  >
+                    <ClipboardList className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"

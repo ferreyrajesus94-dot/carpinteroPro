@@ -10,7 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
+import type { PieceFormValue } from './PiecesSection'
 
 // Local form shape used by MuebleForm
 interface ItemValue {
@@ -45,6 +46,7 @@ interface FormValues {
   wood_items: ItemValue[]
   extra_items: ItemValue[]
   labor_items: LaborValue[]
+  pieces: PieceFormValue[]
 }
 
 interface ExtraItemsSectionProps {

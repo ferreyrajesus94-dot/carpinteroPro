@@ -15,8 +15,8 @@ import {
 } from '@/shared/ui/select'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
-import { useFurnitureTemplates } from '@/features/recipes/hooks/useRecipes'
-import { computeRecipeCost, resolveItemQuantity } from '@/features/recipes/types'
+import { useFurnitureTemplates } from '@/shared/hooks/useFurnitureTemplates'
+import { computeRecipeCost, resolveItemQuantity } from '@/shared/lib/recipeCalc'
 import { useClients } from '../hooks/useClients'
 import { useQuote, useCreateQuote, useUpdateQuote, useGenerateQuoteNumber } from '../hooks/useQuotes'
 import { QUOTE_STATUS_LABELS, type QuoteStatus, type MarginMode, type QuoteFormValues } from '../types'
@@ -215,11 +215,26 @@ export function QuoteForm() {
           rate: l.rate,
         }))
       : []
+    const pieceSnapshots = tpl
+      ? (tpl.recipe_pieces ?? [])
+          .slice()
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map((p) => ({
+            piece_name: p.piece_name,
+            length_cm: p.length_cm,
+            width_cm: p.width_cm,
+            thickness_mm: p.thickness_mm,
+            material_name: p.material?.name ?? null,
+            quantity: p.quantity,
+            notes: p.notes,
+            sort_order: p.sort_order,
+          }))
+      : []
 
     if (isEditing && id) {
-      await updateMutation.mutateAsync({ id, quote: quoteData, extras: extrasData, recipeSnapshots, laborSnapshots })
+      await updateMutation.mutateAsync({ id, quote: quoteData, extras: extrasData, recipeSnapshots, laborSnapshots, pieceSnapshots })
     } else {
-      await createMutation.mutateAsync({ quote: quoteData, extras: extrasData, recipeSnapshots, laborSnapshots })
+      await createMutation.mutateAsync({ quote: quoteData, extras: extrasData, recipeSnapshots, laborSnapshots, pieceSnapshots })
     }
     navigate('/quotes')
   }

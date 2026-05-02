@@ -10,9 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 import { computeWoodUsage } from '../lib/computeWoodUsage'
 import { formatARS } from '@/shared/lib/utils'
+import type { PieceFormValue } from './PiecesSection'
 
 function labelFor(mode: string, unit: string): string {
   if (mode === 'placa-pieces' || mode === 'placa-area') return 'Área (m²)'
@@ -65,6 +66,7 @@ interface FormValues {
   wood_items: ItemValue[]
   extra_items: ItemValue[]
   labor_items: LaborValue[]
+  pieces: PieceFormValue[]
 }
 
 interface WoodItemsSectionProps {

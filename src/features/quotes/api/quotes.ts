@@ -1,4 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
+import { applyStockMovement } from '@/shared/api/stockMovements'
 import type {
   QuoteInsert,
   QuoteUpdate,
@@ -6,6 +7,7 @@ import type {
   QuoteWithExtras,
   QuoteRecipeSnapshotInsert,
   QuoteLaborSnapshotInsert,
+  QuotePieceSnapshotInsert,
 } from '../types'
 
 const QUOTE_SELECT = `
@@ -13,19 +15,23 @@ const QUOTE_SELECT = `
   client:clients (*),
   extras:quote_extras (*),
   recipe_snapshots:quote_recipe_snapshots (*),
-  labor_snapshots:quote_labor_snapshots (*)
+  labor_snapshots:quote_labor_snapshots (*),
+  piece_snapshots:quote_piece_snapshots (*)
 ` as const
 
 export type RecipeSnapshotInput = Omit<QuoteRecipeSnapshotInsert, 'id' | 'quote_id' | 'created_at'>
 export type LaborSnapshotInput = Omit<QuoteLaborSnapshotInsert, 'id' | 'quote_id' | 'created_at'>
+export type PieceSnapshotInput = Omit<QuotePieceSnapshotInsert, 'id' | 'quote_id' | 'workshop_id' | 'created_at'>
 
 async function replaceSnapshots(
   quoteId: string,
   recipeSnapshots: RecipeSnapshotInput[],
-  laborSnapshots: LaborSnapshotInput[]
+  laborSnapshots: LaborSnapshotInput[],
+  pieceSnapshots: PieceSnapshotInput[]
 ): Promise<void> {
   await supabase.from('quote_recipe_snapshots').delete().eq('quote_id', quoteId)
   await supabase.from('quote_labor_snapshots').delete().eq('quote_id', quoteId)
+  await supabase.from('quote_piece_snapshots').delete().eq('quote_id', quoteId)
 
   if (recipeSnapshots.length > 0) {
     const { error } = await supabase
@@ -37,6 +43,12 @@ async function replaceSnapshots(
     const { error } = await supabase
       .from('quote_labor_snapshots')
       .insert(laborSnapshots.map((s) => ({ ...s, quote_id: quoteId })))
+    if (error) throw error
+  }
+  if (pieceSnapshots.length > 0) {
+    const { error } = await supabase
+      .from('quote_piece_snapshots')
+      .insert(pieceSnapshots.map((s) => ({ ...s, quote_id: quoteId })))
     if (error) throw error
   }
 }
@@ -90,7 +102,8 @@ export async function createQuote(
   quote: Omit<QuoteInsert, 'id' | 'created_at' | 'updated_at'>,
   extras: Omit<QuoteExtraInsert, 'id' | 'quote_id'>[],
   recipeSnapshots: RecipeSnapshotInput[] = [],
-  laborSnapshots: LaborSnapshotInput[] = []
+  laborSnapshots: LaborSnapshotInput[] = [],
+  pieceSnapshots: PieceSnapshotInput[] = []
 ): Promise<string> {
   const { data, error } = await supabase
     .from('quotes')
@@ -106,7 +119,7 @@ export async function createQuote(
     if (extrasError) throw extrasError
   }
 
-  await replaceSnapshots(data.id, recipeSnapshots, laborSnapshots)
+  await replaceSnapshots(data.id, recipeSnapshots, laborSnapshots, pieceSnapshots)
 
   return data.id
 }
@@ -116,7 +129,8 @@ export async function updateQuote(
   quote: QuoteUpdate,
   extras: Omit<QuoteExtraInsert, 'id' | 'quote_id'>[],
   recipeSnapshots: RecipeSnapshotInput[] = [],
-  laborSnapshots: LaborSnapshotInput[] = []
+  laborSnapshots: LaborSnapshotInput[] = [],
+  pieceSnapshots: PieceSnapshotInput[] = []
 ): Promise<void> {
   const { error } = await supabase.from('quotes').update(quote).eq('id', id)
   if (error) throw error
@@ -134,10 +148,57 @@ export async function updateQuote(
     if (insertError) throw insertError
   }
 
-  await replaceSnapshots(id, recipeSnapshots, laborSnapshots)
+  await replaceSnapshots(id, recipeSnapshots, laborSnapshots, pieceSnapshots)
 }
 
 export async function deleteQuote(id: string): Promise<void> {
   const { error } = await supabase.from('quotes').delete().eq('id', id)
   if (error) throw error
+}
+
+export async function maybeAutoDiscountStock(
+  workshopId: string,
+  quoteId: string,
+  newStatus: string | null | undefined,
+): Promise<{ ok: number; errors: string[] }> {
+  if (newStatus !== 'aprobado') return { ok: 0, errors: [] }
+
+  const { data: prev } = await supabase
+    .from('quotes')
+    .select('status, furniture_template_id, quote_number')
+    .eq('id', quoteId)
+    .maybeSingle()
+  if (!prev || prev.status === 'aprobado' || !prev.furniture_template_id) return { ok: 0, errors: [] }
+
+  const { data: settings } = await supabase
+    .from('workshop_settings')
+    .select('auto_stock_discount')
+    .eq('workshop_id', workshopId)
+    .maybeSingle()
+  if (!settings?.auto_stock_discount) return { ok: 0, errors: [] }
+
+  const { data: items } = await supabase
+    .from('recipe_items')
+    .select('material_id, quantity')
+    .eq('furniture_template_id', prev.furniture_template_id)
+  if (!items || items.length === 0) return { ok: 0, errors: [] }
+
+  const note = `Aprobación presupuesto ${prev.quote_number ?? ''}`.trim()
+  let ok = 0
+  const errors: string[] = []
+  for (const it of items) {
+    try {
+      await applyStockMovement({
+        materialId: it.material_id,
+        delta: -Number(it.quantity),
+        reason: 'descuento_presupuesto',
+        note,
+        quoteId,
+      })
+      ok++
+    } catch (e) {
+      errors.push((e as Error).message)
+    }
+  }
+  return { ok, errors }
 }

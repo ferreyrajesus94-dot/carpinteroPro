@@ -1,8 +1,8 @@
 import type { Database } from '@/shared/types/database'
-import type { Client } from '@/features/crm/types'
+import type { Client } from '@/shared/types/client'
 
-export type { Client, ClientInsert, ClientUpdate, ClientSource } from '@/features/crm/types'
-export { CLIENT_SOURCE_LABELS } from '@/features/crm/types'
+export type { Client, ClientInsert, ClientUpdate, ClientSource } from '@/shared/types/client'
+export { CLIENT_SOURCE_LABELS } from '@/shared/types/client'
 
 export type Quote = Database['public']['Tables']['quotes']['Row']
 export type QuoteInsert = Database['public']['Tables']['quotes']['Insert']
@@ -17,14 +17,14 @@ export type ContractTemplate = Database['public']['Tables']['contract_templates'
 export type ContractTemplateInsert = Database['public']['Tables']['contract_templates']['Insert']
 export type ContractTemplateUpdate = Database['public']['Tables']['contract_templates']['Update']
 
-export type WorkshopSettings = Database['public']['Tables']['workshop_settings']['Row']
-export type WorkshopSettingsInsert = Database['public']['Tables']['workshop_settings']['Insert']
-export type WorkshopSettingsUpdate = Database['public']['Tables']['workshop_settings']['Update']
+export type { WorkshopSettings, WorkshopSettingsInsert, WorkshopSettingsUpdate } from '@/shared/types/workshop'
 
 export type QuoteRecipeSnapshot = Database['public']['Tables']['quote_recipe_snapshots']['Row']
 export type QuoteRecipeSnapshotInsert = Database['public']['Tables']['quote_recipe_snapshots']['Insert']
 export type QuoteLaborSnapshot = Database['public']['Tables']['quote_labor_snapshots']['Row']
 export type QuoteLaborSnapshotInsert = Database['public']['Tables']['quote_labor_snapshots']['Insert']
+export type QuotePieceSnapshot = Database['public']['Tables']['quote_piece_snapshots']['Row']
+export type QuotePieceSnapshotInsert = Database['public']['Tables']['quote_piece_snapshots']['Insert']
 
 // Quote completo con cliente y extras (viene del JOIN en la API)
 export type QuoteWithExtras = Quote & {
@@ -32,6 +32,7 @@ export type QuoteWithExtras = Quote & {
   client: Client | null
   recipe_snapshots?: QuoteRecipeSnapshot[]
   labor_snapshots?: QuoteLaborSnapshot[]
+  piece_snapshots?: QuotePieceSnapshot[]
 }
 
 export const QUOTE_STATUS_LABELS: Record<QuoteStatus, string> = {

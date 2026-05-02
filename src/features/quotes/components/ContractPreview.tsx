@@ -13,9 +13,9 @@ import {
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useQuote } from '../hooks/useQuotes'
 import { useContractTemplates } from '../hooks/useContractTemplates'
-import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
+import { useWorkshopSettings } from '@/shared/hooks/useWorkshopSettings'
 import { renderContract } from '../lib/contractRenderer'
-import { generateQuotePDF } from '../lib/pdf'
+import { generateQuotePDF, generateWorkshopSheetPDF } from '../lib/pdf'
 import { calculateQuote, type CalcExtra } from '../lib/calculator'
 import { formatCurrency } from '../types'
 import { format } from 'date-fns'
@@ -35,6 +35,11 @@ export function ContractPreview() {
   const defaultTemplate = templates.find((t) => t.is_default)
   const activeTemplateId = selectedTemplateId || defaultTemplate?.id || ''
   const activeTemplate = templates.find((t) => t.id === activeTemplateId)
+
+  useEffect(() => {
+    setEditedContract(null)
+    setIsEditing(false)
+  }, [activeTemplateId])
 
   if (!quote) return <div className="p-4 text-muted-foreground">Cargando...</div>
 
@@ -58,11 +63,6 @@ export function ContractPreview() {
     ? renderContract(activeTemplate.body_markdown, vars)
     : ''
   const renderedContract = editedContract ?? baseContract
-
-  useEffect(() => {
-    setEditedContract(null)
-    setIsEditing(false)
-  }, [activeTemplateId])
 
   function buildWhatsAppText(): string {
     const lines: string[] = [
@@ -103,6 +103,10 @@ export function ContractPreview() {
 
   function handleDownloadPDF() {
     generateQuotePDF({ quote: quote!, settings: settings ?? null })
+  }
+
+  function handleDownloadWorkshopSheet() {
+    generateWorkshopSheetPDF({ quote: quote!, settings: settings ?? null })
   }
 
   function markdownToHtml(md: string): string {
@@ -149,6 +153,10 @@ export function ContractPreview() {
         <Button onClick={handleDownloadPDF} variant="outline">
           <Download className="h-4 w-4 mr-2" />
           Descargar PDF
+        </Button>
+        <Button onClick={handleDownloadWorkshopSheet} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          Hoja de taller
         </Button>
         <Button onClick={handleCopy} variant="outline">
           <Copy className="h-4 w-4 mr-2" />

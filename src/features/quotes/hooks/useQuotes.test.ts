@@ -173,7 +173,7 @@ describe('useCreateQuote', () => {
 
     await act(() => result.current.mutateAsync(payload))
 
-    expect(quotesApi.createQuote).toHaveBeenCalledWith(payload.quote, payload.extras)
+    expect(quotesApi.createQuote).toHaveBeenCalledWith(payload.quote, payload.extras, undefined, undefined, undefined)
   })
 
   it('sets isError when API fails', async () => {
@@ -231,7 +231,10 @@ describe('useUpdateQuote', () => {
     expect(quotesApi.updateQuote).toHaveBeenCalledWith(
       'q-1',
       { status: 'enviado' },
-      []
+      [],
+      undefined,
+      undefined,
+      undefined
     )
   })
 
@@ -250,7 +253,7 @@ describe('useUpdateQuote', () => {
       result.current.mutateAsync({ id: 'q-1', quote: { margin_pct: 35 }, extras: newExtras })
     )
 
-    expect(quotesApi.updateQuote).toHaveBeenCalledWith('q-1', { margin_pct: 35 }, newExtras)
+    expect(quotesApi.updateQuote).toHaveBeenCalledWith('q-1', { margin_pct: 35 }, newExtras, undefined, undefined, undefined)
   })
 
   it('sets isError when API fails', async () => {

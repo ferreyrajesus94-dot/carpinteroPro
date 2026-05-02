@@ -4,6 +4,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { formatARS } from '@/shared/lib/utils'
+import type { PieceFormValue } from './PiecesSection'
 
 interface ItemValue {
   material_id: string
@@ -37,6 +38,7 @@ interface FormValues {
   wood_items: ItemValue[]
   extra_items: ItemValue[]
   labor_items: LaborValue[]
+  pieces: PieceFormValue[]
 }
 
 interface LaborItemsSectionProps {

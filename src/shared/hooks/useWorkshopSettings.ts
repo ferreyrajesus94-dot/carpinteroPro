@@ -1,0 +1,30 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import {
+  fetchWorkshopSettings,
+  upsertWorkshopSettings,
+} from '@/shared/api/workshopSettings'
+import type { WorkshopSettingsInsert } from '@/shared/api/workshopSettings'
+
+const SETTINGS_KEY = 'workshop_settings'
+
+export function useWorkshopSettings(workshopId: string) {
+  return useQuery({
+    queryKey: [SETTINGS_KEY, workshopId],
+    queryFn: () => fetchWorkshopSettings(workshopId),
+    enabled: Boolean(workshopId),
+  })
+}
+
+export function useUpsertWorkshopSettings(workshopId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (settings: Omit<WorkshopSettingsInsert, 'workshop_id'>) =>
+      upsertWorkshopSettings({ ...settings, workshop_id: workshopId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [SETTINGS_KEY, workshopId] })
+      toast.success('Configuración guardada')
+    },
+    onError: (error: Error) => toast.error(error.message),
+  })
+}

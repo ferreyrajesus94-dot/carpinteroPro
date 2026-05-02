@@ -203,7 +203,7 @@ export function AppLayout() {
           <button
             type="button"
             onClick={handleFab}
-            className="fixed left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-cp-accent px-5 text-[14px] font-medium text-[var(--cp-accent-ink)] shadow-xl transition-transform hover:scale-[1.02] active:scale-95 lg:hidden"
+            className="fixed right-4 z-30 flex h-12 items-center gap-2 rounded-full bg-cp-accent px-5 text-[14px] font-medium text-[var(--cp-accent-ink)] shadow-xl transition-transform hover:scale-[1.02] active:scale-95 lg:hidden"
             style={{ bottom: 'calc(72px + env(safe-area-inset-bottom) + 14px)' }}
           >
             <i className="fi fi-rr-plus text-sm leading-none" />

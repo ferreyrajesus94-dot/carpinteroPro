@@ -1,45 +1,30 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import {
-  fetchFurnitureTemplates,
-  fetchFurnitureTemplate,
   createFurnitureTemplate,
   updateFurnitureTemplate,
   deleteFurnitureTemplate,
   duplicateFurnitureTemplate,
   fetchTemplateUsageCounts,
+  type RecipePieceDraft,
 } from '../api/recipes'
 import type { FurnitureTemplateInsert, FurnitureTemplateUpdate, RecipeItemInsert, LaborItemInsert } from '../types'
+export { useFurnitureTemplates, useFurnitureTemplate } from '@/shared/hooks/useFurnitureTemplates'
 
 const TEMPLATES_KEY = 'furniture_templates'
-
-export function useFurnitureTemplates(workshopId: string) {
-  return useQuery({
-    queryKey: [TEMPLATES_KEY, workshopId],
-    queryFn: () => fetchFurnitureTemplates(workshopId),
-    enabled: Boolean(workshopId),
-  })
-}
-
-export function useFurnitureTemplate(id: string | null) {
-  return useQuery({
-    queryKey: [TEMPLATES_KEY, id],
-    queryFn: () => fetchFurnitureTemplate(id!),
-    enabled: Boolean(id),
-  })
-}
 
 interface CreatePayload {
   template: Omit<FurnitureTemplateInsert, 'id' | 'created_at' | 'updated_at'>
   items: Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>[]
   laborItems?: Omit<LaborItemInsert, 'id' | 'furniture_template_id' | 'created_at'>[]
+  pieces?: RecipePieceDraft[]
 }
 
 export function useCreateFurnitureTemplate(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ template, items, laborItems }: CreatePayload) =>
-      createFurnitureTemplate(template, items, laborItems),
+    mutationFn: ({ template, items, laborItems, pieces }: CreatePayload) =>
+      createFurnitureTemplate(template, items, laborItems, pieces),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
       toast.success('Mueble guardado')
@@ -53,13 +38,14 @@ interface UpdatePayload {
   template: FurnitureTemplateUpdate
   items: Omit<RecipeItemInsert, 'id' | 'furniture_template_id'>[]
   laborItems?: Omit<LaborItemInsert, 'id' | 'furniture_template_id' | 'created_at'>[]
+  pieces?: RecipePieceDraft[]
 }
 
 export function useUpdateFurnitureTemplate(workshopId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ id, template, items, laborItems }: UpdatePayload) =>
-      updateFurnitureTemplate(id, template, items, laborItems),
+    mutationFn: ({ id, template, items, laborItems, pieces }: UpdatePayload) =>
+      updateFurnitureTemplate(id, template, items, laborItems, pieces),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, workshopId] })
       queryClient.invalidateQueries({ queryKey: [TEMPLATES_KEY, variables.id] })
