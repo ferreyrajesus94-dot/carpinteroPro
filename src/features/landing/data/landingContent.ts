@@ -179,3 +179,56 @@ export const footerColumns: FooterColumn[] = [
 		],
 	},
 ];
+
+export type Testimonial = {
+	name: string;
+	role: string;
+	quote: string;
+};
+
+export type PainPoint = {
+	question: string;
+};
+
+export const testimonials: Testimonial[] = [
+	{
+		name: "Presupuesto profesional",
+		role: "Flujo esperado para talleres",
+		quote:
+			"Armá presupuestos claros en minutos, con materiales, mano de obra y margen listos para enviar.",
+	},
+	{
+		name: "Inventario ordenado",
+		role: "Control diario de materiales",
+		quote:
+			"Tené a mano costos, stock y alertas para no quedarte sin herrajes o placas a mitad de un trabajo.",
+	},
+	{
+		name: "Clientes y tareas",
+		role: "Seguimiento del pedido",
+		quote:
+			"Organizá contactos, estados y próximos pasos para saber qué responder y cuándo avanzar.",
+	},
+];
+
+export const painPoints: PainPoint[] = [
+	{
+		question:
+			"¿Calculás presupuestos a mano y después te das cuenta que te olvidaste un material?",
+	},
+	{
+		question:
+			"¿Te pasó que un cliente pidió un cambio y tuviste que recalcular todo desde cero?",
+	},
+	{
+		question:
+			"¿Perdiste un trabajo porque tardaste demasiado en mandar el presupuesto?",
+	},
+	{
+		question:
+			"¿Tenés mensajes de clientes en 5 chats distintos y no sabés cuál es cuál?",
+	},
+	{
+		question: "¿Alguna vez te quedaste sin un material a mitad de un mueble?",
+	},
+];
