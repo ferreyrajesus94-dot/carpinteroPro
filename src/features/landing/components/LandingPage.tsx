@@ -13,6 +13,7 @@ import { ComparisonSection } from "./ComparisonSection";
 import { ROICalculatorSection } from "./ROICalculatorSection";
 import { WalkthroughDemoSection } from "./WalkthroughDemoSection";
 import { InlineQuoteDemoSection } from "./InlineQuoteDemoSection";
+import { MobileFirstSection } from "./MobileFirstSection";
 import "./landing-visual-demos.css";
 import {
 	afterItems,
@@ -67,6 +68,8 @@ export function LandingPage() {
 				<WalkthroughDemoSection />
 
 				<InlineQuoteDemoSection />
+
+				<MobileFirstSection />
 
 				<LandingSection id="workflow" aria-label="Cómo funciona" variant="alt">
 					<div className="mb-12 text-center">
