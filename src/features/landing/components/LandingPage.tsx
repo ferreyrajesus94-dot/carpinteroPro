@@ -50,8 +50,8 @@ export function LandingPage() {
 							Todo lo que necesitás para gestionar tu taller
 						</h2>
 						<p className="mx-auto max-w-2xl text-base text-ink2">
-							Dejá de usar cuadernos, Excel y WhatsApp suelto. Una sola app
-							para todo.
+							Dejá de usar cuadernos, Excel y WhatsApp suelto. Una sola app para
+							todo.
 						</p>
 					</div>
 					<FeatureGrid features={features} />
