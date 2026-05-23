@@ -394,3 +394,166 @@
 		grid-template-columns: 1fr;
 	}
 }
+
+.landing-page .landing-demo-section-alt {
+	background: var(--bg-2);
+}
+
+.landing-page .landing-demo-container-narrow {
+	max-width: 34rem;
+}
+
+.landing-page .landing-walkthrough-steps,
+.landing-page .landing-walkthrough-actions {
+	display: flex;
+	gap: 0.5rem;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+.landing-page .landing-walkthrough-step {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	background: var(--surface);
+	padding: 0.45rem 0.75rem;
+	font-size: 0.8rem;
+	font-weight: 700;
+	color: var(--ink-3);
+}
+
+.landing-page .landing-walkthrough-step span {
+	display: grid;
+	width: 1.35rem;
+	height: 1.35rem;
+	place-items: center;
+	border-radius: 999px;
+	background: var(--line);
+	font-size: 0.7rem;
+}
+
+.landing-page .landing-walkthrough-step.is-active {
+	border-color: var(--cp-accent);
+	background: var(--cp-accent-soft);
+	color: var(--cp-accent);
+}
+
+.landing-page .landing-walkthrough-step.is-active span {
+	background: var(--cp-accent);
+	color: var(--cp-accent-ink);
+}
+
+.landing-page .landing-walkthrough-progress {
+	height: 0.25rem;
+	margin: 1rem 0;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--line);
+}
+
+.landing-page .landing-walkthrough-progress div {
+	height: 100%;
+	border-radius: inherit;
+	background: var(--cp-accent);
+	transition: width 0.45s ease;
+}
+
+.landing-page .landing-phone-frame {
+	overflow: hidden;
+	border: 3px solid var(--line-2);
+	border-radius: 1.5rem;
+	background: var(--surface);
+}
+
+.landing-page .landing-phone-notch {
+	width: 6rem;
+	height: 1.15rem;
+	margin: 0 auto;
+	border-radius: 0 0 0.9rem 0.9rem;
+	background: var(--line-2);
+}
+
+.landing-page .landing-walkthrough-screen {
+	min-height: 22rem;
+	animation: landing-fade-slide 0.35s ease both;
+}
+
+.landing-page .landing-walkthrough-topbar {
+	display: flex;
+	justify-content: space-between;
+	border-bottom: 1px solid var(--line);
+	padding: 0.75rem 1rem;
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.landing-page .landing-walkthrough-body {
+	padding: 1rem;
+}
+
+.landing-page .landing-walkthrough-instruction {
+	margin-bottom: 0.9rem;
+	font-weight: 700;
+	color: var(--ink);
+}
+
+.landing-page .landing-walkthrough-option,
+.landing-page .landing-walkthrough-row,
+.landing-page .landing-walkthrough-total {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	border-bottom: 1px solid var(--line);
+	padding: 0.65rem 0;
+	font-size: 0.82rem;
+}
+
+.landing-page .landing-walkthrough-option {
+	justify-content: flex-start;
+	border: 1px solid var(--line);
+	border-radius: 0.75rem;
+	padding: 0.75rem;
+	margin-bottom: 0.5rem;
+}
+
+.landing-page .landing-walkthrough-option small {
+	display: block;
+	color: var(--ink-3);
+}
+
+.landing-page .landing-walkthrough-option b {
+	margin-left: auto;
+	color: var(--cp-accent);
+}
+
+.landing-page .landing-walkthrough-option.is-selected {
+	border-color: var(--cp-accent);
+	background: var(--cp-accent-soft);
+}
+
+.landing-page .landing-walkthrough-total {
+	font-weight: 800;
+	color: var(--ink);
+}
+
+.landing-page .landing-positive {
+	color: var(--cp-success) !important;
+}
+
+@keyframes landing-fade-slide {
+	from { opacity: 0; transform: translateX(1rem); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.landing-page .landing-walkthrough-screen {
+		animation: none;
+	}
+
+	.landing-page .landing-walkthrough-progress div {
+		transition: none;
+	}
+}
