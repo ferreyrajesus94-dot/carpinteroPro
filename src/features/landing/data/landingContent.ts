@@ -232,3 +232,48 @@ export const painPoints: PainPoint[] = [
 		question: "¿Alguna vez te quedaste sin un material a mitad de un mueble?",
 	},
 ];
+
+export type BeforeAfterItem = {
+	text: string;
+	good?: boolean;
+};
+
+export type ComparisonRow = {
+	name: string;
+	vals: (boolean | string)[];
+};
+
+export const beforeItems: BeforeAfterItem[] = [
+	{ text: "Presupuestos en cuaderno o Excel" },
+	{ text: "Cálculos de materiales a ojo" },
+	{ text: "Clientes en contactos del celu" },
+	{ text: "Sin idea de cuánto facturás" },
+	{ text: "Presupuestos que tardan 30+ min" },
+];
+
+export const afterItems: BeforeAfterItem[] = [
+	{ text: "Presupuestos profesionales en PDF", good: true },
+	{ text: "Costos calculados con criterios consistentes", good: true },
+	{ text: "CRM con historial completo", good: true },
+	{ text: "Dashboard con métricas en vivo", good: true },
+	{ text: "Presupuestos listos en pocos minutos", good: true },
+];
+
+export const comparisonTools = [
+	"CarpinteroPro",
+	"Excel",
+	"Cuaderno",
+	"WhatsApp suelto",
+];
+
+export const comparisonRows: ComparisonRow[] = [
+	{ name: "Presupuestos profesionales", vals: [true, "~", false, false] },
+	{ name: "Cálculo automático de costos", vals: [true, "~", false, false] },
+	{ name: "Control de inventario", vals: [true, "~", false, false] },
+	{ name: "Envío por WhatsApp/PDF", vals: [true, false, false, "~"] },
+	{ name: "CRM de clientes", vals: [true, false, false, false] },
+	{ name: "Dashboard con métricas", vals: [true, false, false, false] },
+	{ name: "Funciona desde el celular", vals: [true, false, false, true] },
+	{ name: "Sin saber de tecnología", vals: [true, false, false, true] },
+	{ name: "Datos centralizados en la app", vals: [true, false, false, false] },
+];

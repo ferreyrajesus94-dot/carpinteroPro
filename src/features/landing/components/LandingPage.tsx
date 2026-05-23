@@ -8,7 +8,13 @@ import { PricingSection } from "./PricingSection";
 import { FaqSection } from "./FaqSection";
 import { SocialProofSection } from "./SocialProofSection";
 import { PainPointsSection } from "./PainPointsSection";
+import { BeforeAfterSection } from "./BeforeAfterSection";
+import { ComparisonSection } from "./ComparisonSection";
 import {
+	afterItems,
+	beforeItems,
+	comparisonRows,
+	comparisonTools,
 	faqs,
 	features,
 	footerColumns,
@@ -47,6 +53,10 @@ export function LandingPage() {
 				</LandingSection>
 
 				<PainPointsSection pains={painPoints} />
+
+				<BeforeAfterSection beforeItems={beforeItems} afterItems={afterItems} />
+
+				<ComparisonSection tools={comparisonTools} rows={comparisonRows} />
 
 				<LandingSection id="workflow" aria-label="Cómo funciona" variant="alt">
 					<div className="mb-12 text-center">
