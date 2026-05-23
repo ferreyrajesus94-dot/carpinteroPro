@@ -10,6 +10,7 @@ import { SocialProofSection } from "./SocialProofSection";
 import { PainPointsSection } from "./PainPointsSection";
 import { BeforeAfterSection } from "./BeforeAfterSection";
 import { ComparisonSection } from "./ComparisonSection";
+import { ROICalculatorSection } from "./ROICalculatorSection";
 import "./landing-visual-demos.css";
 import {
 	afterItems,
@@ -58,6 +59,8 @@ export function LandingPage() {
 				<BeforeAfterSection beforeItems={beforeItems} afterItems={afterItems} />
 
 				<ComparisonSection tools={comparisonTools} rows={comparisonRows} />
+
+				<ROICalculatorSection />
 
 				<LandingSection id="workflow" aria-label="Cómo funciona" variant="alt">
 					<div className="mb-12 text-center">
