@@ -89,7 +89,8 @@ export function OnboardingWizard() {
     try {
       const toCreate = SEED_MATERIALS.filter(m => selectedSeeds.has(m.name))
       for (const m of toCreate) {
-        const { description: _, ...mat } = m
+        const { description, ...mat } = m
+        void description
         await createMaterial.mutateAsync(mat)
       }
       setStep(3)

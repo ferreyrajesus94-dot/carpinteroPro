@@ -23,7 +23,7 @@ export function generateTechnicalSheetPDF({ template, settings }: TechnicalSheet
     try {
       const imgFormat = settings.logo_url.includes('data:image/png') ? 'PNG' : 'JPEG'
       doc.addImage(settings.logo_url, imgFormat, margin, y, 20, 20)
-    } catch (_) {
+    } catch {
       // logo inválido
     }
   }
@@ -63,7 +63,7 @@ export function generateTechnicalSheetPDF({ template, settings }: TechnicalSheet
     try {
       const fmt = template.photo_url.includes('data:image/png') ? 'PNG' : 'JPEG'
       doc.addImage(template.photo_url, fmt, margin, y, 35, 35)
-    } catch (_) {
+    } catch {
       // foto inválida
     }
   }

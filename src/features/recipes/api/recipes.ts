@@ -107,7 +107,10 @@ export async function createFurnitureTemplate(
   if (items.length > 0) {
     const { data: insertedItems, error: itemsError } = await supabase
       .from('recipe_items')
-      .insert(items.map(({ cut_pieces: _cp, ...item }) => ({ ...item, furniture_template_id: data.id })))
+      .insert(items.map(({ cut_pieces, ...item }) => {
+        void cut_pieces
+        return { ...item, furniture_template_id: data.id }
+      }))
       .select('id')
     if (itemsError) throw itemsError
 
@@ -147,7 +150,10 @@ export async function updateFurnitureTemplate(
   if (items.length > 0) {
     const { data: insertedItems, error: insertError } = await supabase
       .from('recipe_items')
-      .insert(items.map(({ cut_pieces: _cp, ...item }) => ({ ...item, furniture_template_id: id })))
+      .insert(items.map(({ cut_pieces, ...item }) => {
+        void cut_pieces
+        return { ...item, furniture_template_id: id }
+      }))
       .select('id')
     if (insertError) throw insertError
 
@@ -173,13 +179,16 @@ export async function deleteFurnitureTemplate(id: string): Promise<void> {
 export async function duplicateFurnitureTemplate(id: string): Promise<string> {
   const original = await fetchFurnitureTemplate(id)
   const {
-    id: _id,
-    created_at: _c,
-    updated_at: _u,
+    id: originalId,
+    created_at: createdAt,
+    updated_at: updatedAt,
     recipe_items,
     labor_items,
     ...rest
   } = original
+  void originalId
+  void createdAt
+  void updatedAt
   return createFurnitureTemplate(
     { ...rest, name: `${original.name} (copia)` },
     recipe_items.map((it) => ({

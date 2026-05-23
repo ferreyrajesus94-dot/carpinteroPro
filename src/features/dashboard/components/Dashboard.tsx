@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Clock, FileText, Package, Armchair, Users } from 'lucide-react'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
@@ -25,14 +25,28 @@ export function Dashboard() {
   const { data: quotes = [], isLoading } = useQuotes(workshopId)
   const { data: materials = [] } = useMaterials(workshopId)
   const [period, setPeriod] = useState<Period>('current_month')
+  const [staleQuotes, setStaleQuotes] = useState<typeof quotes>([])
   const stats = useDashboardStats(quotes, period)
 
+  useEffect(() => {
+    function updateStaleQuotes() {
+      const currentTime = Date.now()
+      setStaleQuotes(quotes.filter(q => {
+        if (q.status !== 'enviado') return false
+        const diffDays = (currentTime - new Date(q.created_at).getTime()) / 86_400_000
+        return diffDays > 5
+      }))
+    }
+
+    const timeoutId = window.setTimeout(updateStaleQuotes, 0)
+    const intervalId = window.setInterval(updateStaleQuotes, 60_000)
+    return () => {
+      window.clearTimeout(timeoutId)
+      window.clearInterval(intervalId)
+    }
+  }, [quotes])
+
   const lowStockMaterials = materials.filter(m => m.stock <= m.min_stock)
-  const staleQuotes = quotes.filter(q => {
-    if (q.status !== 'enviado') return false
-    const diffDays = (Date.now() - new Date(q.created_at).getTime()) / 86_400_000
-    return diffDays > 5
-  })
 
   const totalDist = stats.byStatus.reduce((a, b) => a + b.count, 0)
 
