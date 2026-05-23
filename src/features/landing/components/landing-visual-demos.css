@@ -270,3 +270,127 @@
 		animation: none;
 	}
 }
+
+.landing-page .landing-demo-section {
+	padding: 4rem 0;
+	background: var(--bg);
+}
+
+.landing-page .landing-demo-container {
+	max-width: 72rem;
+	margin: 0 auto;
+	padding: 0 1.5rem;
+}
+
+.landing-page .landing-demo-header {
+	margin-bottom: 2rem;
+	text-align: center;
+}
+
+.landing-page .landing-demo-overline {
+	display: inline-block;
+	margin-bottom: 0.75rem;
+	border: 1px solid var(--line);
+	border-radius: 999px;
+	background: var(--surface);
+	padding: 0.25rem 0.75rem;
+	font-size: 0.75rem;
+	font-weight: 700;
+	color: var(--ink-2);
+}
+
+.landing-page .landing-demo-title {
+	font-family: "Space Grotesk", system-ui, sans-serif;
+	font-size: clamp(2rem, 5vw, 2.75rem);
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	color: var(--ink);
+}
+
+.landing-page .landing-demo-subtitle {
+	max-width: 40rem;
+	margin: 0.75rem auto 0;
+	color: var(--ink-2);
+}
+
+.landing-page .landing-roi-card {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 2rem;
+	border: 1px solid var(--line);
+	border-radius: 1rem;
+	background: var(--surface);
+	box-shadow: 0 20px 60px rgb(0 0 0 / 0.08);
+	padding: 2rem;
+}
+
+.landing-page .landing-roi-inputs,
+.landing-page .landing-roi-results {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.landing-page .landing-roi-label,
+.landing-page .landing-roi-result-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.landing-page .landing-roi-label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: var(--ink);
+}
+
+.landing-page .landing-roi-value,
+.landing-page .landing-roi-accent {
+	font-weight: 800;
+	color: var(--cp-accent);
+}
+
+.landing-page .landing-range {
+	width: 100%;
+	accent-color: var(--cp-accent);
+}
+
+.landing-page .landing-roi-range-labels {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.72rem;
+	color: var(--ink-3);
+}
+
+.landing-page .landing-roi-result-item {
+	border-bottom: 1px solid var(--line);
+	padding-bottom: 0.75rem;
+	font-size: 0.9rem;
+	color: var(--ink-2);
+}
+
+.landing-page .landing-roi-result-item strong {
+	color: var(--ink);
+}
+
+.landing-page .landing-roi-total {
+	border-radius: 1rem;
+	background: var(--cp-accent-soft);
+	padding: 1.25rem;
+	text-align: center;
+	color: var(--ink-2);
+}
+
+.landing-page .landing-roi-total strong {
+	display: block;
+	margin: 0.25rem 0;
+	font-size: clamp(2rem, 5vw, 3rem);
+	color: var(--cp-accent);
+}
+
+@media (max-width: 768px) {
+	.landing-page .landing-roi-card {
+		grid-template-columns: 1fr;
+	}
+}
