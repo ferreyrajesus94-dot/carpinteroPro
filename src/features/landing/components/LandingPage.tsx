@@ -6,6 +6,8 @@ import { FeatureGrid } from "./FeatureGrid";
 import { WorkflowSection } from "./WorkflowSection";
 import { PricingSection } from "./PricingSection";
 import { FaqSection } from "./FaqSection";
+import { SocialProofSection } from "./SocialProofSection";
+import { PainPointsSection } from "./PainPointsSection";
 import {
 	faqs,
 	features,
@@ -13,6 +15,8 @@ import {
 	heroCopy,
 	loginCta,
 	navItems,
+	painPoints,
+	testimonials,
 	workflowSteps,
 } from "../data/landingContent";
 import { pricingPlan } from "../data/pricing";
@@ -23,6 +27,8 @@ export function LandingPage() {
 			<LandingHeader navItems={navItems} primaryCta={loginCta} />
 			<main>
 				<LandingHero copy={heroCopy} />
+
+				<SocialProofSection testimonials={testimonials} />
 
 				<LandingSection id="features" aria-label="Funciones">
 					<div className="mb-12 text-center">
@@ -39,6 +45,8 @@ export function LandingPage() {
 					</div>
 					<FeatureGrid features={features} />
 				</LandingSection>
+
+				<PainPointsSection pains={painPoints} />
 
 				<LandingSection id="workflow" aria-label="Cómo funciona" variant="alt">
 					<div className="mb-12 text-center">
