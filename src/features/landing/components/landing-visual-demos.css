@@ -1,0 +1,272 @@
+.landing-page .landing-hero-particles {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
+.landing-page .landing-hero-particles span {
+	position: absolute;
+	width: 0.45rem;
+	height: 0.45rem;
+	border-radius: 999px;
+	background: var(--cp-accent);
+	opacity: 0.35;
+	animation: landing-float 6s ease-in-out infinite;
+}
+
+.landing-page .landing-hero-demo,
+.landing-page .landing-before-after-card {
+	border: 1px solid var(--line);
+	background: var(--surface);
+	box-shadow: 0 20px 60px rgb(0 0 0 / 0.08);
+}
+
+.landing-page .landing-hero-demo {
+	position: relative;
+	overflow: hidden;
+	border-radius: 1.25rem;
+	padding: 1rem;
+}
+
+.landing-page .landing-hero-demo::before {
+	position: absolute;
+	inset: -40% -20% auto auto;
+	width: 16rem;
+	height: 16rem;
+	border-radius: 999px;
+	background: var(--cp-accent-soft);
+	content: "";
+}
+
+.landing-page .landing-hero-demo-toolbar,
+.landing-page .landing-hero-kpis,
+.landing-page .landing-hero-pipeline,
+.landing-page .landing-hero-task-card {
+	position: relative;
+	z-index: 1;
+}
+
+.landing-page .landing-hero-demo-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+
+.landing-page .landing-hero-demo-toolbar p,
+.landing-page .landing-hero-kpis span,
+.landing-page .landing-hero-pipeline span,
+.landing-page .landing-hero-task-card span {
+	font-size: 0.75rem;
+	color: var(--ink-3);
+}
+
+.landing-page .landing-hero-demo-toolbar strong,
+.landing-page .landing-hero-kpis strong,
+.landing-page .landing-hero-pipeline strong,
+.landing-page .landing-hero-task-card strong {
+	display: block;
+	color: var(--ink);
+}
+
+.landing-page .landing-hero-demo-toolbar > span {
+	border-radius: 999px;
+	background: var(--cp-accent-soft);
+	padding: 0.25rem 0.6rem;
+	font-size: 0.75rem;
+	font-weight: 800;
+	color: var(--cp-accent);
+}
+
+.landing-page .landing-hero-kpis {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.75rem;
+}
+
+.landing-page .landing-hero-kpis > div,
+.landing-page .landing-hero-task-card,
+.landing-page .landing-hero-pipeline > div {
+	border: 1px solid var(--line);
+	border-radius: 0.9rem;
+	background: var(--bg);
+	padding: 0.85rem;
+}
+
+.landing-page .landing-animated-bar {
+	height: 0.35rem;
+	margin-top: 0.7rem;
+	overflow: hidden;
+	border-radius: 999px;
+	background: var(--line);
+}
+
+.landing-page .landing-animated-bar i {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+	background: var(--cp-accent);
+	animation: landing-grow 1.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.landing-page .landing-hero-pipeline {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.5rem;
+	margin: 0.75rem 0;
+}
+
+.landing-page .landing-before-after-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	gap: 1.5rem;
+	align-items: center;
+}
+
+.landing-page .landing-before-after-card {
+	border-radius: 1rem;
+	padding: 1.25rem;
+}
+
+.landing-page .landing-before-card {
+	background: color-mix(in oklch, var(--surface) 88%, var(--destructive) 12%);
+}
+
+.landing-page .landing-after-card {
+	background: color-mix(in oklch, var(--surface) 88%, var(--cp-accent) 12%);
+}
+
+.landing-page .landing-before-after-arrow {
+	display: grid;
+	width: 2.4rem;
+	height: 2.4rem;
+	place-items: center;
+	border-radius: 999px;
+	background: var(--cp-accent);
+	font-weight: 900;
+	color: var(--cp-accent-ink);
+	animation: landing-pulse 2s ease-in-out infinite;
+}
+
+.landing-page .landing-chaos-visual,
+.landing-page .landing-app-preview {
+	display: grid;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+}
+
+.landing-page .landing-notebook-card,
+.landing-page .landing-chat-card,
+.landing-page .landing-paper-card,
+.landing-page .landing-app-preview > div {
+	border: 1px solid var(--line);
+	border-radius: 0.75rem;
+	background: var(--bg);
+	padding: 0.75rem;
+	font-size: 0.8rem;
+}
+
+.landing-page .landing-wa-preview {
+	background: oklch(55% 0.14 155) !important;
+	color: white;
+	font-weight: 800;
+	text-align: center;
+}
+
+.landing-page .landing-comparison-wrap {
+	overflow-x: auto;
+}
+
+.landing-page .landing-comparison-table {
+	min-width: 38rem;
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: 0.85rem;
+}
+
+.landing-page .landing-comparison-table th,
+.landing-page .landing-comparison-table td {
+	border-bottom: 1px solid var(--line);
+	padding: 0.85rem 0.75rem;
+	text-align: center;
+}
+
+.landing-page .landing-comparison-table th:first-child,
+.landing-page .landing-comparison-feature {
+	text-align: left;
+}
+
+.landing-page .landing-comparison-highlight {
+	background: var(--cp-accent-soft);
+	color: var(--cp-accent);
+	font-weight: 800;
+}
+
+.landing-page .landing-comparison-badge {
+	display: block;
+	width: max-content;
+	margin: 0 auto 0.25rem;
+	border-radius: 999px;
+	background: var(--cp-accent);
+	padding: 0.15rem 0.5rem;
+	font-size: 0.62rem;
+	font-weight: 900;
+	color: var(--cp-accent-ink);
+}
+
+.landing-page .landing-comparison-yes,
+.landing-page .landing-comparison-no {
+	width: 1.1rem;
+	height: 1.1rem;
+	margin: 0 auto;
+}
+
+.landing-page .landing-comparison-yes {
+	color: var(--cp-success);
+}
+
+.landing-page .landing-comparison-no {
+	color: var(--ink-3);
+}
+
+.landing-page .landing-comparison-partial {
+	font-size: 1rem;
+	font-weight: 900;
+	color: var(--cp-warn);
+}
+
+@keyframes landing-float {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-0.5rem); }
+}
+
+@keyframes landing-grow {
+	from { transform: scaleX(0); transform-origin: left; }
+	to { transform: scaleX(1); transform-origin: left; }
+}
+
+@keyframes landing-pulse {
+	0%, 100% { transform: scale(1); }
+	50% { transform: scale(1.05); }
+}
+
+@media (max-width: 768px) {
+	.landing-page .landing-before-after-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.landing-page .landing-before-after-arrow {
+		margin: 0 auto;
+		animation: none;
+		transform: rotate(90deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.landing-page .landing-hero-particles span,
+	.landing-page .landing-animated-bar i,
+	.landing-page .landing-before-after-arrow {
+		animation: none;
+	}
+}

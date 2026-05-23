@@ -10,6 +10,7 @@ import { SocialProofSection } from "./SocialProofSection";
 import { PainPointsSection } from "./PainPointsSection";
 import { BeforeAfterSection } from "./BeforeAfterSection";
 import { ComparisonSection } from "./ComparisonSection";
+import "./landing-visual-demos.css";
 import {
 	afterItems,
 	beforeItems,
