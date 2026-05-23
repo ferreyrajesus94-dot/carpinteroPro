@@ -543,6 +543,51 @@
 	color: var(--cp-success) !important;
 }
 
+.landing-page .landing-walkthrough-margin {
+	margin: 0.9rem 0;
+}
+
+.landing-page .landing-walkthrough-margin span {
+	font-weight: 700;
+	color: var(--cp-accent);
+}
+
+.landing-page .landing-walkthrough-margin div {
+	height: 0.4rem;
+	margin-top: 0.4rem;
+	border-radius: 999px;
+	background: var(--line);
+}
+
+.landing-page .landing-walkthrough-margin i {
+	display: block;
+	width: 50%;
+	height: 100%;
+	border-radius: inherit;
+	background: var(--cp-accent);
+}
+
+.landing-page .landing-demo-receipt {
+	display: grid;
+	gap: 0.45rem;
+	border: 1px solid var(--line);
+	border-radius: 0.75rem;
+	background: var(--bg-2);
+	padding: 0.9rem;
+	font-size: 0.85rem;
+}
+
+.landing-page .landing-walkthrough-time {
+	margin-top: 0.75rem;
+	border-radius: 999px;
+	background: var(--cp-accent-soft);
+	padding: 0.5rem;
+	text-align: center;
+	font-size: 0.8rem;
+	font-weight: 800;
+	color: var(--cp-accent);
+}
+
 @keyframes landing-fade-slide {
 	from { opacity: 0; transform: translateX(1rem); }
 	to { opacity: 1; transform: translateX(0); }
@@ -672,6 +717,18 @@
 	border: 1px solid var(--line);
 	background: var(--surface);
 	color: var(--ink);
+}
+
+.landing-page .landing-inline-margin {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 0.5rem;
+	font-weight: 700;
+}
+
+.landing-page .landing-inline-margin strong {
+	font-size: 1.65rem;
+	color: var(--cp-accent);
 }
 
 .landing-page .landing-inline-summary span,
@@ -870,5 +927,12 @@
 @media (max-width: 768px) {
 	.landing-page .landing-mobile-grid {
 		grid-template-columns: 1fr;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.landing-page .landing-mobile-screen,
+	.landing-page .landing-mobile-badge {
+		animation: none;
 	}
 }
