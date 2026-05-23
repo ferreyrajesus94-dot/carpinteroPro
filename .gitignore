@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .vercel
 .worktrees
+# Local Pi runtime state
+.atl/
+.pi/
+.pi-lens/
