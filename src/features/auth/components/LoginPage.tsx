@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
 import { checkGoogleEnabled, signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/features/auth/api'
@@ -83,18 +83,9 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
 
   // Campos compartidos
-  const [email, setEmail]       = useState('')
+  const [email, setEmail]       = useState(() => localStorage.getItem('carpinteroPro.rememberedEmail') || '')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
-
-  // Pre-llenar email si fue guardado previamente
-  useEffect(() => {
-    const saved = localStorage.getItem('carpinteroPro.rememberedEmail')
-    if (saved) {
-      setEmail(saved)
-      setRememberMe(true)
-    }
-  }, [])
 
   // Solo registro
   const [workshopName, setWorkshopName]   = useState('')

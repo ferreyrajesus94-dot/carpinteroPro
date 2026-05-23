@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft, Download, Share2, Copy, Pencil, Check } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
@@ -29,12 +29,17 @@ export function ContractPreview() {
   const { data: settings } = useWorkshopSettings(workshopId)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('')
   const [copied, setCopied] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedContract, setEditedContract] = useState<string | null>(null)
+  const [editState, setEditState] = useState<{ templateId: string; contract: string | null; isEditing: boolean }>({
+    templateId: '',
+    contract: null,
+    isEditing: false,
+  })
 
   const defaultTemplate = templates.find((t) => t.is_default)
   const activeTemplateId = selectedTemplateId || defaultTemplate?.id || ''
   const activeTemplate = templates.find((t) => t.id === activeTemplateId)
+  const editedContract = editState.templateId === activeTemplateId ? editState.contract : null
+  const isEditing = editState.templateId === activeTemplateId ? editState.isEditing : false
 
   if (!quote) return <div className="p-4 text-muted-foreground">Cargando...</div>
 
@@ -58,11 +63,6 @@ export function ContractPreview() {
     ? renderContract(activeTemplate.body_markdown, vars)
     : ''
   const renderedContract = editedContract ?? baseContract
-
-  useEffect(() => {
-    setEditedContract(null)
-    setIsEditing(false)
-  }, [activeTemplateId])
 
   function buildWhatsAppText(): string {
     const lines: string[] = [
@@ -163,12 +163,11 @@ export function ContractPreview() {
               variant="outline"
               size="sm"
               onClick={() => {
-                if (isEditing) {
-                  setIsEditing(false)
-                } else {
-                  setEditedContract(renderedContract)
-                  setIsEditing(true)
-                }
+                setEditState({
+                  templateId: activeTemplateId,
+                  contract: isEditing ? editedContract : renderedContract,
+                  isEditing: !isEditing,
+                })
               }}
             >
               {isEditing ? <Check className="h-4 w-4 mr-1" /> : <Pencil className="h-4 w-4 mr-1" />}
@@ -178,7 +177,7 @@ export function ContractPreview() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setEditedContract(null)}
+                onClick={() => setEditState({ templateId: activeTemplateId, contract: null, isEditing: false })}
               >
                 Restaurar plantilla
               </Button>
@@ -187,7 +186,7 @@ export function ContractPreview() {
           {isEditing ? (
             <Textarea
               value={editedContract ?? ''}
-              onChange={(e) => setEditedContract(e.target.value)}
+              onChange={(e) => setEditState({ templateId: activeTemplateId, contract: e.target.value, isEditing: true })}
               rows={14}
               className="font-mono text-sm"
             />

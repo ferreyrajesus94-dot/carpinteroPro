@@ -26,7 +26,7 @@ export function generateQuotePDF({ quote, settings }: QuotePDFData): void {
     try {
       const imgFormat = settings.logo_url.includes('data:image/png') ? 'PNG' : 'JPEG'
       doc.addImage(settings.logo_url, imgFormat, margin, y, 20, 20)
-    } catch (_) {
+    } catch {
       // logo inválido, continuar sin él
     }
   }
