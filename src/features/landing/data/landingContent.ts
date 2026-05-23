@@ -119,3 +119,63 @@ export const workflowSteps: WorkflowStep[] = [
 			"Generá presupuestos profesionales y mandalos por WhatsApp.",
 	},
 ];
+
+export type FaqItem = {
+	question: string;
+	answer: string;
+};
+
+export type FooterLink = {
+	label: string;
+	href: string;
+};
+
+export type FooterColumn = {
+	title: string;
+	links: FooterLink[];
+};
+
+export const faqs: FaqItem[] = [
+	{
+		question: "¿Necesito saber de tecnología?",
+		answer:
+			"No. CarpinteroPro está diseñado para carpinteros, no para programadores. Si usás WhatsApp, podés usar nuestra app.",
+	},
+	{
+		question: "¿Funciona sin internet?",
+		answer:
+			"Las funciones básicas sí. Los datos se sincronizan automáticamente cuando vuelvas a tener conexión.",
+	},
+	{
+		question: "¿Puedo probar gratis?",
+		answer:
+			"Sí, tenés 14 días de prueba gratuita con todas las funciones. Sin tarjeta de crédito.",
+	},
+	{
+		question: "¿Mis datos están seguros?",
+		answer:
+			"Tus datos se gestionan con la infraestructura de Supabase y las políticas de privacidad publicadas. Podés revisar los detalles en nuestra página de privacidad.",
+	},
+	{
+		question: "¿Puedo cancelar cuando quiera?",
+		answer: "Sí, sin compromiso. Cancelás desde la app y no se te cobra más.",
+	},
+];
+
+export const footerColumns: FooterColumn[] = [
+	{
+		title: "Producto",
+		links: [
+			{ label: "Funciones", href: "#features" },
+			{ label: "Precios", href: "#pricing" },
+			{ label: "FAQ", href: "#faq" },
+		],
+	},
+	{
+		title: "Legal",
+		links: [
+			{ label: "Términos", href: "/terms" },
+			{ label: "Privacidad", href: "/privacy" },
+		],
+	},
+];
