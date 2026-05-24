@@ -59,7 +59,9 @@ select results_eq(
       ('labor_items'),
       ('quote_extras'),
       ('quote_recipe_snapshots'),
-      ('quote_labor_snapshots')
+      ('quote_labor_snapshots'),
+      ('recipe_pieces'),
+      ('quote_piece_snapshots')
     ) as tenant_tables(table_name)
     left join information_schema.columns c
       on c.table_schema = 'public'
