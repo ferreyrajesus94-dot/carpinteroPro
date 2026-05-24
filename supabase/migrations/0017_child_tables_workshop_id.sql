@@ -19,6 +19,7 @@ ALTER TABLE recipe_items ALTER COLUMN workshop_id SET NOT NULL;
 CREATE INDEX IF NOT EXISTS recipe_items_workshop_id_idx ON recipe_items (workshop_id);
 
 DROP POLICY IF EXISTS "workshop_members_recipe_items" ON recipe_items;
+DROP POLICY IF EXISTS "workshop_isolation_recipe_items" ON recipe_items;
 CREATE POLICY "workshop_isolation_recipe_items" ON recipe_items
   FOR ALL
   USING  (workshop_id = get_current_workshop_id())
@@ -38,6 +39,7 @@ ALTER TABLE labor_items ALTER COLUMN workshop_id SET NOT NULL;
 CREATE INDEX IF NOT EXISTS labor_items_workshop_id_idx ON labor_items (workshop_id);
 
 DROP POLICY IF EXISTS "labor_items by workshop" ON labor_items;
+DROP POLICY IF EXISTS "workshop_isolation_labor_items" ON labor_items;
 CREATE POLICY "workshop_isolation_labor_items" ON labor_items
   FOR ALL
   USING  (workshop_id = get_current_workshop_id())
@@ -59,6 +61,7 @@ CREATE INDEX IF NOT EXISTS quote_extras_workshop_id_idx ON quote_extras (worksho
 -- quote_extras no tenía RLS — la habilitamos con política directa
 ALTER TABLE quote_extras ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "workshop_isolation_quote_extras" ON quote_extras;
 CREATE POLICY "workshop_isolation_quote_extras" ON quote_extras
   FOR ALL
   USING  (workshop_id = get_current_workshop_id())
