@@ -1,0 +1,140 @@
+sdd_version: "1.0"
+project: carpinteropro
+execution_mode: interactive
+artifact_store: openspec
+chained_pr_strategy: auto-forecast
+review_budget_changed_lines: 400
+
+stack:
+  frontend:
+    framework: React 19
+    bundler: Vite 8
+    language: TypeScript ~6.0
+    styling: Tailwind CSS 3.4
+    state: "Zustand 5, TanStack Query 5"
+    forms: "React Hook Form + Zod 4"
+    testing: "Vitest 4 + jsdom + Testing Library React/Jest-DOM"
+  backend:
+    platform: Supabase
+    auth: Supabase Auth
+    database: "PostgreSQL with Row Level Security (RLS)"
+    client: "@supabase/supabase-js ^2.103"
+  architecture:
+    pattern: Feature-sliced
+    features_dir: src/features/
+    shared_dir: src/shared/
+    rule: "No cross-feature imports; shared code goes to src/shared/"
+    db_queries: "src/features/<name>/api/"
+    query_wrappers: "src/features/<name>/hooks/"
+
+testing:
+  runner: vitest
+  command: "npm test"
+  watch_command: "npm run test:watch"
+  environment: jsdom
+  setup_file: tests/setup.ts
+  globals: true
+  coverage_tool: "vitest built-in (not configured yet)"
+  existing_tests:
+    - "tests/features/quotes/ (partial coverage only)"
+  strict_tdd: true
+  guidance: |
+    Every SDD package that changes behavior must include:
+    1. A failing test that reproduces the gap or demonstrates the new contract.
+    2. The minimal change that makes the test pass.
+    3. Refactor if needed, keeping tests green.
+    For SQL/RLS changes, add pgTAP or migration-level assertions;
+    for frontend logic, add Vitest + Testing Library unit tests.
+    If a package is purely structural (no runtime behavior change),
+    document the exception in the SDD design doc.
+
+phase_rules:
+  explore: "Review existing migrations, RLS policies, auth flow, and frontend tenant context."
+  proposal: "Write 1-page proposal with scope, acceptance criteria, and risk assessment."
+  spec: "Define exact file changes, SQL statements, API contracts, and test cases."
+  design: "Identify work units, commit boundaries, and rollback plan."
+  tasks: "Break into reviewable chunks respecting the 400-line review budget."
+  apply: "Implement with tests first; no RLS change without a SQL test."
+  verify: "Run npm test + manual verification checklist; fix before merge."
+  archive: "Move spec to openspec/archive/ and update roadmap status."
+
+sdd_packages:
+  - id: sdd-1
+    name: "Tenant security / RLS"
+    priority: P0
+    status: ready_to_start
+    depends_on: []
+    launch_blocker: true
+    summary: |
+      Replace client-controlled x-workshop-id header with server-derived
+      workshop identity via auth.uid() → profiles.workshop_id. Review and
+      harden all RLS policies. Add SQL tests proving cross-tenant isolation.
+
+  - id: sdd-2
+    name: "Billing + MercadoPago"
+    priority: P0
+    status: blocked
+    depends_on:
+      - sdd-1
+    launch_blocker: true
+
+  - id: sdd-3
+    name: "Auth/profile hardening"
+    priority: P1
+    status: blocked
+    depends_on:
+      - sdd-1
+    launch_blocker: false
+
+  - id: sdd-4
+    name: "Cache/PWA privacy"
+    priority: P1
+    status: blocked
+    depends_on:
+      - sdd-1
+    launch_blocker: false
+
+  - id: sdd-5
+    name: "Production ops"
+    priority: P1
+    status: blocked
+    depends_on: []
+    launch_blocker: false
+
+  - id: sdd-6
+    name: "Observability/support"
+    priority: "P1/P2"
+    status: blocked
+    depends_on:
+      - sdd-5
+    launch_blocker: false
+
+  - id: sdd-7
+    name: "Business-critical E2E"
+    priority: P2
+    status: blocked
+    depends_on:
+      - sdd-1
+      - sdd-2
+    launch_blocker: false
+
+  - id: sdd-8
+    name: "Architecture cleanup"
+    priority: P2
+    status: blocked
+    depends_on: []
+    launch_blocker: false
+
+known_gaps:
+  - "Client-controlled x-workshop-id header is currently trusted by RLS (security gap)."
+  - "No automated SQL tests for RLS tenant isolation."
+  - "Very limited frontend unit test coverage (only quotes feature partially tested)."
+  - ".env.example incomplete; no SERVICE_ROLE_KEY or webhook secrets documented."
+  - "No CI pipeline configured for lint/test/build."
+
+conventions:
+  - "Every table must include workshop_id uuid NOT NULL."
+  - "RLS must be enabled on every new table."
+  - "Always include 'Relationships: []' in manually maintained database.ts types."
+  - "Never expose service role key in frontend."
+  - "All client queries go through typed supabase client from @/shared/lib/supabase."
