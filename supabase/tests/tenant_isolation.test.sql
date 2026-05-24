@@ -2,7 +2,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(10);
+select plan(11);
 
 create temporary table _tenant_test_ids (
   key text primary key,
@@ -162,6 +162,17 @@ select set_config(
   'request.headers',
   json_build_object('x-workshop-id', (select id::text from _tenant_test_ids where key = 'workshop_a'))::text,
   true
+);
+
+select throws_ok(
+  $$
+    update public.profiles
+    set workshop_id = '10000000-0000-0000-0000-000000000002'::uuid
+    where id = '20000000-0000-0000-0000-000000000001'::uuid
+  $$,
+  '42501',
+  'profiles.workshop_id cannot be changed by authenticated users',
+  'user A cannot change their own profile workshop_id'
 );
 
 select throws_ok(
