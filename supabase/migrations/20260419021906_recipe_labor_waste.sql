@@ -1,0 +1,9 @@
+-- Remote migration history placeholder.
+--
+-- Version `20260419021906` / `recipe_labor_waste` is already applied in the linked Supabase
+-- project history. The executable schema for local development is represented
+-- by `0010_recipe_labor_waste.sql` in this repository.
+--
+-- Keep this file comment-only. It exists so `supabase migration list --linked`
+-- can reconcile the remote timestamp ledger without replaying duplicate
+-- historical DDL during local resets or future pushes.

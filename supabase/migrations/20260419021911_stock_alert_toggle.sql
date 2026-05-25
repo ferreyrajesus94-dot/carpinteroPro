@@ -1,0 +1,9 @@
+-- Remote migration history placeholder.
+--
+-- Version `20260419021911` / `stock_alert_toggle` is already applied in the linked Supabase
+-- project history. The executable schema for local development is represented
+-- by `0011_stock_alert_toggle.sql` in this repository.
+--
+-- Keep this file comment-only. It exists so `supabase migration list --linked`
+-- can reconcile the remote timestamp ledger without replaying duplicate
+-- historical DDL during local resets or future pushes.

@@ -1,0 +1,9 @@
+-- Remote migration history placeholder.
+--
+-- Version `20260416010748` / `fix_get_current_workshop_id_use_auth` is already applied in the linked Supabase
+-- project history. The executable schema for local development is represented
+-- by `0020_tenant_rls_security.sql` in this repository.
+--
+-- Keep this file comment-only. It exists so `supabase migration list --linked`
+-- can reconcile the remote timestamp ledger without replaying duplicate
+-- historical DDL during local resets or future pushes.
