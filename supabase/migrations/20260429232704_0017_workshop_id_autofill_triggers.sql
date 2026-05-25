@@ -1,0 +1,9 @@
+-- Remote migration history placeholder.
+--
+-- Version `20260429232704` / `0017_workshop_id_autofill_triggers` is already applied in the linked Supabase
+-- project history. The executable schema for local development is represented
+-- by `0018_workshop_id_autofill_triggers.sql` in this repository.
+--
+-- Keep this file comment-only. It exists so `supabase migration list --linked`
+-- can reconcile the remote timestamp ledger without replaying duplicate
+-- historical DDL during local resets or future pushes.
