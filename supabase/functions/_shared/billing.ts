@@ -23,6 +23,7 @@ export async function isValidSignature(
 	signatureHeader: string,
 	secret: string,
 ): Promise<boolean> {
+	if (!secret || !signatureHeader) return false;
 	const match = signatureHeader.match(/v1=([a-f0-9]+)/i);
 	if (!match) return false;
 	const providedHash = match[1].toLowerCase();

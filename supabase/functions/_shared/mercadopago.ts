@@ -23,6 +23,11 @@ export async function getPreapproval(id: string) {
 	return res.json();
 }
 
+export async function getPayment(id: string) {
+	const res = await fetch(`${BASE}/v1/payments/${id}`, { headers: headers() });
+	if (!res.ok) throw new Error(`MP getPayment ${res.status}`);
+	return res.json();
+}
 
 export async function cancelPreapproval(id: string) {
 	const res = await fetch(`${BASE}/preapproval/${id}`, {
