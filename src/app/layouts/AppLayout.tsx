@@ -3,6 +3,9 @@ import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useAuth } from '@/shared/providers/AuthProvider'
+import { useSubscription } from '@/features/billing/hooks/useSubscription'
+import { useCreateSubscription } from '@/features/billing/hooks/useBillingActions'
+import { BillingGate } from '@/features/billing/components/BillingGate'
 import { NAV_ITEMS, type NavItem } from './nav-items'
 import { dispatchFab } from '@/shared/lib/fab'
 
@@ -17,7 +20,9 @@ function activeNav(pathname: string): NavItem | undefined {
 
 export function AppLayout() {
   const { theme, toggle } = useTheme()
-  const { session, loading, onboardedAt } = useAuth()
+  const { session, loading, onboardedAt, workshopId } = useAuth()
+  const { data: subscription, isLoading: subscriptionLoading } = useSubscription(workshopId, onboardedAt)
+  const createSubscription = useCreateSubscription()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -44,25 +49,25 @@ export function AppLayout() {
     ?? (location.pathname.startsWith('/settings') ? 'Ajustes'
       : location.pathname.startsWith('/profile') ? 'Mi perfil' : 'CarpinteroPro')
 
+  async function handleStartPayment() {
+    const result = await createSubscription.mutateAsync()
+    if (result.initPoint) window.location.assign(result.initPoint)
+  }
+
   function handleFab() {
     if (!current) return
     if (current.fabHref) navigate(current.fabHref)
     else if (current.fabAction) dispatchFab(current.fabAction)
   }
 
-  // Wizard: layout fullscreen sin shell
-  if (wizard) {
-    return (
-      <div className="flex h-screen flex-col bg-background">
-        <OfflineBanner />
-        <main className="flex-1 overflow-y-auto">
-          <Outlet />
-        </main>
-      </div>
-    )
-  }
-
-  return (
+  const shell = wizard ? (
+    <div className="flex h-screen flex-col bg-background">
+      <OfflineBanner />
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
+    </div>
+  ) : (
     <div className="flex h-screen bg-background">
       {/* === SIDEBAR DESKTOP ≥1024 === */}
       <aside className="hidden lg:flex lg:w-60 lg:flex-col border-r border-line bg-cp-surface">
@@ -239,5 +244,16 @@ export function AppLayout() {
         </nav>
       </div>
     </div>
+  )
+
+  return (
+    <BillingGate
+      subscription={subscription ?? null}
+      isLoading={subscriptionLoading}
+      onStartPayment={handleStartPayment}
+      isPaymentLoading={createSubscription.isPending}
+    >
+      {shell}
+    </BillingGate>
   )
 }
