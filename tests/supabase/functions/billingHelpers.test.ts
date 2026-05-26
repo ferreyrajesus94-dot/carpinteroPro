@@ -73,6 +73,21 @@ describe("isValidSignature", () => {
 		expect(valid).toBe(false);
 	});
 
+	it("rejects when secret is empty", async () => {
+		const valid = await isValidSignature(
+			"id",
+			"req",
+			"123",
+			"ts=123,v1=abcdef",
+			"",
+		);
+		expect(valid).toBe(false);
+	});
+
+	it("rejects when signature header is empty", async () => {
+		const valid = await isValidSignature("id", "req", "123", "", "secret");
+		expect(valid).toBe(false);
+	});
 });
 
 describe("calculateNextPeriodDates", () => {
