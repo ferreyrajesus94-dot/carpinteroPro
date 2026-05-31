@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
+import { BILLING_PRICE } from "@/shared/constants/billingPricing";
 
 const AVG_QUOTE_VALUE = 150_000;
-const SUBSCRIPTION_PRICE = 4_990;
 
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat("es-AR", {
@@ -27,7 +27,10 @@ export function ROICalculatorSection() {
 			monthlySaved: Math.round(monthlySaved),
 			lostQuotes,
 			totalBenefit: Math.round(totalBenefit),
-			returnRate: Math.max(1, Math.round(totalBenefit / SUBSCRIPTION_PRICE)),
+			returnRate: Math.max(
+				1,
+				Math.round(totalBenefit / BILLING_PRICE.amountARS),
+			),
 		};
 	}, [hourlyRate, hoursPerWeek, quotesPerMonth]);
 
@@ -139,7 +142,7 @@ export function ROICalculatorSection() {
 							<strong>{formatCurrency(results.totalBenefit)}</strong>
 							<p>
 								Cálculo orientativo según tus datos vs.{" "}
-								{formatCurrency(SUBSCRIPTION_PRICE)}
+								{formatCurrency(BILLING_PRICE.amountARS)}
 								/mes de suscripción →{" "}
 								<b>retorno estimado {results.returnRate}x</b>
 							</p>
