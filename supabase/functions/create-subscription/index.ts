@@ -1,5 +1,5 @@
 import { AuthError, getAuthContext, serviceClient } from "../_shared/auth.ts";
-import { createPreapproval } from "../_shared/mercadopago.ts";
+import { createPreapproval, getPreapproval } from "../_shared/mercadopago.ts";
 import { err, json, preflight } from "../_shared/response.ts";
 
 Deno.serve(async (req) => {
@@ -9,6 +9,7 @@ Deno.serve(async (req) => {
 
 	try {
 		const { workshopId, email } = await getAuthContext(req);
+		console.info("create-subscription request", { workshopId, email });
 		const supabase = serviceClient();
 		const { data: sub, error: selectError } = await supabase
 			.from("subscriptions")
@@ -17,14 +18,29 @@ Deno.serve(async (req) => {
 			.maybeSingle();
 		if (selectError) throw selectError;
 
+		const origin = Deno.env.get("APP_ORIGIN") || "http://localhost:3000";
+		const isSandboxCheckout = origin.includes("vercel.app");
+		const payerEmail = isSandboxCheckout
+			? Deno.env.get("MERCADOPAGO_SANDBOX_PAYER_EMAIL")
+			: email;
+		const getCheckoutUrl = (mp: Record<string, unknown>) => {
+			const initPoint = mp.init_point as string | undefined;
+			const sandboxInitPoint = mp.sandbox_init_point as string | undefined;
+			return isSandboxCheckout
+				? (sandboxInitPoint ?? initPoint)
+				: (initPoint ?? sandboxInitPoint);
+		};
+
 		if (sub?.provider_preapproval_id && sub.status !== "cancelled") {
+			const mp = await getPreapproval(sub.provider_preapproval_id);
 			return json({
+				initPoint: getCheckoutUrl(mp),
 				status: sub.status,
 				preapprovalId: sub.provider_preapproval_id,
 			});
 		}
 
-		const origin = Deno.env.get("APP_ORIGIN") || "http://localhost:3000";
+		console.info("creating MercadoPago preapproval", { workshopId, origin });
 		const mp = await createPreapproval({
 			reason: "CarpinteroPro Pro Mensual",
 			auto_recurring: {
@@ -35,7 +51,7 @@ Deno.serve(async (req) => {
 			},
 			external_reference: sub?.id || workshopId,
 			back_url: `${origin}/settings`,
-			payer_email: email,
+			...(payerEmail ? { payer_email: payerEmail } : {}),
 			status: "pending",
 		});
 
@@ -55,13 +71,14 @@ Deno.serve(async (req) => {
 		if (upsertError) throw upsertError;
 
 		return json({
-			initPoint: mp.init_point,
+			initPoint: getCheckoutUrl(mp),
 			preapprovalId: mp.id,
 			status: mp.status,
 		});
 	} catch (e: unknown) {
 		const status = e instanceof AuthError ? e.status : 500;
 		const msg = e instanceof Error ? e.message : "Unknown error";
+		console.error("create-subscription failed", msg);
 		return err(msg, status);
 	}
 });

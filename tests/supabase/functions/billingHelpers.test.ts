@@ -3,6 +3,7 @@ import {
 	mapMercadoPagoStatusToAppStatus,
 	isValidSignature,
 	calculateNextPeriodDates,
+	classifyMercadoPagoWebhookType,
 } from "../../../supabase/functions/_shared/billing";
 
 describe("mapMercadoPagoStatusToAppStatus", () => {
@@ -62,6 +63,34 @@ describe("isValidSignature", () => {
 		expect(valid).toBe(true);
 	});
 
+	it("accepts MercadoPago simulator signatures that omit missing URL data.id", async () => {
+		const secret = "my-secret";
+		const requestId = "req-456";
+		const ts = "1716000000";
+		const manifest = `request-id:${requestId};ts:${ts};`;
+		const encoder = new TextEncoder();
+		const key = await crypto.subtle.importKey(
+			"raw",
+			encoder.encode(secret),
+			{ name: "HMAC", hash: "SHA-256" },
+			false,
+			["sign"],
+		);
+		const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(manifest));
+		const hash = Array.from(new Uint8Array(sig))
+			.map((b) => b.toString(16).padStart(2, "0"))
+			.join("");
+		const signature = `ts=${ts},v1=${hash}`;
+		const valid = await isValidSignature(
+			null,
+			requestId,
+			ts,
+			signature,
+			secret,
+		);
+		expect(valid).toBe(true);
+	});
+
 	it("rejects an incorrect signature", async () => {
 		const valid = await isValidSignature(
 			"id",
@@ -87,6 +116,40 @@ describe("isValidSignature", () => {
 	it("rejects when signature header is empty", async () => {
 		const valid = await isValidSignature("id", "req", "123", "", "secret");
 		expect(valid).toBe(false);
+	});
+});
+
+describe("classifyMercadoPagoWebhookType", () => {
+	it("treats subscription preapproval events as preapproval resources", () => {
+		expect(classifyMercadoPagoWebhookType("subscription_preapproval")).toBe(
+			"preapproval",
+		);
+		expect(
+			classifyMercadoPagoWebhookType("subscription_preapproval.updated"),
+		).toBe("preapproval");
+	});
+
+	it("keeps legacy preapproval and payment event support", () => {
+		expect(classifyMercadoPagoWebhookType("preapproval.updated")).toBe(
+			"preapproval",
+		);
+		expect(classifyMercadoPagoWebhookType("payment")).toBe("payment");
+		expect(classifyMercadoPagoWebhookType("payment.created")).toBe("payment");
+	});
+
+	it("treats subscription authorized payment events as authorized payment resources", () => {
+		expect(
+			classifyMercadoPagoWebhookType("subscription_authorized_payment"),
+		).toBe("authorized_payment");
+		expect(
+			classifyMercadoPagoWebhookType("subscription_authorized_payment.updated"),
+		).toBe("authorized_payment");
+	});
+
+	it("returns unknown for unsupported topics", () => {
+		expect(classifyMercadoPagoWebhookType("topic_claims_integration_wh")).toBe(
+			"unknown",
+		);
 	});
 });
 
