@@ -16,8 +16,34 @@ export function mapMercadoPagoStatusToAppStatus(
 	return "past_due";
 }
 
+export type MercadoPagoWebhookResourceType =
+	| "preapproval"
+	| "payment"
+	| "authorized_payment"
+	| "unknown";
+
+export function classifyMercadoPagoWebhookType(
+	eventType: string,
+): MercadoPagoWebhookResourceType {
+	if (
+		eventType === "subscription_preapproval" ||
+		eventType.startsWith("subscription_preapproval.") ||
+		eventType.startsWith("preapproval")
+	) {
+		return "preapproval";
+	}
+	if (
+		eventType === "subscription_authorized_payment" ||
+		eventType.startsWith("subscription_authorized_payment.")
+	) {
+		return "authorized_payment";
+	}
+	if (eventType.startsWith("payment")) return "payment";
+	return "unknown";
+}
+
 export async function isValidSignature(
-	dataId: string,
+	dataId: string | null,
 	requestId: string,
 	timestamp: string,
 	signatureHeader: string,
@@ -28,7 +54,7 @@ export async function isValidSignature(
 	if (!match) return false;
 	const providedHash = match[1].toLowerCase();
 
-	const manifest = `id:${dataId};request-id:${requestId};ts:${timestamp};`;
+	const manifest = `${dataId ? `id:${dataId.toLowerCase()};` : ""}request-id:${requestId};ts:${timestamp};`;
 	const encoder = new TextEncoder();
 	const key = await crypto.subtle.importKey(
 		"raw",

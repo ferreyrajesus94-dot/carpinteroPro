@@ -3,8 +3,13 @@ import {
 	calculateNextPeriodDates,
 	mapMercadoPagoStatusToAppStatus,
 	isValidSignature,
+	classifyMercadoPagoWebhookType,
 } from "../_shared/billing.ts";
-import { getPayment, getPreapproval } from "../_shared/mercadopago.ts";
+import {
+	getAuthorizedPayment,
+	getPayment,
+	getPreapproval,
+} from "../_shared/mercadopago.ts";
 import { err, json, preflight } from "../_shared/response.ts";
 
 interface WebhookPayload {
@@ -49,8 +54,9 @@ Deno.serve(async (req: Request) => {
 		return err("Missing data.id", 400);
 	}
 
+	const signatureDataId = new URL(req.url).searchParams.get("data.id");
 	const valid = await isValidSignature(
-		dataId,
+		signatureDataId,
 		requestId,
 		timestamp,
 		signatureHeader,
@@ -60,10 +66,9 @@ Deno.serve(async (req: Request) => {
 		return err("Invalid signature", 403);
 	}
 
-	const isPreapproval = payload.type.startsWith("preapproval");
-	const isPayment = payload.type.startsWith("payment");
+	const resourceType = classifyMercadoPagoWebhookType(payload.type);
 
-	if (!isPreapproval && !isPayment) {
+	if (resourceType === "unknown") {
 		console.warn(`Unknown event type: ${payload.type}`);
 		return json({ message: "Unknown event type" });
 	}
@@ -72,9 +77,16 @@ Deno.serve(async (req: Request) => {
 	let preapprovalId: string | null = null;
 
 	try {
-		if (isPreapproval) {
+		if (resourceType === "preapproval") {
 			providerResource = await getPreapproval(dataId);
 			preapprovalId = dataId;
+		} else if (resourceType === "authorized_payment") {
+			const authorizedPayment = await getAuthorizedPayment(dataId);
+			providerResource = authorizedPayment;
+			preapprovalId =
+				(authorizedPayment?.preapproval_id as string) ||
+				(authorizedPayment?.preapproval?.id as string) ||
+				null;
 		} else {
 			const payment = await getPayment(dataId);
 			providerResource = payment;
