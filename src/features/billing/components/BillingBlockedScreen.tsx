@@ -1,6 +1,7 @@
 import { useAuth } from "@/shared/providers/AuthProvider";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { BillingSettingsCard } from "@/features/billing/components/BillingSettingsCard";
 import { formatBillingStatus } from "@/features/billing/lib/access";
 import type { SubscriptionRow } from "@/features/billing/types";
 
@@ -21,13 +22,6 @@ export function BillingBlockedScreen({
 		? formatBillingStatus(subscription)
 		: "Acceso suspendido";
 
-	const actionLabel =
-		subscription?.status === "trialing"
-			? "Empezar suscripción"
-			: subscription?.status === "past_due" || subscription?.status === "unpaid"
-				? "Actualizar pago"
-				: "Suscribirse";
-
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-background p-4">
 			<Card className="w-full max-w-md">
@@ -41,14 +35,12 @@ export function BillingBlockedScreen({
 						CarpinteroPro, necesitás una suscripción activa o completar el pago
 						pendiente.
 					</p>
+					<BillingSettingsCard
+						subscription={subscription}
+						onStartPayment={onStartPayment}
+						isPaymentLoading={isPaymentLoading}
+					/>
 					<div className="flex flex-col gap-2">
-						<Button
-							onClick={onStartPayment}
-							disabled={isPaymentLoading}
-							className="w-full"
-						>
-							{isPaymentLoading ? "Abriendo pago…" : actionLabel}
-						</Button>
 						<Button
 							variant="outline"
 							onClick={() => signOut()}

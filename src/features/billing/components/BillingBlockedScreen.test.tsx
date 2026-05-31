@@ -9,6 +9,19 @@ vi.mock("@/shared/providers/AuthProvider", () => ({
 	}),
 }));
 
+vi.mock("@/features/billing/hooks/useBillingActions", () => ({
+	useCreateSubscription: () => ({
+		mutateAsync: vi.fn(),
+		isPending: false,
+		error: null,
+	}),
+	useCancelSubscription: () => ({
+		mutateAsync: vi.fn(),
+		isPending: false,
+		error: null,
+	}),
+}));
+
 function makeSub(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
 	return {
 		id: "sub-1",
