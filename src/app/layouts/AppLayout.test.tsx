@@ -20,6 +20,7 @@ vi.mock("@/features/billing/hooks/useSubscription", () => ({
 
 vi.mock("@/features/billing/hooks/useBillingActions", () => ({
 	useCreateSubscription: vi.fn(),
+	useCancelSubscription: vi.fn(),
 }));
 
 vi.mock("@/shared/hooks/useTheme", () => ({
@@ -54,6 +55,12 @@ describe("AppLayout billing integration", () => {
 		} as unknown as ReturnType<
 			typeof billingActionsModule.useCreateSubscription
 		>);
+		vi.mocked(billingActionsModule.useCancelSubscription).mockReturnValue({
+			mutateAsync: vi.fn(),
+			isPending: false,
+		} as unknown as ReturnType<
+			typeof billingActionsModule.useCancelSubscription
+		>);
 	});
 
 	it("shows subscription loading spinner after auth is ready", () => {
@@ -66,7 +73,9 @@ describe("AppLayout billing integration", () => {
 		} as ReturnType<typeof subscriptionModule.useSubscription>);
 
 		renderWithRouter();
-		expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+		expect(
+			screen.getByRole("status", { name: "Cargando suscripción" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders app shell when subscription is active", () => {
@@ -97,7 +106,9 @@ describe("AppLayout billing integration", () => {
 
 		renderWithRouter();
 		expect(screen.getAllByText("CarpinteroPro").length).toBeGreaterThan(0);
-		expect(document.querySelector(".animate-spin")).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("status", { name: "Cargando suscripción" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("renders blocked screen when subscription is past_due", () => {

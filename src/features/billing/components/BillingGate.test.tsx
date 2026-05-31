@@ -11,6 +11,19 @@ vi.mock("@/shared/providers/AuthProvider", () => ({
 	}),
 }));
 
+vi.mock("@/features/billing/hooks/useBillingActions", () => ({
+	useCreateSubscription: () => ({
+		mutateAsync: vi.fn(),
+		isPending: false,
+		error: null,
+	}),
+	useCancelSubscription: () => ({
+		mutateAsync: vi.fn(),
+		isPending: false,
+		error: null,
+	}),
+}));
+
 function makeSub(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
 	return {
 		id: "sub-1",
@@ -45,7 +58,9 @@ describe("BillingGate", () => {
 			</BillingGate>,
 		);
 		expect(screen.queryByTestId("app")).not.toBeInTheDocument();
-		expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+		expect(
+			screen.getByRole("status", { name: "Cargando suscripción" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders children when access is allowed", () => {
@@ -84,7 +99,7 @@ describe("BillingGate", () => {
 		});
 
 		expect(screen.queryByTestId("app")).not.toBeInTheDocument();
-		expect(screen.getByText("Período de prueba")).toBeInTheDocument();
+		expect(screen.getAllByText("Período de prueba").length).toBeGreaterThan(0);
 	});
 
 	it("reschedules long access boundaries beyond the browser timeout cap", () => {
