@@ -26,7 +26,8 @@ CarpinteroPro is not ready for public paid production yet. Use this roadmap to r
 - SDD 1 — archived / PASS (2026-05-24).
 - SDD 2 — archived / PASS (2026-05-31).
 - SDD 3 — archived / PASS (2026-05-31).
-- SDD 4, SDD 5, SDD 7, and SDD 8 are now ready to start.
+- SDD 4 — archived / PASS_WITH_WARNING (2026-06-01).
+- SDD 5, SDD 7, and SDD 8 are now ready to start.
 - SDD 6 remains blocked on SDD 5.
 
 ## SDD 1 — Tenant security / RLS
@@ -97,11 +98,15 @@ Likely scope:
 
 ## SDD 4 — Cache/PWA privacy
 
+**Status:** archived / PASS_WITH_WARNING (2026-06-01).
+
 Goal: prevent sensitive business data from persisting unsafely on shared devices or across users.
 
 Key files:
 
 - `src/shared/lib/queryClient.ts`
+- `src/shared/lib/cachePrivacy.ts`
+- `src/shared/providers/AuthProvider.tsx`
 - `vite.config.ts`
 
 Likely scope:

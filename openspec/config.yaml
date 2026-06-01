@@ -89,7 +89,7 @@ sdd_packages:
   - id: sdd-4
     name: "Cache/PWA privacy"
     priority: P1
-    status: ready_to_start
+    status: archived
     depends_on:
       - sdd-1
     launch_blocker: false
@@ -126,7 +126,6 @@ sdd_packages:
     launch_blocker: false
 
 known_gaps:
-  - "SDD 4 cache/PWA privacy still needs cache-purge and persistence hardening."
   - "SDD 5 production ops docs/env cleanup still needs final review."
   - "SDD 6 observability/support, SDD 7 business-critical E2E, and SDD 8 architecture cleanup remain pending."
 
