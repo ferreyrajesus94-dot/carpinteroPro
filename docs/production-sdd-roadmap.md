@@ -25,7 +25,8 @@ CarpinteroPro is not ready for public paid production yet. Use this roadmap to r
 
 - SDD 1 — archived / PASS (2026-05-24).
 - SDD 2 — archived / PASS (2026-05-31).
-- SDD 3, SDD 4, SDD 5, SDD 7, and SDD 8 are now ready to start.
+- SDD 3 — archived / PASS (2026-05-31).
+- SDD 4, SDD 5, SDD 7, and SDD 8 are now ready to start.
 - SDD 6 remains blocked on SDD 5.
 
 ## SDD 1 — Tenant security / RLS
@@ -79,6 +80,8 @@ Key files:
 - New migrations and server/edge-function files.
 
 ## SDD 3 — Auth/profile hardening
+
+**Status:** archived / PASS (2026-05-31).
 
 Goal: make auth/profile failures explicit, supportable, and fail-closed.
 
