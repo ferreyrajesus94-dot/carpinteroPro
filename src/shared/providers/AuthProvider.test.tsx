@@ -29,22 +29,74 @@ const mockFrom = supabaseLib.supabase.from as unknown as ReturnType<
 
 const WORKSHOP_ID = "00000000-0000-0000-0000-000000000001";
 const USER_ID = "user-abc-123";
+const ONBOARDED_AT = "2026-05-31T12:00:00.000Z";
 
-/** Build the chainable `.from('profiles').select(...).eq(...).single()` mock. */
-function mockProfileQuery(workshopId: string | null) {
-	mockProfileQuerySequence([workshopId]);
+type ProfileRow = {
+	workshop_id: string | null;
+	onboarded_at: string | null;
+};
+
+type ProfileQueryError = {
+	message: string;
+};
+
+type ProfileQueryResult = {
+	data: ProfileRow | null;
+	error: ProfileQueryError | null;
+};
+
+let profileLookupCalls = 0;
+
+function makeProfileRow(
+	workshopId: string | null = WORKSHOP_ID,
+	onboardedAt: string | null = ONBOARDED_AT,
+): ProfileRow {
+	return { workshop_id: workshopId, onboarded_at: onboardedAt };
 }
 
-function mockProfileQuerySequence(workshopIds: Array<string | null>) {
+function profileSuccess(row = makeProfileRow()): ProfileQueryResult {
+	return { data: row, error: null };
+}
+
+function profileMissing(): ProfileQueryResult {
+	return { data: null, error: null };
+}
+
+function profileError(message = "RLS denied"): ProfileQueryResult {
+	return { data: null, error: { message } };
+}
+
+/** Build the chainable `.from('profiles').select(...).eq(...).maybeSingle()` mock. */
+function mockProfileQuery(workshopId: string | null) {
+	mockProfileQueryResults([
+		workshopId ? profileSuccess(makeProfileRow(workshopId)) : profileMissing(),
+	]);
+}
+
+function mockProfileQueryResults(
+	results: Array<ProfileQueryResult | Promise<ProfileQueryResult>>,
+) {
+	const queue = [...results];
 	mockFrom.mockImplementation(() => {
-		const workshopId = workshopIds.shift() ?? null;
-		const single = vi.fn().mockResolvedValue({
-			data: workshopId ? { workshop_id: workshopId } : null,
+		const resolveNext = vi.fn(() => {
+			profileLookupCalls += 1;
+			return Promise.resolve(queue.shift() ?? profileMissing());
 		});
-		const eq = vi.fn().mockReturnValue({ single });
+		const eq = vi.fn().mockReturnValue({
+			maybeSingle: resolveNext,
+			single: resolveNext,
+		});
 		const select = vi.fn().mockReturnValue({ eq });
 		return { select };
 	});
+}
+
+function createDeferredProfileResult() {
+	let resolve!: (value: ProfileQueryResult) => void;
+	const promise = new Promise<ProfileQueryResult>((resolver) => {
+		resolve = resolver;
+	});
+	return { promise, resolve };
 }
 
 /** Returns a subscription stub; also exposes the last registered callback. */
@@ -73,6 +125,7 @@ function makeWrapper() {
 describe("AuthProvider", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		profileLookupCalls = 0;
 		// Default subscription stub (overridden per-test when needed)
 		mockAuth.onAuthStateChange.mockReturnValue({
 			data: { subscription: { unsubscribe: vi.fn() } },
@@ -90,6 +143,26 @@ describe("AuthProvider", () => {
 		expect(result.current.workshopId).toBeNull();
 	});
 
+	it("exposes explicit status and profileIssue while preserving compatibility fields", async () => {
+		mockAuth.getSession.mockResolvedValue({ data: { session: null } });
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		expect(result.current.status).toBe("initializing");
+		expect(result.current.profileIssue).toBeNull();
+		expect(result.current.loading).toBe(true);
+		expect(result.current.signOut).toEqual(expect.any(Function));
+		expect(result.current.refreshProfile).toEqual(expect.any(Function));
+
+		await waitFor(() => expect(result.current.loading).toBe(false));
+
+		expect(result.current.status).toBe("unauthenticated");
+		expect(result.current.session).toBeNull();
+		expect(result.current.workshopId).toBeNull();
+		expect(result.current.onboardedAt).toBeNull();
+		expect(result.current.profileIssue).toBeNull();
+	});
+
 	it("loads workshopId from profile when a session is restored", async () => {
 		const session = { user: { id: USER_ID } };
 		mockAuth.getSession.mockResolvedValue({ data: { session } });
@@ -100,19 +173,113 @@ describe("AuthProvider", () => {
 		await waitFor(() => expect(result.current.loading).toBe(false));
 
 		expect(result.current.session).toBe(session);
+		expect(result.current.status).toBe("ready");
+		expect(result.current.profileIssue).toBeNull();
 		expect(result.current.workshopId).toBe(WORKSHOP_ID);
 	});
 
-	it("does not set workshopId when profile has no workshop_id", async () => {
+	it("keeps a valid not-onboarded profile in ready state", async () => {
 		const session = { user: { id: USER_ID } };
 		mockAuth.getSession.mockResolvedValue({ data: { session } });
-		mockProfileQuery(null);
+		mockProfileQueryResults([
+			profileSuccess(makeProfileRow(WORKSHOP_ID, null)),
+		]);
 
 		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
 
 		await waitFor(() => expect(result.current.loading).toBe(false));
 
+		expect(result.current.status).toBe("ready");
+		expect(result.current.workshopId).toBe(WORKSHOP_ID);
+		expect(result.current.onboardedAt).toBeNull();
+		expect(result.current.profileIssue).toBeNull();
+	});
+
+	it("sets profile_missing when the restored session has no profile row", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([profileMissing()]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.status).toBe("profile_missing"));
+
+		expect(result.current.loading).toBe(false);
 		expect(result.current.workshopId).toBeNull();
+		expect(result.current.onboardedAt).toBeNull();
+		expect(result.current.profileIssue).toMatchObject({
+			kind: "missing_profile",
+			retryable: true,
+		});
+		expect(profileLookupCalls).toBe(1);
+	});
+
+	it("retries one query error once, then sets profile_error", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([profileError(), profileError("still down")]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.status).toBe("profile_error"));
+
+		expect(profileLookupCalls).toBe(2);
+		expect(result.current.loading).toBe(false);
+		expect(result.current.workshopId).toBeNull();
+		expect(result.current.onboardedAt).toBeNull();
+		expect(result.current.profileIssue).toMatchObject({
+			kind: "query_error",
+			retryable: true,
+		});
+	});
+
+	it("recovers to ready when the automatic retry succeeds", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([profileError(), profileSuccess()]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+
+		expect(profileLookupCalls).toBe(2);
+		expect(result.current.workshopId).toBe(WORKSHOP_ID);
+		expect(result.current.onboardedAt).toBe(ONBOARDED_AT);
+		expect(result.current.profileIssue).toBeNull();
+	});
+
+	it("manual retry recovers from a missing profile state", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([profileMissing(), profileSuccess()]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.status).toBe("profile_missing"));
+
+		await act(() => result.current.refreshProfile());
+
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.workshopId).toBe(WORKSHOP_ID);
+		expect(result.current.profileIssue).toBeNull();
+	});
+
+	it("manual retry recovers from a profile error state", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([
+			profileError(),
+			profileError("still down"),
+			profileSuccess(),
+		]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.status).toBe("profile_error"));
+
+		await act(() => result.current.refreshProfile());
+
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.workshopId).toBe(WORKSHOP_ID);
+		expect(result.current.profileIssue).toBeNull();
 	});
 
 	it("updates session and workshopId when onAuthStateChange fires a login", async () => {
@@ -128,13 +295,14 @@ describe("AuthProvider", () => {
 
 		await waitFor(() => expect(result.current.workshopId).toBe(WORKSHOP_ID));
 		expect(result.current.session).toBe(newSession);
+		expect(result.current.status).toBe("ready");
 	});
 
-	it("clears stale workshopId when a later profile lookup has no workshop", async () => {
+	it("clears stale workshopId when a later profile lookup has no profile", async () => {
 		const firstSession = { user: { id: USER_ID } };
 		mockAuth.getSession.mockResolvedValue({ data: { session: firstSession } });
 		const sub = makeSubscription();
-		mockProfileQuerySequence([WORKSHOP_ID, null]);
+		mockProfileQueryResults([profileSuccess(), profileMissing()]);
 
 		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
 		await waitFor(() => expect(result.current.workshopId).toBe(WORKSHOP_ID));
@@ -142,8 +310,32 @@ describe("AuthProvider", () => {
 		const nextSession = { user: { id: "user-without-profile" } };
 		sub.fire("SIGNED_IN", nextSession);
 
-		await waitFor(() => expect(result.current.workshopId).toBeNull());
+		await waitFor(() => expect(result.current.status).toBe("profile_missing"));
+		expect(result.current.workshopId).toBeNull();
 		expect(result.current.session).toBe(nextSession);
+	});
+
+	it("does not let stale profile loads overwrite newer sign-out state", async () => {
+		const staleProfile = createDeferredProfileResult();
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		const sub = makeSubscription();
+		mockProfileQueryResults([staleProfile.promise]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.status).toBe("profile_loading"));
+
+		sub.fire("SIGNED_OUT", null);
+		expect(result.current.status).toBe("unauthenticated");
+
+		await act(async () => {
+			staleProfile.resolve(profileSuccess());
+			await staleProfile.promise;
+		});
+
+		expect(result.current.status).toBe("unauthenticated");
+		expect(result.current.session).toBeNull();
+		expect(result.current.workshopId).toBeNull();
 	});
 
 	it("clears session and workshopId on logout via onAuthStateChange", async () => {
@@ -155,8 +347,10 @@ describe("AuthProvider", () => {
 
 		sub.fire("SIGNED_OUT", null);
 
+		expect(result.current.status).toBe("unauthenticated");
 		expect(result.current.session).toBeNull();
 		expect(result.current.workshopId).toBeNull();
+		expect(result.current.profileIssue).toBeNull();
 	});
 
 	it("signOut calls supabase.auth.signOut", async () => {

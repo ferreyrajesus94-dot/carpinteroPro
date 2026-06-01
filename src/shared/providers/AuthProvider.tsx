@@ -1,22 +1,64 @@
 import {
 	createContext,
+	useCallback,
 	useContext,
 	useEffect,
+	useRef,
 	useState,
 	type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/shared/lib/supabase";
 
+export type AuthStatus =
+	| "initializing"
+	| "unauthenticated"
+	| "profile_loading"
+	| "ready"
+	| "profile_missing"
+	| "profile_error";
+
+export type ProfileIssueKind = "missing_profile" | "query_error";
+
+export interface ProfileIssue {
+	kind: ProfileIssueKind;
+	title: string;
+	message: string;
+	retryable: boolean;
+}
+
+interface ProfileRow {
+	workshop_id: string | null;
+	onboarded_at: string | null;
+}
+
 interface AuthContextValue {
 	session: Session | null;
 	workshopId: string | null;
 	onboardedAt: string | null;
-	/** true mientras se restaura la sesión inicial */
+	/** true mientras se restaura la sesión inicial o se carga el perfil */
 	loading: boolean;
+	status: AuthStatus;
+	profileIssue: ProfileIssue | null;
 	signOut: () => Promise<void>;
 	refreshProfile: () => Promise<void>;
 }
+
+const missingProfileIssue: ProfileIssue = {
+	kind: "missing_profile",
+	title: "No pudimos encontrar tu perfil de taller",
+	message:
+		"Tu sesión está activa, pero no encontramos el perfil asociado a tu cuenta. Reintentá o cerrá sesión. Si continúa, contactá a soporte con el email de tu cuenta.",
+	retryable: true,
+};
+
+const queryProfileIssue: ProfileIssue = {
+	kind: "query_error",
+	title: "No pudimos cargar tu perfil de taller",
+	message:
+		"Hubo un problema al cargar la información de tu taller. Reintentá en unos segundos o cerrá sesión para volver a ingresar.",
+	retryable: true,
+};
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -24,33 +66,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [workshopId, setWorkshopIdState] = useState<string | null>(null);
 	const [onboardedAt, setOnboardedAt] = useState<string | null>(null);
-	const [loading, setLoading] = useState(true);
+	const [status, setStatus] = useState<AuthStatus>("initializing");
+	const [profileIssue, setProfileIssue] = useState<ProfileIssue | null>(null);
+	const loadRequestIdRef = useRef(0);
+	const activeUserIdRef = useRef<string | null>(null);
+	const sessionRef = useRef<Session | null>(null);
 
-	async function loadProfile(userId: string) {
-		const { data } = await supabase
-			.from("profiles")
-			.select("workshop_id, onboarded_at")
-			.eq("id", userId)
-			.single();
+	const isCurrentProfileLoad = useCallback(
+		(requestId: number, userId: string) => {
+			return (
+				requestId === loadRequestIdRef.current &&
+				activeUserIdRef.current === userId
+			);
+		},
+		[],
+	);
 
-		setWorkshopIdState(data?.workshop_id ?? null);
-		setOnboardedAt(data?.onboarded_at ?? null);
-	}
+	const clearProfileState = useCallback(() => {
+		setWorkshopIdState(null);
+		setOnboardedAt(null);
+		setProfileIssue(null);
+	}, []);
 
-	async function refreshProfile() {
-		if (session?.user?.id) {
-			await loadProfile(session.user.id);
+	const applyUnauthenticated = useCallback(() => {
+		loadRequestIdRef.current += 1;
+		activeUserIdRef.current = null;
+		sessionRef.current = null;
+		setSession(null);
+		clearProfileState();
+		setStatus("unauthenticated");
+	}, [clearProfileState]);
+
+	const loadProfileForSession = useCallback(
+		async (nextSession: Session) => {
+			const requestId = loadRequestIdRef.current + 1;
+			const userId = nextSession.user.id;
+			loadRequestIdRef.current = requestId;
+			activeUserIdRef.current = userId;
+			sessionRef.current = nextSession;
+			setSession(nextSession);
+			setStatus("profile_loading");
+			setProfileIssue(null);
+
+			async function fetchProfile() {
+				return supabase
+					.from("profiles")
+					.select("workshop_id, onboarded_at")
+					.eq("id", userId)
+					.maybeSingle<ProfileRow>();
+			}
+
+			let { data, error } = await fetchProfile();
+			if (!isCurrentProfileLoad(requestId, userId)) return;
+
+			if (error) {
+				const retryResult = await fetchProfile();
+				if (!isCurrentProfileLoad(requestId, userId)) return;
+				data = retryResult.data;
+				error = retryResult.error;
+			}
+
+			if (error) {
+				setWorkshopIdState(null);
+				setOnboardedAt(null);
+				setProfileIssue(queryProfileIssue);
+				setStatus("profile_error");
+				return;
+			}
+
+			if (!data) {
+				setWorkshopIdState(null);
+				setOnboardedAt(null);
+				setProfileIssue(missingProfileIssue);
+				setStatus("profile_missing");
+				return;
+			}
+
+			setWorkshopIdState(data.workshop_id ?? null);
+			setOnboardedAt(data.onboarded_at ?? null);
+			setProfileIssue(null);
+			setStatus("ready");
+		},
+		[isCurrentProfileLoad],
+	);
+
+	const refreshProfile = useCallback(async () => {
+		const currentSession = sessionRef.current;
+		if (currentSession?.user?.id) {
+			await loadProfileForSession(currentSession);
 		}
-	}
+	}, [loadProfileForSession]);
 
 	useEffect(() => {
 		// Restaurar sesión al montar (ej. recarga de página)
 		supabase.auth.getSession().then(({ data: { session } }) => {
-			setSession(session);
 			if (session) {
-				loadProfile(session.user.id).finally(() => setLoading(false));
+				void loadProfileForSession(session);
 			} else {
-				setLoading(false);
+				applyUnauthenticated();
 			}
 		});
 
@@ -58,21 +171,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange((_event, session) => {
-			setSession(session);
 			if (session) {
-				loadProfile(session.user.id);
+				void loadProfileForSession(session);
 			} else {
-				setWorkshopIdState(null);
-				setOnboardedAt(null);
+				applyUnauthenticated();
 			}
 		});
 
 		return () => subscription.unsubscribe();
-	}, []);
+	}, [applyUnauthenticated, loadProfileForSession]);
 
 	async function signOut() {
 		await supabase.auth.signOut();
 	}
+
+	const loading = status === "initializing" || status === "profile_loading";
 
 	return (
 		<AuthContext.Provider
@@ -81,6 +194,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				workshopId,
 				onboardedAt,
 				loading,
+				status,
+				profileIssue,
 				signOut,
 				refreshProfile,
 			}}
