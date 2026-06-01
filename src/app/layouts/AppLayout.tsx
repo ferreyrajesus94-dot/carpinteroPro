@@ -1,8 +1,9 @@
 import { Outlet, NavLink, Navigate, Link, useLocation, useNavigate } from 'react-router-dom'
+import type { Session } from '@supabase/supabase-js'
 import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
-import { useAuth } from '@/shared/providers/AuthProvider'
+import { useAuth, type ProfileIssue } from '@/shared/providers/AuthProvider'
 import { useSubscription } from '@/features/billing/hooks/useSubscription'
 import { useCreateSubscription } from '@/features/billing/hooks/useBillingActions'
 import { BillingGate } from '@/features/billing/components/BillingGate'
@@ -19,22 +20,91 @@ function activeNav(pathname: string): NavItem | undefined {
 }
 
 export function AppLayout() {
-  const { theme, toggle } = useTheme()
-  const { session, loading, onboardedAt, workshopId } = useAuth()
-  const { data: subscription, isLoading: subscriptionLoading } = useSubscription(workshopId, onboardedAt)
-  const createSubscription = useCreateSubscription()
-  const location = useLocation()
-  const navigate = useNavigate()
+  const auth = useAuth()
 
-  if (loading) {
+  if (auth.loading || auth.status === 'initializing' || auth.status === 'profile_loading') {
     return (
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex h-screen items-center justify-center" role="status" aria-label="Cargando sesión">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     )
   }
-  if (!session) return <Navigate to="/login" replace />
-  if (!onboardedAt) return <Navigate to="/onboarding" replace />
+  if (auth.status === 'unauthenticated' || !auth.session) return <Navigate to="/login" replace />
+  if (auth.status === 'profile_error' || auth.status === 'profile_missing') {
+    return (
+      <AuthProfileRecoveryScreen
+        issue={auth.profileIssue}
+        onRetry={auth.refreshProfile}
+        onSignOut={auth.signOut}
+      />
+    )
+  }
+  if (!auth.onboardedAt) return <Navigate to="/onboarding" replace />
+
+  return (
+    <AuthenticatedAppShell
+      session={auth.session}
+      onboardedAt={auth.onboardedAt}
+      workshopId={auth.workshopId}
+    />
+  )
+}
+
+interface AuthProfileRecoveryScreenProps {
+  issue: ProfileIssue | null
+  onRetry: () => Promise<void>
+  onSignOut: () => Promise<void>
+}
+
+function AuthProfileRecoveryScreen({ issue, onRetry, onSignOut }: AuthProfileRecoveryScreenProps) {
+  const title = issue?.title ?? 'No pudimos cargar tu perfil de taller'
+  const message = issue?.message
+    ?? 'Hubo un problema al cargar la información de tu taller. Reintentá en unos segundos o cerrá sesión para volver a ingresar.'
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+      <section className="w-full max-w-md rounded-xl border border-line bg-cp-surface p-6 text-center shadow-sm">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cp-accent-soft text-cp-accent">
+          <i className="fi fi-rr-triangle-warning text-xl leading-none" aria-hidden="true" />
+        </div>
+        <h1 className="font-display text-xl font-semibold tracking-tight text-ink">{title}</h1>
+        <p className="mt-3 text-sm leading-6 text-ink2">{message}</p>
+        <p className="mt-3 text-xs leading-5 text-ink3">
+          Si el problema continúa, contactá a soporte e indicá el email de tu cuenta.
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <button
+            type="button"
+            onClick={() => { void onRetry() }}
+            className="inline-flex h-10 items-center justify-center rounded-md bg-cp-accent px-4 text-sm font-medium text-[var(--cp-accent-ink)] transition-opacity hover:opacity-90"
+          >
+            Reintentar
+          </button>
+          <button
+            type="button"
+            onClick={() => { void onSignOut() }}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium text-ink2 transition-colors hover:bg-cp-bg2 hover:text-ink"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      </section>
+    </main>
+  )
+}
+
+interface AuthenticatedAppShellProps {
+  session: Session
+  onboardedAt: string
+  workshopId: string | null
+}
+
+function AuthenticatedAppShell({ session, onboardedAt, workshopId }: AuthenticatedAppShellProps) {
+  const { theme, toggle } = useTheme()
+  const { data: subscription, isLoading: subscriptionLoading } = useSubscription(workshopId, onboardedAt)
+  const createSubscription = useCreateSubscription()
+  const location = useLocation()
+  const navigate = useNavigate()
 
   const userEmail = session?.user?.email ?? ''
   const workshopName = session?.user?.user_metadata?.workshop_name ?? ''
