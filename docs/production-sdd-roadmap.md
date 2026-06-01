@@ -21,6 +21,13 @@ CarpinteroPro is not ready for public paid production yet. Use this roadmap to r
 | 7 | Business-critical E2E | P2 | Cover signup, onboarding, CRUD, logout, tenant isolation, and billing gates. | SDD 1 and SDD 2 for full coverage |
 | 8 | Architecture cleanup | P2 | Reduce feature coupling and enforce project architecture rules. | After P0s |
 
+## Current status
+
+- SDD 1 — archived / PASS (2026-05-24).
+- SDD 2 — archived / PASS (2026-05-31).
+- SDD 3, SDD 4, SDD 5, SDD 7, and SDD 8 are now ready to start.
+- SDD 6 remains blocked on SDD 5.
+
 ## SDD 1 — Tenant security / RLS
 
 **Status:** archived / PASS (2026-05-24).
@@ -50,6 +57,8 @@ Acceptance direction:
 - [ ] Missing/broken profile state fails safely.
 
 ## SDD 2 — Billing + MercadoPago
+
+**Status:** archived / PASS (2026-05-31).
 
 Goal: implement real monetization instead of pricing/legal copy only.
 
