@@ -8,6 +8,10 @@ import {
 	type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
+import {
+	purgeLegacyCachePrivacyState,
+	purgeSensitiveBrowserState,
+} from "@/shared/lib/cachePrivacy";
 import { supabase } from "@/shared/lib/supabase";
 
 export type AuthStatus =
@@ -157,32 +161,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}
 	}, [loadProfileForSession]);
 
-	useEffect(() => {
-		// Restaurar sesión al montar (ej. recarga de página)
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			if (session) {
-				void loadProfileForSession(session);
-			} else {
-				applyUnauthenticated();
+	const applyAuthenticatedSession = useCallback(
+		async (nextSession: Session) => {
+			const currentUserId = sessionRef.current?.user.id ?? null;
+			const nextUserId = nextSession.user.id;
+			if (currentUserId && currentUserId !== nextUserId) {
+				loadRequestIdRef.current += 1;
+				activeUserIdRef.current = nextUserId;
+				sessionRef.current = nextSession;
+				setSession(nextSession);
+				clearProfileState();
+				setStatus("profile_loading");
+				await purgeSensitiveBrowserState("user-switch");
 			}
-		});
+			await loadProfileForSession(nextSession);
+		},
+		[clearProfileState, loadProfileForSession],
+	);
+
+	const applyUnauthenticatedWithPurge = useCallback(async () => {
+		await purgeSensitiveBrowserState("session-removed");
+		applyUnauthenticated();
+	}, [applyUnauthenticated]);
+
+	useEffect(() => {
+		let cancelled = false;
+
+		async function initializeAuthState() {
+			await purgeLegacyCachePrivacyState();
+			if (cancelled) return;
+			const {
+				data: { session: nextSession },
+			} = await supabase.auth.getSession();
+			if (cancelled) return;
+			if (nextSession) {
+				await applyAuthenticatedSession(nextSession);
+				return;
+			}
+			await applyUnauthenticatedWithPurge();
+		}
+
+		void initializeAuthState();
 
 		// Suscribirse a cambios de sesión (login / logout / refresh)
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, session) => {
-			if (session) {
-				void loadProfileForSession(session);
-			} else {
-				applyUnauthenticated();
+		} = supabase.auth.onAuthStateChange((_event, nextSession) => {
+			if (nextSession) {
+				void applyAuthenticatedSession(nextSession);
+				return;
 			}
+			void applyUnauthenticatedWithPurge();
 		});
 
-		return () => subscription.unsubscribe();
-	}, [applyUnauthenticated, loadProfileForSession]);
+		return () => {
+			cancelled = true;
+			subscription.unsubscribe();
+		};
+	}, [applyAuthenticatedSession, applyUnauthenticatedWithPurge]);
 
 	async function signOut() {
-		await supabase.auth.signOut();
+		try {
+			await supabase.auth.signOut();
+		} finally {
+			await purgeSensitiveBrowserState("logout");
+		}
 	}
 
 	const loading = status === "initializing" || status === "profile_loading";

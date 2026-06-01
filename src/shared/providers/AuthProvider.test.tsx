@@ -14,7 +14,13 @@ vi.mock("@/shared/lib/supabase", () => ({
 	},
 }));
 
+vi.mock("@/shared/lib/cachePrivacy", () => ({
+	purgeLegacyCachePrivacyState: vi.fn().mockResolvedValue(undefined),
+	purgeSensitiveBrowserState: vi.fn().mockResolvedValue(undefined),
+}));
+
 import * as supabaseLib from "@/shared/lib/supabase";
+import * as cachePrivacy from "@/shared/lib/cachePrivacy";
 import { AuthProvider, useAuth } from "./AuthProvider";
 
 // Typed aliases for convenience
@@ -26,6 +32,15 @@ const mockAuth = supabaseLib.supabase.auth as unknown as {
 const mockFrom = supabaseLib.supabase.from as unknown as ReturnType<
 	typeof vi.fn
 >;
+
+const mockPurgeLegacyCachePrivacyState =
+	cachePrivacy.purgeLegacyCachePrivacyState as unknown as ReturnType<
+		typeof vi.fn
+	>;
+const mockPurgeSensitiveBrowserState =
+	cachePrivacy.purgeSensitiveBrowserState as unknown as ReturnType<
+		typeof vi.fn
+	>;
 
 const WORKSHOP_ID = "00000000-0000-0000-0000-000000000001";
 const USER_ID = "user-abc-123";
@@ -99,6 +114,14 @@ function createDeferredProfileResult() {
 	return { promise, resolve };
 }
 
+function createDeferredVoid() {
+	let resolve!: () => void;
+	const promise = new Promise<void>((resolver) => {
+		resolve = resolver;
+	});
+	return { promise, resolve };
+}
+
 /** Returns a subscription stub; also exposes the last registered callback. */
 function makeSubscription() {
 	const unsubscribe = vi.fn();
@@ -126,6 +149,8 @@ describe("AuthProvider", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		profileLookupCalls = 0;
+		mockPurgeLegacyCachePrivacyState.mockResolvedValue(undefined);
+		mockPurgeSensitiveBrowserState.mockResolvedValue(undefined);
 		// Default subscription stub (overridden per-test when needed)
 		mockAuth.onAuthStateChange.mockReturnValue({
 			data: { subscription: { unsubscribe: vi.fn() } },
@@ -326,7 +351,7 @@ describe("AuthProvider", () => {
 		await waitFor(() => expect(result.current.status).toBe("profile_loading"));
 
 		sub.fire("SIGNED_OUT", null);
-		expect(result.current.status).toBe("unauthenticated");
+		await waitFor(() => expect(result.current.status).toBe("unauthenticated"));
 
 		await act(async () => {
 			staleProfile.resolve(profileSuccess());
@@ -353,7 +378,77 @@ describe("AuthProvider", () => {
 		expect(result.current.profileIssue).toBeNull();
 	});
 
-	it("signOut calls supabase.auth.signOut", async () => {
+	it("runs startup legacy cleanup before restoring an authenticated session", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQuery(WORKSHOP_ID);
+
+		renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() =>
+			expect(mockPurgeLegacyCachePrivacyState).toHaveBeenCalledOnce(),
+		);
+		expect(mockAuth.getSession).toHaveBeenCalledOnce();
+	});
+
+	it("purges sensitive state when auth transitions to signed out", async () => {
+		mockAuth.getSession.mockResolvedValue({ data: { session: null } });
+		const sub = makeSubscription();
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.loading).toBe(false));
+
+		sub.fire("SIGNED_OUT", null);
+
+		await waitFor(() => {
+			expect(mockPurgeSensitiveBrowserState).toHaveBeenCalledWith(
+				"session-removed",
+			);
+		});
+		expect(result.current.status).toBe("unauthenticated");
+	});
+
+	it("purges user data before loading a different authenticated user", async () => {
+		const firstSession = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session: firstSession } });
+		const sub = makeSubscription();
+		mockProfileQueryResults([
+			profileSuccess(),
+			profileSuccess(),
+			profileSuccess(makeProfileRow("workshop-b")),
+		]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+
+		sub.fire("TOKEN_REFRESHED", { user: { id: USER_ID } });
+		await waitFor(() => expect(result.current.session?.user.id).toBe(USER_ID));
+		expect(mockPurgeSensitiveBrowserState).not.toHaveBeenCalledWith(
+			"user-switch",
+		);
+
+		const switchPurge = createDeferredVoid();
+		mockPurgeSensitiveBrowserState.mockImplementationOnce(
+			() => switchPurge.promise,
+		);
+		sub.fire("SIGNED_IN", { user: { id: "user-b" } });
+
+		await waitFor(() => {
+			expect(mockPurgeSensitiveBrowserState).toHaveBeenCalledWith(
+				"user-switch",
+			);
+			expect(result.current.status).toBe("profile_loading");
+			expect(result.current.loading).toBe(true);
+			expect(result.current.workshopId).toBeNull();
+			expect(result.current.session?.user.id).toBe("user-b");
+		});
+
+		switchPurge.resolve();
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.workshopId).toBe("workshop-b");
+	});
+
+	it("signOut calls supabase.auth.signOut before logout purge", async () => {
 		mockAuth.getSession.mockResolvedValue({ data: { session: null } });
 		mockAuth.signOut.mockResolvedValue({});
 
@@ -363,6 +458,18 @@ describe("AuthProvider", () => {
 		await act(() => result.current.signOut());
 
 		expect(mockAuth.signOut).toHaveBeenCalledOnce();
+		expect(mockPurgeSensitiveBrowserState).toHaveBeenCalledWith("logout");
+
+		const logoutCallIndex = mockPurgeSensitiveBrowserState.mock.calls.findIndex(
+			([reason]) => reason === "logout",
+		);
+		expect(logoutCallIndex).toBeGreaterThanOrEqual(0);
+
+		const logoutCallOrder =
+			mockPurgeSensitiveBrowserState.mock.invocationCallOrder[logoutCallIndex];
+		expect(mockAuth.signOut.mock.invocationCallOrder[0]).toBeLessThan(
+			logoutCallOrder,
+		);
 	});
 
 	it("unsubscribes from auth changes on unmount", async () => {
