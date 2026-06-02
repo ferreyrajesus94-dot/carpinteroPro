@@ -66,16 +66,17 @@ All feature routes are lazy-loaded via React Router's `lazy()`. The root renders
 
 **Tailwind v3** (not v4). Config is in `tailwind.config.ts`. CSS variables for theming are in `src/index.css`. The `.h-screen` utility is overridden to `100dvh` for iOS Safari.
 
-**Multi-tenant design:** Every DB table must include `workshop_id uuid` from day one. The current placeholder is `VITE_WORKSHOP_ID=00000000-0000-0000-0000-000000000001`.
+**Multi-tenant design:** Every DB table must include `workshop_id uuid` from day one. Workshop identity is server-derived through `auth.uid() → profiles.workshop_id`; do not reintroduce client-controlled tenant selection.
 
 ## Environment
 
-`.env.local` (gitignored) holds:
+`.env.local` (gitignored) holds only browser-safe frontend values:
 ```
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
-VITE_WORKSHOP_ID=
 ```
+
+Server-only Supabase and MercadoPago secrets belong in Supabase Edge Function secrets, not frontend env files.
 
 Supabase project: `revbbzqjglqnphjrasvv`. The CLI is available via `npx supabase`.
 

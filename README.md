@@ -1,73 +1,86 @@
-# React + TypeScript + Vite
+# CarpinteroPro
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CarpinteroPro is a production-oriented SaaS for carpentry and woodworking shops. It helps teams manage materials, furniture templates, quotes, contracts, CRM workflows, billing, and workshop settings with a tenant-safe Supabase backend.
 
-Currently, two official plugins are available:
+## Quick path
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Copy the environment template and fill the public Supabase values:
+   ```bash
+   cp .env.example .env.local
+   ```
+3. Start the local app:
+   ```bash
+   npm run dev
+   ```
 
-## React Compiler
+For full environment guidance, read [`docs/operations/environment-setup.md`](docs/operations/environment-setup.md).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Stack
 
-## Expanding the ESLint configuration
+| Area | Technology |
+| --- | --- |
+| Frontend | React 19, Vite 8, TypeScript |
+| UI | Tailwind CSS, shadcn/ui |
+| State/data | Zustand, TanStack Query |
+| Forms | React Hook Form, Zod |
+| Backend | Supabase Auth, Postgres, RLS, Edge Functions |
+| Billing | MercadoPago |
+| Testing | Vitest, Testing Library, jsdom |
+| Deploy | Vercel frontend, Supabase backend |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- Node.js 20 or newer.
+- npm.
+- A Supabase project with URL and anon key access.
+- Supabase CLI for migrations and Edge Function workflows.
+- MercadoPago sandbox/production credentials when testing billing flows.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Environment
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+The frontend only needs browser-safe Vite variables in `.env.local`:
+
+```dotenv
+VITE_SUPABASE_URL=<your-supabase-project-url>
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Server-only values such as the Supabase service role key and MercadoPago secrets belong in Supabase Edge Function secrets, not in frontend env files. See [`docs/operations/environment-setup.md`](docs/operations/environment-setup.md).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server. |
+| `npm run build` | Type-check and create the production build. |
+| `npm run lint` | Run ESLint. |
+| `npm run test` | Run the Vitest suite once. |
+| `npm run test:watch` | Run Vitest in watch mode. |
+| `npm run preview` | Preview the production build locally. |
+
+## Deployment overview
+
+- **Frontend:** Vercel auto-deploys from `main`.
+- **Backend:** Supabase owns Auth, Postgres, RLS policies, and Edge Functions.
+- **Migrations:** Keep local migration history reconciled before applying remote changes.
+- **Billing:** MercadoPago secrets are configured for Supabase Edge Functions.
+
+Before production changes, complete the [`docs/operations/supabase-production-checklist.md`](docs/operations/supabase-production-checklist.md) and follow the migration/rollback docs when applicable.
+
+## Operations docs
+
+| Need | Doc |
+| --- | --- |
+| Configure local, preview, or production env | [`docs/operations/environment-setup.md`](docs/operations/environment-setup.md) |
+| Check Supabase production readiness | [`docs/operations/supabase-production-checklist.md`](docs/operations/supabase-production-checklist.md) |
+| Deploy database migrations safely | [`docs/operations/migration-deployment.md`](docs/operations/migration-deployment.md) |
+| Recover from a bad release | [`docs/operations/rollback-runbook.md`](docs/operations/rollback-runbook.md) |
+| Understand Vercel config status | [`docs/operations/vercel-config-decision.md`](docs/operations/vercel-config-decision.md) |
+
+## Out of scope for SDD 5
+
+Monitoring dashboards, alert routing, logging pipelines, support workflows, and performance budgets are deferred to SDD 6.
