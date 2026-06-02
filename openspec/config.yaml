@@ -104,7 +104,7 @@ sdd_packages:
   - id: sdd-6
     name: "Observability/support"
     priority: "P1/P2"
-    status: blocked
+    status: ready_to_start
     depends_on:
       - sdd-5
     launch_blocker: false

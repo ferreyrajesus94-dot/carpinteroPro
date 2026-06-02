@@ -1,0 +1,186 @@
+# SDD-6 Tasks — Observability & Support
+
+## Status
+
+**tasks_complete**
+
+## Delivery Strategy
+
+**Recommended:** chained PRs / staged apply.
+
+Forecast: **450–650 changed lines** with strict TDD tests. This exceeds the 400-line review budget selected for the session. Keep work split into the review units below unless the user explicitly approves one larger apply.
+
+## Strict TDD Contract
+
+`openspec/config.yaml` declares strict TDD and test command `npm test`.
+
+For every runtime behavior task:
+
+1. RED — add/adjust a failing test first.
+2. GREEN — implement the minimum code.
+3. TRIANGULATE — add edge case coverage where needed.
+4. REFACTOR — clean with tests green.
+
+Record evidence in `apply-progress.md`.
+
+---
+
+## PR A — Shared frontend observability foundation
+
+Estimated changed lines: **230–320**
+
+### A1. Reporter tests RED
+
+- [ ] Create `src/shared/lib/errorReporter.test.ts`.
+- [ ] Test DSN-present initialization behavior.
+- [ ] Test DSN-absent no-op behavior.
+- [ ] Test `captureException` does not throw for `unknown` inputs.
+- [ ] Test context allowlist excludes arbitrary PII/business payload keys.
+
+### A2. Reporter implementation GREEN
+
+- [ ] Create `src/shared/lib/errorReporter.ts`.
+- [ ] Define explicit types for report context; no `any`.
+- [ ] Implement env-gated initialization.
+- [ ] Implement safe context allowlist.
+- [ ] Keep external reporting no-op unless configured.
+- [ ] Add/adjust Vite env typing for `VITE_SENTRY_DSN`.
+
+### A3. Support contact tests RED
+
+- [ ] Create `src/shared/lib/supportContact.test.ts`.
+- [ ] Test configured `VITE_SUPPORT_EMAIL` produces a safe `mailto:` href.
+- [ ] Test missing support email returns no broken link.
+- [ ] Test subject/body encoding if helper supports it.
+
+### A4. Support contact implementation GREEN
+
+- [ ] Create `src/shared/lib/supportContact.ts`.
+- [ ] Add/adjust Vite env typing for `VITE_SUPPORT_EMAIL`.
+- [ ] Update `.env.example` with placeholder/comment for `VITE_SUPPORT_EMAIL` and `VITE_SENTRY_DSN`.
+
+### A5. ErrorBoundary tests RED
+
+- [ ] Create `src/shared/components/ErrorBoundary.test.tsx`.
+- [ ] Test render crash is caught and fallback appears.
+- [ ] Test reporter is called when child render fails.
+- [ ] Test recovery action resets/reloads according to implementation.
+- [ ] Test support link is shown only when configured.
+
+### A6. ErrorBoundary implementation GREEN
+
+- [ ] Create `src/shared/components/ErrorBoundary.tsx`.
+- [ ] Use a functional exported fallback component if useful, but ErrorBoundary itself may be class-based because React error boundaries require lifecycle methods.
+- [ ] Report errors through shared reporter.
+- [ ] Render accessible fallback UI with recovery action and optional support link.
+
+### A7. Global handler tests RED
+
+- [ ] Create `src/shared/lib/registerGlobalErrorHandlers.test.ts`.
+- [ ] Test browser `error` event reports via reporter.
+- [ ] Test `unhandledrejection` reports via reporter.
+- [ ] Test cleanup removes handlers and prevents duplicate reporting.
+
+### A8. Global handler implementation GREEN
+
+- [ ] Create `src/shared/lib/registerGlobalErrorHandlers.ts`.
+- [ ] Register `window.addEventListener('error', ...)`.
+- [ ] Register `window.addEventListener('unhandledrejection', ...)`.
+- [ ] Return cleanup function.
+
+---
+
+## PR B — App/query/support wiring
+
+Estimated changed lines: **170–250**
+
+### B1. QueryClient tests RED
+
+- [ ] Create or update `src/shared/lib/queryClient.test.ts`.
+- [ ] Test QueryCache `onError` routes query errors through the reporter.
+- [ ] Test MutationCache `onError` routes mutation errors through the reporter.
+- [ ] Ensure tests do not require real network/Supabase calls.
+
+### B2. QueryClient implementation GREEN
+
+- [ ] Modify `src/shared/lib/queryClient.ts` to add `QueryCache` and `MutationCache` global `onError` handlers.
+- [ ] Preserve existing `defaultOptions` and cache privacy behavior.
+- [ ] Avoid import cycles; reporter imports must stay shared-only.
+
+### B3. App/router wiring tests RED
+
+- [ ] Add focused tests if existing app/router tests can cover the wrapper behavior.
+- [ ] Prove global handlers are registered and cleaned up by the app shell, or keep this covered by helper tests if App-level tests would be brittle.
+
+### B4. App/router wiring GREEN
+
+- [ ] Modify `src/main.tsx` to call reporter initialization before render.
+- [ ] Modify `src/app/App.tsx` to register global handlers and wrap app content in ErrorBoundary.
+- [ ] Modify `src/app/router.tsx` to replace static route fallback with shared recovery UI or shared fallback component.
+
+### B5. Auth/app-shell support tests RED
+
+- [ ] Update `src/app/layouts/AppLayout.test.tsx` to assert actionable support link when configured.
+- [ ] Assert no broken support link when support email is absent.
+
+### B6. Auth/app-shell support implementation GREEN
+
+- [ ] Modify `src/app/layouts/AppLayout.tsx` profile recovery copy to use shared support-contact helper.
+- [ ] Keep retry/logout actions unchanged.
+
+### B7. Billing support tests RED
+
+- [ ] Update `src/features/billing/components/BillingBlockedScreen.test.tsx` to use env-configurable support link.
+- [ ] Preserve current billing CTA expectations.
+
+### B8. Billing support implementation GREEN
+
+- [ ] Modify `src/features/billing/components/BillingBlockedScreen.tsx` to use shared support-contact helper instead of hardcoded email.
+- [ ] Keep WhatsApp link only if product wants it and it does not conflict with configured support email.
+
+### B9. Docs/env update
+
+- [ ] Update production operations docs or README section with observability/support env configuration.
+- [ ] Audit `.env.example` for no real DSNs/secrets.
+
+---
+
+## PR C — Structured billing edge errors
+
+Estimated changed lines: **80–140**
+
+### C1. Response helper tests RED
+
+- [ ] Determine whether Deno tests already run in project tooling.
+- [ ] If feasible, add tests for `supabase/functions/_shared/response.ts` structured error helper.
+- [ ] If Deno tests are not available, add a documented structural exception in `apply-progress.md` and verify with code review plus `npm test` for frontend changes.
+
+### C2. Response helper implementation GREEN
+
+- [ ] Modify `supabase/functions/_shared/response.ts` to add `structuredErr(code, message, status)`.
+- [ ] Keep existing `err(message, status)` backward-compatible unless all callers are migrated.
+
+### C3. Edge function structured errors
+
+- [ ] Update `supabase/functions/create-subscription/index.ts` known failure paths with stable codes.
+- [ ] Update `supabase/functions/cancel-subscription/index.ts` known failure paths with stable codes.
+- [ ] Update `supabase/functions/mercadopago-webhook/index.ts` validation/provider failure paths with stable codes.
+- [ ] Ensure responses do not include secrets, raw provider payloads, stack traces, or raw headers.
+
+---
+
+## Verification Tasks
+
+- [ ] Run `npm test`.
+- [ ] Run `npm run lint` and document any pre-existing warnings.
+- [ ] Run `npm run build`.
+- [ ] Run `git diff --check`.
+- [ ] Audit changed files for secrets/DSNs/PII leakage.
+- [ ] Confirm no cross-feature imports were introduced.
+- [ ] Record TDD evidence and command output in `apply-progress.md`.
+
+## Review Workload Decision
+
+Because the forecast exceeds 400 changed lines, **do not apply all tasks as one diff without explicit user approval**.
+
+Recommended next action: apply **PR A only** first, then verify and review before continuing to PR B/C.
