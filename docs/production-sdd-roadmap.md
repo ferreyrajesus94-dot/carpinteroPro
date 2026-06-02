@@ -27,8 +27,9 @@ CarpinteroPro is not ready for public paid production yet. Use this roadmap to r
 - SDD 2 — archived / PASS (2026-05-31).
 - SDD 3 — archived / PASS (2026-05-31).
 - SDD 4 — archived / PASS_WITH_WARNING (2026-06-01).
-- SDD 5, SDD 7, and SDD 8 are now ready to start.
-- SDD 6 remains blocked on SDD 5.
+- SDD 5 — archived / PASS (2026-06-02).
+- SDD 7 and SDD 8 are now ready to start.
+- SDD 6 is unblocked by SDD 5 completion and may begin.
 
 ## SDD 1 — Tenant security / RLS
 
@@ -117,14 +118,20 @@ Likely scope:
 
 ## SDD 5 — Production ops
 
+**Status:** archived / PASS (2026-06-02).
+
 Goal: make production deployment repeatable.
 
-Likely scope:
+Delivered:
 
-- Real deployment README.
-- Complete `.env.example`.
-- CI for lint/test/build.
-- Supabase setup checklist, auth redirects, migrations, and rollback notes.
+- Complete `.env.example` with public frontend placeholders and server-only secret comments.
+- Project-specific README with stack, prerequisites, scripts, deployment overview, and operations links.
+- Environment setup guide for local, preview/staging, and production contexts.
+- Supabase production checklist covering auth URLs, Edge Function secrets, RLS, migrations, and backups.
+- Migration deployment procedures with safe CLI workflow and reconciliation warnings.
+- Rollback runbook covering frontend, Edge Function, database/migration, and mixed incidents.
+- Vercel config decision record (deferred).
+- Stale `VITE_WORKSHOP_ID` references removed from `CLAUDE.md`.
 
 ## SDD 6 — Observability/support
 
