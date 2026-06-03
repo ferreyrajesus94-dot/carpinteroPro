@@ -1,11 +1,12 @@
-# SDD-7 Apply Progress — PR 1
+# SDD-7 Apply Progress — PR 1 + PR 2
 
 ## Workload / PR Boundary
 
 - Delivery strategy: auto-chain, stacked-to-main.
-- Applied scope: PR 1 only — Playwright harness, active-trial browser access spec, subscription-state integration spec, deterministic Node-only fixtures, and runbook docs.
-- Explicitly not implemented: PR 2/PR 3 webhook, tenant-isolation, inventory, and quote journey coverage.
-- Review budget: Low risk for PR 1; human-reviewed source/doc additions are intended to stay under 400 changed lines excluding lockfile churn.
+- Applied PR 1 scope — Playwright harness, active-trial browser access spec, subscription-state integration spec, deterministic Node-only fixtures, and runbook docs.
+- Applied PR 2 scope — blocked billing browser scenarios, MercadoPago webhook persistence integration, tenant-isolation regression, fixture extensions, and runbook updates.
+- Explicitly not implemented: PR 3 quote, contract/PDF, inventory stock movement, or operational workflow coverage.
+- Review budget: PR 1 was low risk; PR 2 was medium risk and stayed scoped to tests/fixtures/docs/OpenSpec artifacts only.
 
 ## Completed Tasks
 
@@ -90,10 +91,42 @@
 | `npm run lint` | 0 | Passed with 6 existing React Hook Form compiler warnings. |
 | `npm run build` | 0 | Production build completed. |
 
+## PR 2 Apply Progress
+
+- Applied scope: PR 2 only — blocked billing browser scenarios, MercadoPago webhook persistence integration, tenant-isolation regression, and runbook updates.
+- Explicitly not implemented: PR 3 quote, contract/PDF, inventory stock movement, or operational workflow coverage.
+- Webhook strategy: direct database integration simulation for persistence/idempotency plus signature helper validation, avoiding external MercadoPago network mocking in this PR.
+
+### PR 2 Completed Tasks
+
+- [x] Task 2.1 — Added `tests/e2e/browser/billing-gate-blocked.spec.ts` for expired-trial and past-due billing-block screens.
+- [x] Task 2.2 — Added `tests/e2e/integration/mercadopago-webhook.spec.ts` for activation, failed-charge/past-due, idempotency, and signature validation.
+- [x] Task 2.3 — Added `tests/e2e/integration/tenant-isolation.spec.ts` proving workshop B cannot read workshop A materials through an authenticated anon client.
+- [x] Task 2.4 — Updated `docs/testing/runbook.md` with PR 2 specs and expanded cleanup coverage.
+
+### PR 2 TDD / Fix Evidence
+
+| Cycle | RED | GREEN | REFACTOR |
+| --- | --- | --- | --- |
+| PR 2 specs | Initial focused PR 2 E2E run failed 2 browser assertions because status text appeared in multiple visible components. | Adjusted browser assertions to exact/first text locators; focused PR 2 E2E passed 7/7. | Kept specs scoped to PR 2 and reused PR 1 fixture patterns; no production source changes. |
+
+### PR 2 Verification
+
+| Command | Exit | Evidence |
+| --- | ---: | --- |
+| `npx tsc -p tsconfig.node.json --noEmit` | 0 | Node/E2E fixture typing passed after fixture extensions. |
+| `npm run test:e2e -- tests/e2e/browser/billing-gate-blocked.spec.ts tests/e2e/integration/mercadopago-webhook.spec.ts tests/e2e/integration/tenant-isolation.spec.ts` | 1 | RED/fix evidence: browser status selectors were ambiguous. |
+| `npm run test:e2e -- tests/e2e/browser/billing-gate-blocked.spec.ts tests/e2e/integration/mercadopago-webhook.spec.ts tests/e2e/integration/tenant-isolation.spec.ts` | 0 | PR 2 focused E2E passed 7/7. |
+| `npm run test:e2e` | 0 | Full PR 1 + PR 2 Playwright suite passed 10/10 against local Supabase. |
+| `npm test` | 0 | 34 files / 246 tests passed. |
+| `npx tsc -p tsconfig.app.json --noEmit && npx tsc -p tsconfig.node.json --noEmit` | 0 | App and Node type-checks passed. |
+| `npm run lint` | 0 | Passed with 6 existing React Hook Form compiler warnings. |
+| `npm run build` | 0 | Production build completed. |
+
 ## Remaining Tasks
 
 - PR 1 full E2E is complete: local Supabase env vars were exported from `supabase status --output env`, local Supabase was started, and `npm run test:e2e` passed.
-- PR 2 remains pending: blocked billing/browser scenarios, MercadoPago webhook persistence, and tenant-isolation regression.
+- PR 2 full E2E is complete: focused PR 2 E2E passed 7/7 and full Playwright suite passed 10/10.
 - PR 3 remains pending: quote and inventory operational workflows.
 
 ## Persistence

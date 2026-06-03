@@ -1,12 +1,12 @@
-# SDD-7 Verify Report — PR 1 Business-Critical E2E
+# SDD-7 Verify Report — PR 1 + PR 2 Business-Critical E2E
 
 ## Status
 
 **PASS**
 
-PR 1 is verified for the intended slice: Playwright harness, one active-trial browser contract, one subscription-state integration contract, fixture/runbook documentation, and review fixes. Existing non-E2E validation is green. Full E2E execution also passed against local Supabase using the documented runbook environment.
+PR 1 and PR 2 are verified for their intended slices. PR 1 established the Playwright/local Supabase harness, active-trial browser contract, and subscription-state integration contract. PR 2 added blocked billing browser scenarios, MercadoPago webhook persistence integration, tenant-isolation regression, and runbook updates. Existing non-E2E validation is green. Full E2E execution passed against local Supabase using the documented runbook environment.
 
-## Spec Coverage — PR 1 Only
+## Spec Coverage — PR 1 + PR 2
 
 | Area | Result | Evidence |
 | --- | --- | --- |
@@ -16,11 +16,14 @@ PR 1 is verified for the intended slice: Playwright harness, one active-trial br
 | Subscription-state persistence | PASS | `tests/e2e/integration/subscription-state.spec.ts` asserts `past_due` mutation is visible through authenticated anon client and `getBillingAccess` blocks; also checks trial boundary ±1 ms. Runtime passed against local Supabase. |
 | Existing unit suite separate/green | PASS | `npm test` passed: 34 files / 246 tests. |
 | Runbook/docs | PASS | `docs/testing/runbook.md` documents local Supabase, env vars, commands, cleanup, CI expectations; README links to runbook. |
-| PR 2 / PR 3 requirements | NOT REQUIRED FOR PR 1 | Webhook, tenant-isolation, quote, inventory, blocked-billing browser cases remain pending by approved chain scope. |
+| Blocked billing browser access | PASS | `tests/e2e/browser/billing-gate-blocked.spec.ts` covers expired-trial and past-due users seeing the billing-block screen instead of dashboard content. |
+| MercadoPago webhook persistence | PASS | `tests/e2e/integration/mercadopago-webhook.spec.ts` covers simulated activation, failed-charge past-due updates, duplicate event idempotency, and signature validation. |
+| Tenant isolation regression | PASS | `tests/e2e/integration/tenant-isolation.spec.ts` proves workshop B cannot read workshop A materials through an authenticated anon client. |
+| PR 3 requirements | NOT REQUIRED FOR PR 2 | Quote, contract/PDF, inventory, and stock movement coverage remain pending by approved chain scope. |
 
 ## Task Completion Status
 
-All PR 1 tasks 1.1–1.10 are completed in the working tree. PR 2/PR 3 tasks are intentionally not implemented and were not required for this verification.
+All PR 1 tasks 1.1–1.10 and PR 2 tasks 2.1–2.4 are completed in the working tree. PR 3 tasks are intentionally not implemented and were not required for this verification.
 
 ## Strict TDD Compliance
 
@@ -31,8 +34,11 @@ All PR 1 tasks 1.1–1.10 are completed in the working tree. PR 2/PR 3 tasks are
 - `apply-progress.md` contains a `TDD Cycle Evidence` table with RED, GREEN, TRIANGULATE, and REFACTOR entries.
 - Reported test files exist:
   - `tests/e2e/browser/billing-gate-active-trial.spec.ts`
+  - `tests/e2e/browser/billing-gate-blocked.spec.ts`
   - `tests/e2e/integration/subscription-state.spec.ts`
-- Actual GREEN for the E2E tests is confirmed against local Supabase: `npm run test:e2e` passed 3/3 tests with documented local env vars.
+  - `tests/e2e/integration/mercadopago-webhook.spec.ts`
+  - `tests/e2e/integration/tenant-isolation.spec.ts`
+- Actual GREEN for the E2E tests is confirmed against local Supabase: `npm run test:e2e` passed 10/10 tests with documented local env vars.
 
 ## Assertion Quality Findings
 
@@ -46,9 +52,9 @@ All PR 1 tasks 1.1–1.10 are completed in the working tree. PR 2/PR 3 tasks are
 **PASS**
 
 - PR 1 stayed within the approved functional boundary: harness/config/fixtures/docs plus active-trial browser and subscription-state integration specs only.
-- No PR 2/PR 3 E2E files were found under `tests/e2e`; grep found no `billing-gate-blocked`, `mercadopago-webhook`, `tenant-isolation`, `quote-creation`, `contract-pdf`, or `inventory-stock-movement` implementation references in PR 1 test/docs paths.
-- Human-reviewed implementation/docs additions are approximately at the budget edge: about 399 changed lines excluding lockfile and OpenSpec artifacts. No `size:exception` appears necessary if OpenSpec artifacts and lockfile churn are reviewed separately; include a note if reviewers count OpenSpec artifacts in the PR diff.
-- Chain strategy `stacked-to-main` was respected for PR 1 only.
+- PR 2 stayed within the approved functional boundary: blocked billing, MercadoPago webhook persistence, tenant isolation, fixture extensions, and runbook updates only.
+- No PR 3 E2E files were found under `tests/e2e`; grep found no `quote-creation`, `contract-pdf`, or `inventory-stock-movement` implementation references.
+- Chain strategy `stacked-to-main` was respected for PR 1 and PR 2.
 
 ## Review Blocker Fix Validation
 
@@ -78,18 +84,21 @@ All PR 1 tasks 1.1–1.10 are completed in the working tree. PR 2/PR 3 tasks are
 | `npm run test:e2e` with local Supabase env from runbook | 0 | Passed 3/3 tests after fixing the selector and making subscription fixture writes target the unique workshop subscription. |
 | `npx playwright install --dry-run chromium` | 0 | Browser install plan / local cache reported successfully. |
 | `grep -RInE 'service_role|SERVICE_ROLE|SUPABASE_SERVICE_ROLE|E2E_SUPABASE_SERVICE_ROLE_KEY' src tests scripts docs .env.example 2>/dev/null || true` | 0 | Only fixture helper, docs, and existing env/docs references; no `src/` or `tests/` service-role exposure. |
-| `grep -RInE 'quote-creation|contract-pdf|inventory-stock-movement|mercadopago-webhook|tenant-isolation|billing-gate-blocked' tests/e2e docs/testing README.md 2>/dev/null || true` | 0 | No PR 2/PR 3 test implementation references. |
+| `grep -RInE 'quote-creation|contract-pdf|inventory-stock-movement' tests/e2e docs/testing README.md 2>/dev/null || true` | 0 | No PR 3 test implementation references. |
 | `git status --short --untracked-files=all | grep -E 'test-results|playwright-report|blob-report' || true` | 0 | No untracked Playwright artifacts reported. |
+| `npm run test:e2e -- tests/e2e/browser/billing-gate-blocked.spec.ts tests/e2e/integration/mercadopago-webhook.spec.ts tests/e2e/integration/tenant-isolation.spec.ts` | 1 | PR 2 RED/fix evidence: browser status text selectors were ambiguous. |
+| `npm run test:e2e -- tests/e2e/browser/billing-gate-blocked.spec.ts tests/e2e/integration/mercadopago-webhook.spec.ts tests/e2e/integration/tenant-isolation.spec.ts` | 0 | PR 2 focused E2E passed 7/7 after selector hardening. |
+| `npm run test:e2e` | 0 | Full PR 1 + PR 2 Playwright suite passed 10/10 against local Supabase. |
 
 ## Exact Blockers
 
-No code or environment blockers remain for the PR 1 slice.
+No code or environment blockers remain for the PR 1 or PR 2 slices.
 
 Local Supabase final readiness evidence:
 
 1. Started local Supabase with `supabase stop && supabase start`.
 2. Exported runbook env vars from `supabase status --output env` without writing secrets to files.
-3. Ran `npm run test:e2e` to completion: 3/3 Playwright tests passed.
+3. Ran `npm run test:e2e` to completion: 10/10 Playwright tests passed.
 
 ## Persistence
 

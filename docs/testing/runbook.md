@@ -2,10 +2,13 @@
 
 ## Scope
 
-SDD 7 PR 1 adds a small Playwright suite for business-critical billing access:
+SDD 7 adds a Playwright suite for business-critical billing access and tenant regressions:
 
 - `tests/e2e/browser/billing-gate-active-trial.spec.ts`
+- `tests/e2e/browser/billing-gate-blocked.spec.ts`
 - `tests/e2e/integration/subscription-state.spec.ts`
+- `tests/e2e/integration/mercadopago-webhook.spec.ts`
+- `tests/e2e/integration/tenant-isolation.spec.ts`
 
 The existing fast suite remains `npm test` and is not coupled to Playwright.
 
@@ -50,7 +53,10 @@ E2E_TEST_PASSWORD=<dedicated strong test password>
 3. Run one spec when debugging:
    ```bash
    npm run test:e2e -- tests/e2e/browser/billing-gate-active-trial.spec.ts
+   npm run test:e2e -- tests/e2e/browser/billing-gate-blocked.spec.ts
    npm run test:e2e -- tests/e2e/integration/subscription-state.spec.ts
+   npm run test:e2e -- tests/e2e/integration/mercadopago-webhook.spec.ts
+   npm run test:e2e -- tests/e2e/integration/tenant-isolation.spec.ts
    ```
 4. Use Playwright UI or debugger:
    ```bash
@@ -60,11 +66,13 @@ E2E_TEST_PASSWORD=<dedicated strong test password>
 
 ## Fixture cleanup
 
-Fixtures use stable `e2e_sdd7_` identity names and the workshop ID documented in `scripts/e2e/fixtures.ts`. Each suite calls teardown automatically. If a run is interrupted, rerun either E2E spec with valid env; the first setup/teardown cycle is idempotent and removes stale rows for:
+Fixtures use stable `e2e_sdd7_` identity names and workshop IDs documented in `scripts/e2e/fixtures.ts`. Each suite calls teardown automatically. If a run is interrupted, rerun any E2E spec with valid env; the first setup/teardown cycle is idempotent and removes stale rows for:
 
 - `e2e_sdd7_active_trial@example.invalid`
+- `e2e_sdd7_user_b@example.invalid`
 - `e2e_sdd7_active_trial_workshop`
-- the matching `profiles` and `subscriptions` rows
+- `e2e_sdd7_workshop_b`
+- matching `profiles`, `subscriptions`, `materials`, and `billing_webhook_events` rows
 
 ## CI expectations
 
