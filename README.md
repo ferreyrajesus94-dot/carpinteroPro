@@ -60,7 +60,13 @@ Server-only values such as the Supabase service role key and MercadoPago secrets
 | `npm run lint` | Run ESLint. |
 | `npm run test` | Run the Vitest suite once. |
 | `npm run test:watch` | Run Vitest in watch mode. |
+| `npm run test:e2e` | Run Playwright E2E/integration tests. |
 | `npm run preview` | Preview the production build locally. |
+
+## E2E testing
+
+Business-critical Playwright checks run separately from `npm test` with `npm run test:e2e`.
+See [`docs/testing/runbook.md`](docs/testing/runbook.md) for local Supabase env, fixtures, cleanup, and debugging.
 
 ## Deployment overview
 
