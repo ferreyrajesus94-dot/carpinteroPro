@@ -254,3 +254,29 @@ Implemented settings `billingSlot`/reset props, app-level `SettingsPage`, onboar
 - Composition seams live in `src/app/pages/*Page.tsx`; `src/features/settings/routes.tsx` remains but app router now uses `SettingsPage`.
 - Manual browser smoke was not run; build/component tests are green. Fresh review remains before commit. WU5/SDD7 were not touched.
 - After review cleanup, code/test/eslint diff is 251 additions / 42 deletions = 293 changed lines. Full diff including OpenSpec is 306 additions / 63 deletions = 369 changed lines. WU4 is within the ≤320 implementation target and below the 400-line review budget.
+
+---
+
+## Work Unit 5 — Core Coupling Architecture Decision
+
+**Status:** Complete for documentation-only SDD8 scope; not committed yet.
+
+### Completed tasks
+
+- Created `openspec/changes/2026-06-03-sdd-8-architecture-cleanup/decisions/core-coupling.md`.
+- Recorded the decision to defer quotes/CRM/recipes/inventory decoupling to a separate SDD change.
+- Documented rationale, rejected approaches, recommended follow-up options, and remaining ESLint exceptions.
+- Confirmed WU5 made no production, test, lint, package, or app code changes.
+
+### Validation
+
+| Command | Exit | Result |
+|---|---:|---|
+| `git status --short --branch` | 0 | Clean start from `main...origin/main` before WU5; after WU5 only OpenSpec docs changed. |
+| Decision document read/review | 0 | Document exists with rationale and follow-up plan. |
+
+### Workload / PR boundary
+
+- Boundary: WU5 documentation-only OpenSpec update.
+- No runtime rollback required; update or supersede the decision if follow-up scope changes.
+- SDD7 PR3 was not touched.

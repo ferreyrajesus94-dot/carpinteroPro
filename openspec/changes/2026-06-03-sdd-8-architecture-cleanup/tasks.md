@@ -348,16 +348,16 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 5.1 — Record deferred architecture decision
 
-- [ ] Update `design.md` (or create `openspec/changes/2026-06-03-sdd-8-architecture-cleanup/decisions/core-coupling.md`) with:
+- [x] Created `openspec/changes/2026-06-03-sdd-8-architecture-cleanup/decisions/core-coupling.md` with:
   - Decision: Defer quotes/CRM/recipes/inventory decoupling to a separate SDD/change.
   - Rationale: Bidirectional coupling, domain-heavy, mechanical cleanup risks behavior changes and oversized diffs.
-  - Rejected approaches: Event bus, shared global state (adds runtime behavior without product need).
+  - Rejected approaches: Event bus, shared global state, feature-to-feature public API loopholes, and all-at-once decoupling.
   - Recommended follow-up: App-level orchestration using feature public APIs, shared domain contracts, or a dedicated workflow module.
   - Remaining ESLint exceptions to resolve in the follow-up SDD.
 
 **Verification:**
 - Decision document exists with rationale and follow-up plan.
-- No code changes are made.
+- No production, test, lint, package, or app code changes were made for WU5.
 
 ---
 
