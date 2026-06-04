@@ -121,12 +121,12 @@ sdd_packages:
   - id: sdd-8
     name: "Architecture cleanup"
     priority: P2
-    status: ready_to_start
+    status: archived
     depends_on: []
     launch_blocker: false
 
 known_gaps:
-  - "SDD 6 observability/support, SDD 7 business-critical E2E, and SDD 8 architecture cleanup remain pending."
+  - "SDD 6 observability/support and SDD 7 business-critical E2E remain pending. SDD 8 architecture cleanup is archived; remaining core coupling exceptions require a separate future SDD."
 
 conventions:
   - "Every table must include workshop_id uuid NOT NULL."
