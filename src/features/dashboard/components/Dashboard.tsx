@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Clock, FileText, Package, Armchair, Users } from 'lucide-react'
-import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
-import { useQuotes } from '@/features/quotes/hooks/useQuotes'
-import { useMaterials } from '@/features/inventory/hooks/useMaterials'
 import { formatCurrency } from '@/shared/lib/formatters'
-import { QUOTE_STATUS_LABELS } from '@/features/quotes/types'
+import { QUOTE_STATUS_LABELS } from '@/shared/types/quotes'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { KPICards } from './KPICards'
 import { RevenueChart } from './RevenueChart'
 import { ActiveQuotesPanel } from './ActiveQuotesPanel'
 import { useDashboardStats, type Period } from '../hooks/useDashboardStats'
+import type { DashboardMaterial, DashboardQuote } from '../types'
 
 const PERIOD_OPTIONS: { value: Period; label: string }[] = [
   { value: 'current_month', label: 'Mes actual' },
@@ -20,11 +18,14 @@ const PERIOD_OPTIONS: { value: Period; label: string }[] = [
 
 const ALL_STATUSES = ['presupuesto', 'enviado', 'aprobado', 'en_produccion', 'entregado', 'cancelado'] as const
 
-export function Dashboard() {
+export interface DashboardProps {
+  quotes: DashboardQuote[]
+  materials: DashboardMaterial[]
+  isLoading: boolean
+}
+
+export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
   const navigate = useNavigate()
-  const workshopId = useWorkshopId()
-  const { data: quotes = [], isLoading } = useQuotes(workshopId)
-  const { data: materials = [] } = useMaterials(workshopId)
   const [period, setPeriod] = useState<Period>('current_month')
   const [staleQuotes, setStaleQuotes] = useState<typeof quotes>([])
   const stats = useDashboardStats(quotes, period)

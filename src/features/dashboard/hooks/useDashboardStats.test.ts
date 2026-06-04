@@ -1,22 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { computeDashboardStats } from './useDashboardStats'
-import type { QuoteWithExtras } from '@/features/quotes/types'
+import type { DashboardQuote } from '../types'
 
-function makeQuote(overrides: Partial<QuoteWithExtras> = {}): QuoteWithExtras {
+function makeQuote(overrides: Partial<DashboardQuote> = {}): DashboardQuote {
   return {
     id: 'q1',
-    workshop_id: 'w1',
     quote_number: 'P-001',
-    client_id: null,
-    furniture_template_id: null,
     furniture_name: 'Mesa',
     recipe_cost: 1000,
     margin_mode: 'on_cost',
     margin_pct: 0,
     status: 'presupuesto',
-    notes: null,
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
     extras: [],
     client: null,
     ...overrides,
@@ -26,7 +21,7 @@ function makeQuote(overrides: Partial<QuoteWithExtras> = {}): QuoteWithExtras {
 describe('computeDashboardStats', () => {
   it('totalRevenue suma salePrice de aprobado y entregado en el período', () => {
     const now = new Date()
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'aprobado', recipe_cost: 1000, margin_pct: 0, created_at: now.toISOString() }),
       makeQuote({ id: 'q2', status: 'entregado', recipe_cost: 2000, margin_pct: 0, created_at: now.toISOString() }),
       makeQuote({ id: 'q3', status: 'cancelado', recipe_cost: 500, margin_pct: 0, created_at: now.toISOString() }),
@@ -37,7 +32,7 @@ describe('computeDashboardStats', () => {
 
   it('quoteCount cuenta todos los quotes en el período, sin importar estado', () => {
     const now = new Date()
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'aprobado', created_at: now.toISOString() }),
       makeQuote({ id: 'q2', status: 'cancelado', created_at: now.toISOString() }),
     ]
@@ -47,7 +42,7 @@ describe('computeDashboardStats', () => {
 
   it('conversionRate es aprobados+entregados sobre total, en %', () => {
     const now = new Date()
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'aprobado', created_at: now.toISOString() }),
       makeQuote({ id: 'q2', status: 'cancelado', created_at: now.toISOString() }),
       makeQuote({ id: 'q3', status: 'presupuesto', created_at: now.toISOString() }),
@@ -58,7 +53,7 @@ describe('computeDashboardStats', () => {
   })
 
   it('averageTicket es 0 cuando no hay aprobados/entregados', () => {
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'presupuesto', created_at: new Date().toISOString() }),
     ]
     const stats = computeDashboardStats(quotes, 'current_month')
@@ -67,7 +62,7 @@ describe('computeDashboardStats', () => {
 
   it('excluye quotes fuera del período en KPIs', () => {
     const oldDate = new Date(2020, 0, 1).toISOString()
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'aprobado', recipe_cost: 5000, created_at: oldDate }),
     ]
     const stats = computeDashboardStats(quotes, 'current_month')
@@ -77,7 +72,7 @@ describe('computeDashboardStats', () => {
 
   it('activeQuotes incluye solo enviado y en_produccion, sin filtro de período', () => {
     const oldDate = new Date(2020, 0, 1).toISOString()
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'enviado', created_at: oldDate }),
       makeQuote({ id: 'q2', status: 'en_produccion', created_at: oldDate }),
       makeQuote({ id: 'q3', status: 'aprobado', created_at: oldDate }),
@@ -94,13 +89,13 @@ describe('computeDashboardStats', () => {
 
   it('incluye extras en el cálculo de salePrice', () => {
     const now = new Date()
-    const quotes: QuoteWithExtras[] = [
+    const quotes: DashboardQuote[] = [
       makeQuote({
         id: 'q1',
         status: 'aprobado',
         recipe_cost: 1000,
         margin_pct: 0,
-        extras: [{ id: 'e1', workshop_id: 'w1', quote_id: 'q1', description: 'Extra', amount: 500, show_in_quote: true, sort_order: 0 }],
+        extras: [{ amount: 500, show_in_quote: true }],
         created_at: now.toISOString(),
       }),
     ]

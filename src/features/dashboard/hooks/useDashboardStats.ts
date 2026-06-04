@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { startOfMonth, subMonths, endOfMonth, isBefore, isAfter, format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { calculateQuote } from '@/features/quotes/lib/calculator'
-import type { QuoteWithExtras, QuoteStatus } from '@/features/quotes/types'
+import type { QuoteStatus } from '@/shared/types/quotes'
+import type { DashboardQuote } from '../types'
 
 export type Period = 'current_month' | 'last_month' | 'last_3_months'
 
@@ -13,16 +13,19 @@ export interface DashboardStats {
   conversionRate: number
   revenueByMonth: { month: string; total: number }[]
   byStatus: { status: QuoteStatus; count: number; total: number }[]
-  activeQuotes: QuoteWithExtras[]
+  activeQuotes: DashboardQuote[]
 }
 
-export function getSalePrice(quote: QuoteWithExtras): number {
-  return calculateQuote({
-    recipeCost: quote.recipe_cost,
-    extras: quote.extras.map(e => ({ amount: e.amount, show_in_quote: e.show_in_quote })),
-    marginMode: quote.margin_mode,
-    marginPct: quote.margin_pct,
-  }).salePrice
+export function getSalePrice(quote: DashboardQuote): number {
+  const totalExtras = quote.extras.reduce((sum, extra) => sum + extra.amount, 0)
+  const costBase = quote.recipe_cost + totalExtras
+
+  if (quote.margin_mode === 'on_cost') {
+    return costBase * (1 + quote.margin_pct / 100)
+  }
+
+  const divisor = 1 - quote.margin_pct / 100
+  return divisor > 0 ? costBase / divisor : costBase
 }
 
 function getDateRange(period: Period): { start: Date; end: Date } {
@@ -49,7 +52,7 @@ const ALL_STATUSES: QuoteStatus[] = [
   'presupuesto', 'enviado', 'aprobado', 'en_produccion', 'entregado', 'cancelado',
 ]
 
-export function computeDashboardStats(quotes: QuoteWithExtras[], period: Period): DashboardStats {
+export function computeDashboardStats(quotes: DashboardQuote[], period: Period): DashboardStats {
   const { start, end } = getDateRange(period)
   const periodQuotes = quotes.filter(q => inRange(q.created_at, start, end))
 
@@ -85,6 +88,6 @@ export function computeDashboardStats(quotes: QuoteWithExtras[], period: Period)
   return { totalRevenue, quoteCount, averageTicket, conversionRate, revenueByMonth, byStatus, activeQuotes }
 }
 
-export function useDashboardStats(quotes: QuoteWithExtras[], period: Period): DashboardStats {
+export function useDashboardStats(quotes: DashboardQuote[], period: Period): DashboardStats {
   return useMemo(() => computeDashboardStats(quotes, period), [quotes, period])
 }

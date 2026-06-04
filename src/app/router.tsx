@@ -73,8 +73,8 @@ export const router = createBrowserRouter([
 					{
 						path: "/dashboard/*",
 						lazy: () =>
-							import("@/features/dashboard/routes").then((m) => ({
-								Component: m.DashboardRoutes,
+							import("./pages/DashboardPage").then((m) => ({
+								Component: m.DashboardPage,
 							})),
 					},
 					{

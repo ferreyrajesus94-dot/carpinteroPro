@@ -200,36 +200,36 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 3.1 — Define dashboard component prop contracts
 
-- [ ] Identify data dependencies of each dashboard component:
+- [x] Identify data dependencies of each dashboard component:
   - `Dashboard.tsx` — which quote/inventory data does it consume?
   - `StatusPieChart.tsx` — what props does it need?
   - `KPICards.tsx` — what props does it need?
   - `ActiveQuotesPanel.tsx` — what props does it need?
   - `useDashboardStats.ts` — does this hook move to the composition seam or stay local?
-- [ ] Define TypeScript interfaces for each component's props.
-- [ ] Place shared dashboard contracts in `src/features/dashboard/types.ts` or `src/shared/types/dashboard.ts`.
+- [x] Define TypeScript interfaces for each component's props.
+- [x] Place shared dashboard contracts in `src/features/dashboard/types.ts` or `src/shared/types/dashboard.ts`.
 
 **Verification:**
 - Type interfaces exist and document each component's data requirements.
 
 ### Task 3.2 — Write RED tests for new prop contracts
 
-- [ ] Write failing tests for each dashboard component that verify rendering with injected props (no direct feature imports).
-- [ ] Use Testing Library React to render components with mock prop data.
-- [ ] Tests MUST fail before implementation (RED phase).
+- [x] Write focused failing tests for the dashboard prop contract that verify rendering with injected quote/material/loading props (no direct feature imports).
+- [x] Use Testing Library React to render the dashboard with mock prop data.
+- [x] Tests MUST fail before implementation (RED phase).
 
 **Verification:**
-- `npm test -- tests/features/dashboard/` shows expected failures for new prop-based tests.
+- Focused dashboard prop-contract tests show expected failures before implementation.
 
 ### Task 3.3 — Implement composition seam (GREEN phase)
 
-- [ ] Create or update the dashboard route/page composition wrapper (likely in `src/app/` or `src/pages/`).
-- [ ] The wrapper gathers data using quote/inventory hooks and passes data as props to dashboard components.
-- [ ] Refactor dashboard components to accept props instead of importing from quotes/inventory.
-- [ ] Remove cross-feature imports from `src/features/dashboard/`:
+- [x] Create or update the dashboard route/page composition wrapper (likely in `src/app/` or `src/pages/`).
+- [x] The wrapper gathers data using quote/inventory hooks and passes data as props to dashboard components.
+- [x] Refactor dashboard components to accept props instead of importing from quotes/inventory.
+- [x] Remove cross-feature imports from `src/features/dashboard/`:
   - No imports from `src/features/quotes/`.
   - No imports from `src/features/inventory/`.
-- [ ] Dashboard components may import from `src/shared/` and dashboard-local files only.
+- [x] Dashboard components may import from `src/shared/` and dashboard-local files only.
 
 **Verification:**
 - `npm test` passes (including new prop contract tests).
@@ -238,8 +238,8 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 3.4 — Remove dashboard exceptions from ESLint boundary rules
 
-- [ ] Remove temporary ESLint exceptions for `dashboard → quotes` and `dashboard → inventory`.
-- [ ] `npm run lint` must still pass.
+- [x] Remove temporary ESLint exceptions for `dashboard → quotes` and `dashboard → inventory`.
+- [x] `npm run lint` must still pass.
 
 **Verification:**
 - `npm run lint` exits 0.
@@ -253,9 +253,9 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 ### Task 3.6 — PR3 commit and verification
 
 - [ ] Commit(s) follow TDD story: RED test → GREEN implementation → REFACTOR.
-- [ ] Run `npm test` — all tests green.
-- [ ] Run `npm run lint` — exits 0.
-- [ ] Verify diff changed-line count ≤ 300.
+- [x] Run `npm test` — all tests green.
+- [x] Run `npm run lint` — exits 0.
+- [x] Verify diff changed-line count ≤ 300.
 - [ ] PR description states: depends on PR1, out-of-scope items, rollback plan.
 
 **Rollback:** Revert PR3. Dashboard returns to direct hook imports. No data model changes to reverse.

@@ -23,8 +23,7 @@ const featureBoundaryZones = [
 	featureZone("billing"),
 	// SDD8 temp exception — remove after WU5 completion: crm → quotes.
 	featureZone("crm", ["quotes"]),
-	// SDD8 temp exception — remove after WU3 completion: dashboard → quotes/inventory.
-	featureZone("dashboard", ["quotes", "inventory"]),
+	featureZone("dashboard"),
 	featureZone("inventory"),
 	featureZone("landing"),
 	featureZone("legal"),

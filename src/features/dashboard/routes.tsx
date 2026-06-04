@@ -1,5 +1,5 @@
-import { Dashboard } from './components/Dashboard'
+import { Dashboard, type DashboardProps } from './components/Dashboard'
 
-export function DashboardRoutes() {
-  return <Dashboard />
+export function DashboardRoutes(props: DashboardProps) {
+  return <Dashboard {...props} />
 }
