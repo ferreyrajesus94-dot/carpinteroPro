@@ -220,3 +220,37 @@
 - Corrected `tasks.md` wording so WU3 does not overclaim tests for every dashboard subcomponent; the implemented RED coverage is focused on the approved `Dashboard` prop contract, with existing stats tests preserved.
 - Matched the local dashboard status badge spacing to the previous quote badge style by using `inline-flex items-center ... py-0.5`.
 - Recomputed changed-line counts after cleanup: implementation files including untracked files are 191 additions / 77 deletions = 268 changed lines; including OpenSpec task/progress evidence the full working-tree diff is 288 additions / 94 deletions = 382 changed lines. The implementation slice remains within the WU3 ≤300 target and the full review diff remains below the 400-line session budget.
+
+---
+
+## Work Unit 4 — Settings/Onboarding Composition (PR4)
+
+**Status:** Complete for implementation; not committed per instruction.
+
+### Completed tasks / files
+
+Implemented settings `billingSlot`/reset props, app-level `SettingsPage`, onboarding save/material callback props, app-level `OnboardingPage`, onboarding-local material contracts, WU4 boundary exception removal, focused tests, and OpenSpec updates. Files: `eslint.config.js`, `src/app/router.tsx`, `src/app/pages/{SettingsPage,OnboardingPage}.tsx`, `src/features/settings/components/WorkshopSettings.{tsx,test.tsx}`, `src/features/onboarding/{types.ts,data/seedMaterials.ts,components/OnboardingWizard.tsx,components/OnboardingWizard.test.tsx}`, `tasks.md`, `apply-progress.md`.
+
+### TDD Cycle Evidence
+
+| Cycle | RED | GREEN | TRIANGULATE | REFACTOR | Evidence |
+|---|---|---|---|---|---|
+| Settings/onboarding slots/actions | Focused WU4 tests failed before implementation (exit 1) because components did not support injected contracts. | Focused WU4 tests passed after prop/callback seams (exit 0). | Full `npm test` passed: 38 files / 252 tests. | Removed WU4 ESLint exceptions, minimized formatting churn, ran lint/build/diff check. | Focused WU4 tests, `npm test`, `npm run lint`, `npm run build`, `git diff --check`, boundary greps. |
+
+### Verification commands
+
+| Command | Exit | Result |
+|---|---:|---|
+| Focused WU4 tests (RED) | 1 | Expected pre-implementation contract failure. |
+| `npm test -- src/features/settings/components/WorkshopSettings.test.tsx src/features/onboarding/components/OnboardingWizard.test.tsx` | 0 | 2 files / 3 tests passed. |
+| `npm test` | 0 | 38 files / 252 tests passed. |
+| `npm run lint` | 0 | No errors; existing React Compiler `watch()` warnings remain unrelated/pre-existing. |
+| `npm run build` | 0 | TypeScript + Vite production build passed. |
+| `git diff --check` | 0 | No whitespace errors. |
+| Boundary greps | 0 | No settings→billing/onboarding, onboarding→settings/inventory, or WU4 ESLint exception matches. |
+
+### Deviations / remaining / workload
+
+- Composition seams live in `src/app/pages/*Page.tsx`; `src/features/settings/routes.tsx` remains but app router now uses `SettingsPage`.
+- Manual browser smoke was not run; build/component tests are green. Fresh review remains before commit. WU5/SDD7 were not touched.
+- After review cleanup, code/test/eslint diff is 251 additions / 42 deletions = 293 changed lines. Full diff including OpenSpec is 306 additions / 63 deletions = 369 changed lines. WU4 is within the ≤320 implementation target and below the 400-line review budget.

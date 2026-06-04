@@ -1,6 +1,6 @@
-import type { MaterialInsert } from '@/features/inventory/types'
+import type { OnboardingMaterialInput } from '../types'
 
-export interface SeedMaterial extends Omit<MaterialInsert, 'workshop_id'> {
+export interface SeedMaterial extends OnboardingMaterialInput {
   description: string
 }
 

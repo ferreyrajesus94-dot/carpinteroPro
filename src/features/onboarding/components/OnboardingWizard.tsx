@@ -9,11 +9,9 @@ import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
 import { useAuth } from '@/shared/providers/AuthProvider'
-import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
-import { useUpsertWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
-import { useCreateMaterial } from '@/features/inventory/hooks/useMaterials'
 import { SEED_MATERIALS } from '../data/seedMaterials'
 import { useMarkOnboarded } from '../hooks/useOnboarding'
+import type { OnboardingMaterialInput, OnboardingWorkshopSettingsInput } from '../types'
 
 const workshopSchema = z.object({
   name: z.string().min(1, 'Ponele un nombre a tu taller'),
@@ -28,9 +26,20 @@ const STEPS = [
   { n: 3, label: 'Listo', icon: Sparkles },
 ]
 
-export function OnboardingWizard() {
+export interface OnboardingWizardProps {
+  onSaveWorkshopSettings: (settings: OnboardingWorkshopSettingsInput) => Promise<unknown>
+  onCreateMaterial: (material: OnboardingMaterialInput) => Promise<unknown>
+  isSavingWorkshopSettings?: boolean
+  isCreatingMaterial?: boolean
+}
+
+export function OnboardingWizard({
+  onSaveWorkshopSettings,
+  onCreateMaterial,
+  isSavingWorkshopSettings = false,
+  isCreatingMaterial = false,
+}: OnboardingWizardProps) {
   const { session, loading, onboardedAt } = useAuth()
-  const workshopId = useWorkshopId()
 
   const [step, setStep] = useState(1)
   const [selectedSeeds, setSelectedSeeds] = useState<Set<string>>(
@@ -39,8 +48,6 @@ export function OnboardingWizard() {
   const [savingMaterials, setSavingMaterials] = useState(false)
   const [finishTarget, setFinishTarget] = useState<string | null>(null)
 
-  const upsertSettings = useUpsertWorkshopSettings(workshopId)
-  const createMaterial = useCreateMaterial(workshopId)
   const markOnboarded = useMarkOnboarded()
 
   const {
@@ -76,7 +83,7 @@ export function OnboardingWizard() {
   }
 
   async function handleStep1(values: WorkshopValues) {
-    await upsertSettings.mutateAsync({
+    await onSaveWorkshopSettings({
       name: values.name,
       phone: values.phone || null,
       address: values.address || null,
@@ -91,7 +98,7 @@ export function OnboardingWizard() {
       for (const m of toCreate) {
         const { description, ...mat } = m
         void description
-        await createMaterial.mutateAsync(mat)
+        await onCreateMaterial(mat)
       }
       setStep(3)
     } finally {
@@ -209,8 +216,8 @@ export function OnboardingWizard() {
                 >
                   Saltar
                 </Button>
-                <Button type="submit" disabled={upsertSettings.isPending}>
-                  {upsertSettings.isPending ? 'Guardando…' : 'Siguiente'}
+                <Button type="submit" disabled={isSavingWorkshopSettings}>
+                  {isSavingWorkshopSettings ? 'Guardando…' : 'Siguiente'}
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </Button>
               </div>
@@ -277,12 +284,12 @@ export function OnboardingWizard() {
                     type="button"
                     variant="ghost"
                     onClick={() => setStep(3)}
-                    disabled={savingMaterials}
+                    disabled={savingMaterials || isCreatingMaterial}
                   >
                     Saltar
                   </Button>
-                  <Button onClick={handleStep2} disabled={savingMaterials}>
-                    {savingMaterials
+                  <Button onClick={handleStep2} disabled={savingMaterials || isCreatingMaterial}>
+                    {savingMaterials || isCreatingMaterial
                       ? 'Cargando…'
                       : selectedSeeds.size > 0
                         ? `Cargar ${selectedSeeds.size}`

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,14 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Switch } from "@/shared/ui/switch";
 import { useWorkshopId } from "@/shared/hooks/useWorkshopId";
 import { useTheme, type Palette } from "@/shared/hooks/useTheme";
-import { useAuth } from "@/shared/providers/AuthProvider";
-import { BillingSettingsCard } from "@/features/billing/components/BillingSettingsCard";
-import { useSubscription } from "@/features/billing/hooks/useSubscription";
 import {
 	useWorkshopSettings,
 	useUpsertWorkshopSettings,
 } from "../hooks/useWorkshopSettings";
-import { useResetOnboarding } from "@/features/onboarding/hooks/useOnboarding";
 
 const PALETTE_OPTIONS: {
 	value: Palette;
@@ -130,14 +126,20 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-export function WorkshopSettings() {
+export interface WorkshopSettingsProps {
+	billingSlot?: ReactNode;
+	onResetOnboarding?: () => void;
+	isResetOnboardingPending?: boolean;
+}
+
+export function WorkshopSettings({
+	billingSlot,
+	onResetOnboarding,
+	isResetOnboardingPending = false,
+}: WorkshopSettingsProps) {
 	const workshopId = useWorkshopId();
-	const { onboardedAt } = useAuth();
-	const { data: subscription, isLoading: isSubscriptionLoading } =
-		useSubscription(workshopId, onboardedAt);
 	const { data: settings, isLoading } = useWorkshopSettings(workshopId);
 	const upsertMutation = useUpsertWorkshopSettings(workshopId);
-	const resetOnboarding = useResetOnboarding();
 
 	const {
 		register,
@@ -215,10 +217,7 @@ export function WorkshopSettings() {
 				</p>
 			</div>
 
-			<BillingSettingsCard
-				subscription={subscription ?? null}
-				isLoading={isSubscriptionLoading}
-			/>
+			{billingSlot}
 
 			<AppearanceCard />
 
@@ -240,11 +239,11 @@ export function WorkshopSettings() {
 						type="button"
 						variant="outline"
 						size="sm"
-						disabled={resetOnboarding.isPending}
-						onClick={() => resetOnboarding.mutate()}
+						disabled={isResetOnboardingPending || !onResetOnboarding}
+						onClick={onResetOnboarding}
 						className="shrink-0"
 					>
-						{resetOnboarding.isPending ? "Redirigiendo…" : "Reiniciar"}
+						{isResetOnboardingPending ? "Redirigiendo…" : "Reiniciar"}
 					</Button>
 				</CardContent>
 			</Card>

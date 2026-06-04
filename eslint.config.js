@@ -27,14 +27,12 @@ const featureBoundaryZones = [
 	featureZone("inventory"),
 	featureZone("landing"),
 	featureZone("legal"),
-	// SDD8 temp exception — remove after WU4 completion: onboarding → settings/inventory.
-	featureZone("onboarding", ["settings", "inventory"]),
+	featureZone("onboarding"),
 	// SDD8 temp exception — remove after WU5 completion: quotes → crm/recipes/settings.
 	featureZone("quotes", ["crm", "recipes", "settings"]),
 	// SDD8 temp exception — remove after WU5 completion: recipes → inventory/settings.
 	featureZone("recipes", ["inventory", "settings"]),
-	// SDD8 temp exception — remove after WU4 completion: settings → billing/onboarding.
-	featureZone("settings", ["billing", "onboarding"]),
+	featureZone("settings"),
 	featureZone("tasks"),
 ];
 

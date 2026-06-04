@@ -276,35 +276,35 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 4.1 — Define settings component prop/slot contracts
 
-- [ ] Identify cross-feature dependencies in settings:
-  - `WorkshopSettings.tsx` imports `BillingSettingsCard` and `useSubscription` from billing.
-  - `WorkshopSettings.tsx` imports `useResetOnboarding` from onboarding.
-- [ ] Define prop types for optional slots/actions:
+- [x] Identify cross-feature dependencies in settings:
+  - `WorkshopSettings.tsx` imported `BillingSettingsCard` and `useSubscription` from billing.
+  - `WorkshopSettings.tsx` imported `useResetOnboarding` from onboarding.
+- [x] Define prop types for optional slots/actions:
   - `billingSlot?: React.ReactNode` (or similar pattern).
   - `onResetOnboarding?: () => void` (callback pattern).
-- [ ] Identify onboarding's dependencies on settings/inventory:
-  - `OnboardingWizard.tsx` imports `useUpsertWorkshopSettings` from settings.
-  - `OnboardingWizard.tsx` and `seedMaterials.ts` import from inventory.
+- [x] Identify onboarding's dependencies on settings/inventory:
+  - `OnboardingWizard.tsx` imported `useUpsertWorkshopSettings` from settings.
+  - `OnboardingWizard.tsx` and `seedMaterials.ts` imported from inventory.
 
 **Verification:**
 - Type interfaces exist for settings slots and onboarding callbacks.
 
 ### Task 4.2 — Write RED tests for new prop/slot contracts
 
-- [ ] Write failing tests for `WorkshopSettings` that verify rendering with injected billing slot and onboarding reset callback.
-- [ ] Write failing tests for `OnboardingWizard` that verify operation with injected settings/inventory callbacks.
-- [ ] Tests MUST fail before implementation (RED phase).
+- [x] Write failing tests for `WorkshopSettings` that verify rendering with injected billing slot and onboarding reset callback.
+- [x] Write failing tests for `OnboardingWizard` that verify operation with injected settings/inventory callbacks.
+- [x] Tests MUST fail before implementation (RED phase).
 
 **Verification:**
 - `npm test` shows expected failures for new slot/callback tests.
 
 ### Task 4.3 — Implement settings composition seam (GREEN phase)
 
-- [ ] Create or update the settings route/page composition wrapper.
-- [ ] Wrapper injects `BillingSettingsCard`, `useSubscription` result, and `useResetOnboarding` into `WorkshopSettings` via props.
-- [ ] `WorkshopSettings` no longer imports from `src/features/billing/` or `src/features/onboarding/`.
-- [ ] For onboarding: create a composition seam that passes settings and inventory operations as callbacks.
-- [ ] `OnboardingWizard` no longer imports from `src/features/settings/` or `src/features/inventory/`.
+- [x] Create or update the settings route/page composition wrapper.
+- [x] Wrapper injects `BillingSettingsCard`, `useSubscription` result, and `useResetOnboarding` into `WorkshopSettings` via props.
+- [x] `WorkshopSettings` no longer imports from `src/features/billing/` or `src/features/onboarding/`.
+- [x] For onboarding: create a composition seam that passes settings and inventory operations as callbacks.
+- [x] `OnboardingWizard` no longer imports from `src/features/settings/` or `src/features/inventory/`.
 
 **Verification:**
 - `npm test` passes (including new slot/callback tests).
@@ -314,8 +314,8 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 4.4 — Remove settings/onboarding exceptions from ESLint boundary rules
 
-- [ ] Remove temporary ESLint exceptions for `settings → billing`, `settings → onboarding`, `onboarding → settings`, `onboarding → inventory`.
-- [ ] `npm run lint` must still pass.
+- [x] Remove temporary ESLint exceptions for `settings → billing`, `settings → onboarding`, `onboarding → settings`, `onboarding → inventory`.
+- [x] `npm run lint` must still pass.
 
 **Verification:**
 - `npm run lint` exits 0.
@@ -328,10 +328,10 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 ### Task 4.6 — PR4 commit and verification
 
 - [ ] Commit(s) follow TDD story: RED test → GREEN implementation → REFACTOR.
-- [ ] Run `npm test` — all tests green.
-- [ ] Run `npm run lint` — exits 0.
-- [ ] Verify diff changed-line count ≤ 320.
-- [ ] If >320 lines, split PR4 into two stacked PRs (settings composition first, then onboarding).
+- [x] Run `npm test` — all tests green.
+- [x] Run `npm run lint` — exits 0.
+- [x] Verify diff changed-line count ≤ 320 (code/test/eslint diff after review cleanup: 251 additions / 42 deletions = 293 changed lines).
+- [x] No split needed; implementation changed-line count stayed ≤320 (full diff including OpenSpec: 306 additions / 63 deletions = 369 changed lines, below 400 review budget).
 - [ ] PR description states: depends on PR1, out-of-scope items, rollback plan.
 
 **Rollback:** Revert PR4. Settings and onboarding return to direct imports. No data model changes.

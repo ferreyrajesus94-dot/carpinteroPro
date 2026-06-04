@@ -59,9 +59,9 @@ export const router = createBrowserRouter([
 			{
 				path: "/onboarding",
 				lazy: () =>
-					import("@/features/onboarding/components/OnboardingWizard").then(
-						(m) => ({ Component: m.OnboardingWizard }),
-					),
+					import("./pages/OnboardingPage").then((m) => ({
+						Component: m.OnboardingPage,
+					})),
 			},
 			{
 				hydrateFallbackElement,
@@ -115,8 +115,8 @@ export const router = createBrowserRouter([
 					{
 						path: "/settings/*",
 						lazy: () =>
-							import("@/features/settings/routes").then((m) => ({
-								Component: m.SettingsRoutes,
+							import("./pages/SettingsPage").then((m) => ({
+								Component: m.SettingsPage,
 							})),
 					},
 					{
