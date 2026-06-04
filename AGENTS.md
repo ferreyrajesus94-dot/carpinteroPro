@@ -16,6 +16,13 @@
 - All DB queries in `src/features/<name>/api/`
 - TanStack Query wrappers in `src/features/<name>/hooks/`
 
+### Import Boundaries
+- `src/app/**` may compose multiple features and wire feature public APIs together
+- `src/features/<feature>/**` may import only its own feature files and `src/shared/**`
+- `src/features/<feature>/index.ts` may expose a public API for app-level composition, not feature-to-feature imports
+- `src/shared/**` must not import from `src/features/**`
+- ESLint enforces this staged model with `eslint-plugin-import` `import/no-restricted-paths`; temporary exceptions are documented in `eslint.config.js` for OpenSpec change `2026-06-03-sdd-8-architecture-cleanup` and should be removed as later SDD8 work units clean each scope.
+
 ## Database
 - Every table must include `workshop_id uuid NOT NULL` for multi-tenant isolation
 - RLS must be enabled on every new table

@@ -126,9 +126,9 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 2.1 — Verify or install `eslint-plugin-import`
 
-- [ ] Check if `eslint-plugin-import` is already in `package.json` dependencies.
-- [ ] If not installed, run `npm install -D eslint-plugin-import`.
-- [ ] Verify the plugin loads in the existing ESLint config (flat config or `.eslintrc`).
+- [x] Check if `eslint-plugin-import` is already in `package.json` dependencies.
+- [x] If not installed, run `npm install -D eslint-plugin-import`.
+- [x] Verify the plugin loads in the existing ESLint config (flat config or `.eslintrc`).
 
 **Verification:**
 - `npx eslint --print-config src/app/App.tsx | grep import` shows plugin active.
@@ -136,7 +136,7 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 
 ### Task 2.2 — Add `no-restricted-paths` rule configuration
 
-- [ ] In the ESLint config file, add `import/no-restricted-paths` zones:
+- [x] In the ESLint config file, add `import/no-restricted-paths` zones:
   - **Zone: feature isolation** — `src/features/` cannot import from other `src/features/` subdirectories (except self).
   - **Exception: cleaned shared imports** — features may import from `src/shared/`.
   - **Temporary exceptions** for dirty scopes that are NOT yet cleaned:
@@ -150,27 +150,25 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
     - `onboarding → inventory` (deferred to WU4)
     - `recipes → inventory` (deferred to WU5)
     - `recipes → settings` (deferred to WU5)
-    - `recipes → quotes` (deferred to WU5)
     - `crm → quotes` (deferred to WU5)
-    - `inventory → quotes` (deferred to WU5)
   - Each exception must include a code comment: `// SDD8 temp exception — remove after <WU#> completion`
-- [ ] **Critical:** Run `npm run lint` after configuration. It MUST pass. If it fails, adjust exceptions until green.
+- [x] **Critical:** Run `npm run lint` after configuration. It MUST pass. If it fails, adjust exceptions until green.
 
 **Verification:**
 - `npm run lint` exits 0.
 - ESLint config has `no-restricted-paths` zones with documented exceptions.
-- A manual test: adding a fake `import { X } from '@/features/crm/...'` in `src/features/quotes/` triggers a lint error (for the non-excepted pairs).
+- A manual test: adding a fake `import { X } from '@/features/crm/...'` in `src/features/auth/` triggers a lint error (for a non-excepted pair).
 
 ### Task 2.3 — Update AGENTS.md with import boundary documentation
 
-- [ ] Add a section to `AGENTS.md` documenting the target import model:
+- [x] Add a section to `AGENTS.md` documenting the target import model:
   ```
   src/app/**                  → may compose multiple features
   src/features/<feature>/**   → may import self and src/shared/** only
   src/shared/**               → must not import src/features/**
   ```
-- [ ] Reference `eslint-plugin-import` `no-restricted-paths` as the enforcement mechanism.
-- [ ] Note that temporary exceptions exist and link to this SDD8 change.
+- [x] Reference `eslint-plugin-import` `no-restricted-paths` as the enforcement mechanism.
+- [x] Note that temporary exceptions exist and link to this SDD8 change.
 
 **Verification:**
 - AGENTS.md contains the import model documentation.
@@ -179,9 +177,9 @@ Deferred (WU5 — core coupling decision) ←  OpenSpec doc only, no implementat
 ### Task 2.4 — PR2 commit and verification
 
 - [ ] Commit as: `chore(lint): add feature-sliced import boundary rules with SDD8 staged exceptions`
-- [ ] Run `npm test` — all tests green.
-- [ ] Run `npm run lint` — exits 0.
-- [ ] Verify diff changed-line count ≤ 120.
+- [x] Run `npm test` — all tests green.
+- [x] Run `npm run lint` — exits 0.
+- [x] Verify diff changed-line count ≤ 120.
 
 **Rollback:** Remove the `no-restricted-paths` rule and exception entries from ESLint config. Revert AGENTS.md additions. Config-only change, no runtime impact.
 
