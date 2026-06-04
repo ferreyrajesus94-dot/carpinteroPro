@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { formatCurrency } from '@/features/quotes/types'
+import { formatCurrency } from '@/shared/lib/formatters'
 import { QuoteStatusBadge } from '@/features/quotes/components/QuoteStatusBadge'
 import { getSalePrice, type DashboardStats } from '../hooks/useDashboardStats'
 

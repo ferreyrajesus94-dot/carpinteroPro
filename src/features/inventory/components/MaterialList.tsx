@@ -24,7 +24,7 @@ import { PriceSparkline, type SparklinePoint } from './PriceSparkline'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { exportMaterialsCsv } from '../lib/exportMaterialsCsv'
-import { formatCurrency } from '@/features/quotes/types'
+import { formatCurrency } from '@/shared/lib/formatters'
 import type { Material, MaterialCategory } from '../types'
 import { MATERIAL_CATEGORIES, WOOD_SUBTYPES } from '../types'
 

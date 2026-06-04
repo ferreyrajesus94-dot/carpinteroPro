@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card'
 import { Separator } from '@/shared/ui/separator'
 import { calculateQuote } from '../lib/calculator'
-import { formatCurrency, type QuoteFormValues } from '../types'
+import { formatCurrency } from '@/shared/lib/formatters'
+import type { QuoteFormValues } from '../types'
 
 interface QuoteLivePreviewProps {
   recipeCost: number

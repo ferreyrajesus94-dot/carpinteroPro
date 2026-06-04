@@ -1,5 +1,6 @@
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { QUOTE_STATUS_LABELS, QUOTE_STATUS_HEX_COLORS, formatCurrency } from '@/features/quotes/types'
+import { formatCurrency } from '@/shared/lib/formatters'
+import { QUOTE_STATUS_LABELS, QUOTE_STATUS_HEX_COLORS } from '@/features/quotes/types'
 import type { QuoteStatus } from '@/features/quotes/types'
 import type { DashboardStats } from '../hooks/useDashboardStats'
 

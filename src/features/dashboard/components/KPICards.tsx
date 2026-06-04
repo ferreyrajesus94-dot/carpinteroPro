@@ -1,4 +1,4 @@
-import { formatCurrency } from '@/features/quotes/types'
+import { formatCurrency } from '@/shared/lib/formatters'
 import type { DashboardStats } from '../hooks/useDashboardStats'
 
 interface Props {

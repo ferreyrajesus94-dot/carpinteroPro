@@ -3,7 +3,7 @@ import { formatARS } from '@/shared/lib/utils'
 import { computeRecipeCost } from '../types'
 import { computeWoodUsage } from './computeWoodUsage'
 import type { FurnitureTemplateWithItems } from '../types'
-import type { WorkshopSettings } from '@/features/quotes/types'
+import type { WorkshopSettings } from '@/shared/types/workshopSettings'
 
 export interface TechnicalSheetData {
   template: FurnitureTemplateWithItems

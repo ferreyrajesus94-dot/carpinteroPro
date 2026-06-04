@@ -17,10 +17,6 @@ export type ContractTemplate = Database['public']['Tables']['contract_templates'
 export type ContractTemplateInsert = Database['public']['Tables']['contract_templates']['Insert']
 export type ContractTemplateUpdate = Database['public']['Tables']['contract_templates']['Update']
 
-export type WorkshopSettings = Database['public']['Tables']['workshop_settings']['Row']
-export type WorkshopSettingsInsert = Database['public']['Tables']['workshop_settings']['Insert']
-export type WorkshopSettingsUpdate = Database['public']['Tables']['workshop_settings']['Update']
-
 export type QuoteRecipeSnapshot = Database['public']['Tables']['quote_recipe_snapshots']['Row']
 export type QuoteRecipeSnapshotInsert = Database['public']['Tables']['quote_recipe_snapshots']['Insert']
 export type QuoteLaborSnapshot = Database['public']['Tables']['quote_labor_snapshots']['Row']
@@ -72,14 +68,4 @@ export interface QuoteFormValues {
   margin_pct: number
   status: 'presupuesto' | 'enviado' | 'aprobado' | 'en_produccion' | 'entregado' | 'cancelado'
   notes?: string
-}
-
-// Formatea números al estilo argentino: 1234567.89 → "$1.234.567,89"
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
 }

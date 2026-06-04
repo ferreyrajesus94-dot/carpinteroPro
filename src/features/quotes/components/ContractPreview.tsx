@@ -17,7 +17,7 @@ import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettin
 import { renderContract } from '../lib/contractRenderer'
 import { generateQuotePDF } from '../lib/pdf'
 import { calculateQuote, type CalcExtra } from '../lib/calculator'
-import { formatCurrency } from '../types'
+import { formatCurrency } from '@/shared/lib/formatters'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 

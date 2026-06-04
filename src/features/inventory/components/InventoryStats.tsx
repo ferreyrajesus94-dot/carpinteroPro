@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Skeleton } from '@/shared/ui/skeleton'
-import { formatCurrency } from '@/features/quotes/types'
+import { formatCurrency } from '@/shared/lib/formatters'
 import { useMaterials } from '../hooks/useMaterials'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { computeInventoryStats } from '../lib/computeInventoryStats'

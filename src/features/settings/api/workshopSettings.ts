@@ -1,7 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
+import type { WorkshopSettings } from '@/shared/types/workshopSettings'
 import type { Database } from '@/shared/types/database'
 
-type WorkshopSettings = Database['public']['Tables']['workshop_settings']['Row']
 type WorkshopSettingsInsert = Database['public']['Tables']['workshop_settings']['Insert']
 type WorkshopSettingsUpdate = Database['public']['Tables']['workshop_settings']['Update']
 

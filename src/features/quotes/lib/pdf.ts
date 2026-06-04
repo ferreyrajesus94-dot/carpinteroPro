@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf'
-import { formatCurrency } from '../types'
+import { formatCurrency } from '@/shared/lib/formatters'
 import { calculateQuote, type CalcExtra } from './calculator'
-import type { QuoteWithExtras, WorkshopSettings } from '../types'
+import type { WorkshopSettings } from '@/shared/types/workshopSettings'
+import type { QuoteWithExtras } from '../types'
 
 export interface QuotePDFData {
   quote: QuoteWithExtras

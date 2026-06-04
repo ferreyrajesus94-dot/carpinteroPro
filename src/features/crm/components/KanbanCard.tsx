@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { calculateQuote } from '@/features/quotes/lib/calculator'
-import { formatCurrency, QUOTE_STATUS_COLORS } from '@/features/quotes/types'
+import { formatCurrency } from '@/shared/lib/formatters'
+import { QUOTE_STATUS_COLORS } from '@/features/quotes/types'
 import type { QuoteWithExtras } from '@/features/quotes/types'
 
 interface KanbanCardProps {
