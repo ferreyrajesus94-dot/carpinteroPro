@@ -30,6 +30,21 @@ Not implemented yet:
 - PR C structured billing edge errors (explicitly out of scope for this run).
 - SDD7 work remains untouched.
 
+## TDD Cycle Evidence
+
+### Strict TDD Evidence (PR A)
+
+| Cycle | RED evidence | GREEN evidence | TRIANGULATE / REFACTOR evidence | Notes |
+| --- | --- | --- | --- | --- |
+| Reporter | `src/shared/lib/errorReporter.test.ts` initially failed because `./errorReporter` did not exist. | Implemented `src/shared/lib/errorReporter.ts`; focused reporter tests passed. | Added coverage for DSN-present initialization, DSN-absent no-op behavior, unknown input safety, and context allowlist / route query stripping. | Reporter remains env-gated and no-op unless configured. Arbitrary metadata/tags are not forwarded outside the allowlist. |
+| Support contact | `src/shared/lib/supportContact.test.ts` initially failed because `./supportContact` did not exist, then failed on mailto space encoding. | Implemented `src/shared/lib/supportContact.ts`; focused support-contact tests passed after encoding fix. | Added missing/invalid email coverage and subject/body encoding coverage. | No broken `mailto:` link is produced when support email is absent or invalid. |
+| ErrorBoundary | `src/shared/components/ErrorBoundary.test.tsx` initially failed before the component existed. | Implemented class-based `ErrorBoundary` plus exported fallback UI; focused ErrorBoundary tests passed. | Added tests for render crash capture, reporter call, retry/recovery behavior, and optional support link rendering. | Class component is intentional because React error boundaries require lifecycle methods. |
+| Global handlers | `src/shared/lib/registerGlobalErrorHandlers.test.ts` initially failed before the helper existed. | Implemented global `error` and `unhandledrejection` listener registration plus cleanup; focused global-handler tests passed. | Added duplicate/cleanup behavior coverage to ensure cleanup removes handlers and prevents stale reporting. | The helper returns a cleanup function and is later wired by PR B. |
+
+### Fresh Review Fix (PR A)
+
+A fresh reviewer found one blocker: arbitrary `tags` could forward PII despite the privacy allowlist. The reporter now removes free-form tags entirely and forwards only explicit top-level allowlisted context. A nice-to-have was also fixed: `supportEmail={null}` now explicitly disables support links even if `VITE_SUPPORT_EMAIL` is configured.
+
 ## Strict TDD Evidence (PR B)
 
 | Cycle | RED evidence | GREEN evidence | Notes |

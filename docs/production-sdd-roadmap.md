@@ -29,7 +29,7 @@ CarpinteroPro is not ready for public paid production yet. Use this roadmap to r
 - SDD 4 — archived / PASS_WITH_WARNING (2026-06-01).
 - SDD 5 — archived / PASS (2026-06-02).
 - SDD 7 and SDD 8 are now ready to start.
-- SDD 6 is unblocked by SDD 5 completion and may begin.
+- SDD 6 is archived; SDD 7 remains the next pre-SDD9 cleanup target.
 
 ## SDD 1 — Tenant security / RLS
 
@@ -135,13 +135,17 @@ Delivered:
 
 ## SDD 6 — Observability/support
 
+**Status:** archived / PASS (2026-06-05).
+
 Goal: detect and diagnose production errors without leaking PII.
 
-Likely scope:
+Delivered:
 
-- Error reporter.
-- Error boundaries with support IDs.
-- Supabase/auth/network failure handling.
+- Shared env-gated error reporter with privacy allowlist.
+- Support contact helper and configurable `VITE_SUPPORT_EMAIL` docs.
+- React ErrorBoundary, global browser error handlers, and route fallback reporting.
+- TanStack Query global query/mutation error reporting.
+- Billing edge functions with stable structured error codes.
 
 ## SDD 7 — Business-critical E2E
 
