@@ -2,13 +2,16 @@
 
 ## Scope
 
-SDD 7 adds a Playwright suite for business-critical billing access and tenant regressions:
+SDD 7 adds a Playwright suite for business-critical billing access, tenant regressions, and operational workflows:
 
 - `tests/e2e/browser/billing-gate-active-trial.spec.ts`
 - `tests/e2e/browser/billing-gate-blocked.spec.ts`
+- `tests/e2e/browser/quote-creation.spec.ts`
+- `tests/e2e/browser/contract-pdf.spec.ts`
 - `tests/e2e/integration/subscription-state.spec.ts`
 - `tests/e2e/integration/mercadopago-webhook.spec.ts`
 - `tests/e2e/integration/tenant-isolation.spec.ts`
+- `tests/e2e/integration/inventory-stock-movement.spec.ts`
 
 The existing fast suite remains `npm test` and is not coupled to Playwright.
 
@@ -54,9 +57,12 @@ E2E_TEST_PASSWORD=<dedicated strong test password>
    ```bash
    npm run test:e2e -- tests/e2e/browser/billing-gate-active-trial.spec.ts
    npm run test:e2e -- tests/e2e/browser/billing-gate-blocked.spec.ts
+   npm run test:e2e -- tests/e2e/browser/quote-creation.spec.ts
+   npm run test:e2e -- tests/e2e/browser/contract-pdf.spec.ts
    npm run test:e2e -- tests/e2e/integration/subscription-state.spec.ts
    npm run test:e2e -- tests/e2e/integration/mercadopago-webhook.spec.ts
    npm run test:e2e -- tests/e2e/integration/tenant-isolation.spec.ts
+   npm run test:e2e -- tests/e2e/integration/inventory-stock-movement.spec.ts
    ```
 4. Use Playwright UI or debugger:
    ```bash
@@ -72,7 +78,7 @@ Fixtures use stable `e2e_sdd7_` identity names and workshop IDs documented in `s
 - `e2e_sdd7_user_b@example.invalid`
 - `e2e_sdd7_active_trial_workshop`
 - `e2e_sdd7_workshop_b`
-- matching `profiles`, `subscriptions`, `materials`, and `billing_webhook_events` rows
+- matching `profiles`, `subscriptions`, `clients`, `furniture_templates`, `recipe_items`, `labor_items`, `contract_templates`, `quotes`, `quote_extras`, quote snapshot rows, `materials`, `stock_movements`, and `billing_webhook_events` rows
 
 ## CI expectations
 

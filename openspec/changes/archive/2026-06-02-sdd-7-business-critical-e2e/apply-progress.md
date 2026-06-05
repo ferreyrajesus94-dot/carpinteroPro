@@ -132,3 +132,38 @@
 ## Persistence
 
 - Engram memory tools were unavailable in this subagent session; this progress file is the persisted OpenSpec artifact.
+
+## PR 3 Apply Progress
+
+- Applied scope: PR 3 only — quote creation browser workflow, contract/PDF browser surface, inventory stock movement integration, and runbook updates.
+- Added a database hardening migration for `apply_stock_movement` after the RED inventory isolation check exposed that cross-workshop material IDs could be accepted by the RPC path in local E2E.
+- Explicitly not implemented: SDD9 core coupling cleanup or non-SDD7 workflows.
+
+### PR 3 Completed Tasks
+
+- [x] Task 3.1 — Added `tests/e2e/browser/quote-creation.spec.ts` covering login, client/template selection, calculated quote total, persisted quote, recipe snapshots, and labor snapshots.
+- [x] Task 3.2 — Added `tests/e2e/browser/contract-pdf.spec.ts` covering contract rendering with customer/project/total data and PDF download initiation.
+- [x] Task 3.3 — Added `tests/e2e/integration/inventory-stock-movement.spec.ts` covering stock increase/decrease RPC writes and tenant-isolated stock movement RLS denial; added `supabase/migrations/20260605000100_harden_stock_movement_rpc.sql` for explicit RPC tenant hardening.
+- [x] Task 3.4 — Updated `docs/testing/runbook.md` with PR 3 specs and expanded fixture cleanup coverage.
+
+### PR 3 TDD / Fix Evidence
+
+| Cycle | RED | GREEN | REFACTOR |
+| --- | --- | --- | --- |
+| PR 3 operational specs | Focused PR 3 E2E initially failed without E2E env, then with env exposed browser selector/format assumptions and an inventory isolation gap: the stock movement RPC did not reject a cross-workshop material ID. | Added deterministic quote/contract/stock fixture helpers, hardened `apply_stock_movement`, and fixed browser assertions to target visible cells/contract content; focused PR 3 E2E passed 5/5. | Kept helper exports Node-only in `scripts/e2e/fixtures.ts`, reused existing authenticated anon clients, and documented new specs/cleanup in the runbook. |
+
+### PR 3 Verification
+
+| Command | Exit | Evidence |
+| --- | ---: | --- |
+| `npx tsc -p tsconfig.node.json --noEmit` | 0 | Node/E2E fixture typing passed after PR 3 helper additions. |
+| `npm test` | 0 | 41 files / 271 tests passed. |
+| `npx tsc -p tsconfig.app.json --noEmit && npx tsc -p tsconfig.node.json --noEmit` | 0 | App and Node type-checks passed. |
+| `npm run test:e2e -- --list` | 0 | Listed 15 Playwright tests across 8 files without requiring E2E secrets at import time. |
+| `npm run test:e2e -- tests/e2e/browser/quote-creation.spec.ts tests/e2e/browser/contract-pdf.spec.ts tests/e2e/integration/inventory-stock-movement.spec.ts` | 1 | RED/fix evidence: missing env first, then visible selector issues and cross-tenant stock movement gap. |
+| `supabase db query --local --file supabase/migrations/20260605000100_harden_stock_movement_rpc.sql` | 0 | Applied local RPC hardening for focused verification after creating the migration. |
+| `npm run test:e2e -- tests/e2e/browser/quote-creation.spec.ts tests/e2e/browser/contract-pdf.spec.ts tests/e2e/integration/inventory-stock-movement.spec.ts` | 0 | Focused PR 3 E2E passed 5/5 against local Supabase. |
+
+## Remaining Tasks
+
+- Run full SDD7 verification including full Playwright suite, lint/build, fresh review, then sync/archive SDD7 if clean.

@@ -5,6 +5,15 @@ type TestClient = SupabaseClient<Database>;
 type SubscriptionRow = Database["public"]["Tables"]["subscriptions"]["Row"];
 type SubscriptionStatus = SubscriptionRow["status"];
 type MaterialRow = Database["public"]["Tables"]["materials"]["Row"];
+type QuoteRow = Database["public"]["Tables"]["quotes"]["Row"];
+type QuoteWithRelations = QuoteRow & {
+	client: Database["public"]["Tables"]["clients"]["Row"] | null;
+	extras: Database["public"]["Tables"]["quote_extras"]["Row"][];
+	recipe_snapshots: Database["public"]["Tables"]["quote_recipe_snapshots"]["Row"][];
+	labor_snapshots: Database["public"]["Tables"]["quote_labor_snapshots"]["Row"][];
+};
+type StockMovementRow = Database["public"]["Tables"]["stock_movements"]["Row"];
+type StockMovementReason = Database["public"]["Enums"]["stock_movement_reason"];
 type WebhookEventRow =
 	Database["public"]["Tables"]["billing_webhook_events"]["Row"];
 
@@ -14,6 +23,12 @@ const secondWorkshopId = "00000000-0000-4000-8000-000000070003";
 const secondSubscriptionId = "00000000-0000-4000-8000-000000070004";
 const materialAId = "00000000-0000-4000-8000-000000070005";
 const materialBId = "00000000-0000-4000-8000-000000070006";
+const quoteClientId = "00000000-0000-4000-8000-000000070007";
+const quoteTemplateId = "00000000-0000-4000-8000-000000070008";
+const quoteRecipeItemId = "00000000-0000-4000-8000-000000070009";
+const quoteLaborItemId = "00000000-0000-4000-8000-00000007000a";
+const quoteId = "00000000-0000-4000-8000-00000007000b";
+const contractTemplateId = "00000000-0000-4000-8000-00000007000c";
 const email = "e2e_sdd7_active_trial@example.invalid";
 const secondEmail = "e2e_sdd7_user_b@example.invalid";
 const workshopName = "e2e_sdd7_active_trial_workshop";
@@ -44,6 +59,28 @@ export interface MaterialFixture {
 	workshopBId: string;
 	materialA: MaterialRow;
 	materialB: MaterialRow;
+}
+
+export interface QuoteWorkflowFixture extends ActiveTrialFixture {
+	clientId: string;
+	materialId: string;
+	templateId: string;
+	expectedRecipeCost: number;
+	expectedSalePrice: number;
+	quoteId: string;
+	quoteNumber: string;
+}
+
+export interface StockMovementFixture extends MaterialFixture {
+	initialStock: number;
+}
+
+export interface StockMovementOptions {
+	materialId: string;
+	delta: number;
+	reason: StockMovementReason;
+	note?: string | null;
+	quoteId?: string | null;
 }
 
 export interface WebhookSimulationOptions {
@@ -167,6 +204,36 @@ export async function cleanupSdd7Fixtures(): Promise<void> {
 			.delete()
 			.in("workshop_id", workshopIds);
 		if (webhookEventError) throw webhookEventError;
+
+		const quoteTables = [
+			"quote_extras",
+			"quote_recipe_snapshots",
+			"quote_labor_snapshots",
+			"stock_movements",
+			"quotes",
+		] as const;
+		for (const table of quoteTables) {
+			const { error } = await client
+				.from(table)
+				.delete()
+				.in("workshop_id", workshopIds);
+			if (error) throw error;
+		}
+
+		const recipeTables = [
+			"recipe_items",
+			"labor_items",
+			"contract_templates",
+			"furniture_templates",
+			"clients",
+		] as const;
+		for (const table of recipeTables) {
+			const { error } = await client
+				.from(table)
+				.delete()
+				.in("workshop_id", workshopIds);
+			if (error) throw error;
+		}
 
 		const { error: materialError } = await client
 			.from("materials")
@@ -333,6 +400,174 @@ export async function seedMaterialIsolationFixtures(): Promise<MaterialFixture> 
 		materialA,
 		materialB,
 	};
+}
+
+export async function seedQuoteWorkflowFixture(): Promise<QuoteWorkflowFixture> {
+	const fixture = await seedActiveTrialFixture();
+	const client = adminClient();
+	const now = new Date().toISOString();
+
+	const { error: clientError } = await client.from("clients").upsert({
+		id: quoteClientId,
+		workshop_id: fixture.workshopId,
+		name: "SDD 7 Cliente Presupuesto",
+		phone: "+541112345678",
+		email: "cliente.sdd7@example.invalid",
+		source: "otro",
+	});
+	if (clientError) throw clientError;
+
+	const { data: material, error: materialError } = await client
+		.from("materials")
+		.upsert({
+			id: materialAId,
+			workshop_id: fixture.workshopId,
+			name: "e2e_sdd7_material_quote",
+			category: "herraje",
+			unit: "un",
+			price_per_unit: 100,
+			stock: 10,
+			min_stock: 1,
+		})
+		.select("*")
+		.single();
+	if (materialError) throw materialError;
+
+	const { error: templateError } = await client
+		.from("furniture_templates")
+		.upsert({
+			id: quoteTemplateId,
+			workshop_id: fixture.workshopId,
+			name: "SDD 7 Mesa Operativa",
+			category: "mesa",
+			tags: ["e2e_sdd7"],
+			suggested_margin_pct: 30,
+			params: [],
+		});
+	if (templateError) throw templateError;
+
+	const { error: recipeError } = await client.from("recipe_items").upsert({
+		id: quoteRecipeItemId,
+		workshop_id: fixture.workshopId,
+		furniture_template_id: quoteTemplateId,
+		material_id: material.id,
+		quantity: 2,
+		waste_pct: 10,
+	});
+	if (recipeError) throw recipeError;
+
+	const { error: laborError } = await client.from("labor_items").upsert({
+		id: quoteLaborItemId,
+		workshop_id: fixture.workshopId,
+		furniture_template_id: quoteTemplateId,
+		description: "Armado E2E",
+		hours: 3,
+		rate: 50,
+	});
+	if (laborError) throw laborError;
+
+	const { error: contractTemplateError } = await client
+		.from("contract_templates")
+		.upsert({
+			id: contractTemplateId,
+			workshop_id: fixture.workshopId,
+			name: "Contrato SDD 7",
+			body_markdown:
+				"Contrato para **{{client_name}}** por {{furniture_name}}. Total: **{{total}}**.",
+			is_default: true,
+			updated_at: now,
+		});
+	if (contractTemplateError) throw contractTemplateError;
+
+	return {
+		...fixture,
+		clientId: quoteClientId,
+		materialId: material.id,
+		templateId: quoteTemplateId,
+		expectedRecipeCost: 370,
+		expectedSalePrice: 481,
+		quoteId,
+		quoteNumber: "P-0001",
+	};
+}
+
+export async function seedContractQuoteFixture(): Promise<QuoteWorkflowFixture> {
+	const fixture = await seedQuoteWorkflowFixture();
+	const client = adminClient();
+	const { error: quoteError } = await client.from("quotes").upsert({
+		id: quoteId,
+		workshop_id: fixture.workshopId,
+		quote_number: fixture.quoteNumber,
+		client_id: fixture.clientId,
+		furniture_template_id: fixture.templateId,
+		furniture_name: "SDD 7 Mesa Operativa",
+		recipe_cost: fixture.expectedRecipeCost,
+		status: "presupuesto",
+		margin_mode: "on_cost",
+		margin_pct: 30,
+	});
+	if (quoteError) throw quoteError;
+	return fixture;
+}
+
+export async function fetchFixtureQuoteByFurnitureName(
+	furnitureName: string,
+): Promise<QuoteWithRelations | null> {
+	const { data, error } = await adminClient()
+		.from("quotes")
+		.select(
+			"*, client:clients (*), extras:quote_extras (*), recipe_snapshots:quote_recipe_snapshots (*), labor_snapshots:quote_labor_snapshots (*)",
+		)
+		.eq("furniture_name", furnitureName)
+		.maybeSingle();
+	if (error) throw error;
+	return data as QuoteWithRelations | null;
+}
+
+export async function seedStockMovementFixture(): Promise<StockMovementFixture> {
+	const fixture = await seedMaterialIsolationFixtures();
+	return { ...fixture, initialStock: fixture.materialA.stock };
+}
+
+export async function applyFixtureStockMovement(
+	client: TestClient,
+	options: StockMovementOptions,
+): Promise<number> {
+	const { data, error } = await client.rpc("apply_stock_movement", {
+		p_material_id: options.materialId,
+		p_delta: options.delta,
+		p_reason: options.reason,
+		p_note: options.note ?? null,
+		p_quote_id: options.quoteId ?? null,
+	});
+	if (error) throw error;
+	return data as number;
+}
+
+export async function fetchFixtureMaterial(
+	client: TestClient,
+	materialId: string,
+): Promise<MaterialRow | null> {
+	const { data, error } = await client
+		.from("materials")
+		.select("*")
+		.eq("id", materialId)
+		.maybeSingle();
+	if (error) throw error;
+	return data;
+}
+
+export async function fetchFixtureStockMovements(
+	client: TestClient,
+	materialId: string,
+): Promise<StockMovementRow[]> {
+	const { data, error } = await client
+		.from("stock_movements")
+		.select("*")
+		.eq("material_id", materialId)
+		.order("created_at", { ascending: true });
+	if (error) throw error;
+	return data ?? [];
 }
 
 export async function createAuthenticatedFixtureClient(): Promise<TestClient> {

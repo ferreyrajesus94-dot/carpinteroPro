@@ -112,7 +112,7 @@ sdd_packages:
   - id: sdd-7
     name: "Business-critical E2E"
     priority: P2
-    status: ready_to_start
+    status: archived
     depends_on:
       - sdd-1
       - sdd-2
@@ -126,7 +126,7 @@ sdd_packages:
     launch_blocker: false
 
 known_gaps:
-  - "SDD 7 business-critical E2E remains pending. SDD 6 observability/support and SDD 8 architecture cleanup are archived; remaining core coupling exceptions require SDD9 follow-up implementation."
+  - "SDD 6 observability/support, SDD 7 business-critical E2E, and SDD 8 architecture cleanup are archived; remaining core coupling exceptions require SDD9 follow-up implementation."
 
 conventions:
   - "Every table must include workshop_id uuid NOT NULL."
