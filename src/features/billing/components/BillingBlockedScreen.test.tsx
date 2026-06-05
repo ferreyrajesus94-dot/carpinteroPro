@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BillingBlockedScreen } from "./BillingBlockedScreen";
 import type { SubscriptionRow } from "@/features/billing/types";
@@ -45,6 +45,10 @@ function makeSub(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
 }
 
 describe("BillingBlockedScreen", () => {
+	afterEach(() => {
+		vi.unstubAllEnvs();
+	});
+
 	it("renders blocked message without business data", () => {
 		render(
 			<BillingBlockedScreen subscription={makeSub({ status: "past_due" })} />,
@@ -120,16 +124,53 @@ describe("BillingBlockedScreen", () => {
 		).toBeDisabled();
 	});
 
-	it("renders support links", () => {
+	it("renders WhatsApp and support email links when support email is configured", () => {
+		vi.stubEnv("VITE_SUPPORT_EMAIL", "soporte@carpinteropro.app");
 		render(<BillingBlockedScreen subscription={makeSub()} />);
-		expect(screen.getByRole("link", { name: /WhatsApp/i })).toHaveAttribute(
+
+		const whatsappLink = screen.getByTestId("billing-whatsapp-link");
+		expect(whatsappLink).toHaveAttribute(
 			"href",
-			expect.stringContaining("wa.me"),
+			expect.stringContaining("https://wa.me/"),
 		);
-		expect(screen.getByRole("link", { name: /email/i })).toHaveAttribute(
+
+		const supportLink = screen.getByTestId("billing-support-link");
+		expect(supportLink).toHaveAttribute(
 			"href",
-			expect.stringContaining("mailto:hola@carpinteropro.app"),
+			expect.stringContaining("mailto:soporte@carpinteropro.app"),
 		);
+		expect(supportLink).toHaveAttribute(
+			"href",
+			expect.stringContaining("subject=Ayuda%20con%20mi%20suscripci%C3%B3n"),
+		);
+	});
+
+	it("keeps WhatsApp and does not render broken email link when support email is absent", () => {
+		vi.stubEnv("VITE_SUPPORT_EMAIL", "");
+		render(<BillingBlockedScreen subscription={makeSub()} />);
+
+		expect(screen.getByTestId("billing-whatsapp-link")).toBeInTheDocument();
+		expect(
+			screen.queryByTestId("billing-support-link"),
+		).not.toBeInTheDocument();
+	});
+
+	it("preserves billing CTAs alongside support link wiring", () => {
+		vi.stubEnv("VITE_SUPPORT_EMAIL", "soporte@carpinteropro.app");
+		render(
+			<BillingBlockedScreen
+				subscription={makeSub({ status: "past_due" })}
+				onStartPayment={vi.fn()}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: /Actualizar pago/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /Cerrar sesión/i }),
+		).toBeInTheDocument();
+		expect(screen.getByTestId("billing-support-link")).toBeInTheDocument();
 	});
 
 	it("renders logout button", () => {

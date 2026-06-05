@@ -26,12 +26,16 @@ These values are exposed to the browser by Vite. They are safe to configure in `
 | --- | --- | --- |
 | `VITE_SUPABASE_URL` | Supabase dashboard → Project settings → API | Frontend Supabase project URL. |
 | `VITE_SUPABASE_ANON_KEY` | Supabase dashboard → Project settings → API | Public anon key used with RLS. |
+| `VITE_SENTRY_DSN` | Sentry project settings, if observability is enabled | Optional browser error reporting DSN; leave blank to keep reporting no-op. |
+| `VITE_SUPPORT_EMAIL` | Product/support inbox | Optional support address used to build safe `mailto:` links in recovery screens. |
 
 Example:
 
 ```dotenv
 VITE_SUPABASE_URL=<your-supabase-project-url>
 VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+VITE_SENTRY_DSN=
+VITE_SUPPORT_EMAIL=soporte@example.com
 ```
 
 ## Server-only secrets

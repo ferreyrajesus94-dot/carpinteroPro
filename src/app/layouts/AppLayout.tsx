@@ -4,6 +4,7 @@ import { cn } from '@/shared/lib/utils'
 import { OfflineBanner } from '@/shared/components/OfflineBanner'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { useAuth, type ProfileIssue } from '@/shared/providers/AuthProvider'
+import { getSupportMailtoHref } from '@/shared/lib/supportContact'
 import { useSubscription } from '@/features/billing/hooks/useSubscription'
 import { useCreateSubscription } from '@/features/billing/hooks/useBillingActions'
 import { BillingGate } from '@/features/billing/components/BillingGate'
@@ -60,6 +61,10 @@ function AuthProfileRecoveryScreen({ issue, onRetry, onSignOut }: AuthProfileRec
   const title = issue?.title ?? 'No pudimos cargar tu perfil de taller'
   const message = issue?.message
     ?? 'Hubo un problema al cargar la información de tu taller. Reintentá en unos segundos o cerrá sesión para volver a ingresar.'
+  const profileSupportHref = getSupportMailtoHref({
+    subject: 'Problema con mi perfil de taller',
+    body: 'Necesito ayuda con un error al cargar mi perfil en CarpinteroPro.',
+  })
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
@@ -72,6 +77,17 @@ function AuthProfileRecoveryScreen({ issue, onRetry, onSignOut }: AuthProfileRec
         <p className="mt-3 text-xs leading-5 text-ink3">
           Si el problema continúa, contactá a soporte e indicá el email de tu cuenta.
         </p>
+        {profileSupportHref ? (
+          <p className="mt-2 text-xs leading-5 text-ink3">
+            <a
+              data-testid="profile-recovery-support-link"
+              href={profileSupportHref}
+              className="text-cp-accent underline hover:text-cp-accent-ink"
+            >
+              Escribir a soporte
+            </a>
+          </p>
+        ) : null}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             type="button"

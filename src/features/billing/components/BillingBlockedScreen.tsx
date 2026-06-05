@@ -1,6 +1,7 @@
 import { useAuth } from "@/shared/providers/AuthProvider";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { BillingSettingsCard } from "@/features/billing/components/BillingSettingsCard";
 import { formatBillingStatus } from "@/features/billing/lib/access";
 import type { SubscriptionRow } from "@/features/billing/types";
@@ -17,6 +18,12 @@ export function BillingBlockedScreen({
 	isPaymentLoading = false,
 }: BillingBlockedScreenProps) {
 	const { signOut } = useAuth();
+	const supportHref = getSupportMailtoHref({
+		subject: "Ayuda con mi suscripción de CarpinteroPro",
+		body: "Necesito ayuda con un problema de facturación o suscripción.",
+	});
+	const whatsappHref =
+		"https://wa.me/?text=Necesito%20ayuda%20con%20mi%20suscripci%C3%B3n%20de%20CarpinteroPro";
 
 	const statusText = subscription
 		? formatBillingStatus(subscription)
@@ -52,20 +59,26 @@ export function BillingBlockedScreen({
 					<div className="text-center text-xs text-muted-foreground">
 						<span>¿Necesitás ayuda? </span>
 						<a
-							href="https://wa.me/?text=Necesito%20ayuda%20con%20mi%20suscripci%C3%B3n%20de%20CarpinteroPro"
+							data-testid="billing-whatsapp-link"
+							href={whatsappHref}
 							target="_blank"
 							rel="noreferrer"
 							className="underline hover:text-foreground"
 						>
 							WhatsApp
 						</a>
-						<span> o </span>
-						<a
-							href="mailto:hola@carpinteropro.app?subject=Ayuda%20con%20suscripci%C3%B3n"
-							className="underline hover:text-foreground"
-						>
-							email
-						</a>
+						{supportHref ? (
+							<>
+								<span> o </span>
+								<a
+									data-testid="billing-support-link"
+									href={supportHref}
+									className="underline hover:text-foreground"
+								>
+									email
+								</a>
+							</>
+						) : null}
 						<span>.</span>
 					</div>
 				</CardContent>

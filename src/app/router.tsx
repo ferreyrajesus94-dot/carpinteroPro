@@ -1,20 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
+import { RouteErrorFallback } from "@/shared/components/RouteErrorFallback";
 
 const hydrateFallbackElement = <div className="min-h-screen bg-background" />;
 
-const errorElement = (
-	<div className="flex h-screen flex-col items-center justify-center gap-4 p-8">
-		<p className="text-lg font-medium text-destructive">
-			Error al cargar la página
-		</p>
-		<button
-			className="text-sm text-muted-foreground underline"
-			onClick={() => window.location.reload()}
-		>
-			Recargar
-		</button>
-	</div>
-);
+const errorElement = <RouteErrorFallback />;
 
 export const router = createBrowserRouter([
 	{

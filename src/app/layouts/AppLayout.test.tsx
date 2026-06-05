@@ -246,6 +246,52 @@ describe("AppLayout billing integration", () => {
 		expect(screen.queryByText("CarpinteroPro")).not.toBeInTheDocument();
 	});
 
+	it("renders actionable support link on profile recovery when support email is configured", () => {
+		vi.stubEnv("VITE_SUPPORT_EMAIL", "soporte@carpinteropro.app");
+		setAuthState({
+			status: "profile_error",
+			profileIssue: {
+				kind: "query_error",
+				title: "No pudimos cargar tu perfil de taller",
+				message: "Hubo un problema al cargar la información de tu taller.",
+				retryable: true,
+			},
+			workshopId: null,
+			onboardedAt: null,
+		});
+
+		renderWithRouter();
+
+		const supportLink = screen.getByTestId("profile-recovery-support-link");
+		expect(supportLink).toHaveAttribute(
+			"href",
+			expect.stringContaining("mailto:soporte@carpinteropro.app"),
+		);
+		vi.unstubAllEnvs();
+	});
+
+	it("does not render broken support link on profile recovery when support email is absent", () => {
+		vi.stubEnv("VITE_SUPPORT_EMAIL", "");
+		setAuthState({
+			status: "profile_error",
+			profileIssue: {
+				kind: "query_error",
+				title: "No pudimos cargar tu perfil de taller",
+				message: "Hubo un problema al cargar la información de tu taller.",
+				retryable: true,
+			},
+			workshopId: null,
+			onboardedAt: null,
+		});
+
+		renderWithRouter();
+
+		expect(
+			screen.queryByTestId("profile-recovery-support-link"),
+		).not.toBeInTheDocument();
+		vi.unstubAllEnvs();
+	});
+
 	it("shows profile missing recovery screen instead of redirecting to onboarding", () => {
 		setAuthState({
 			status: "profile_missing",

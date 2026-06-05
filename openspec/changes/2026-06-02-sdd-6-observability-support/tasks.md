@@ -31,62 +31,62 @@ Estimated changed lines: **230–320**
 
 ### A1. Reporter tests RED
 
-- [ ] Create `src/shared/lib/errorReporter.test.ts`.
-- [ ] Test DSN-present initialization behavior.
-- [ ] Test DSN-absent no-op behavior.
-- [ ] Test `captureException` does not throw for `unknown` inputs.
-- [ ] Test context allowlist excludes arbitrary PII/business payload keys.
+- [x] Create `src/shared/lib/errorReporter.test.ts`.
+- [x] Test DSN-present initialization behavior.
+- [x] Test DSN-absent no-op behavior.
+- [x] Test `captureException` does not throw for `unknown` inputs.
+- [x] Test context allowlist excludes arbitrary PII/business payload keys.
 
 ### A2. Reporter implementation GREEN
 
-- [ ] Create `src/shared/lib/errorReporter.ts`.
-- [ ] Define explicit types for report context; no `any`.
-- [ ] Implement env-gated initialization.
-- [ ] Implement safe context allowlist.
-- [ ] Keep external reporting no-op unless configured.
-- [ ] Add/adjust Vite env typing for `VITE_SENTRY_DSN`.
+- [x] Create `src/shared/lib/errorReporter.ts`.
+- [x] Define explicit types for report context; no `any`.
+- [x] Implement env-gated initialization.
+- [x] Implement safe context allowlist.
+- [x] Keep external reporting no-op unless configured.
+- [x] Add/adjust Vite env typing for `VITE_SENTRY_DSN`.
 
 ### A3. Support contact tests RED
 
-- [ ] Create `src/shared/lib/supportContact.test.ts`.
-- [ ] Test configured `VITE_SUPPORT_EMAIL` produces a safe `mailto:` href.
-- [ ] Test missing support email returns no broken link.
-- [ ] Test subject/body encoding if helper supports it.
+- [x] Create `src/shared/lib/supportContact.test.ts`.
+- [x] Test configured `VITE_SUPPORT_EMAIL` produces a safe `mailto:` href.
+- [x] Test missing support email returns no broken link.
+- [x] Test subject/body encoding if helper supports it.
 
 ### A4. Support contact implementation GREEN
 
-- [ ] Create `src/shared/lib/supportContact.ts`.
-- [ ] Add/adjust Vite env typing for `VITE_SUPPORT_EMAIL`.
-- [ ] Update `.env.example` with placeholder/comment for `VITE_SUPPORT_EMAIL` and `VITE_SENTRY_DSN`.
+- [x] Create `src/shared/lib/supportContact.ts`.
+- [x] Add/adjust Vite env typing for `VITE_SUPPORT_EMAIL`.
+- [x] Update `.env.example` with placeholder/comment for `VITE_SUPPORT_EMAIL` and `VITE_SENTRY_DSN`.
 
 ### A5. ErrorBoundary tests RED
 
-- [ ] Create `src/shared/components/ErrorBoundary.test.tsx`.
-- [ ] Test render crash is caught and fallback appears.
-- [ ] Test reporter is called when child render fails.
-- [ ] Test recovery action resets/reloads according to implementation.
-- [ ] Test support link is shown only when configured.
+- [x] Create `src/shared/components/ErrorBoundary.test.tsx`.
+- [x] Test render crash is caught and fallback appears.
+- [x] Test reporter is called when child render fails.
+- [x] Test recovery action resets/reloads according to implementation.
+- [x] Test support link is shown only when configured.
 
 ### A6. ErrorBoundary implementation GREEN
 
-- [ ] Create `src/shared/components/ErrorBoundary.tsx`.
-- [ ] Use a functional exported fallback component if useful, but ErrorBoundary itself may be class-based because React error boundaries require lifecycle methods.
-- [ ] Report errors through shared reporter.
-- [ ] Render accessible fallback UI with recovery action and optional support link.
+- [x] Create `src/shared/components/ErrorBoundary.tsx`.
+- [x] Use a functional exported fallback component if useful, but ErrorBoundary itself may be class-based because React error boundaries require lifecycle methods.
+- [x] Report errors through shared reporter.
+- [x] Render accessible fallback UI with recovery action and optional support link.
 
 ### A7. Global handler tests RED
 
-- [ ] Create `src/shared/lib/registerGlobalErrorHandlers.test.ts`.
-- [ ] Test browser `error` event reports via reporter.
-- [ ] Test `unhandledrejection` reports via reporter.
-- [ ] Test cleanup removes handlers and prevents duplicate reporting.
+- [x] Create `src/shared/lib/registerGlobalErrorHandlers.test.ts`.
+- [x] Test browser `error` event reports via reporter.
+- [x] Test `unhandledrejection` reports via reporter.
+- [x] Test cleanup removes handlers and prevents duplicate reporting.
 
 ### A8. Global handler implementation GREEN
 
-- [ ] Create `src/shared/lib/registerGlobalErrorHandlers.ts`.
-- [ ] Register `window.addEventListener('error', ...)`.
-- [ ] Register `window.addEventListener('unhandledrejection', ...)`.
-- [ ] Return cleanup function.
+- [x] Create `src/shared/lib/registerGlobalErrorHandlers.ts`.
+- [x] Register `window.addEventListener('error', ...)`.
+- [x] Register `window.addEventListener('unhandledrejection', ...)`.
+- [x] Return cleanup function.
 
 ---
 
@@ -96,52 +96,52 @@ Estimated changed lines: **170–250**
 
 ### B1. QueryClient tests RED
 
-- [ ] Create or update `src/shared/lib/queryClient.test.ts`.
-- [ ] Test QueryCache `onError` routes query errors through the reporter.
-- [ ] Test MutationCache `onError` routes mutation errors through the reporter.
-- [ ] Ensure tests do not require real network/Supabase calls.
+- [x] Create or update `src/shared/lib/queryClient.test.ts`.
+- [x] Test QueryCache `onError` routes query errors through the reporter.
+- [x] Test MutationCache `onError` routes mutation errors through the reporter.
+- [x] Ensure tests do not require real network/Supabase calls.
 
 ### B2. QueryClient implementation GREEN
 
-- [ ] Modify `src/shared/lib/queryClient.ts` to add `QueryCache` and `MutationCache` global `onError` handlers.
-- [ ] Preserve existing `defaultOptions` and cache privacy behavior.
-- [ ] Avoid import cycles; reporter imports must stay shared-only.
+- [x] Modify `src/shared/lib/queryClient.ts` to add `QueryCache` and `MutationCache` global `onError` handlers.
+- [x] Preserve existing `defaultOptions` and cache privacy behavior.
+- [x] Avoid import cycles; reporter imports must stay shared-only.
 
 ### B3. App/router wiring tests RED
 
-- [ ] Add focused tests if existing app/router tests can cover the wrapper behavior.
-- [ ] Prove global handlers are registered and cleaned up by the app shell, or keep this covered by helper tests if App-level tests would be brittle.
+- [x] Add focused tests if existing app/router tests can cover the wrapper behavior.
+- [x] Prove global handlers are registered and cleaned up by the app shell, or keep this covered by helper tests if App-level tests would be brittle.
 
 ### B4. App/router wiring GREEN
 
-- [ ] Modify `src/main.tsx` to call reporter initialization before render.
-- [ ] Modify `src/app/App.tsx` to register global handlers and wrap app content in ErrorBoundary.
-- [ ] Modify `src/app/router.tsx` to replace static route fallback with shared recovery UI or shared fallback component.
+- [x] Modify `src/main.tsx` to call reporter initialization before render.
+- [x] Modify `src/app/App.tsx` to register global handlers and wrap app content in ErrorBoundary.
+- [x] Modify `src/app/router.tsx` to replace static route fallback with shared recovery UI or shared fallback component.
 
 ### B5. Auth/app-shell support tests RED
 
-- [ ] Update `src/app/layouts/AppLayout.test.tsx` to assert actionable support link when configured.
-- [ ] Assert no broken support link when support email is absent.
+- [x] Update `src/app/layouts/AppLayout.test.tsx` to assert actionable support link when configured.
+- [x] Assert no broken support link when support email is absent.
 
 ### B6. Auth/app-shell support implementation GREEN
 
-- [ ] Modify `src/app/layouts/AppLayout.tsx` profile recovery copy to use shared support-contact helper.
-- [ ] Keep retry/logout actions unchanged.
+- [x] Modify `src/app/layouts/AppLayout.tsx` profile recovery copy to use shared support-contact helper.
+- [x] Keep retry/logout actions unchanged.
 
 ### B7. Billing support tests RED
 
-- [ ] Update `src/features/billing/components/BillingBlockedScreen.test.tsx` to use env-configurable support link.
-- [ ] Preserve current billing CTA expectations.
+- [x] Update `src/features/billing/components/BillingBlockedScreen.test.tsx` to use env-configurable support link.
+- [x] Preserve current billing CTA expectations.
 
 ### B8. Billing support implementation GREEN
 
-- [ ] Modify `src/features/billing/components/BillingBlockedScreen.tsx` to use shared support-contact helper instead of hardcoded email.
-- [ ] Keep WhatsApp link only if product wants it and it does not conflict with configured support email.
+- [x] Modify `src/features/billing/components/BillingBlockedScreen.tsx` to use shared support-contact helper instead of hardcoded email.
+- [x] Keep WhatsApp link only if product wants it and it does not conflict with configured support email.
 
 ### B9. Docs/env update
 
-- [ ] Update production operations docs or README section with observability/support env configuration.
-- [ ] Audit `.env.example` for no real DSNs/secrets.
+- [x] Update production operations docs or README section with observability/support env configuration.
+- [x] Audit `.env.example` for no real DSNs/secrets.
 
 ---
 
