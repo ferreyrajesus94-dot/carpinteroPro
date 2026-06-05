@@ -396,7 +396,7 @@ Revert PR 2 branch. Specs and fixture extensions removed; PR 1 harness remains i
 >
 > **Forecast:** ~350–650 lines. Likely needs sub-split if both quote and inventory grow.
 
-### Task 3.1 — Add quote creation browser E2E spec
+### [x] Task 3.1 — Add quote creation browser E2E spec
 
 **Description:** Create `tests/e2e/browser/quote-creation.spec.ts` covering:
 
@@ -419,7 +419,7 @@ npm test
 
 ---
 
-### Task 3.2 — Add contract/PDF surface E2E spec
+### [x] Task 3.2 — Add contract/PDF surface E2E spec
 
 **Description:** Create `tests/e2e/browser/contract-pdf.spec.ts` covering:
 
@@ -439,7 +439,7 @@ npm test
 
 ---
 
-### Task 3.3 — Add inventory stock movement integration spec
+### [x] Task 3.3 — Add inventory stock movement integration spec
 
 **Description:** Create `tests/e2e/integration/inventory-stock-movement.spec.ts` covering:
 
@@ -463,7 +463,7 @@ npm test
 
 ---
 
-### Task 3.4 — Update runbook for PR 3 additions
+### [x] Task 3.4 — Update runbook for PR 3 additions
 
 **Description:** Update `docs/testing/runbook.md` with new specs and any new env vars or fixture data.
 

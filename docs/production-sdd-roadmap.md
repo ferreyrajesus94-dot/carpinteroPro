@@ -28,8 +28,9 @@ CarpinteroPro is not ready for public paid production yet. Use this roadmap to r
 - SDD 3 — archived / PASS (2026-05-31).
 - SDD 4 — archived / PASS_WITH_WARNING (2026-06-01).
 - SDD 5 — archived / PASS (2026-06-02).
-- SDD 7 and SDD 8 are now ready to start.
-- SDD 6 is archived; SDD 7 remains the next pre-SDD9 cleanup target.
+- SDD 7 — archived / PASS (2026-06-05).
+- SDD 8 — archived / PASS (2026-06-03).
+- SDD 9 remains the next planned implementation target for deferred core coupling cleanup.
 
 ## SDD 1 — Tenant security / RLS
 
@@ -149,15 +150,17 @@ Delivered:
 
 ## SDD 7 — Business-critical E2E
 
-Goal: protect revenue and trust-critical flows.
+**Status:** archived / PASS (2026-06-05).
 
-Likely scope:
+Delivered:
 
-- Signup/login/onboarding.
-- Main CRUD flows.
-- Logout and user switching.
-- Tenant isolation.
-- Billing gate/trial/expired/active subscription.
+- Playwright/local Supabase E2E harness and runbook.
+- Active-trial and blocked billing-gate browser coverage.
+- Subscription-state and MercadoPago webhook persistence integration coverage.
+- Tenant-isolation regression coverage.
+- Quote creation browser E2E with persisted recipe/labor snapshots.
+- Contract/PDF browser surface coverage.
+- Inventory stock movement integration coverage and RPC tenant hardening.
 
 ## SDD 8 — Architecture cleanup
 
