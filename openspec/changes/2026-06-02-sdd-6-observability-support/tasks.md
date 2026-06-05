@@ -151,33 +151,33 @@ Estimated changed lines: **80–140**
 
 ### C1. Response helper tests RED
 
-- [ ] Determine whether Deno tests already run in project tooling.
-- [ ] If feasible, add tests for `supabase/functions/_shared/response.ts` structured error helper.
-- [ ] If Deno tests are not available, add a documented structural exception in `apply-progress.md` and verify with code review plus `npm test` for frontend changes.
+- [x] Determine whether Deno tests already run in project tooling.
+- [x] If feasible, add tests for `supabase/functions/_shared/response.ts` structured error helper.
+- [x] If Deno tests are not available, add a documented structural exception in `apply-progress.md` and verify with code review plus `npm test` for frontend changes.
 
 ### C2. Response helper implementation GREEN
 
-- [ ] Modify `supabase/functions/_shared/response.ts` to add `structuredErr(code, message, status)`.
-- [ ] Keep existing `err(message, status)` backward-compatible unless all callers are migrated.
+- [x] Modify `supabase/functions/_shared/response.ts` to add `structuredErr(code, message, status)`.
+- [x] Keep existing `err(message, status)` backward-compatible unless all callers are migrated.
 
 ### C3. Edge function structured errors
 
-- [ ] Update `supabase/functions/create-subscription/index.ts` known failure paths with stable codes.
-- [ ] Update `supabase/functions/cancel-subscription/index.ts` known failure paths with stable codes.
-- [ ] Update `supabase/functions/mercadopago-webhook/index.ts` validation/provider failure paths with stable codes.
-- [ ] Ensure responses do not include secrets, raw provider payloads, stack traces, or raw headers.
+- [x] Update `supabase/functions/create-subscription/index.ts` known failure paths with stable codes.
+- [x] Update `supabase/functions/cancel-subscription/index.ts` known failure paths with stable codes.
+- [x] Update `supabase/functions/mercadopago-webhook/index.ts` validation/provider failure paths with stable codes.
+- [x] Ensure responses do not include secrets, raw provider payloads, stack traces, or raw headers.
 
 ---
 
 ## Verification Tasks
 
-- [ ] Run `npm test`.
-- [ ] Run `npm run lint` and document any pre-existing warnings.
-- [ ] Run `npm run build`.
-- [ ] Run `git diff --check`.
-- [ ] Audit changed files for secrets/DSNs/PII leakage.
-- [ ] Confirm no cross-feature imports were introduced.
-- [ ] Record TDD evidence and command output in `apply-progress.md`.
+- [x] Run `npm test`.
+- [x] Run `npm run lint` and document any pre-existing warnings.
+- [x] Run `npm run build`.
+- [x] Run `git diff --check`.
+- [x] Audit changed files for secrets/DSNs/PII leakage.
+- [x] Confirm no cross-feature imports were introduced.
+- [x] Record TDD evidence and command output in `apply-progress.md`.
 
 ## Review Workload Decision
 

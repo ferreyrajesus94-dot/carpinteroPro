@@ -1,11 +1,17 @@
 import { AuthError, getAuthContext, serviceClient } from "../_shared/auth.ts";
 import { createPreapproval, getPreapproval } from "../_shared/mercadopago.ts";
-import { err, json, preflight } from "../_shared/response.ts";
+import { json, preflight, structuredErr } from "../_shared/response.ts";
 
-Deno.serve(async (req) => {
+declare const Deno: {
+	serve(handler: (req: Request) => Response | Promise<Response>): void;
+	env: { get(key: string): string | undefined };
+};
+
+Deno.serve(async (req: Request) => {
 	const options = preflight(req);
 	if (options) return options;
-	if (req.method !== "POST") return err("Method not allowed", 405);
+	if (req.method !== "POST")
+		return structuredErr("method_not_allowed", "Method not allowed", 405);
 
 	try {
 		const { workshopId, email } = await getAuthContext(req);
@@ -16,7 +22,17 @@ Deno.serve(async (req) => {
 			.select("*")
 			.eq("workshop_id", workshopId)
 			.maybeSingle();
-		if (selectError) throw selectError;
+		if (selectError) {
+			console.error(
+				"create-subscription: failed to load subscription",
+				selectError,
+			);
+			return structuredErr(
+				"subscription_lookup_failed",
+				"No se pudo leer la suscripción del taller",
+				500,
+			);
+		}
 
 		const origin = Deno.env.get("APP_ORIGIN") || "http://localhost:3000";
 		const isSandboxCheckout = origin.includes("vercel.app");
@@ -68,7 +84,17 @@ Deno.serve(async (req) => {
 		const { error: upsertError } = await supabase
 			.from("subscriptions")
 			.upsert(payload, { onConflict: "workshop_id" });
-		if (upsertError) throw upsertError;
+		if (upsertError) {
+			console.error(
+				"create-subscription: failed to upsert subscription",
+				upsertError,
+			);
+			return structuredErr(
+				"subscription_upsert_failed",
+				"No se pudo guardar la suscripción",
+				500,
+			);
+		}
 
 		return json({
 			initPoint: getCheckoutUrl(mp),
@@ -76,9 +102,15 @@ Deno.serve(async (req) => {
 			status: mp.status,
 		});
 	} catch (e: unknown) {
-		const status = e instanceof AuthError ? e.status : 500;
+		if (e instanceof AuthError) {
+			return structuredErr("auth_failed", e.message, e.status);
+		}
 		const msg = e instanceof Error ? e.message : "Unknown error";
 		console.error("create-subscription failed", msg);
-		return err(msg, status);
+		return structuredErr(
+			"checkout_unavailable",
+			"No se pudo iniciar el checkout, intentá de nuevo",
+			500,
+		);
 	}
 });

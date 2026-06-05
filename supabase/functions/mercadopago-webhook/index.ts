@@ -1,3 +1,4 @@
+// @ts-expect-error Deno remote import is resolved by the Supabase Edge runtime.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.103";
 import {
 	calculateNextPeriodDates,
@@ -10,7 +11,12 @@ import {
 	getPayment,
 	getPreapproval,
 } from "../_shared/mercadopago.ts";
-import { err, json, preflight } from "../_shared/response.ts";
+import { json, preflight, structuredErr } from "../_shared/response.ts";
+
+declare const Deno: {
+	serve(handler: (req: Request) => Response | Promise<Response>): void;
+	env: { get(key: string): string | undefined };
+};
 
 interface WebhookPayload {
 	data: {
@@ -24,13 +30,17 @@ Deno.serve(async (req: Request) => {
 	if (preflightResponse) return preflightResponse;
 
 	if (req.method !== "POST") {
-		return err("Method not allowed", 405);
+		return structuredErr("method_not_allowed", "Method not allowed", 405);
 	}
 
 	const secret = Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET");
 	if (!secret) {
 		console.error("MERCADOPAGO_WEBHOOK_SECRET is not configured");
-		return err("Webhook not configured", 401);
+		return structuredErr(
+			"webhook_not_configured",
+			"El webhook no está configurado en el servidor",
+			401,
+		);
 	}
 
 	const signatureHeader = req.headers.get("x-signature") || "";
@@ -39,19 +49,27 @@ Deno.serve(async (req: Request) => {
 	const timestamp = tsMatch ? tsMatch[1] : "";
 
 	if (!signatureHeader || !requestId || !timestamp) {
-		return err("Missing signature headers", 401);
+		return structuredErr(
+			"missing_signature_headers",
+			"Faltan headers de firma del webhook",
+			401,
+		);
 	}
 
 	let payload: WebhookPayload;
 	try {
 		payload = await req.json();
 	} catch {
-		return err("Invalid JSON", 400);
+		return structuredErr("invalid_json", "Cuerpo JSON inválido", 400);
 	}
 
 	const dataId = payload.data?.id;
 	if (!dataId) {
-		return err("Missing data.id", 400);
+		return structuredErr(
+			"missing_data_id",
+			"Falta el identificador del recurso",
+			400,
+		);
 	}
 
 	const signatureDataId = new URL(req.url).searchParams.get("data.id");
@@ -63,7 +81,11 @@ Deno.serve(async (req: Request) => {
 		secret,
 	);
 	if (!valid) {
-		return err("Invalid signature", 403);
+		return structuredErr(
+			"invalid_signature",
+			"La firma del webhook no es válida",
+			403,
+		);
 	}
 
 	const resourceType = classifyMercadoPagoWebhookType(payload.type);
@@ -99,7 +121,11 @@ Deno.serve(async (req: Request) => {
 			return json({ message: "Resource not found" });
 		}
 		console.error("Provider fetch failed", e);
-		return err("Provider fetch failed", 502);
+		return structuredErr(
+			"provider_fetch_failed",
+			"No se pudo obtener el recurso del proveedor",
+			502,
+		);
 	}
 
 	if (!preapprovalId) {
@@ -120,7 +146,11 @@ Deno.serve(async (req: Request) => {
 
 	if (selectError) {
 		console.error("Failed to find subscription", selectError);
-		return err("Database error", 500);
+		return structuredErr(
+			"subscription_lookup_failed",
+			"No se pudo buscar la suscripción",
+			500,
+		);
 	}
 
 	if (!subscription) {
@@ -147,7 +177,11 @@ Deno.serve(async (req: Request) => {
 			return json({ message: "Already processed" });
 		}
 		console.error("Failed to insert webhook event", insertError);
-		return err("Failed to record event", 500);
+		return structuredErr(
+			"event_record_failed",
+			"No se pudo registrar el evento del webhook",
+			500,
+		);
 	}
 
 	const providerStatus = (providerResource?.status as string) || "unknown";
@@ -173,7 +207,11 @@ Deno.serve(async (req: Request) => {
 
 	if (updateError) {
 		console.error("Failed to update subscription", updateError);
-		return err("Failed to update subscription", 500);
+		return structuredErr(
+			"subscription_update_failed",
+			"No se pudo actualizar la suscripción",
+			500,
+		);
 	}
 
 	return json({ message: "OK" });

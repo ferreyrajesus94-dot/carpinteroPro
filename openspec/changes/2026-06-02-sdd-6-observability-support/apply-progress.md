@@ -97,3 +97,83 @@ Fresh review found three issues: missing focused coverage for `RouteErrorFallbac
 ## Next
 
 Run fresh review before deciding whether to apply PR C (structured billing edge errors). PR C remains explicitly out of scope for this run.
+
+---
+
+# SDD-6 Apply Progress — PR C
+
+## Status
+
+**PR C implemented / awaiting fresh review**
+
+## Scope Applied
+
+PR C only — structured billing edge errors. PR A/PR B already committed. SDD7 and SDD9 untouched.
+
+- `supabase/functions/_shared/response.ts` now exports `structuredErr(code, message, status)` while keeping the existing `err(message, status)` helper backward-compatible for any future caller that still needs the legacy `{ error: message }` shape.
+- The three billing edge functions now return stable, non-secret error codes for every known failure path:
+  - `create-subscription`: `method_not_allowed`, `auth_failed`, `subscription_lookup_failed`, `subscription_upsert_failed`, `checkout_unavailable`.
+  - `cancel-subscription`: `method_not_allowed`, `auth_failed`, `subscription_lookup_failed`, `no_provider_subscription`, `subscription_update_failed`, `cancel_failed`.
+  - `mercadopago-webhook`: `method_not_allowed`, `webhook_not_configured`, `missing_signature_headers`, `invalid_json`, `missing_data_id`, `invalid_signature`, `provider_fetch_failed`, `subscription_lookup_failed`, `event_record_failed`, `subscription_update_failed`.
+- Responses never echo `MERCADOPAGO_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, raw provider payloads, raw headers, or stack traces. Provider fetch errors are sanitized into a stable user-safe message; provider debug details stay on the server `console.error` log.
+- New test file `tests/supabase-functions/response.test.ts` covers the response helper (json, err backward compat, structuredErr shape, structuredErr default status, leak guard, preflight) plus source-text contract guards that verify the three edge functions call `structuredErr()` with the promised codes and no longer call legacy `err()`.
+
+Not implemented yet:
+
+- SDD7 work remains untouched.
+- SDD9 implementation remains untouched.
+
+## Strict TDD Evidence (PR C)
+
+| Cycle | RED evidence | GREEN evidence | Notes |
+| --- | --- | --- | --- |
+| `structuredErr` shape | `tests/supabase-functions/response.test.ts` initially failed with `TypeError: structuredErr is not a function`. | Added `structuredErr(code, message, status = 500)` to `supabase/functions/_shared/response.ts`; tests now assert `{ error: { code, message } }` and the provided status. | Default status verified separately to 500. |
+| Leak guard | Test asserted that `stack`, `headers`, `provider`, and `x-signature` keys are NOT in the response body for a `provider_invalid_response` error. | Implementation never propagates those keys; the test passes without code changes beyond adding `structuredErr`. | Catches accidental future regressions that forward raw provider payloads. |
+| `err` backward compatibility | Test asserted `err("Boom", 500)` still returns `{ error: "Boom" }` with status 500. | `err()` remains unchanged; test passes. | No call site was using `{ error }`; the helper is preserved for compatibility only. |
+| Code contract | Source-text contract tests inspect the three handler files for promised `structuredErr()` codes and no legacy `err()` calls. | Implementation uses exactly those codes. | Future renames or accidental `err()` reintroduction break the contract test loudly. |
+
+## Deno Test Tooling Exception (C1)
+
+- The repo configures `npm test` / `vitest` for the frontend, but no Deno test runner is configured. The Deno-only handler bodies (`Deno.serve`, `Deno.env.get`, Supabase service client bootstrap) cannot run under Vitest without substantial stubbing of the Deno globals and the Supabase SDK.
+- The response helper is the only piece of PR C with a stable, dependency-free public surface, so it is the only piece covered by a focused unit test. The handler bodies are covered by:
+  - A grep-driven code review of the codes wired into each handler.
+  - A code review for absent `MERCADOPAGO_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY`, raw provider payloads, raw headers, and stack traces in response bodies.
+  - A code review confirming every `err()` call in the three handlers has been replaced with `structuredErr()` and that the status codes match the original `err()` calls.
+- This structural exception is documented here and in the test file comment so reviewers know what is and is not covered.
+
+## Privacy & Security Audit (PR C)
+
+- The new codes are stable, user-safe Spanish-language messages. The internal `e.message` from a thrown error is no longer echoed back to the user; the server still logs the original message to `console.error` for support/observability.
+- No request body, raw provider payload, or stack trace is included in any `structuredErr` response.
+- Signing secret (`MERCADOPAGO_WEBHOOK_SECRET`) and service role key are read via `Deno.env.get` and never returned in a response body.
+- Headers like `x-signature` and `x-request-id` are read for validation only; only `provider_status` (an external provider enum value) is stored on the subscription row, never the signature itself.
+
+## Validation (PR C)
+
+| Command | Result |
+| --- | --- |
+| `npm test -- tests/supabase-functions/response.test.ts` | PASS — 1 file / 10 tests |
+| `npm test` | PASS — 41 files / 271 tests |
+| `npm run lint` | PASS (0 errors, 6 pre-existing React Compiler/RHF `watch()` warnings, unchanged from PR A baseline) |
+| `npm run build` | PASS |
+| `git diff --check` | PASS |
+
+## Cross-feature / Secrets Check (PR C)
+
+- No cross-feature imports introduced; all changes live under `supabase/functions/**` plus a new Vitest test file under `tests/supabase-functions/**`.
+- No new dependencies added; the helper reuses the existing `Response` and `Headers` globals available in Deno.
+- No real DSNs, secrets, PII, or provider payloads in the diff. Only stable, user-safe Spanish-language messages appear in `structuredErr(...)` arguments.
+
+## Changed Files for PR C
+
+- `supabase/functions/_shared/response.ts` (modified: add `structuredErr(code, message, status)`)
+- `supabase/functions/create-subscription/index.ts` (modified: replace known failure paths with stable codes)
+- `supabase/functions/cancel-subscription/index.ts` (modified: replace known failure paths with stable codes)
+- `supabase/functions/mercadopago-webhook/index.ts` (modified: replace validation/provider failure paths with stable codes)
+- `tests/supabase-functions/response.test.ts` (new: 10 focused tests + source-text code contract guards)
+- `openspec/changes/2026-06-02-sdd-6-observability-support/tasks.md` (modified: mark PR C checkboxes `[x]`)
+- `openspec/changes/2026-06-02-sdd-6-observability-support/apply-progress.md` (modified: append PR C section)
+
+## Next
+
+Run fresh review before deciding whether to advance to SDD7 or archive SDD-6.

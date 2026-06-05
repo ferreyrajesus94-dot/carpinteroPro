@@ -24,3 +24,7 @@ export function json(data: unknown, status = 200) {
 export function err(message: string, status = 500) {
 	return json({ error: message }, status);
 }
+
+export function structuredErr(code: string, message: string, status = 500) {
+	return json({ error: { code, message } }, status);
+}
