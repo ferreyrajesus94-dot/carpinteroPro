@@ -76,16 +76,65 @@ export const router = createBrowserRouter([
 					{
 						path: "/recipes/*",
 						lazy: () =>
-							import("@/features/recipes/routes").then((m) => ({
-								Component: m.RecipesRoutes,
+							import("./pages/RecipesPage").then((m) => ({
+								Component: m.RecipesPage,
 							})),
+						errorElement,
+					},
+					{
+						path: "/quotes/new",
+						lazy: () =>
+							import("@/app/pages/QuoteCreatorPage").then((m) => ({
+								Component: m.QuoteCreatorPage,
+							})),
+						errorElement,
+					},
+					{
+						path: "/quotes/templates",
+						lazy: () =>
+							import("@/features/quotes").then((m) => ({
+								Component: m.TemplateEditor,
+							})),
+						errorElement,
+					},
+					{
+						path: "/quotes/:id",
+						lazy: () =>
+							import("@/app/pages/QuoteCreatorPage").then((m) => ({
+								Component: m.QuoteCreatorPage,
+							})),
+						errorElement,
+					},
+					{
+						path: "/quotes/:id/contract",
+						lazy: () =>
+							import("@/app/pages/QuoteContractPage").then((m) => ({
+								Component: m.QuoteContractPage,
+							})),
+						errorElement,
 					},
 					{
 						path: "/quotes/*",
 						lazy: () =>
-							import("@/features/quotes/routes").then((m) => ({
+							import("@/features/quotes").then((m) => ({
 								Component: m.QuotesRoutes,
 							})),
+					},
+					{
+						path: "/crm/clientes",
+						lazy: () =>
+							import("@/app/pages/CrmClientsPage").then((m) => ({
+								Component: m.CrmClientsPage,
+							})),
+						errorElement,
+					},
+					{
+						path: "/crm/clientes/:id",
+						lazy: () =>
+							import("@/app/pages/CrmClientDetailPage").then((m) => ({
+								Component: m.CrmClientDetailPage,
+							})),
+						errorElement,
 					},
 					{
 						path: "/crm/*",
