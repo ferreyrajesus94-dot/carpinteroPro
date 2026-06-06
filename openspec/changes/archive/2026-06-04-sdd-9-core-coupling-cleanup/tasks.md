@@ -66,10 +66,10 @@ WU1–WU3 establish shared contracts. WU4a–WU4b wire the quote creation app se
 
 ### Acceptance criteria
 
-- [ ] All 5 files above import from `src/shared/**` instead of cross-feature paths for the identified symbols.
-- [ ] `npm run lint` passes (exceptions still present but unused by these files).
-- [ ] `npm test` passes with no behavioral changes.
-- [ ] No production behavior changes; purely import path redirects.
+- [x] All 5 files above import from `src/shared/**` instead of cross-feature paths for the identified symbols.
+- [x] `npm run lint` passes (exceptions still present but unused by these files).
+- [x] `npm test` passes with no behavioral changes.
+- [x] No production behavior changes; purely import path redirects.
 
 ### TDD/validation evidence
 
@@ -114,14 +114,14 @@ No. Well under budget.
 
 ### Acceptance criteria
 
-- [ ] `calculateQuote` lives in `src/shared/lib/quotesCalculator.ts` with zero feature imports.
-- [ ] `computeRecipeCost` and full dependency chain live in `src/shared/lib/recipeCosting.ts` with zero feature imports.
-- [ ] `evalFormula` and `safeEvalFormula` live in `src/shared/lib/evalFormula.ts`.
-- [ ] `computeWoodUsage` and related types live in `src/shared/lib/computeWoodUsage.ts`.
-- [ ] Existing tests pass at old and new locations (re-export preserves backward compat).
-- [ ] New characterization tests cover: `calculateQuote` on_cost/on_price margins, zero-margin edge, division-by-zero guard; `computeRecipeCost` with empty items, waste_pct, mixed madera/extras, labor; `computeWoodUsage` with each mode (placa-pieces, placa-area, lineal-pieces, lineal-meters, flat).
-- [ ] All moved functions produce identical numeric outputs for identical inputs (fixture-based assertions).
-- [ ] `npm test` passes. `npm run lint` passes (no new violations; re-exports keep old paths working).
+- [x] `calculateQuote` lives in `src/shared/lib/quotesCalculator.ts` with zero feature imports.
+- [x] `computeRecipeCost` and full dependency chain live in `src/shared/lib/recipeCosting.ts` with zero feature imports.
+- [x] `evalFormula` and `safeEvalFormula` live in `src/shared/lib/evalFormula.ts`.
+- [x] `computeWoodUsage` and related types live in `src/shared/lib/computeWoodUsage.ts`.
+- [x] Existing tests pass at old and new locations (re-export preserves backward compat).
+- [x] New characterization tests cover: `calculateQuote` on_cost/on_price margins, zero-margin edge, division-by-zero guard; `computeRecipeCost` with empty items, waste_pct, mixed madera/extras, labor; `computeWoodUsage` with each mode (placa-pieces, placa-area, lineal-pieces, lineal-meters, flat).
+- [x] All moved functions produce identical numeric outputs for identical inputs (fixture-based assertions).
+- [x] `npm test` passes. `npm run lint` passes (no new violations; re-exports keep old paths working).
 
 ### TDD/validation evidence
 
@@ -171,12 +171,12 @@ WU2 is near the budget ceiling (~380 lines including characterization tests). If
 
 ### Acceptance criteria
 
-- [ ] `src/shared/types/client.ts` exports `Client`, `ClientInsert`, `ClientUpdate`, `ClientSource`, `CLIENT_SOURCE_LABELS` with zero feature imports.
-- [ ] `src/shared/types/recipes.ts` exports `FurnitureTemplateWithItems`, `RecipeItemWithMaterial`, `FurnitureParam`, `RecipeCost` with imports only from `@/shared/**`.
-- [ ] `src/shared/types/priceHistory.ts` exports `PriceHistoryRow` with zero feature imports.
-- [ ] `src/features/quotes/types.ts` imports `Client` from `@/shared/types/client` instead of `@/features/crm/types`.
-- [ ] `npm test` passes. `npm run lint` passes.
-- [ ] No speculative fields added; contracts mirror current UI read shapes exactly.
+- [x] `src/shared/types/client.ts` exports `Client`, `ClientInsert`, `ClientUpdate`, `ClientSource`, `CLIENT_SOURCE_LABELS` with zero feature imports.
+- [x] `src/shared/types/recipes.ts` exports `FurnitureTemplateWithItems`, `RecipeItemWithMaterial`, `FurnitureParam`, `RecipeCost` with imports only from `@/shared/**`.
+- [x] `src/shared/types/priceHistory.ts` exports `PriceHistoryRow` with zero feature imports.
+- [x] `src/features/quotes/types.ts` imports `Client` from `@/shared/types/client` instead of `@/features/crm/types`.
+- [x] `npm test` passes. `npm run lint` passes.
+- [x] No speculative fields added; contracts mirror current UI read shapes exactly.
 
 ### TDD/validation evidence
 
@@ -214,11 +214,11 @@ No. Well under budget.
 
 ### Acceptance criteria
 
-- [ ] Each barrel exports only items needed for app-level SDD9 composition. No speculative re-exports.
-- [ ] Barrel imports do not create new cross-feature coupling (barrels must not import from other features).
-- [ ] `npm run lint` passes. The `import/no-restricted-paths` rule does not fire for barrel self-imports.
-- [ ] `npm test` passes.
-- [ ] Features do not import other feature barrels (barrels are for `src/app/**` only).
+- [x] Each barrel exports only items needed for app-level SDD9 composition. No speculative re-exports.
+- [x] Barrel imports do not create new cross-feature coupling (barrels must not import from other features).
+- [x] `npm run lint` passes. The `import/no-restricted-paths` rule does not fire for barrel self-imports.
+- [x] `npm test` passes.
+- [x] Features do not import other feature barrels (barrels are for `src/app/**` only).
 
 ### TDD/validation evidence
 
@@ -261,14 +261,14 @@ No. Well under budget.
 
 ### Acceptance criteria
 
-- [ ] `QuoteForm` receives clients, templates, and client-creation callback as props.
-- [ ] `ClientSection` and `ClientDialog` no longer import from `@/features/crm/**`.
-- [ ] `FurnitureSection` no longer imports from `@/features/recipes/**`.
-- [ ] `QuoteForm` still computes real-time quote totals using shared `calculateQuote` and `computeRecipeCost`.
-- [ ] `quotes → crm` and `quotes → recipes` lint exceptions are removed from `eslint.config.js`.
-- [ ] `npm run lint` passes with the reduced exception set: `featureZone("quotes", ["settings"])`.
-- [ ] `npm test` passes.
-- [ ] Manual smoke: `/quotes/new` page loads, client selection works, template selection works, real-time cost preview updates, quote creation succeeds.
+- [x] `QuoteForm` receives clients, templates, and client-creation callback as props.
+- [x] `ClientSection` and `ClientDialog` no longer import from `@/features/crm/**`.
+- [x] `FurnitureSection` no longer imports from `@/features/recipes/**`.
+- [x] `QuoteForm` still computes real-time quote totals using shared `calculateQuote` and `computeRecipeCost`.
+- [x] `quotes → crm` and `quotes → recipes` lint exceptions are removed from `eslint.config.js`.
+- [x] `npm run lint` passes with the reduced exception set: `featureZone("quotes", ["settings"])`.
+- [x] `npm test` passes.
+- [x] Manual smoke: `/quotes/new` page loads, client selection works, template selection works, real-time cost preview updates, quote creation succeeds.
 
 ### TDD/validation evidence
 
@@ -318,12 +318,12 @@ This WU is at the budget ceiling. If during implementation the changed-line coun
 
 ### Acceptance criteria
 
-- [ ] `ContractPreview` receives a `workshopSettings` snapshot prop.
-- [ ] `ContractPreview` no longer imports from `@/features/settings/**`.
-- [ ] Contract preview renders workshop name, address, phone, email, and footer identically.
-- [ ] `quotes` exception is fully removed from `eslint.config.js`.
-- [ ] `npm run lint` passes. `npm test` passes.
-- [ ] Manual smoke: `/quotes/:id/contract` page renders contract correctly.
+- [x] `ContractPreview` receives a `workshopSettings` snapshot prop.
+- [x] `ContractPreview` no longer imports from `@/features/settings/**`.
+- [x] Contract preview renders workshop name, address, phone, email, and footer identically.
+- [x] `quotes` exception is fully removed from `eslint.config.js`.
+- [x] `npm run lint` passes. `npm test` passes.
+- [x] Manual smoke: `/quotes/:id/contract` page renders contract correctly.
 
 ### TDD/validation evidence
 
@@ -369,13 +369,13 @@ No. Well under budget.
 
 ### Acceptance criteria
 
-- [ ] `ClientList` receives quote summaries through props; no `@/features/quotes/**` imports.
-- [ ] `ClientDetail` receives quotes and status badge rendering through props/slots; no `@/features/quotes/**` imports.
-- [ ] `KanbanCard` receives quote summary and status color through props or shared imports; no `@/features/quotes/**` imports.
-- [ ] CRM quote history, totals, statuses, and badges render identically.
-- [ ] `crm` exception is fully removed from `eslint.config.js`.
-- [ ] `npm run lint` passes. `npm test` passes.
-- [ ] Manual smoke: `/crm/clientes` shows quote counts/totals; `/crm/clientes/:id` shows quote history with status badges.
+- [x] `ClientList` receives quote summaries through props; no `@/features/quotes/**` imports.
+- [x] `ClientDetail` receives quotes and status badge rendering through props/slots; no `@/features/quotes/**` imports.
+- [x] `KanbanCard` receives quote summary and status color through props or shared imports; no `@/features/quotes/**` imports.
+- [x] CRM quote history, totals, statuses, and badges render identically.
+- [x] `crm` exception is fully removed from `eslint.config.js`.
+- [x] `npm run lint` passes. `npm test` passes.
+- [x] Manual smoke: `/crm/clientes` shows quote counts/totals; `/crm/clientes/:id` shows quote history with status badges.
 
 ### TDD/validation evidence
 
@@ -428,14 +428,14 @@ Possibly. If the combined component refactors + app pages exceed 350 lines, spli
 
 ### Acceptance criteria
 
-- [ ] `MuebleList` receives materials, price history, and stock_alert_enabled through props; no inventory/settings imports.
-- [ ] `useStockCheck` accepts materials and stockAlertEnabled as arguments; no internal hook calls to inventory/settings.
-- [ ] `FurnitureCostSparkline` receives price history through props or uses shared PriceSparkline; no inventory imports.
-- [ ] Stock alert behavior preserves `stock_alert_enabled` toggle: when false, no stock shortages displayed; when true, shortages computed correctly.
-- [ ] Cost history sparkline renders identical data points.
-- [ ] `recipes` exception is fully removed from `eslint.config.js`.
-- [ ] `npm run lint` passes. `npm test` passes.
-- [ ] Manual smoke: `/recipes` page loads, stock alerts toggle works, cost history sparkline renders, material availability displays.
+- [x] `MuebleList` receives materials, price history, and stock_alert_enabled through props; no inventory/settings imports.
+- [x] `useStockCheck` accepts materials and stockAlertEnabled as arguments; no internal hook calls to inventory/settings.
+- [x] `FurnitureCostSparkline` receives price history through props or uses shared PriceSparkline; no inventory imports.
+- [x] Stock alert behavior preserves `stock_alert_enabled` toggle: when false, no stock shortages displayed; when true, shortages computed correctly.
+- [x] Cost history sparkline renders identical data points.
+- [x] `recipes` exception is fully removed from `eslint.config.js`.
+- [x] `npm run lint` passes. `npm test` passes.
+- [x] Manual smoke: `/recipes` page loads, stock alerts toggle works, cost history sparkline renders, material availability displays.
 
 ### TDD/validation evidence
 
@@ -482,12 +482,12 @@ This WU is at the budget ceiling. If changed lines approach 400, split into:
 
 ### Acceptance criteria
 
-- [ ] `eslint.config.js` has zero SDD8 temporary exception comments.
-- [ ] `featureZone("crm")`, `featureZone("quotes")`, `featureZone("recipes")` have no exception arrays.
-- [ ] `npm run lint` passes with no `import/no-restricted-paths` violations in the five involved features.
-- [ ] `npm test` passes (full suite).
-- [ ] `grep -r "@/features/" src/features/crm/ src/features/quotes/ src/features/recipes/ src/features/inventory/ src/features/settings/ | grep -v node_modules` returns no cross-feature imports (only self-feature and shared imports).
-- [ ] Verification evidence recorded in this task file or a verification.md artifact.
+- [x] `eslint.config.js` has zero SDD8 temporary exception comments.
+- [x] `featureZone("crm")`, `featureZone("quotes")`, `featureZone("recipes")` have no exception arrays.
+- [x] `npm run lint` passes with no `import/no-restricted-paths` violations in the five involved features.
+- [x] `npm test` passes (full suite).
+- [x] `grep -r "@/features/" src/features/crm/ src/features/quotes/ src/features/recipes/ src/features/inventory/ src/features/settings/ | grep -v node_modules` returns no cross-feature imports (only self-feature and shared imports).
+- [x] Verification evidence recorded in this task file or a verification.md artifact.
 
 ### TDD/validation evidence
 
@@ -527,24 +527,24 @@ WU1, WU2, WU3, and WU4a can land in any order (or in parallel) since they create
 
 Per design constraint, all costing values must remain exact. This checklist applies to WU2 and any WU that touches costing paths:
 
-- [ ] `calculateQuote` produces identical `CalcResult` for every fixture tested in `calculator.test.ts`.
-- [ ] `computeRecipeCost` produces identical `RecipeCost` for every fixture tested in `computeRecipeCost.test.ts`.
-- [ ] `computeWoodUsage` produces identical `WoodUsage.subtotal` for each mode (placa-pieces, placa-area, lineal-pieces, lineal-meters, flat).
-- [ ] `resolveItemQuantity` evaluates formulas identically via `safeEvalFormula`.
-- [ ] `applyWaste` applies `qty * (1 + wastePct / 100)` with no rounding.
-- [ ] No numeric type changes (all remain `number`).
-- [ ] No formula rewrites; only import path changes.
+- [x] `calculateQuote` produces identical `CalcResult` for every fixture tested in `calculator.test.ts`.
+- [x] `computeRecipeCost` produces identical `RecipeCost` for every fixture tested in `computeRecipeCost.test.ts`.
+- [x] `computeWoodUsage` produces identical `WoodUsage.subtotal` for each mode (placa-pieces, placa-area, lineal-pieces, lineal-meters, flat).
+- [x] `resolveItemQuantity` evaluates formulas identically via `safeEvalFormula`.
+- [x] `applyWaste` applies `qty * (1 + wastePct / 100)` with no rounding.
+- [x] No numeric type changes (all remain `number`).
+- [x] No formula rewrites; only import path changes.
 
 ## Architecture Shortcut Rejection Checklist
 
 Per design and spec constraints:
 
-- [ ] No event bus introduced.
-- [ ] No shared global state (Zustand store spanning features) introduced.
-- [ ] No feature-to-feature barrel imports (barrels are for `src/app/**` only).
-- [ ] No hooks or DB queries moved into `src/shared/**`.
-- [ ] No TanStack Query wrappers moved into `src/shared/**`.
-- [ ] Workflow modules created only if explicitly justified by WU4b or WU7 implementation evidence.
+- [x] No event bus introduced.
+- [x] No shared global state (Zustand store spanning features) introduced.
+- [x] No feature-to-feature barrel imports (barrels are for `src/app/**` only).
+- [x] No hooks or DB queries moved into `src/shared/**`.
+- [x] No TanStack Query wrappers moved into `src/shared/**`.
+- [x] Workflow modules created only if explicitly justified by WU4b or WU7 implementation evidence.
 
 ## SDD7 PR3 Exclusion
 
