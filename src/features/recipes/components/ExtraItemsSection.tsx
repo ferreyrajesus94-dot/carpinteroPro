@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/shared/ui/select'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 
 // Local form shape used by MuebleForm
 interface ItemValue {

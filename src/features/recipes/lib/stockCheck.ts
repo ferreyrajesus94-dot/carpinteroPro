@@ -1,4 +1,4 @@
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 
 export interface StockCheckItem {
   material_id: string
