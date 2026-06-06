@@ -2,20 +2,33 @@ import { useCallback, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { useFabAction } from "@/shared/lib/fab";
+import { useWorkshopId } from "@/shared/hooks/useWorkshopId";
+import { useMaterials } from "@/features/inventory";
+import { useAllPriceHistory } from "@/features/inventory";
+import { useWorkshopSettings } from "@/features/settings";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 } from "@/shared/ui/dialog";
-import { MuebleList } from "./components/MuebleList";
-import { MuebleForm } from "./components/MuebleForm";
-import type { FurnitureTemplateWithItems } from "./types";
+import { MuebleList } from "@/features/recipes";
+import { MuebleForm } from "@/features/recipes";
+import type { FurnitureTemplateWithItems } from "@/shared/types/recipes";
+import type { Material } from "@/shared/types/material";
+import type { PriceHistoryRow } from "@/shared/types/priceHistory";
 
-export function RecipesRoutes() {
+export function RecipesPage() {
+	const workshopId = useWorkshopId();
 	const [formOpen, setFormOpen] = useState(false);
 	const [selectedTemplate, setSelectedTemplate] =
 		useState<FurnitureTemplateWithItems | null>(null);
+
+	const { data: materials = [] as Material[] } = useMaterials(workshopId);
+	const { data: priceHistory = [] as PriceHistoryRow[] } =
+		useAllPriceHistory(workshopId);
+	const { data: settings } = useWorkshopSettings(workshopId);
+	const stockAlertEnabled = Boolean(settings?.stock_alert_enabled);
 
 	function handleEdit(template: FurnitureTemplateWithItems) {
 		setSelectedTemplate(template);
@@ -55,13 +68,12 @@ export function RecipesRoutes() {
 				</Button>
 			</div>
 
-			{/* MuebleList requires materials/priceHistory/settings from app page */}
 			<MuebleList
 				onEdit={handleEdit}
-				materials={[]}
-				priceHistory={[]}
-				stockAlertEnabled={false}
-				workshopSettings={null}
+				materials={materials}
+				priceHistory={priceHistory}
+				stockAlertEnabled={stockAlertEnabled}
+				workshopSettings={settings ?? null}
 			/>
 
 			<Dialog

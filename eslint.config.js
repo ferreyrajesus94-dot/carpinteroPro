@@ -21,17 +21,17 @@ const featureBoundaryZones = [
 	},
 	featureZone("auth"),
 	featureZone("billing"),
-	// SDD8 temp exception — remove after WU5 completion: crm → quotes.
-	featureZone("crm", ["quotes"]),
+	// SDD9 WU6 complete: CRM no longer imports from quotes feature.
+	featureZone("crm"),
 	featureZone("dashboard"),
 	featureZone("inventory"),
 	featureZone("landing"),
 	featureZone("legal"),
 	featureZone("onboarding"),
-	// SDD8 temp exception — remove after WU5 completion: quotes → crm/recipes/settings.
-	featureZone("quotes", ["crm", "recipes", "settings"]),
-	// SDD8 temp exception — remove after WU5 completion: recipes → inventory/settings.
-	featureZone("recipes", ["inventory", "settings"]),
+	// SDD9 complete: quotes has no remaining feature exceptions.
+	featureZone("quotes"),
+	// SDD9 WU7 complete: recipes no longer imports inventory or settings.
+	featureZone("recipes"),
 	featureZone("settings"),
 	featureZone("tasks"),
 ];

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { computeRecipeCost } from '../types'
 import type { RecipeItemWithMaterial } from '../types'
-import type { Material } from '@/features/inventory/types'
+import type { Material } from '@/shared/types/material'
 
 type Category = Material['category']
 

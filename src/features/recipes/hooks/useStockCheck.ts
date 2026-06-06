@@ -1,7 +1,5 @@
-import { useMaterials } from '@/features/inventory/hooks/useMaterials'
-import { useWorkshopSettings } from '@/features/settings/hooks/useWorkshopSettings'
-import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { computeStockShortages, type StockCheckItem, type StockShortage } from '../lib/stockCheck'
+import type { Material } from '@/shared/types/material'
 
 export type { StockCheckItem, StockShortage }
 
@@ -11,12 +9,17 @@ export interface StockCheckResult {
   hasShortage: boolean
 }
 
-export function useStockCheck(items: StockCheckItem[] | undefined): StockCheckResult {
-  const workshopId = useWorkshopId()
-  const { data: settings } = useWorkshopSettings(workshopId)
-  const { data: materials = [] } = useMaterials(workshopId)
-
-  const enabled = Boolean(settings?.stock_alert_enabled)
+/**
+ * Hook that computes stock shortages for given items.
+ * Accepts materials and stockAlertEnabled as explicit arguments
+ * instead of calling inventory/settings hooks internally.
+ */
+export function useStockCheck(
+  items: StockCheckItem[] | undefined,
+  materials: Material[] = [],
+  stockAlertEnabled: boolean = false,
+): StockCheckResult {
+  const enabled = Boolean(stockAlertEnabled)
   if (!enabled || !items || items.length === 0) {
     return { enabled, shortages: [], hasShortage: false }
   }

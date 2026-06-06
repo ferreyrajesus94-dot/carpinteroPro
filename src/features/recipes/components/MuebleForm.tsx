@@ -185,10 +185,14 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
     if (p?.name) paramValues[p.name] = Number(p.default) || 0
   }
 
-  const stockCheck = useStockCheck([
-    ...(woodItemsWatch ?? []),
-    ...(extraItemsWatch ?? []),
-  ])
+  const stockCheck = useStockCheck(
+    [
+      ...(woodItemsWatch ?? []),
+      ...(extraItemsWatch ?? []),
+    ],
+    allMaterials,
+    Boolean(workshopSettings?.stock_alert_enabled),
+  )
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]

@@ -1,12 +1,16 @@
-import { ClientForm } from '@/features/crm/components/ClientForm'
-import type { Client } from '@/features/crm/types'
+import type { ReactNode } from "react";
 
 interface ClientDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onCreated: (client: Client) => void
+	open: boolean;
+	children: ReactNode;
 }
 
-export function ClientDialog({ open, onOpenChange, onCreated }: ClientDialogProps) {
-  return <ClientForm open={open} onOpenChange={onOpenChange} onCreated={onCreated} />
+/**
+ * Dialog wrapper for creating a new client during quote creation.
+ * Receives the client form component as `children` from the app seam
+ * instead of importing it from the CRM feature directly.
+ */
+export function ClientDialog({ open, children }: ClientDialogProps) {
+	if (!open) return null;
+	return <>{children}</>;
 }
