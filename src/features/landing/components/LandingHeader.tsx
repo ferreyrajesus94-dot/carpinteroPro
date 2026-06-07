@@ -6,9 +6,16 @@ import type { NavItem, LandingCta } from "../data/landingContent";
 interface LandingHeaderProps {
 	navItems: NavItem[];
 	primaryCta: LandingCta;
+	theme: "light" | "dark";
+	toggle: () => void;
 }
 
-export function LandingHeader({ navItems, primaryCta }: LandingHeaderProps) {
+export function LandingHeader({
+	navItems,
+	primaryCta,
+	theme,
+	toggle,
+}: LandingHeaderProps) {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const [scrolled, setScrolled] = useState(false);
 
@@ -54,6 +61,19 @@ export function LandingHeader({ navItems, primaryCta }: LandingHeaderProps) {
 							{item.label}
 						</a>
 					))}
+					<button
+						type="button"
+						onClick={toggle}
+						aria-label={
+							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
+						}
+						className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer"
+					>
+						<i
+							aria-hidden="true"
+							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
+						/>
+					</button>
 					<Link
 						to={primaryCta.href}
 						className="ml-3 inline-flex h-10 items-center justify-center rounded-md bg-cp-accent px-4 text-sm font-semibold text-[var(--cp-accent-ink)] shadow-sm transition-transform hover:scale-[1.01] active:scale-[0.99]"
@@ -109,6 +129,21 @@ export function LandingHeader({ navItems, primaryCta }: LandingHeaderProps) {
 							{item.label}
 						</a>
 					))}
+					<div className="mt-4 flex items-center gap-3">
+						<button
+							type="button"
+							onClick={toggle}
+							aria-label={
+								theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
+							}
+							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer"
+						>
+							<i
+								aria-hidden="true"
+								className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
+							/>
+						</button>
+					</div>
 					<div className="mt-3 flex flex-col gap-2">
 						<Link
 							to={primaryCta.href}

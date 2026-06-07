@@ -1,3 +1,4 @@
+import { useTheme } from "@/shared/hooks/useTheme";
 import { LandingHeader } from "./LandingHeader";
 import { LandingHero } from "./LandingHero";
 import { LandingFooter } from "./LandingFooter";
@@ -33,9 +34,15 @@ import {
 import { pricingPlan } from "../data/pricing";
 
 export function LandingPage() {
+	const { theme, toggle } = useTheme();
 	return (
 		<div className="landing-page min-h-screen bg-background text-foreground">
-			<LandingHeader navItems={navItems} primaryCta={loginCta} />
+			<LandingHeader
+				navItems={navItems}
+				primaryCta={loginCta}
+				theme={theme}
+				toggle={toggle}
+			/>
 			<main>
 				<LandingHero copy={heroCopy} />
 

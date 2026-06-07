@@ -1,5 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { LandingPage } from "./LandingPage";
 import {
@@ -202,6 +208,29 @@ describe("LandingPage", () => {
 		expect(screen.getByRole("banner")).toBeInTheDocument();
 		expect(screen.getByRole("main")).toBeInTheDocument();
 		expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+	});
+
+	it("renders a landing theme toggle that persists the user override", async () => {
+		localStorage.removeItem("theme");
+		document.documentElement.classList.remove("dark");
+
+		setup();
+
+		const toggle = screen.getByRole("button", {
+			name: "Activar modo oscuro",
+		});
+		fireEvent.click(toggle);
+
+		await waitFor(() => {
+			expect(document.documentElement).toHaveClass("dark");
+			expect(localStorage.getItem("theme")).toBe("dark");
+		});
+		expect(
+			screen.getByRole("button", { name: "Activar modo claro" }),
+		).toBeInTheDocument();
+
+		localStorage.removeItem("theme");
+		document.documentElement.classList.remove("dark");
 	});
 
 	it("has exactly one h1 heading", () => {
