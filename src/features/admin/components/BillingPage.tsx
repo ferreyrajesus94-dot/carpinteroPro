@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
+import { useSort } from "../lib/useSort";
 import { cn } from "@/shared/lib/utils";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -60,7 +61,10 @@ function BillingSkeleton() {
 
 export function BillingPage() {
 	const [statusFilter, setStatusFilter] = useState("");
+	const [expandedId, setExpandedId] = useState<string | null>(null);
 	const subscriptions = useAdminSubscriptions(statusFilter || undefined);
+	const data = subscriptions.data?.subscriptions ?? [];
+	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "workshopName", "asc");
 
 	if (subscriptions.isPending) return <BillingSkeleton />;
 
@@ -86,8 +90,6 @@ export function BillingPage() {
 			</section>
 		);
 	}
-
-	const data = subscriptions.data?.subscriptions ?? [];
 
 	return (
 		<div className="space-y-4">
@@ -128,67 +130,104 @@ export function BillingPage() {
 					>
 						<thead>
 							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3">Taller</th>
-								<th className="px-4 py-3">Plan</th>
-								<th className="px-4 py-3">Proveedor</th>
-								<th className="px-4 py-3">Estado</th>
-								<th className="px-4 py-3">Vence</th>
-								<th className="px-4 py-3">Actualizado</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("workshopName")}>
+									Taller {sortKey === "workshopName" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("plan")}>
+									Plan {sortKey === "plan" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("provider")}>
+									Proveedor {sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("status")}>
+									Estado {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("currentPeriodEnd")}>
+									Vence {sortKey === "currentPeriodEnd" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("updatedAt")}>
+									Actualizado {sortKey === "updatedAt" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
 								<th className="px-4 py-3">
 									<span className="sr-only">Taller</span>
 								</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-line">
-							{data.map((sub) => (
-								<tr
-									key={sub.id}
-									className="bg-cp-surface transition-colors hover:bg-cp-bg2"
-								>
-									<td className="px-4 py-3 font-medium text-ink">
-										{sub.workshopName}
-									</td>
-									<td className="px-4 py-3 text-ink2 capitalize">
-										{sub.plan}
-									</td>
-									<td className="px-4 py-3 text-ink2">
-										{sub.provider === "mercadopago"
-											? "MercadoPago"
-											: sub.provider}
-									</td>
-									<td className="px-4 py-3">{statusBadge(sub.status)}</td>
-									<td className="px-4 py-3 text-ink2">
-										{sub.currentPeriodEnd
-											? new Date(
-													sub.currentPeriodEnd,
-												).toLocaleDateString("es-AR", {
+							{sorted.map((sub) => {
+								const isExpanded = expandedId === sub.id;
+								return (
+									<>
+										<tr
+											key={sub.id}
+											onClick={() =>
+												setExpandedId(isExpanded ? null : sub.id)
+											}
+											className="cursor-pointer bg-cp-surface transition-colors hover:bg-cp-bg2"
+										>
+											<td className="px-4 py-3 font-medium text-ink">
+												{sub.workshopName}
+											</td>
+											<td className="px-4 py-3 text-ink2 capitalize">{sub.plan}</td>
+											<td className="px-4 py-3 text-ink2">
+												{sub.provider === "mercadopago"
+													? "MercadoPago"
+													: sub.provider}
+											</td>
+											<td className="px-4 py-3">{statusBadge(sub.status)}</td>
+											<td className="px-4 py-3 text-ink2">
+												{sub.currentPeriodEnd
+													? new Date(sub.currentPeriodEnd).toLocaleDateString(
+															"es-AR",
+															{ day: "numeric", month: "short", year: "numeric" },
+														)
+													: "—"}
+											</td>
+											<td className="px-4 py-3 text-ink2">
+												{new Date(sub.updatedAt).toLocaleDateString("es-AR", {
 													day: "numeric",
 													month: "short",
 													year: "numeric",
-												})
-											: "—"}
-									</td>
-									<td className="px-4 py-3 text-ink2">
-										{new Date(sub.updatedAt).toLocaleDateString(
-											"es-AR",
-											{
-												day: "numeric",
-												month: "short",
-												year: "numeric",
-											},
+												})}
+											</td>
+											<td className="px-4 py-3">
+												<Link
+													to={`/admin/workshops/${sub.workshopId}`}
+													className="text-[13px] font-medium text-cp-accent hover:underline"
+													aria-label={`Ver taller ${sub.workshopName}`}
+													onClick={(e) => e.stopPropagation()}
+												>
+													Taller
+												</Link>
+											</td>
+										</tr>
+										{isExpanded && (
+											<tr key={`${sub.id}-detail`} className="bg-cp-bg2">
+												<td colSpan={7} className="px-4 py-3">
+													<div className="grid gap-2 text-xs sm:grid-cols-3">
+														<div>
+															<span className="font-medium text-ink3">ID Suscripción</span>
+															<p className="mt-0.5 font-mono text-ink2">{sub.id}</p>
+														</div>
+														<div>
+															<span className="font-medium text-ink3">ID Taller</span>
+															<p className="mt-0.5 font-mono text-ink2">{sub.workshopId}</p>
+														</div>
+														<div>
+															<span className="font-medium text-ink3">Proveedor ID</span>
+															<p className="mt-0.5 font-mono text-ink2">{sub.providerPreapprovalId ?? "—"}</p>
+														</div>
+														<div>
+															<span className="font-medium text-ink3">Estado proveedor</span>
+															<p className="mt-0.5 text-ink2">{sub.providerStatus ?? "—"}</p>
+														</div>
+													</div>
+												</td>
+											</tr>
 										)}
-									</td>
-									<td className="px-4 py-3">
-										<Link
-											to={`/admin/workshops/${sub.workshopId}`}
-											className="text-[13px] font-medium text-cp-accent hover:underline"
-											aria-label={`Ver taller ${sub.workshopName}`}
-										>
-											Taller
-										</Link>
-									</td>
-								</tr>
-							))}
+									</>
+								);
+							})}
 						</tbody>
 					</table>
 				</div>

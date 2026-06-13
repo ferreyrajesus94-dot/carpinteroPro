@@ -1,10 +1,13 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
 import { useTheme } from "@/shared/hooks/useTheme";
+import { useAdminOverview } from "../hooks/useAdminOverview";
 import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 
 export function AdminLayout() {
 	const { theme, toggle } = useTheme();
+	const overview = useAdminOverview();
+	const webhookFailures = overview.data?.support?.recentWebhookFailures ?? 0;
 
 	return (
 		<div className="flex min-h-screen bg-background">
@@ -37,6 +40,11 @@ export function AdminLayout() {
 								aria-hidden="true"
 							/>
 							{label}
+							{to === "/admin" && webhookFailures > 0 && (
+								<span className="ml-auto rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 leading-none">
+									{webhookFailures}
+								</span>
+							)}
 						</NavLink>
 					))}
 				</nav>
@@ -46,7 +54,10 @@ export function AdminLayout() {
 						to="/dashboard"
 						className="flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 					>
-						<i className="fi fi-rr-arrow-left text-sm leading-none" aria-hidden="true" />
+						<i
+							className="fi fi-rr-arrow-left text-sm leading-none"
+							aria-hidden="true"
+						/>
 						Volver a la app
 					</Link>
 					<button
@@ -83,7 +94,7 @@ export function AdminLayout() {
 									end={to === "/admin"}
 									className={({ isActive }) =>
 										cn(
-											"rounded-full border border-line px-3 py-1.5 text-xs font-medium",
+											"inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium",
 											isActive
 												? "bg-cp-accent text-[var(--cp-accent-ink)]"
 												: "text-ink2",
@@ -91,6 +102,11 @@ export function AdminLayout() {
 									}
 								>
 									{label}
+									{to === "/admin" && webhookFailures > 0 && (
+										<span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 leading-none">
+											{webhookFailures}
+										</span>
+									)}
 								</NavLink>
 							))}
 						</nav>
@@ -102,7 +118,10 @@ export function AdminLayout() {
 							aria-label="Volver a la app"
 							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 						>
-							<i className="fi fi-rr-arrow-left text-base leading-none" aria-hidden="true" />
+							<i
+								className="fi fi-rr-arrow-left text-base leading-none"
+								aria-hidden="true"
+							/>
 						</Link>
 						<button
 							type="button"
@@ -128,19 +147,4 @@ export function AdminLayout() {
 	);
 }
 
-export function AdminPlaceholderPage() {
-	return (
-		<section className="rounded-xl border border-line bg-cp-surface p-6 shadow-sm">
-			<p className="font-mono text-xs uppercase tracking-wider text-ink3">
-				Dashboard interno
-			</p>
-			<h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">
-				Panel de administrador
-			</h2>
-			<p className="mt-3 max-w-2xl text-sm leading-6 text-ink2">
-				La estructura segura de administración ya está lista. Las métricas,
-				talleres, billing y soporte se conectan en los próximos work units.
-			</p>
-		</section>
-	);
-}
+
