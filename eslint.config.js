@@ -20,6 +20,7 @@ const featureBoundaryZones = [
 			"Shared code must not import feature code; move shared contracts to src/shared/.",
 	},
 	featureZone("auth"),
+	featureZone("admin"),
 	featureZone("billing"),
 	// SDD9 WU6 complete: CRM no longer imports from quotes feature.
 	featureZone("crm"),
