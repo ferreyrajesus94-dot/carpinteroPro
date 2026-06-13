@@ -1,4 +1,5 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/shared/lib/utils";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useAdminOverview } from "../hooks/useAdminOverview";
@@ -7,6 +8,7 @@ import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 export function AdminLayout() {
 	const { theme, toggle } = useTheme();
 	const overview = useAdminOverview();
+	const queryClient = useQueryClient();
 	const webhookFailures = overview.data?.support?.recentWebhookFailures ?? 0;
 
 	return (
@@ -113,6 +115,14 @@ export function AdminLayout() {
 					</div>
 
 					<div className="flex items-center gap-2">
+						<button
+							type="button"
+							onClick={() => queryClient.invalidateQueries()}
+							aria-label="Actualizar datos"
+							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+						>
+							<i className="fi fi-rr-refresh text-base leading-none" aria-hidden="true" />
+						</button>
 						<Link
 							to="/dashboard"
 							aria-label="Volver a la app"

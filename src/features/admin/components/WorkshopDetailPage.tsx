@@ -123,22 +123,34 @@ export function WorkshopDetailPage() {
 								})}
 							</p>
 						</div>
-						{workshop.subscriptionStatus && (
+						<div className="flex flex-col items-end gap-2">
 							<span
 								className={cn(
 									"rounded-full px-3 py-1 text-xs font-medium",
-									workshop.subscriptionStatus === "active" ||
-										workshop.subscriptionStatus === "trial"
+									workshop.isActive
 										? "bg-emerald-100 text-emerald-700"
-										: workshop.subscriptionStatus === "paused"
-											? "bg-amber-100 text-amber-700"
-											: "bg-red-100 text-red-700",
+										: "bg-red-100 text-red-700",
 								)}
 							>
-								{STATUS_LABELS[workshop.subscriptionStatus] ??
-									workshop.subscriptionStatus}
+								{workshop.isActive ? "Activo" : "Inactivo"}
 							</span>
-						)}
+							{workshop.subscriptionStatus && (
+								<span
+									className={cn(
+										"rounded-full px-3 py-1 text-xs font-medium",
+										workshop.subscriptionStatus === "active" ||
+											workshop.subscriptionStatus === "trial"
+											? "bg-emerald-100 text-emerald-700"
+											: workshop.subscriptionStatus === "paused"
+												? "bg-amber-100 text-amber-700"
+												: "bg-red-100 text-red-700",
+									)}
+								>
+									{STATUS_LABELS[workshop.subscriptionStatus] ??
+										workshop.subscriptionStatus}
+								</span>
+							)}
+						</div>
 					</div>
 				</header>
 			</div>

@@ -9,12 +9,14 @@ declare const Deno: {
 Deno.serve(async (req: Request) => {
 	const options = preflight(req);
 	if (options) return options;
-	if (req.method !== "POST") return structuredErr("method_not_allowed", "Method not allowed", 405);
+	if (req.method !== "POST")
+		return structuredErr("method_not_allowed", "Method not allowed", 405);
 
 	try {
 		await requirePlatformAdmin(req);
 		const body: { eventId?: string } = await req.json().catch(() => ({}));
-		if (!body.eventId) return structuredErr("invalid_request", "eventId required", 400);
+		if (!body.eventId)
+			return structuredErr("invalid_request", "eventId required", 400);
 
 		// Look up the webhook event to get context
 		const { data: event, error: lookupErr } = await serviceClient()
@@ -40,12 +42,17 @@ Deno.serve(async (req: Request) => {
 
 		if (insertErr) {
 			console.error("admin-retry-webhook: insert failed", insertErr);
-			return structuredErr("retry_failed", "No se pudo registrar el reintento", 500);
+			return structuredErr(
+				"retry_failed",
+				"No se pudo registrar el reintento",
+				500,
+			);
 		}
 
 		return json({ status: "sent" });
 	} catch (e: unknown) {
-		if (e instanceof AdminAuthError) return structuredErr("admin_auth_failed", e.message, e.status);
+		if (e instanceof AdminAuthError)
+			return structuredErr("admin_auth_failed", e.message, e.status);
 		console.error("admin-retry-webhook failed", e);
 		return structuredErr("retry_failed", "Error al reintentar webhook", 500);
 	}

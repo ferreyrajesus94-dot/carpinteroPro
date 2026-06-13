@@ -131,9 +131,7 @@ describe("BillingPage", () => {
 		expect(
 			screen.getByRole("button", { name: /cancelar/i }),
 		).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /pausar/i }),
-		).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /pausar/i })).toBeInTheDocument();
 		// Retry and refund are still not exposed
 		expect(
 			screen.queryByRole("button", { name: /reintentar/i }),

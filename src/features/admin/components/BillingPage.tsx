@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
-import { useCancelSubscription, useToggleSubscription } from "../hooks/useAdminActions";
+import {
+	useCancelSubscription,
+	useToggleSubscription,
+} from "../hooks/useAdminActions";
 import { useSort } from "../lib/useSort";
 import { downloadCsv } from "../lib/downloadCsv";
 import { cn } from "@/shared/lib/utils";
@@ -124,7 +127,14 @@ export function BillingPage() {
 							type="button"
 							onClick={() =>
 								downloadCsv(
-									["Taller", "Plan", "Proveedor", "Estado", "Vence", "Actualizado"],
+									[
+										"Taller",
+										"Plan",
+										"Proveedor",
+										"Estado",
+										"Vence",
+										"Actualizado",
+									],
 									data.map((s) => [
 										s.workshopName,
 										s.plan,
@@ -138,22 +148,25 @@ export function BillingPage() {
 							}
 							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 						>
-							<i className="fi fi-rr-download text-sm leading-none" aria-hidden="true" />
+							<i
+								className="fi fi-rr-download text-sm leading-none"
+								aria-hidden="true"
+							/>
 							Exportar
 						</button>
 					)}
-				<select
-					aria-label="Filtrar por estado"
-					value={statusFilter}
-					onChange={(e) => setStatusFilter(e.target.value)}
-					className="h-9 rounded-lg border border-line bg-cp-surface px-3 text-[13.5px] text-ink focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
-				>
-					{STATUS_OPTIONS.map(({ value, label }) => (
-						<option key={value} value={value}>
-							{label}
-						</option>
-					))}
-				</select>
+					<select
+						aria-label="Filtrar por estado"
+						value={statusFilter}
+						onChange={(e) => setStatusFilter(e.target.value)}
+						className="h-9 rounded-lg border border-line bg-cp-surface px-3 text-[13.5px] text-ink focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
+					>
+						{STATUS_OPTIONS.map(({ value, label }) => (
+							<option key={value} value={value}>
+								{label}
+							</option>
+						))}
+					</select>
 				</div>
 			</header>
 
@@ -265,59 +278,77 @@ export function BillingPage() {
 													year: "numeric",
 												})}
 											</td>
-										<td className="px-4 py-3">
-											<div className="flex items-center gap-2">
-												<Link
-													to={`/admin/workshops/${sub.workshopId}`}
-													className="text-[13px] font-medium text-cp-accent hover:underline"
-													aria-label={`Ver taller ${sub.workshopName}`}
-													onClick={(e) => e.stopPropagation()}
-												>
-													Taller
-												</Link>
-												{sub.status !== "cancelled" && (
-													<>
-														<button
-															type="button"
-															onClick={(e) => {
-																e.stopPropagation();
-																toggleMutation.mutate({ workshopId: sub.workshopId, action: sub.status === "paused" ? "resume" : "pause" });
-															}}
-															className="text-[11px] text-ink3 hover:text-ink transition-colors"
-														>
-															{sub.status === "paused" ? "Reanudar" : "Pausar"}
-														</button>
-														{confirmCancelId === sub.id ? (
-															<span className="flex items-center gap-1 text-[11px]">
-																¿Cancelar?
-																<button
-																	type="button"
-																	onClick={(e) => { e.stopPropagation(); cancelMutation.mutate(sub.workshopId); setConfirmCancelId(null); }}
-																	className="text-red-600 font-medium hover:underline"
-																>
-																	Sí
-																</button>
-																<button
-																	type="button"
-																	onClick={(e) => { e.stopPropagation(); setConfirmCancelId(null); }}
-																	className="text-ink3 hover:text-ink"
-																>
-																	No
-																</button>
-															</span>
-														) : (
+											<td className="px-4 py-3">
+												<div className="flex items-center gap-2">
+													<Link
+														to={`/admin/workshops/${sub.workshopId}`}
+														className="text-[13px] font-medium text-cp-accent hover:underline"
+														aria-label={`Ver taller ${sub.workshopName}`}
+														onClick={(e) => e.stopPropagation()}
+													>
+														Taller
+													</Link>
+													{sub.status !== "cancelled" && (
+														<>
 															<button
 																type="button"
-																onClick={(e) => { e.stopPropagation(); setConfirmCancelId(sub.id); }}
-																className="text-[11px] text-red-600 hover:underline"
+																onClick={(e) => {
+																	e.stopPropagation();
+																	toggleMutation.mutate({
+																		workshopId: sub.workshopId,
+																		action:
+																			sub.status === "paused"
+																				? "resume"
+																				: "pause",
+																	});
+																}}
+																className="text-[11px] text-ink3 hover:text-ink transition-colors"
 															>
-																Cancelar
+																{sub.status === "paused"
+																	? "Reanudar"
+																	: "Pausar"}
 															</button>
-														)}
-													</>
-												)}
-											</div>
-										</td>
+															{confirmCancelId === sub.id ? (
+																<span className="flex items-center gap-1 text-[11px]">
+																	¿Cancelar?
+																	<button
+																		type="button"
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			cancelMutation.mutate(sub.workshopId);
+																			setConfirmCancelId(null);
+																		}}
+																		className="text-red-600 font-medium hover:underline"
+																	>
+																		Sí
+																	</button>
+																	<button
+																		type="button"
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			setConfirmCancelId(null);
+																		}}
+																		className="text-ink3 hover:text-ink"
+																	>
+																		No
+																	</button>
+																</span>
+															) : (
+																<button
+																	type="button"
+																	onClick={(e) => {
+																		e.stopPropagation();
+																		setConfirmCancelId(sub.id);
+																	}}
+																	className="text-[11px] text-red-600 hover:underline"
+																>
+																	Cancelar
+																</button>
+															)}
+														</>
+													)}
+												</div>
+											</td>
 										</tr>
 										{isExpanded && (
 											<tr key={`${sub.id}-detail`} className="bg-cp-bg2">

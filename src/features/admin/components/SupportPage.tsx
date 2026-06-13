@@ -49,7 +49,11 @@ export function SupportPage() {
 	const workshops = useAdminWorkshops();
 	const workshopOptions = workshops.data?.workshops ?? [];
 	const data = diagnostics.data?.diagnostics ?? [];
-	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "processedAt", "desc");
+	const { sorted, sortKey, sortDir, toggleSort } = useSort(
+		data,
+		"processedAt",
+		"desc",
+	);
 	const lastUpdated = diagnostics.dataUpdatedAt
 		? new Date(diagnostics.dataUpdatedAt).toLocaleTimeString("es-AR", {
 				hour: "2-digit",
@@ -132,18 +136,35 @@ export function SupportPage() {
 					>
 						<thead>
 							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("providerEventId")}>
-									Evento {sortKey === "providerEventId" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("providerEventId")}
+								>
+									Evento{" "}
+									{sortKey === "providerEventId" &&
+										(sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("eventType")}>
-									Tipo {sortKey === "eventType" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("eventType")}
+								>
+									Tipo{" "}
+									{sortKey === "eventType" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("provider")}>
-									Proveedor {sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("provider")}
+								>
+									Proveedor{" "}
+									{sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
 								<th className="px-4 py-3">Recurso</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("processedAt")}>
-									Procesado {sortKey === "processedAt" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("processedAt")}
+								>
+									Procesado{" "}
+									{sortKey === "processedAt" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
 								<th className="px-4 py-3">Taller</th>
 							</tr>
@@ -175,26 +196,26 @@ export function SupportPage() {
 											minute: "2-digit",
 										})}
 									</td>
-								<td className="px-4 py-3">
-									<div className="flex items-center gap-2">
-										<Link
-											to={`/admin/workshops/${evt.workshopId}`}
-											className="text-[13px] font-medium text-cp-accent hover:underline"
-											aria-label={`Ver taller ${evt.workshopId}`}
-										>
-											Taller
-										</Link>
-										{evt.eventType.toLowerCase().includes("fail") && (
-											<button
-												type="button"
-												onClick={() => retryMutation.mutate(evt.id)}
-												className="text-[11px] text-amber-600 hover:underline"
+									<td className="px-4 py-3">
+										<div className="flex items-center gap-2">
+											<Link
+												to={`/admin/workshops/${evt.workshopId}`}
+												className="text-[13px] font-medium text-cp-accent hover:underline"
+												aria-label={`Ver taller ${evt.workshopId}`}
 											>
-												Reintentar
-											</button>
-										)}
-									</div>
-								</td>
+												Taller
+											</Link>
+											{evt.eventType.toLowerCase().includes("fail") && (
+												<button
+													type="button"
+													onClick={() => retryMutation.mutate(evt.id)}
+													className="text-[11px] text-amber-600 hover:underline"
+												>
+													Reintentar
+												</button>
+											)}
+										</div>
+									</td>
 								</tr>
 							))}
 						</tbody>
