@@ -69,6 +69,12 @@ export function WorkshopsPage() {
 	const workshops = useAdminWorkshops(debouncedSearch || undefined);
 	const data = workshops.data?.workshops ?? [];
 	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "name", "asc");
+	const lastUpdated = workshops.dataUpdatedAt
+		? new Date(workshops.dataUpdatedAt).toLocaleTimeString("es-AR", {
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+		: null;
 
 	function handleSearchChange(value: string) {
 		setSearch(value);
@@ -104,10 +110,16 @@ export function WorkshopsPage() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-					Talleres
-				</h2>
+			<header className="flex flex-wrap items-baseline justify-between gap-2">
+				<div>
+					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+						Talleres
+					</h2>
+					<p className="text-xs text-ink3">
+						{data.length} taller{data.length !== 1 ? "es" : ""}
+						{lastUpdated && ` · Actualizado ${lastUpdated}`}
+					</p>
+				</div>
 				<div className="flex items-center gap-2">
 					{data.length > 0 && (
 						<button
@@ -148,7 +160,7 @@ export function WorkshopsPage() {
 					/>
 				</div>
 				</div>
-			</div>
+			</header>
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
@@ -166,7 +178,12 @@ export function WorkshopsPage() {
 					</p>
 				</section>
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-line">
+				<div
+					className="overflow-x-auto rounded-xl border border-line"
+					role="region"
+					aria-label="Tabla de talleres con scroll horizontal"
+					tabIndex={0}
+				>
 					<table
 						className="w-full text-left text-sm"
 						role="table"
@@ -180,7 +197,13 @@ export function WorkshopsPage() {
 								>
 									Nombre <SortArrow active={sortKey === "name"} dir={sortDir} />
 								</th>
-								<th className="px-4 py-3 text-ink3">Dueño</th>
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("ownerEmail")}
+								>
+									Dueño{" "}
+									<SortArrow active={sortKey === "ownerEmail"} dir={sortDir} />
+								</th>
 								<th
 									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("createdAt")}

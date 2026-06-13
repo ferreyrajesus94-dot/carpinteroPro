@@ -70,6 +70,12 @@ export function BillingPage() {
 		"workshopName",
 		"asc",
 	);
+	const lastUpdated = subscriptions.dataUpdatedAt
+		? new Date(subscriptions.dataUpdatedAt).toLocaleTimeString("es-AR", {
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+		: null;
 
 	if (subscriptions.isPending) return <BillingSkeleton />;
 
@@ -98,10 +104,16 @@ export function BillingPage() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-					Suscripciones
-				</h2>
+			<header className="flex flex-wrap items-baseline justify-between gap-2">
+				<div>
+					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+						Suscripciones
+					</h2>
+					<p className="text-xs text-ink3">
+						{data.length} suscripción{data.length !== 1 ? "es" : ""}
+						{lastUpdated && ` · Actualizado ${lastUpdated}`}
+					</p>
+				</div>
 				<div className="flex items-center gap-2">
 					{data.length > 0 && (
 						<button
@@ -139,7 +151,7 @@ export function BillingPage() {
 					))}
 				</select>
 				</div>
-			</div>
+			</header>
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
