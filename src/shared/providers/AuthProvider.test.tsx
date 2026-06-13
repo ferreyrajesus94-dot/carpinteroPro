@@ -49,6 +49,7 @@ const ONBOARDED_AT = "2026-05-31T12:00:00.000Z";
 type ProfileRow = {
 	workshop_id: string | null;
 	onboarded_at: string | null;
+	is_platform_admin: boolean | null;
 };
 
 type ProfileQueryError = {
@@ -65,8 +66,13 @@ let profileLookupCalls = 0;
 function makeProfileRow(
 	workshopId: string | null = WORKSHOP_ID,
 	onboardedAt: string | null = ONBOARDED_AT,
+	isPlatformAdmin: boolean | null = null,
 ): ProfileRow {
-	return { workshop_id: workshopId, onboarded_at: onboardedAt };
+	return {
+		workshop_id: workshopId,
+		onboarded_at: onboardedAt,
+		is_platform_admin: isPlatformAdmin,
+	};
 }
 
 function profileSuccess(row = makeProfileRow()): ProfileQueryResult {
@@ -252,6 +258,7 @@ describe("AuthProvider", () => {
 		expect(result.current.loading).toBe(false);
 		expect(result.current.workshopId).toBeNull();
 		expect(result.current.onboardedAt).toBeNull();
+		expect(result.current.isPlatformAdmin).toBe(false);
 		expect(result.current.profileIssue).toMatchObject({
 			kind: "query_error",
 			retryable: true,
@@ -446,6 +453,56 @@ describe("AuthProvider", () => {
 		switchPurge.resolve();
 		await waitFor(() => expect(result.current.status).toBe("ready"));
 		expect(result.current.workshopId).toBe("workshop-b");
+	});
+
+	it("isPlatformAdmin defaults to false when profile has no admin flag", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([
+			profileSuccess(makeProfileRow(WORKSHOP_ID, ONBOARDED_AT, null)),
+		]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.isPlatformAdmin).toBe(false);
+	});
+
+	it("isPlatformAdmin is true when profile has is_platform_admin = true", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([
+			profileSuccess(makeProfileRow(WORKSHOP_ID, ONBOARDED_AT, true)),
+		]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.isPlatformAdmin).toBe(true);
+	});
+
+	it("isPlatformAdmin is false when user is not authenticated", async () => {
+		mockAuth.getSession.mockResolvedValue({ data: { session: null } });
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		expect(result.current.isPlatformAdmin).toBe(false);
+	});
+
+	it("isPlatformAdmin remains accessible after profile retry recovers", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([
+			profileError(),
+			profileSuccess(makeProfileRow(WORKSHOP_ID, null, true)),
+		]);
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.isPlatformAdmin).toBe(true);
+		expect(result.current.workshopId).toBe(WORKSHOP_ID);
 	});
 
 	it("signOut calls supabase.auth.signOut before logout purge", async () => {
