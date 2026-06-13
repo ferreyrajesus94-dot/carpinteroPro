@@ -35,6 +35,14 @@ vi.mock("./api/workshops", () => ({
 	fetchAdminWorkshopDetail: vi.fn(),
 }));
 
+vi.mock("./api/subscriptions", () => ({
+	fetchAdminSubscriptions: vi.fn(),
+}));
+
+vi.mock("./api/support", () => ({
+	fetchAdminSupportDiagnostics: vi.fn(),
+}));
+
 import * as overviewApi from "./api/overview";
 
 const MOCK_OVERVIEW = {
