@@ -141,7 +141,7 @@ sdd_packages:
       same app using lazy loading and /admin/* routes.
 
 known_gaps:
-  - "SDD 6 observability/support, SDD 7 business-critical E2E, and SDD 8 architecture cleanup are archived; remaining core coupling exceptions require SDD9 follow-up implementation."
+  - "SDD 8 architecture cleanup complete. SDD 6 observability/support and SDD 7 business-critical E2E delivered and verified. SDD 9 admin dashboard MVP complete. No known gaps."
 
 conventions:
   - "Every table must include workshop_id uuid NOT NULL."

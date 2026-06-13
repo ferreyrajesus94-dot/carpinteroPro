@@ -33,3 +33,9 @@ blob-report/
 .atl/
 .pi/
 .pi-lens/
+
+# Personal research notes (not project code)
+research/
+
+# Playwright MCP artifacts
+.playwright-mcp/
