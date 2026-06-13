@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
 import { useSort } from "../lib/useSort";
+import { downloadCsv } from "../lib/downloadCsv";
 import { cn } from "@/shared/lib/utils";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -64,7 +65,11 @@ export function BillingPage() {
 	const [expandedId, setExpandedId] = useState<string | null>(null);
 	const subscriptions = useAdminSubscriptions(statusFilter || undefined);
 	const data = subscriptions.data?.subscriptions ?? [];
-	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "workshopName", "asc");
+	const { sorted, sortKey, sortDir, toggleSort } = useSort(
+		data,
+		"workshopName",
+		"asc",
+	);
 
 	if (subscriptions.isPending) return <BillingSkeleton />;
 
@@ -97,6 +102,30 @@ export function BillingPage() {
 				<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
 					Suscripciones
 				</h2>
+				<div className="flex items-center gap-2">
+					{data.length > 0 && (
+						<button
+							type="button"
+							onClick={() =>
+								downloadCsv(
+									["Taller", "Plan", "Proveedor", "Estado", "Vence", "Actualizado"],
+									data.map((s) => [
+										s.workshopName,
+										s.plan,
+										s.provider,
+										s.status,
+										s.currentPeriodEnd ?? "",
+										s.updatedAt,
+									]),
+									"suscripciones.csv",
+								)
+							}
+							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+						>
+							<i className="fi fi-rr-download text-sm leading-none" aria-hidden="true" />
+							Exportar
+						</button>
+					)}
 				<select
 					aria-label="Filtrar por estado"
 					value={statusFilter}
@@ -109,6 +138,7 @@ export function BillingPage() {
 						</option>
 					))}
 				</select>
+				</div>
 			</div>
 
 			{data.length === 0 ? (
@@ -130,23 +160,48 @@ export function BillingPage() {
 					>
 						<thead>
 							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("workshopName")}>
-									Taller {sortKey === "workshopName" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("workshopName")}
+								>
+									Taller{" "}
+									{sortKey === "workshopName" &&
+										(sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("plan")}>
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("plan")}
+								>
 									Plan {sortKey === "plan" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("provider")}>
-									Proveedor {sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("provider")}
+								>
+									Proveedor{" "}
+									{sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("status")}>
-									Estado {sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("status")}
+								>
+									Estado{" "}
+									{sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("currentPeriodEnd")}>
-									Vence {sortKey === "currentPeriodEnd" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("currentPeriodEnd")}
+								>
+									Vence{" "}
+									{sortKey === "currentPeriodEnd" &&
+										(sortDir === "asc" ? "↑" : "↓")}
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("updatedAt")}>
-									Actualizado {sortKey === "updatedAt" && (sortDir === "asc" ? "↑" : "↓")}
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("updatedAt")}
+								>
+									Actualizado{" "}
+									{sortKey === "updatedAt" && (sortDir === "asc" ? "↑" : "↓")}
 								</th>
 								<th className="px-4 py-3">
 									<span className="sr-only">Taller</span>
@@ -160,15 +215,15 @@ export function BillingPage() {
 									<>
 										<tr
 											key={sub.id}
-											onClick={() =>
-												setExpandedId(isExpanded ? null : sub.id)
-											}
+											onClick={() => setExpandedId(isExpanded ? null : sub.id)}
 											className="cursor-pointer bg-cp-surface transition-colors hover:bg-cp-bg2"
 										>
 											<td className="px-4 py-3 font-medium text-ink">
 												{sub.workshopName}
 											</td>
-											<td className="px-4 py-3 text-ink2 capitalize">{sub.plan}</td>
+											<td className="px-4 py-3 text-ink2 capitalize">
+												{sub.plan}
+											</td>
 											<td className="px-4 py-3 text-ink2">
 												{sub.provider === "mercadopago"
 													? "MercadoPago"
@@ -179,7 +234,11 @@ export function BillingPage() {
 												{sub.currentPeriodEnd
 													? new Date(sub.currentPeriodEnd).toLocaleDateString(
 															"es-AR",
-															{ day: "numeric", month: "short", year: "numeric" },
+															{
+																day: "numeric",
+																month: "short",
+																year: "numeric",
+															},
 														)
 													: "—"}
 											</td>
@@ -206,20 +265,36 @@ export function BillingPage() {
 												<td colSpan={7} className="px-4 py-3">
 													<div className="grid gap-2 text-xs sm:grid-cols-3">
 														<div>
-															<span className="font-medium text-ink3">ID Suscripción</span>
-															<p className="mt-0.5 font-mono text-ink2">{sub.id}</p>
+															<span className="font-medium text-ink3">
+																ID Suscripción
+															</span>
+															<p className="mt-0.5 font-mono text-ink2">
+																{sub.id}
+															</p>
 														</div>
 														<div>
-															<span className="font-medium text-ink3">ID Taller</span>
-															<p className="mt-0.5 font-mono text-ink2">{sub.workshopId}</p>
+															<span className="font-medium text-ink3">
+																ID Taller
+															</span>
+															<p className="mt-0.5 font-mono text-ink2">
+																{sub.workshopId}
+															</p>
 														</div>
 														<div>
-															<span className="font-medium text-ink3">Proveedor ID</span>
-															<p className="mt-0.5 font-mono text-ink2">{sub.providerPreapprovalId ?? "—"}</p>
+															<span className="font-medium text-ink3">
+																Proveedor ID
+															</span>
+															<p className="mt-0.5 font-mono text-ink2">
+																{sub.providerPreapprovalId ?? "—"}
+															</p>
 														</div>
 														<div>
-															<span className="font-medium text-ink3">Estado proveedor</span>
-															<p className="mt-0.5 text-ink2">{sub.providerStatus ?? "—"}</p>
+															<span className="font-medium text-ink3">
+																Estado proveedor
+															</span>
+															<p className="mt-0.5 text-ink2">
+																{sub.providerStatus ?? "—"}
+															</p>
 														</div>
 													</div>
 												</td>

@@ -4,6 +4,7 @@ import { json, preflight, structuredErr } from "../_shared/response.ts";
 
 declare const Deno: {
 	serve(handler: (req: Request) => Response | Promise<Response>): void;
+	env: { get(key: string): string | undefined };
 };
 
 interface AdminWorkshopsRequest {
@@ -23,6 +24,11 @@ interface ProfileRow {
 	onboarded_at: string | null;
 }
 
+interface UserRow {
+	id: string;
+	email: string;
+}
+
 interface SubscriptionRow {
 	workshop_id: string;
 	status: string;
@@ -31,6 +37,7 @@ interface SubscriptionRow {
 interface RelatedRows {
 	profiles: ProfileRow[];
 	subscriptions: SubscriptionRow[];
+	ownerEmailById: Map<string, string>;
 }
 
 async function readBody(req: Request): Promise<AdminWorkshopsRequest> {
@@ -89,9 +96,42 @@ async function loadRelatedRows(
 		);
 	}
 
+	// Determine owner for each workshop: profile with earliest onboarded_at
+	const ownerIds = new Set<string>();
+	const profiles = profilesResult.data ?? [];
+	for (const p of profiles) {
+		if (p.onboarded_at !== null) ownerIds.add(p.id);
+	}
+
+	// Fetch emails for owner profiles via GoTrue admin API
+	const ownerEmailById = new Map<string, string>();
+	if (ownerIds.size > 0) {
+		const authUrl = `${Deno.env.get("SUPABASE_URL")}/auth/v1/admin/users`;
+		const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+		try {
+			const res = await fetch(authUrl, {
+				headers: {
+					Authorization: `Bearer ${serviceKey}`,
+					apikey: serviceKey,
+				},
+			});
+			if (res.ok) {
+				const data = (await res.json()) as { users: UserRow[] };
+				for (const u of data.users ?? []) {
+					if (ownerIds.has(u.id)) {
+						ownerEmailById.set(u.id, u.email);
+					}
+				}
+			}
+		} catch {
+			// Fall through — owner emails stay as empty map, DTO shows null
+		}
+	}
+
 	return {
-		profiles: profilesResult.data ?? [],
+		profiles,
 		subscriptions: subscriptionsResult.data ?? [],
+		ownerEmailById,
 	};
 }
 
@@ -103,16 +143,26 @@ function mapWorkshop(workshop: WorkshopRow, related: RelatedRows) {
 		(row: SubscriptionRow) => row.workshop_id === workshop.id,
 	);
 
+	// Owner is the first onboarded profile (earliest onboarded_at)
+	const onboardedProfiles = workshopProfiles
+		.filter((p) => p.onboarded_at !== null)
+		.sort(
+			(a, b) =>
+				new Date(a.onboarded_at!).getTime() -
+				new Date(b.onboarded_at!).getTime(),
+		);
+	const ownerProfile = onboardedProfiles[0];
+	const ownerEmail = ownerProfile
+		? (related.ownerEmailById.get(ownerProfile.id) ?? null)
+		: null;
+
 	return {
 		id: workshop.id,
 		name: workshop.name,
 		createdAt: workshop.created_at,
-		// TODO(SDD9 WU4): resolve owner mapping once the admin UI defines how to display workshop ownership.
-		ownerEmail: null,
+		ownerEmail,
 		profileCount: workshopProfiles.length,
-		onboardedProfileCount: workshopProfiles.filter(
-			(profile: ProfileRow) => profile.onboarded_at !== null,
-		).length,
+		onboardedProfileCount: onboardedProfiles.length,
 		subscriptionStatus: subscription?.status ?? null,
 	};
 }

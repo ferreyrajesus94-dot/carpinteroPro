@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
 import { useSort } from "../lib/useSort";
+import { downloadCsv } from "../lib/downloadCsv";
 import { cn } from "@/shared/lib/utils";
 
 function SortArrow({ active, dir }: { active: boolean; dir: "asc" | "desc" }) {
@@ -107,6 +108,30 @@ export function WorkshopsPage() {
 				<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
 					Talleres
 				</h2>
+				<div className="flex items-center gap-2">
+					{data.length > 0 && (
+						<button
+							type="button"
+							onClick={() =>
+								downloadCsv(
+									["Nombre", "Dueño", "Creado", "Perfiles", "Onboardeados", "Suscripción"],
+									data.map((w) => [
+										w.name,
+										w.ownerEmail ?? "",
+										w.createdAt,
+										String(w.profileCount),
+										String(w.onboardedProfileCount),
+										w.subscriptionStatus ?? "",
+									]),
+									"talleres.csv",
+								)
+							}
+							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+						>
+							<i className="fi fi-rr-download text-sm leading-none" aria-hidden="true" />
+							Exportar
+						</button>
+					)}
 				<div className="relative">
 					<i
 						className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink3"
@@ -121,6 +146,7 @@ export function WorkshopsPage() {
 						onChange={(e) => handleSearchChange(e.target.value)}
 						className="h-9 rounded-lg border border-line bg-cp-surface pl-9 pr-3 text-[13.5px] text-ink placeholder:text-ink3 focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
 					/>
+				</div>
 				</div>
 			</div>
 
@@ -148,20 +174,49 @@ export function WorkshopsPage() {
 					>
 						<thead>
 							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("name")}>
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("name")}
+								>
 									Nombre <SortArrow active={sortKey === "name"} dir={sortDir} />
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("createdAt")}>
-									Creado <SortArrow active={sortKey === "createdAt"} dir={sortDir} />
+								<th className="px-4 py-3 text-ink3">Dueño</th>
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("createdAt")}
+								>
+									Creado{" "}
+									<SortArrow active={sortKey === "createdAt"} dir={sortDir} />
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("profileCount")}>
-									Perfiles <SortArrow active={sortKey === "profileCount"} dir={sortDir} />
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("profileCount")}
+								>
+									Perfiles{" "}
+									<SortArrow
+										active={sortKey === "profileCount"}
+										dir={sortDir}
+									/>
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("onboardedProfileCount")}>
-									Onboardeados <SortArrow active={sortKey === "onboardedProfileCount"} dir={sortDir} />
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("onboardedProfileCount")}
+								>
+									Onboardeados{" "}
+									<SortArrow
+										active={sortKey === "onboardedProfileCount"}
+										dir={sortDir}
+									/>
 								</th>
-								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("subscriptionStatus")}>
-									Suscripción <SortArrow active={sortKey === "subscriptionStatus"} dir={sortDir} />
+								<th
+									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+									onClick={() => toggleSort("subscriptionStatus")}
+								>
+									Suscripción{" "}
+									<SortArrow
+										active={sortKey === "subscriptionStatus"}
+										dir={sortDir}
+									/>
 								</th>
 								<th className="px-4 py-3">
 									<span className="sr-only">Acciones</span>
@@ -176,6 +231,9 @@ export function WorkshopsPage() {
 								>
 									<td className="px-4 py-3 font-medium text-ink">
 										{workshop.name}
+									</td>
+									<td className="px-4 py-3 text-ink2 max-w-[160px] truncate" title={workshop.ownerEmail ?? undefined}>
+										{workshop.ownerEmail ?? "—"}
 									</td>
 									<td className="px-4 py-3 text-ink2">
 										{new Date(workshop.createdAt).toLocaleDateString("es-AR", {
