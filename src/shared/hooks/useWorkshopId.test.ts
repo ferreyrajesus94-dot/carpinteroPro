@@ -18,6 +18,7 @@ function makeAuthValue(workshopId: string | null) {
     loading: false,
     status: 'ready' as const,
     profileIssue: null,
+    isPlatformAdmin: false,
     signOut: vi.fn(),
     refreshProfile: vi.fn(),
   }

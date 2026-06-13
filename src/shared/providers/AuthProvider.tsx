@@ -34,6 +34,7 @@ export interface ProfileIssue {
 interface ProfileRow {
 	workshop_id: string | null;
 	onboarded_at: string | null;
+	is_platform_admin: boolean | null;
 }
 
 interface AuthContextValue {
@@ -46,6 +47,8 @@ interface AuthContextValue {
 	profileIssue: ProfileIssue | null;
 	signOut: () => Promise<void>;
 	refreshProfile: () => Promise<void>;
+	/** Whether the current user is a platform super-admin. */
+	isPlatformAdmin: boolean;
 }
 
 const missingProfileIssue: ProfileIssue = {
@@ -70,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [session, setSession] = useState<Session | null>(null);
 	const [workshopId, setWorkshopIdState] = useState<string | null>(null);
 	const [onboardedAt, setOnboardedAt] = useState<string | null>(null);
+	const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
 	const [status, setStatus] = useState<AuthStatus>("initializing");
 	const [profileIssue, setProfileIssue] = useState<ProfileIssue | null>(null);
 	const loadRequestIdRef = useRef(0);
@@ -89,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const clearProfileState = useCallback(() => {
 		setWorkshopIdState(null);
 		setOnboardedAt(null);
+		setIsPlatformAdmin(false);
 		setProfileIssue(null);
 	}, []);
 
@@ -115,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			async function fetchProfile() {
 				return supabase
 					.from("profiles")
-					.select("workshop_id, onboarded_at")
+					.select("workshop_id, onboarded_at, is_platform_admin")
 					.eq("id", userId)
 					.maybeSingle<ProfileRow>();
 			}
@@ -133,6 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (error) {
 				setWorkshopIdState(null);
 				setOnboardedAt(null);
+				setIsPlatformAdmin(false);
 				setProfileIssue(queryProfileIssue);
 				setStatus("profile_error");
 				return;
@@ -141,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			if (!data) {
 				setWorkshopIdState(null);
 				setOnboardedAt(null);
+				setIsPlatformAdmin(false);
 				setProfileIssue(missingProfileIssue);
 				setStatus("profile_missing");
 				return;
@@ -148,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 			setWorkshopIdState(data.workshop_id ?? null);
 			setOnboardedAt(data.onboarded_at ?? null);
+			setIsPlatformAdmin(data.is_platform_admin ?? false);
 			setProfileIssue(null);
 			setStatus("ready");
 		},
@@ -241,6 +249,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				profileIssue,
 				signOut,
 				refreshProfile,
+				isPlatformAdmin,
 			}}
 		>
 			{children}

@@ -12,6 +12,7 @@ const authMock = vi.hoisted(() => ({
 		profileIssue: null as ProfileIssue | null,
 		onboardedAt: "2026-01-01T00:00:00Z" as string | null,
 		workshopId: "ws-1" as string | null,
+		isPlatformAdmin: false,
 		signOut: vi.fn<() => Promise<void>>(),
 		refreshProfile: vi.fn<() => Promise<void>>(),
 	},
@@ -92,6 +93,7 @@ describe("AppLayout billing integration", () => {
 			profileIssue: null,
 			onboardedAt: "2026-01-01T00:00:00Z",
 			workshopId: "ws-1",
+			isPlatformAdmin: false,
 			signOut: vi.fn<() => Promise<void>>(),
 			refreshProfile: vi.fn<() => Promise<void>>(),
 		});
@@ -137,8 +139,28 @@ describe("AppLayout billing integration", () => {
 		expect(screen.getAllByText("CarpinteroPro").length).toBeGreaterThan(0);
 		expect(screen.getByText("Contenido protegido")).toBeInTheDocument();
 		expect(
+			screen.queryByRole("link", { name: "Admin" }),
+		).not.toBeInTheDocument();
+		expect(
 			screen.queryByRole("status", { name: "Cargando suscripción" }),
 		).not.toBeInTheDocument();
+	});
+
+	it("shows admin navigation only for platform admins", () => {
+		setAuthState({ isPlatformAdmin: true });
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		const adminLinks = screen.getAllByRole("link", { name: "Admin" });
+		expect(adminLinks.length).toBeGreaterThan(0);
+		expect(adminLinks[0]).toHaveAttribute("href", "/admin");
 	});
 
 	it("renders blocked screen when subscription is past_due", () => {

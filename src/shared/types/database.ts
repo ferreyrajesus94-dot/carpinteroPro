@@ -36,6 +36,7 @@ export type Database = {
 					workshop_id: string;
 					display_name: string | null;
 					onboarded_at: string | null;
+					is_platform_admin: boolean;
 					terms_accepted_at: string | null;
 					privacy_accepted_at: string | null;
 					created_at: string;
@@ -45,6 +46,7 @@ export type Database = {
 					workshop_id: string;
 					display_name?: string | null;
 					onboarded_at?: string | null;
+					is_platform_admin?: boolean;
 					terms_accepted_at?: string | null;
 					privacy_accepted_at?: string | null;
 					created_at?: string;
@@ -54,6 +56,7 @@ export type Database = {
 					workshop_id?: string;
 					display_name?: string | null;
 					onboarded_at?: string | null;
+					is_platform_admin?: boolean;
 					terms_accepted_at?: string | null;
 					privacy_accepted_at?: string | null;
 					created_at?: string;

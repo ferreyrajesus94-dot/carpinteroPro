@@ -1,0 +1,181 @@
+import { Link, useParams } from "react-router-dom";
+import { useAdminWorkshopDetail } from "../hooks/useAdminWorkshops";
+import { cn } from "@/shared/lib/utils";
+
+const STATUS_LABELS: Record<string, string> = {
+	active: "activa",
+	inactive: "inactiva",
+	cancelled: "cancelada",
+	paused: "pausada",
+	past_due: "vencida",
+	trial: "en prueba",
+};
+
+function DetailSkeleton() {
+	return (
+		<div
+			role="status"
+			aria-label="Cargando detalle del taller"
+			className="space-y-4"
+		>
+			<div className="animate-pulse rounded-xl border border-line bg-cp-surface p-6">
+				<div className="mb-3 h-5 w-48 rounded bg-cp-bg2" />
+				<div className="mb-2 h-4 w-32 rounded bg-cp-bg2" />
+				<div className="h-4 w-56 rounded bg-cp-bg2" />
+			</div>
+			<div className="animate-pulse rounded-xl border border-line bg-cp-surface p-6">
+				<div className="mb-3 h-4 w-36 rounded bg-cp-bg2" />
+				<div className="grid gap-3 sm:grid-cols-2">
+					<div className="h-14 rounded bg-cp-bg2" />
+					<div className="h-14 rounded bg-cp-bg2" />
+				</div>
+			</div>
+		</div>
+	);
+}
+
+export function WorkshopDetailPage() {
+	const { workshopId } = useParams<{ workshopId: string }>();
+	const detail = useAdminWorkshopDetail(workshopId ?? "");
+
+	if (detail.isPending) return <DetailSkeleton />;
+
+	if (detail.isError) {
+		const isNotFound =
+			detail.error instanceof Error &&
+			detail.error.message.includes("no encontrado");
+
+		return (
+			<section
+				role={isNotFound ? undefined : "alert"}
+				aria-label={isNotFound ? undefined : "Error al cargar el detalle"}
+				className="rounded-xl border border-line bg-cp-surface p-8 text-center"
+			>
+				<i
+					className={`fi ${isNotFound ? "fi-rr-search-alt" : "fi-rr-exclamation-circle"} mb-3 block text-3xl ${isNotFound ? "text-ink3" : "text-destructive"}`}
+					aria-hidden="true"
+				/>
+				<h2 className="font-display text-lg font-semibold text-ink">
+					{isNotFound ? "Taller no encontrado" : "No se pudo cargar el detalle"}
+				</h2>
+				<p className="mt-1 text-sm text-ink2">
+					{isNotFound
+						? "El taller solicitado no existe o fue eliminado."
+						: detail.error instanceof Error
+							? detail.error.message
+							: "Error desconocido"}
+				</p>
+				<Link
+					to="/admin/workshops"
+					className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-cp-accent hover:underline"
+				>
+					<i className="fi fi-rr-arrow-left text-xs" aria-hidden="true" />
+					Volver a talleres
+				</Link>
+			</section>
+		);
+	}
+
+	const workshop = detail.data?.workshop;
+
+	if (!workshop) {
+		return (
+			<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
+				<p className="text-sm text-ink2">Sin datos disponibles</p>
+				<Link
+					to="/admin/workshops"
+					className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-cp-accent hover:underline"
+				>
+					<i className="fi fi-rr-arrow-left text-xs" aria-hidden="true" />
+					Volver a talleres
+				</Link>
+			</section>
+		);
+	}
+
+	return (
+		<div className="space-y-6">
+			<div>
+				<Link
+					to="/admin/workshops"
+					className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink2 hover:text-ink transition-colors"
+				>
+					<i className="fi fi-rr-arrow-left text-xs" aria-hidden="true" />
+					Volver a talleres
+				</Link>
+
+				<header className="rounded-xl border border-line bg-cp-surface p-6 shadow-sm">
+					<div className="flex flex-wrap items-start justify-between gap-4">
+						<div>
+							<p className="font-mono text-[11px] uppercase tracking-wider text-ink3">
+								Taller
+							</p>
+							<h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
+								{workshop.name}
+							</h1>
+							<p className="mt-1 font-mono text-xs text-ink3">{workshop.id}</p>
+							<p className="mt-2 text-sm text-ink2">
+								Creado el{" "}
+								{new Date(workshop.createdAt).toLocaleDateString("es-AR", {
+									day: "numeric",
+									month: "long",
+									year: "numeric",
+								})}
+							</p>
+						</div>
+						{workshop.subscriptionStatus && (
+							<span
+								className={cn(
+									"rounded-full px-3 py-1 text-xs font-medium",
+									workshop.subscriptionStatus === "active" ||
+										workshop.subscriptionStatus === "trial"
+										? "bg-emerald-100 text-emerald-700"
+										: workshop.subscriptionStatus === "paused"
+											? "bg-amber-100 text-amber-700"
+											: "bg-red-100 text-red-700",
+								)}
+							>
+								{STATUS_LABELS[workshop.subscriptionStatus] ??
+									workshop.subscriptionStatus}
+							</span>
+						)}
+					</div>
+				</header>
+			</div>
+
+			<section
+				className="rounded-xl border border-line bg-cp-surface p-6 shadow-sm"
+				role="region"
+				aria-label="Contexto de soporte"
+			>
+				<h2 className="font-display text-lg font-semibold text-ink">
+					Contexto de soporte
+				</h2>
+				<div className="mt-4 grid gap-4 sm:grid-cols-2">
+					<article className="rounded-lg border border-line bg-cp-bg2 p-4">
+						<p className="text-xs font-medium uppercase tracking-wider text-ink3">
+							Perfiles totales
+						</p>
+						<p className="mt-1 font-mono text-2xl font-bold text-ink">
+							{workshop.profileCount}
+						</p>
+					</article>
+					<article className="rounded-lg border border-line bg-cp-bg2 p-4">
+						<p className="text-xs font-medium uppercase tracking-wider text-ink3">
+							Perfiles onboardeados
+						</p>
+						<p className="mt-1 font-mono text-2xl font-bold text-ink">
+							{workshop.onboardedProfileCount}
+						</p>
+					</article>
+				</div>
+				{workshop.ownerEmail === null && (
+					<p className="mt-4 text-xs text-ink3">
+						El dueño del taller aún no está identificado en el contrato de datos
+						actual.
+					</p>
+				)}
+			</section>
+		</div>
+	);
+}

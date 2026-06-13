@@ -125,6 +125,21 @@ sdd_packages:
     depends_on: []
     launch_blocker: false
 
+  - id: sdd-9
+    name: "Admin dashboard"
+    priority: P1
+    status: active
+    depends_on:
+      - sdd-1
+      - sdd-2
+    launch_blocker: false
+    summary: |
+      Super admin dashboard for platform owner to manage all tenants,
+      monitor billing/subscriptions, view global metrics, and provide
+      support/troubleshooting. Protected via profiles.is_platform_admin,
+      admin-only Edge Functions, and client-side guard. Scoped within
+      same app using lazy loading and /admin/* routes.
+
 known_gaps:
   - "SDD 6 observability/support, SDD 7 business-critical E2E, and SDD 8 architecture cleanup are archived; remaining core coupling exceptions require SDD9 follow-up implementation."
 

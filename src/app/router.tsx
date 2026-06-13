@@ -53,6 +53,13 @@ export const router = createBrowserRouter([
 					})),
 			},
 			{
+				path: "/admin/*",
+				lazy: () =>
+					import("@/features/admin").then((m) => ({
+						Component: m.AdminRoutes,
+					})),
+			},
+			{
 				hydrateFallbackElement,
 				lazy: () =>
 					import("./layouts/AppLayout").then((m) => ({
