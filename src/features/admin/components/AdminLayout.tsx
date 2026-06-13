@@ -1,8 +1,11 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, Link } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
+import { useTheme } from "@/shared/hooks/useTheme";
 import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 
 export function AdminLayout() {
+	const { theme, toggle } = useTheme();
+
 	return (
 		<div className="flex min-h-screen bg-background">
 			<aside className="hidden w-64 flex-col border-r border-line bg-cp-surface lg:flex">
@@ -37,35 +40,84 @@ export function AdminLayout() {
 						</NavLink>
 					))}
 				</nav>
+
+				<div className="border-t border-line p-3 space-y-2">
+					<Link
+						to="/dashboard"
+						className="flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+					>
+						<i className="fi fi-rr-arrow-left text-sm leading-none" aria-hidden="true" />
+						Volver a la app
+					</Link>
+					<button
+						type="button"
+						onClick={toggle}
+						aria-label={
+							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
+						}
+						className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+					>
+						<i
+							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-sm leading-none`}
+							aria-hidden="true"
+						/>
+						{theme === "dark" ? "Modo claro" : "Modo oscuro"}
+					</button>
+				</div>
 			</aside>
 
 			<div className="flex min-w-0 flex-1 flex-col">
-				<header className="border-b border-line bg-cp-surface/90 px-4 py-3 backdrop-blur lg:hidden">
-					<h1 className="font-display text-base font-semibold text-ink">
-						Admin CarpinteroPro
-					</h1>
-					<nav
-						aria-label="Navegación de administración móvil"
-						className="mt-3 flex gap-2 overflow-x-auto pb-1"
-					>
-						{ADMIN_NAV_ITEMS.map(({ to, label }) => (
-							<NavLink
-								key={to}
-								to={to}
-								end={to === "/admin"}
-								className={({ isActive }) =>
-									cn(
-										"rounded-full border border-line px-3 py-1.5 text-xs font-medium",
-										isActive
-											? "bg-cp-accent text-[var(--cp-accent-ink)]"
-											: "text-ink2",
-									)
-								}
-							>
-								{label}
-							</NavLink>
-						))}
-					</nav>
+				<header className="flex items-center justify-between border-b border-line bg-cp-surface/90 px-4 py-3 backdrop-blur">
+					<div>
+						<h1 className="font-display text-base font-semibold text-ink">
+							Admin CarpinteroPro
+						</h1>
+						<nav
+							aria-label="Navegación de administración móvil"
+							className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden"
+						>
+							{ADMIN_NAV_ITEMS.map(({ to, label }) => (
+								<NavLink
+									key={to}
+									to={to}
+									end={to === "/admin"}
+									className={({ isActive }) =>
+										cn(
+											"rounded-full border border-line px-3 py-1.5 text-xs font-medium",
+											isActive
+												? "bg-cp-accent text-[var(--cp-accent-ink)]"
+												: "text-ink2",
+										)
+									}
+								>
+									{label}
+								</NavLink>
+							))}
+						</nav>
+					</div>
+
+					<div className="flex items-center gap-2">
+						<Link
+							to="/dashboard"
+							aria-label="Volver a la app"
+							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+						>
+							<i className="fi fi-rr-arrow-left text-base leading-none" aria-hidden="true" />
+						</Link>
+						<button
+							type="button"
+							onClick={toggle}
+							aria-label={
+								theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
+							}
+							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+						>
+							<i
+								className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
+								aria-hidden="true"
+							/>
+						</button>
+					</div>
 				</header>
 
 				<main className="flex-1 overflow-y-auto p-4 lg:p-6">
