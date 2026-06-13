@@ -48,6 +48,12 @@ export function SupportPage() {
 	const workshopOptions = workshops.data?.workshops ?? [];
 	const data = diagnostics.data?.diagnostics ?? [];
 	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "processedAt", "desc");
+	const lastUpdated = diagnostics.dataUpdatedAt
+		? new Date(diagnostics.dataUpdatedAt).toLocaleTimeString("es-AR", {
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+		: null;
 
 	if (diagnostics.isPending) return <SupportSkeleton />;
 
@@ -76,13 +82,15 @@ export function SupportPage() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center justify-between gap-3">
+			<header className="flex flex-wrap items-baseline justify-between gap-2">
 				<div>
 					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
 						Diagnósticos de soporte
 					</h2>
-					<p className="mt-1 text-sm text-ink2">
-						Últimos 50 eventos de webhook de billing
+					<p className="text-xs text-ink3">
+						Últimos 50 eventos de webhook · {data.length} evento
+						{data.length !== 1 ? "s" : ""}
+						{lastUpdated && ` · Actualizado ${lastUpdated}`}
 					</p>
 				</div>
 				<select
@@ -98,7 +106,7 @@ export function SupportPage() {
 						</option>
 					))}
 				</select>
-			</div>
+			</header>
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">

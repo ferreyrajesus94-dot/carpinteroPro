@@ -66,7 +66,9 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 					</p>
 				</div>
 				<i
-					className={`fi ${icon} text-xl leading-none text-ink3`}
+					className={`fi ${icon} text-2xl leading-none ${
+					variant === "warning" ? "text-amber-600" : "text-cp-accent"
+				}`}
 					aria-hidden="true"
 				/>
 			</div>
@@ -76,6 +78,12 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 
 export function OverviewPage() {
 	const overview = useAdminOverview();
+	const lastUpdated = overview.dataUpdatedAt
+		? new Date(overview.dataUpdatedAt).toLocaleTimeString("es-AR", {
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+		: null;
 
 	if (overview.isPending) return <OverviewSkeleton />;
 
@@ -114,6 +122,22 @@ export function OverviewPage() {
 
 	return (
 		<div className="space-y-6">
+			<header className="flex flex-wrap items-baseline justify-between gap-2">
+				<div>
+					<h1 className="font-display text-2xl font-semibold tracking-tight text-ink">
+						Resumen de plataforma
+					</h1>
+					<p className="mt-1 text-sm text-ink2">
+						Indicadores globales de CarpinteroPro
+					</p>
+				</div>
+				{lastUpdated && (
+					<p className="text-xs text-ink3">
+						Actualizado {lastUpdated}
+					</p>
+				)}
+			</header>
+
 			<section
 				className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
 				role="region"
@@ -174,19 +198,46 @@ export function OverviewPage() {
 				) : (
 					<div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 						{Object.entries(data.subscriptions.byStatus).map(
-							([status, count]) => (
-								<div
-									key={status}
-									className="flex items-center justify-between rounded-lg border border-line bg-cp-bg2 px-4 py-3"
-								>
-									<span className="text-sm font-medium capitalize text-ink">
-										{statusLabel(status)}
-									</span>
-									<span className="font-mono text-lg font-bold text-ink">
-										{count}
-									</span>
-								</div>
-							),
+							([status, count]) => {
+								const isActive = status === "active" || status === "trial";
+								const isWarning = status === "paused" || status === "past_due";
+								return (
+									<div
+										key={status}
+										className={cn(
+											"flex items-center justify-between rounded-lg border px-4 py-3",
+											isActive &&
+												"border-emerald-200 bg-emerald-50",
+											isWarning &&
+												"border-amber-200 bg-amber-50",
+											!isActive &&
+												!isWarning &&
+												"border-red-200 bg-red-50",
+										)}
+									>
+										<span
+											className={cn(
+												"text-sm font-medium capitalize",
+												isActive && "text-emerald-800",
+												isWarning && "text-amber-800",
+												!isActive && !isWarning && "text-red-800",
+											)}
+										>
+											{statusLabel(status)}
+										</span>
+										<span
+											className={cn(
+												"font-mono text-lg font-bold",
+												isActive && "text-emerald-800",
+												isWarning && "text-amber-800",
+												!isActive && !isWarning && "text-red-800",
+											)}
+										>
+											{count}
+										</span>
+									</div>
+								);
+							},
 						)}
 					</div>
 				)}
