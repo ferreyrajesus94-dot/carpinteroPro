@@ -27,11 +27,18 @@ export function useCancelSubscription() {
 export function useToggleSubscription() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: ({ workshopId, action }: { workshopId: string; action: "pause" | "resume" }) =>
-			toggleSubscription(workshopId, action),
+		mutationFn: ({
+			workshopId,
+			action,
+		}: {
+			workshopId: string;
+			action: "pause" | "resume";
+		}) => toggleSubscription(workshopId, action),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: [ADMIN_SUBSCRIPTIONS_KEY] });
-			toast.success(`Suscripción ${data.status === "paused" ? "pausada" : "reanudada"}`);
+			toast.success(
+				`Suscripción ${data.status === "paused" ? "pausada" : "reanudada"}`,
+			);
 		},
 		onError: (e: Error) => toast.error(e.message),
 	});
@@ -42,7 +49,9 @@ export function useRetryWebhook() {
 	return useMutation({
 		mutationFn: (eventId: string) => retryWebhook(eventId),
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: [ADMIN_SUPPORT_DIAGNOSTICS_KEY] });
+			queryClient.invalidateQueries({
+				queryKey: [ADMIN_SUPPORT_DIAGNOSTICS_KEY],
+			});
 			toast.success("Reintento enviado");
 		},
 		onError: (e: Error) => toast.error(e.message),
@@ -64,11 +73,20 @@ export function useForceOnboarding() {
 export function useToggleMaintenance() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: ({ enabled, message }: { enabled: boolean; message?: string }) =>
-			toggleMaintenance(enabled, message),
+		mutationFn: ({
+			enabled,
+			message,
+		}: {
+			enabled: boolean;
+			message?: string;
+		}) => toggleMaintenance(enabled, message),
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: [ADMIN_OVERVIEW_KEY] });
-			toast.success(data.enabled ? "Modo mantenimiento activado" : "Modo mantenimiento desactivado");
+			toast.success(
+				data.enabled
+					? "Modo mantenimiento activado"
+					: "Modo mantenimiento desactivado",
+			);
 		},
 		onError: (e: Error) => toast.error(e.message),
 	});

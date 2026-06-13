@@ -227,9 +227,9 @@ describe("SupportPage", () => {
 		fireEvent.change(filter, { target: { value: "ws-1" } });
 
 		await vi.waitFor(() => {
-			expect(
-				supportApi.fetchAdminSupportDiagnostics,
-			).toHaveBeenCalledWith("ws-1");
+			expect(supportApi.fetchAdminSupportDiagnostics).toHaveBeenCalledWith(
+				"ws-1",
+			);
 		});
 	});
 });

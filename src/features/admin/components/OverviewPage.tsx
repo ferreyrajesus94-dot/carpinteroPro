@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useAdminOverview } from "../hooks/useAdminOverview";
+import { useToggleMaintenance } from "../hooks/useAdminActions";
 import { cn } from "@/shared/lib/utils";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -78,6 +80,8 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 
 export function OverviewPage() {
 	const overview = useAdminOverview();
+	const maintenanceMutation = useToggleMaintenance();
+	const [maintMessage, setMaintMessage] = useState("");
 	const lastUpdated = overview.dataUpdatedAt
 		? new Date(overview.dataUpdatedAt).toLocaleTimeString("es-AR", {
 				hour: "2-digit",
@@ -241,6 +245,43 @@ export function OverviewPage() {
 						)}
 					</div>
 				)}
+			</section>
+
+			<section className="rounded-xl border border-line bg-cp-surface p-5 shadow-sm">
+				<h3 className="font-display text-base font-semibold text-ink">
+					Modo mantenimiento
+				</h3>
+				<p className="mt-1 text-sm text-ink2">
+					Mostrar un banner a todos los usuarios no-admin
+				</p>
+				<div className="mt-3 flex flex-wrap items-center gap-3">
+					<input
+						type="text"
+						placeholder="Mensaje de mantenimiento..."
+						value={maintMessage}
+						onChange={(e) => setMaintMessage(e.target.value)}
+						className="h-9 flex-1 rounded-lg border border-line bg-cp-bg2 px-3 text-[13.5px] text-ink placeholder:text-ink3 focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
+					/>
+					<button
+						type="button"
+						onClick={() =>
+							maintenanceMutation.mutate({
+								enabled: true,
+								message: maintMessage || undefined,
+							})
+						}
+						className="inline-flex h-9 items-center gap-1.5 rounded-md bg-amber-100 px-4 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
+					>
+						Activar
+					</button>
+					<button
+						type="button"
+						onClick={() => maintenanceMutation.mutate({ enabled: false })}
+						className="inline-flex h-9 items-center gap-1.5 rounded-md bg-emerald-100 px-4 text-xs font-medium text-emerald-800 hover:bg-emerald-200 transition-colors"
+					>
+						Desactivar
+					</button>
+				</div>
 			</section>
 		</div>
 	);

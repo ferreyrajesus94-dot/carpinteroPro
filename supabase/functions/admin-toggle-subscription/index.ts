@@ -9,13 +9,24 @@ declare const Deno: {
 Deno.serve(async (req: Request) => {
 	const options = preflight(req);
 	if (options) return options;
-	if (req.method !== "POST") return structuredErr("method_not_allowed", "Method not allowed", 405);
+	if (req.method !== "POST")
+		return structuredErr("method_not_allowed", "Method not allowed", 405);
 
 	try {
 		await requirePlatformAdmin(req);
-		const body: { workshopId?: string; action?: string } = await req.json().catch(() => ({}));
-		if (!body.workshopId || !body.action || !["pause", "resume"].includes(body.action)) {
-			return structuredErr("invalid_request", "workshopId and action (pause|resume) required", 400);
+		const body: { workshopId?: string; action?: string } = await req
+			.json()
+			.catch(() => ({}));
+		if (
+			!body.workshopId ||
+			!body.action ||
+			!["pause", "resume"].includes(body.action)
+		) {
+			return structuredErr(
+				"invalid_request",
+				"workshopId and action (pause|resume) required",
+				400,
+			);
 		}
 
 		const newStatus = body.action === "pause" ? "paused" : "active";
@@ -26,13 +37,22 @@ Deno.serve(async (req: Request) => {
 
 		if (error) {
 			console.error("admin-toggle-subscription: update failed", error);
-			return structuredErr("update_failed", "No se pudo actualizar la suscripción", 500);
+			return structuredErr(
+				"update_failed",
+				"No se pudo actualizar la suscripción",
+				500,
+			);
 		}
 
 		return json({ status: newStatus, updatedAt: new Date().toISOString() });
 	} catch (e: unknown) {
-		if (e instanceof AdminAuthError) return structuredErr("admin_auth_failed", e.message, e.status);
+		if (e instanceof AdminAuthError)
+			return structuredErr("admin_auth_failed", e.message, e.status);
 		console.error("admin-toggle-subscription failed", e);
-		return structuredErr("toggle_failed", "Error al modificar suscripción", 500);
+		return structuredErr(
+			"toggle_failed",
+			"Error al modificar suscripción",
+			500,
+		);
 	}
 });

@@ -10,7 +10,11 @@ declare const Deno: {
 
 async function readBody(req: Request): Promise<{ workshopId?: string }> {
 	if (!req.body) return {};
-	try { return await req.json(); } catch { return {}; }
+	try {
+		return await req.json();
+	} catch {
+		return {};
+	}
 }
 
 Deno.serve(async (req: Request) => {
@@ -60,8 +64,15 @@ Deno.serve(async (req: Request) => {
 			.update({ status: "cancelled", cancelled_at: new Date().toISOString() })
 			.eq("workshop_id", workshopId);
 		if (updateError) {
-			console.error("cancel-subscription: failed to update subscription", updateError);
-			return structuredErr("subscription_update_failed", "No se pudo cancelar la suscripción", 500);
+			console.error(
+				"cancel-subscription: failed to update subscription",
+				updateError,
+			);
+			return structuredErr(
+				"subscription_update_failed",
+				"No se pudo cancelar la suscripción",
+				500,
+			);
 		}
 
 		return json({ status: "cancelled", cancelAtPeriodEnd: false });
@@ -74,6 +85,10 @@ Deno.serve(async (req: Request) => {
 		}
 		const msg = e instanceof Error ? e.message : "Unknown error";
 		console.error("cancel-subscription failed", msg);
-		return structuredErr("cancel_failed", "No se pudo cancelar la suscripción, intentá de nuevo", 500);
+		return structuredErr(
+			"cancel_failed",
+			"No se pudo cancelar la suscripción, intentá de nuevo",
+			500,
+		);
 	}
 });

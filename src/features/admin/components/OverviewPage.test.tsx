@@ -12,6 +12,10 @@ vi.mock("../api/overview", () => ({
 	fetchAdminOverview: vi.fn(),
 }));
 
+vi.mock("../hooks/useAdminActions", () => ({
+	useToggleMaintenance: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import * as overviewApi from "../api/overview";
 
 function renderWithQuery(ui: React.ReactElement) {
