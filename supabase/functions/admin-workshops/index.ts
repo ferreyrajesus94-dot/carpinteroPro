@@ -16,6 +16,7 @@ interface WorkshopRow {
 	id: string;
 	name: string;
 	created_at: string;
+	is_active: boolean;
 }
 
 interface ProfileRow {
@@ -56,7 +57,7 @@ async function readBody(req: Request): Promise<AdminWorkshopsRequest> {
 function loadWorkshops(body: AdminWorkshopsRequest) {
 	let query = serviceClient()
 		.from("workshops")
-		.select("id, name, created_at")
+		.select("id, name, created_at, is_active")
 		.order("created_at", { ascending: false })
 		.limit(100);
 
@@ -160,6 +161,7 @@ function mapWorkshop(workshop: WorkshopRow, related: RelatedRows) {
 		id: workshop.id,
 		name: workshop.name,
 		createdAt: workshop.created_at,
+		isActive: workshop.is_active,
 		ownerEmail,
 		profileCount: workshopProfiles.length,
 		onboardedProfileCount: onboardedProfiles.length,

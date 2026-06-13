@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
+import { useCancelSubscription, useToggleSubscription } from "../hooks/useAdminActions";
 import { useSort } from "../lib/useSort";
 import { downloadCsv } from "../lib/downloadCsv";
 import { cn } from "@/shared/lib/utils";
@@ -63,7 +64,10 @@ function BillingSkeleton() {
 export function BillingPage() {
 	const [statusFilter, setStatusFilter] = useState("");
 	const [expandedId, setExpandedId] = useState<string | null>(null);
+	const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 	const subscriptions = useAdminSubscriptions(statusFilter || undefined);
+	const cancelMutation = useCancelSubscription();
+	const toggleMutation = useToggleSubscription();
 	const data = subscriptions.data?.subscriptions ?? [];
 	const { sorted, sortKey, sortDir, toggleSort } = useSort(
 		data,
@@ -261,7 +265,8 @@ export function BillingPage() {
 													year: "numeric",
 												})}
 											</td>
-											<td className="px-4 py-3">
+										<td className="px-4 py-3">
+											<div className="flex items-center gap-2">
 												<Link
 													to={`/admin/workshops/${sub.workshopId}`}
 													className="text-[13px] font-medium text-cp-accent hover:underline"
@@ -270,7 +275,49 @@ export function BillingPage() {
 												>
 													Taller
 												</Link>
-											</td>
+												{sub.status !== "cancelled" && (
+													<>
+														<button
+															type="button"
+															onClick={(e) => {
+																e.stopPropagation();
+																toggleMutation.mutate({ workshopId: sub.workshopId, action: sub.status === "paused" ? "resume" : "pause" });
+															}}
+															className="text-[11px] text-ink3 hover:text-ink transition-colors"
+														>
+															{sub.status === "paused" ? "Reanudar" : "Pausar"}
+														</button>
+														{confirmCancelId === sub.id ? (
+															<span className="flex items-center gap-1 text-[11px]">
+																¿Cancelar?
+																<button
+																	type="button"
+																	onClick={(e) => { e.stopPropagation(); cancelMutation.mutate(sub.workshopId); setConfirmCancelId(null); }}
+																	className="text-red-600 font-medium hover:underline"
+																>
+																	Sí
+																</button>
+																<button
+																	type="button"
+																	onClick={(e) => { e.stopPropagation(); setConfirmCancelId(null); }}
+																	className="text-ink3 hover:text-ink"
+																>
+																	No
+																</button>
+															</span>
+														) : (
+															<button
+																type="button"
+																onClick={(e) => { e.stopPropagation(); setConfirmCancelId(sub.id); }}
+																className="text-[11px] text-red-600 hover:underline"
+															>
+																Cancelar
+															</button>
+														)}
+													</>
+												)}
+											</div>
+										</td>
 										</tr>
 										{isExpanded && (
 											<tr key={`${sub.id}-detail`} className="bg-cp-bg2">
