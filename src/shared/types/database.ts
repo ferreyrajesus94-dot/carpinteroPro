@@ -17,16 +17,19 @@ export type Database = {
 					id: string;
 					name: string;
 					created_at: string;
+					is_active: boolean;
 				};
 				Insert: {
 					id?: string;
 					name: string;
 					created_at?: string;
+					is_active?: boolean;
 				};
 				Update: {
 					id?: string;
 					name?: string;
 					created_at?: string;
+					is_active?: boolean;
 				};
 				Relationships: [];
 			};
@@ -806,6 +809,24 @@ export type Database = {
 						referencedColumns: ["id"];
 					},
 				];
+			};
+			platform_settings: {
+				Row: {
+					key: string;
+					value: Json;
+					updated_at: string;
+				};
+				Insert: {
+					key: string;
+					value?: Json;
+					updated_at?: string;
+				};
+				Update: {
+					key?: string;
+					value?: Json;
+					updated_at?: string;
+				};
+				Relationships: [];
 			};
 		};
 		Views: {

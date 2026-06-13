@@ -43,6 +43,14 @@ vi.mock("./api/support", () => ({
 	fetchAdminSupportDiagnostics: vi.fn(),
 }));
 
+vi.mock("./hooks/useAdminActions", () => ({
+	useCancelSubscription: () => ({ mutate: vi.fn(), isPending: false }),
+	useToggleSubscription: () => ({ mutate: vi.fn(), isPending: false }),
+	useRetryWebhook: () => ({ mutate: vi.fn(), isPending: false }),
+	useForceOnboarding: () => ({ mutate: vi.fn(), isPending: false }),
+	useToggleMaintenance: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import * as overviewApi from "./api/overview";
 
 const MOCK_OVERVIEW = {

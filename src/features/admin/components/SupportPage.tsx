@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminSupportDiagnostics } from "../hooks/useAdminSupportDiagnostics";
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
+import { useRetryWebhook } from "../hooks/useAdminActions";
 import { useSort } from "../lib/useSort";
 import { cn } from "@/shared/lib/utils";
 
@@ -44,6 +45,7 @@ function SupportSkeleton() {
 export function SupportPage() {
 	const [workshopFilter, setWorkshopFilter] = useState("");
 	const diagnostics = useAdminSupportDiagnostics(workshopFilter || undefined);
+	const retryMutation = useRetryWebhook();
 	const workshops = useAdminWorkshops();
 	const workshopOptions = workshops.data?.workshops ?? [];
 	const data = diagnostics.data?.diagnostics ?? [];
@@ -173,7 +175,8 @@ export function SupportPage() {
 											minute: "2-digit",
 										})}
 									</td>
-									<td className="px-4 py-3">
+								<td className="px-4 py-3">
+									<div className="flex items-center gap-2">
 										<Link
 											to={`/admin/workshops/${evt.workshopId}`}
 											className="text-[13px] font-medium text-cp-accent hover:underline"
@@ -181,7 +184,17 @@ export function SupportPage() {
 										>
 											Taller
 										</Link>
-									</td>
+										{evt.eventType.toLowerCase().includes("fail") && (
+											<button
+												type="button"
+												onClick={() => retryMutation.mutate(evt.id)}
+												className="text-[11px] text-amber-600 hover:underline"
+											>
+												Reintentar
+											</button>
+										)}
+									</div>
+								</td>
 								</tr>
 							))}
 						</tbody>

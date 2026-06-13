@@ -13,6 +13,11 @@ vi.mock("../api/subscriptions", () => ({
 	fetchAdminSubscriptions: vi.fn(),
 }));
 
+vi.mock("../hooks/useAdminActions", () => ({
+	useCancelSubscription: () => ({ mutate: vi.fn(), isPending: false }),
+	useToggleSubscription: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import * as subscriptionsApi from "../api/subscriptions";
 
 function renderPage() {
@@ -113,7 +118,7 @@ describe("BillingPage", () => {
 		).toBeInTheDocument();
 	});
 
-	it("does not expose mutation buttons (cancel, retry, refund)", async () => {
+	it("shows cancel and pause buttons but not retry or refund", async () => {
 		vi.mocked(subscriptionsApi.fetchAdminSubscriptions).mockResolvedValue(
 			MOCK_SUBSCRIPTIONS,
 		);
@@ -122,9 +127,14 @@ describe("BillingPage", () => {
 
 		await screen.findByText("Carpintería del Sur");
 
+		// Cancel button is now exposed (SDD-10)
 		expect(
-			screen.queryByRole("button", { name: /cancelar/i }),
-		).not.toBeInTheDocument();
+			screen.getByRole("button", { name: /cancelar/i }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("button", { name: /pausar/i }),
+		).toBeInTheDocument();
+		// Retry and refund are still not exposed
 		expect(
 			screen.queryByRole("button", { name: /reintentar/i }),
 		).not.toBeInTheDocument();

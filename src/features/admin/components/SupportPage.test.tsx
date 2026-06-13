@@ -17,6 +17,10 @@ vi.mock("../api/workshops", () => ({
 	fetchAdminWorkshops: vi.fn(),
 }));
 
+vi.mock("../hooks/useAdminActions", () => ({
+	useRetryWebhook: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 import * as supportApi from "../api/support";
 import * as workshopsApi from "../api/workshops";
 
@@ -39,6 +43,7 @@ const MOCK_WORKSHOPS = {
 			id: "ws-1",
 			name: "Carpintería del Sur",
 			createdAt: "2026-01-01T00:00:00Z",
+			isActive: true,
 			ownerEmail: null,
 			profileCount: 4,
 			onboardedProfileCount: 3,
@@ -48,6 +53,7 @@ const MOCK_WORKSHOPS = {
 			id: "ws-2",
 			name: "Muebles Norte",
 			createdAt: "2026-03-01T00:00:00Z",
+			isActive: true,
 			ownerEmail: null,
 			profileCount: 2,
 			onboardedProfileCount: 2,

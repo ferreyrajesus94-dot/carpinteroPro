@@ -16,6 +16,7 @@ export interface AdminWorkshopSummary {
 	id: string;
 	name: string;
 	createdAt: string;
+	isActive: boolean;
 	ownerEmail: string | null;
 	profileCount: number;
 	onboardedProfileCount: number;
@@ -60,4 +61,40 @@ export interface AdminSupportDiagnostic {
 
 export interface AdminSupportDiagnosticsResponse {
 	diagnostics: AdminSupportDiagnostic[];
+}
+
+export interface AdminToggleSubscriptionRequest {
+	workshopId: string;
+	action: "pause" | "resume";
+}
+
+export interface AdminToggleSubscriptionResponse {
+	status: string;
+	updatedAt: string;
+}
+
+export interface AdminRetryWebhookRequest {
+	eventId: string;
+}
+
+export interface AdminRetryWebhookResponse {
+	status: "sent" | "error";
+}
+
+export interface AdminForceOnboardingRequest {
+	profileId: string;
+}
+
+export interface AdminForceOnboardingResponse {
+	onboardedAt: string;
+}
+
+export interface AdminMaintenanceToggleRequest {
+	enabled: boolean;
+	message?: string;
+}
+
+export interface MaintenanceModeState {
+	enabled: boolean;
+	message: string;
 }

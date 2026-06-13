@@ -44,6 +44,7 @@ const MOCK_DETAIL = {
 		id: "ws-1",
 		name: "Carpintería del Sur",
 		createdAt: "2026-01-15T00:00:00Z",
+			isActive: true,
 		ownerEmail: null,
 		profileCount: 4,
 		onboardedProfileCount: 3,
