@@ -29,3 +29,35 @@ export interface AdminWorkshopsResponse {
 export interface AdminWorkshopDetailResponse {
 	workshop: AdminWorkshopSummary;
 }
+
+export interface AdminSubscriptionSummary {
+	id: string;
+	workshopId: string;
+	workshopName: string;
+	status: string;
+	plan: string;
+	provider: string;
+	providerPreapprovalId: string | null;
+	providerStatus: string | null;
+	currentPeriodEnd: string | null;
+	updatedAt: string;
+}
+
+export interface AdminSubscriptionsResponse {
+	subscriptions: AdminSubscriptionSummary[];
+}
+
+export interface AdminSupportDiagnostic {
+	id: string;
+	provider: string;
+	providerEventId: string;
+	eventType: string;
+	providerResourceId: string | null;
+	workshopId: string;
+	processedAt: string;
+	updatedAt: string;
+}
+
+export interface AdminSupportDiagnosticsResponse {
+	diagnostics: AdminSupportDiagnostic[];
+}
