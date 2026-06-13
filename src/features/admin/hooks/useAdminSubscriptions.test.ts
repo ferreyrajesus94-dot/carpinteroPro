@@ -53,7 +53,9 @@ describe("useAdminSubscriptions", () => {
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 		expect(result.current.data).toEqual(MOCK_SUBSCRIPTIONS);
-		expect(subscriptionsApi.fetchAdminSubscriptions).toHaveBeenCalledWith(undefined);
+		expect(subscriptionsApi.fetchAdminSubscriptions).toHaveBeenCalledWith(
+			undefined,
+		);
 	});
 
 	it("passes status filter to the API", async () => {

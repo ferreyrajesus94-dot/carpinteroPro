@@ -13,7 +13,12 @@ vi.mock("../api/support", () => ({
 	fetchAdminSupportDiagnostics: vi.fn(),
 }));
 
+vi.mock("../api/workshops", () => ({
+	fetchAdminWorkshops: vi.fn(),
+}));
+
 import * as supportApi from "../api/support";
+import * as workshopsApi from "../api/workshops";
 
 function renderPage() {
 	const client = new QueryClient({
@@ -27,6 +32,29 @@ function renderPage() {
 		),
 	);
 }
+
+const MOCK_WORKSHOPS = {
+	workshops: [
+		{
+			id: "ws-1",
+			name: "Carpintería del Sur",
+			createdAt: "2026-01-01T00:00:00Z",
+			ownerEmail: null,
+			profileCount: 4,
+			onboardedProfileCount: 3,
+			subscriptionStatus: "active",
+		},
+		{
+			id: "ws-2",
+			name: "Muebles Norte",
+			createdAt: "2026-03-01T00:00:00Z",
+			ownerEmail: null,
+			profileCount: 2,
+			onboardedProfileCount: 2,
+			subscriptionStatus: null,
+		},
+	],
+};
 
 const MOCK_DIAGNOSTICS = {
 	diagnostics: [
@@ -54,7 +82,12 @@ const MOCK_DIAGNOSTICS = {
 };
 
 describe("SupportPage", () => {
-	beforeEach(() => vi.clearAllMocks());
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.mocked(workshopsApi.fetchAdminWorkshops).mockResolvedValue(
+			MOCK_WORKSHOPS,
+		);
+	});
 
 	it("renders a loading skeleton while data loads", () => {
 		vi.mocked(supportApi.fetchAdminSupportDiagnostics).mockImplementation(
@@ -84,9 +117,7 @@ describe("SupportPage", () => {
 		});
 		expect(within(table).getByText("mp-123")).toBeInTheDocument();
 		expect(within(table).getByText("mp-456")).toBeInTheDocument();
-		expect(
-			within(table).getByText("payment.succeeded"),
-		).toBeInTheDocument();
+		expect(within(table).getByText("payment.succeeded")).toBeInTheDocument();
 	});
 
 	it("shows event type with failure highlighting", async () => {
@@ -99,9 +130,9 @@ describe("SupportPage", () => {
 		await screen.findByText("mp-123");
 
 		// Failure events should be visually distinguishable
-		const failureRow = screen.getByText(
-			"subscription_preapproval.failed",
-		).closest("tr");
+		const failureRow = screen
+			.getByText("subscription_preapproval.failed")
+			.closest("tr");
 		expect(failureRow).toBeTruthy();
 	});
 
@@ -172,5 +203,27 @@ describe("SupportPage", () => {
 		expect(
 			screen.queryByRole("button", { name: /eliminar/i }),
 		).not.toBeInTheDocument();
+	});
+
+	it("has a workshop filter dropdown that filters diagnostics", async () => {
+		vi.mocked(supportApi.fetchAdminSupportDiagnostics).mockResolvedValue(
+			MOCK_DIAGNOSTICS,
+		);
+
+		const { fireEvent } = await import("@testing-library/react");
+		renderPage();
+
+		await screen.findByText("Todos los talleres");
+
+		const filter = screen.getByRole("combobox", {
+			name: "Filtrar por taller",
+		});
+		fireEvent.change(filter, { target: { value: "ws-1" } });
+
+		await vi.waitFor(() => {
+			expect(
+				supportApi.fetchAdminSupportDiagnostics,
+			).toHaveBeenCalledWith("ws-1");
+		});
 	});
 });

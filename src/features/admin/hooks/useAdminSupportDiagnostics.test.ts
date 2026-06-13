@@ -53,9 +53,9 @@ describe("useAdminSupportDiagnostics", () => {
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
 		expect(result.current.data).toEqual(MOCK_DIAGNOSTICS);
-		expect(
-			supportApi.fetchAdminSupportDiagnostics,
-		).toHaveBeenCalledWith(undefined);
+		expect(supportApi.fetchAdminSupportDiagnostics).toHaveBeenCalledWith(
+			undefined,
+		);
 	});
 
 	it("passes workshopId filter to the API", async () => {
@@ -66,15 +66,14 @@ describe("useAdminSupportDiagnostics", () => {
 		const { useAdminSupportDiagnostics } = await import(
 			"./useAdminSupportDiagnostics"
 		);
-		const { result } = renderHook(
-			() => useAdminSupportDiagnostics("ws-1"),
-			{ wrapper: makeWrapper() },
-		);
+		const { result } = renderHook(() => useAdminSupportDiagnostics("ws-1"), {
+			wrapper: makeWrapper(),
+		});
 
 		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(
-			supportApi.fetchAdminSupportDiagnostics,
-		).toHaveBeenCalledWith("ws-1");
+		expect(supportApi.fetchAdminSupportDiagnostics).toHaveBeenCalledWith(
+			"ws-1",
+		);
 	});
 
 	it("returns error when API fails", async () => {

@@ -82,9 +82,7 @@ describe("BillingPage", () => {
 		await screen.findByText("Carpintería del Sur");
 
 		const table = screen.getByRole("table", { name: "Suscripciones" });
-		expect(
-			within(table).getByText("Carpintería del Sur"),
-		).toBeInTheDocument();
+		expect(within(table).getByText("Carpintería del Sur")).toBeInTheDocument();
 		expect(within(table).getByText("Muebles Norte")).toBeInTheDocument();
 	});
 
@@ -173,5 +171,50 @@ describe("BillingPage", () => {
 			name: "Ver taller Carpintería del Sur",
 		});
 		expect(wsLink).toHaveAttribute("href", "/admin/workshops/ws-1");
+	});
+
+	it("expands a subscription row to show provider details on click", async () => {
+		vi.mocked(subscriptionsApi.fetchAdminSubscriptions).mockResolvedValue(
+			MOCK_SUBSCRIPTIONS,
+		);
+
+		const { fireEvent } = await import("@testing-library/react");
+		renderPage();
+
+		await screen.findByText("Carpintería del Sur");
+
+		// Provider details should not be visible by default
+		expect(screen.queryByText("pre-123")).not.toBeInTheDocument();
+
+		// Click the first row to expand
+		const firstRow = screen.getByText("Carpintería del Sur").closest("tr")!;
+		fireEvent.click(firstRow);
+
+		// Provider details should now be visible
+		await screen.findByText("pre-123");
+		expect(screen.getByText("authorized")).toBeInTheDocument();
+	});
+
+	it("collapses an expanded subscription row on second click", async () => {
+		vi.mocked(subscriptionsApi.fetchAdminSubscriptions).mockResolvedValue(
+			MOCK_SUBSCRIPTIONS,
+		);
+
+		const { fireEvent } = await import("@testing-library/react");
+		renderPage();
+
+		await screen.findByText("Carpintería del Sur");
+
+		const firstRow = screen.getByText("Carpintería del Sur").closest("tr")!;
+
+		// Expand
+		fireEvent.click(firstRow);
+		await screen.findByText("pre-123");
+
+		// Collapse
+		fireEvent.click(firstRow);
+		await vi.waitFor(() => {
+			expect(screen.queryByText("pre-123")).not.toBeInTheDocument();
+		});
 	});
 });

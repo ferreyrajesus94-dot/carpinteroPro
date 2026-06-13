@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminSupportDiagnostics } from "../hooks/useAdminSupportDiagnostics";
+import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
+import { useSort } from "../lib/useSort";
 import { cn } from "@/shared/lib/utils";
 
 function eventTypeBadge(eventType: string) {
@@ -39,7 +42,12 @@ function SupportSkeleton() {
 }
 
 export function SupportPage() {
-	const diagnostics = useAdminSupportDiagnostics();
+	const [workshopFilter, setWorkshopFilter] = useState("");
+	const diagnostics = useAdminSupportDiagnostics(workshopFilter || undefined);
+	const workshops = useAdminWorkshops();
+	const workshopOptions = workshops.data?.workshops ?? [];
+	const data = diagnostics.data?.diagnostics ?? [];
+	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "processedAt", "desc");
 
 	if (diagnostics.isPending) return <SupportSkeleton />;
 
@@ -66,17 +74,30 @@ export function SupportPage() {
 		);
 	}
 
-	const data = diagnostics.data?.diagnostics ?? [];
-
 	return (
 		<div className="space-y-4">
-			<div>
-				<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-					Diagnósticos de soporte
-				</h2>
-				<p className="mt-1 text-sm text-ink2">
-					Últimos 50 eventos de webhook de billing
-				</p>
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<div>
+					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
+						Diagnósticos de soporte
+					</h2>
+					<p className="mt-1 text-sm text-ink2">
+						Últimos 50 eventos de webhook de billing
+					</p>
+				</div>
+				<select
+					aria-label="Filtrar por taller"
+					value={workshopFilter}
+					onChange={(e) => setWorkshopFilter(e.target.value)}
+					className="h-9 rounded-lg border border-line bg-cp-surface px-3 text-[13.5px] text-ink focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
+				>
+					<option value="">Todos los talleres</option>
+					{workshopOptions.map((w) => (
+						<option key={w.id} value={w.id}>
+							{w.name}
+						</option>
+					))}
+				</select>
 			</div>
 
 			{data.length === 0 ? (
@@ -101,16 +122,24 @@ export function SupportPage() {
 					>
 						<thead>
 							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3">Evento</th>
-								<th className="px-4 py-3">Tipo</th>
-								<th className="px-4 py-3">Proveedor</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("providerEventId")}>
+									Evento {sortKey === "providerEventId" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("eventType")}>
+									Tipo {sortKey === "eventType" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("provider")}>
+									Proveedor {sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
 								<th className="px-4 py-3">Recurso</th>
-								<th className="px-4 py-3">Procesado</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("processedAt")}>
+									Procesado {sortKey === "processedAt" && (sortDir === "asc" ? "↑" : "↓")}
+								</th>
 								<th className="px-4 py-3">Taller</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-line">
-							{data.map((evt) => (
+							{sorted.map((evt) => (
 								<tr
 									key={evt.id}
 									className="bg-cp-surface transition-colors hover:bg-cp-bg2"
@@ -118,9 +147,7 @@ export function SupportPage() {
 									<td className="px-4 py-3 font-mono text-xs text-ink">
 										{evt.providerEventId}
 									</td>
-									<td className="px-4 py-3">
-										{eventTypeBadge(evt.eventType)}
-									</td>
+									<td className="px-4 py-3">{eventTypeBadge(evt.eventType)}</td>
 									<td className="px-4 py-3 text-ink2">
 										{evt.provider === "mercadopago"
 											? "MercadoPago"
@@ -130,16 +157,13 @@ export function SupportPage() {
 										{evt.providerResourceId ?? "—"}
 									</td>
 									<td className="px-4 py-3 text-ink2">
-										{new Date(evt.processedAt).toLocaleDateString(
-											"es-AR",
-											{
-												day: "numeric",
-												month: "short",
-												year: "numeric",
-												hour: "2-digit",
-												minute: "2-digit",
-											},
-										)}
+										{new Date(evt.processedAt).toLocaleDateString("es-AR", {
+											day: "numeric",
+											month: "short",
+											year: "numeric",
+											hour: "2-digit",
+											minute: "2-digit",
+										})}
 									</td>
 									<td className="px-4 py-3">
 										<Link

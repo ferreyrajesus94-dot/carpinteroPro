@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
+import { useSort } from "../lib/useSort";
 import { cn } from "@/shared/lib/utils";
+
+function SortArrow({ active, dir }: { active: boolean; dir: "asc" | "desc" }) {
+	if (!active) return <span className="ml-1 text-ink3">↕</span>;
+	return <span className="ml-1">{dir === "asc" ? "↑" : "↓"}</span>;
+}
 
 const STATUS_LABELS: Record<string, string> = {
 	active: "activa",
@@ -60,6 +66,8 @@ export function WorkshopsPage() {
 	> | null>(null);
 
 	const workshops = useAdminWorkshops(debouncedSearch || undefined);
+	const data = workshops.data?.workshops ?? [];
+	const { sorted, sortKey, sortDir, toggleSort } = useSort(data, "name", "asc");
 
 	function handleSearchChange(value: string) {
 		setSearch(value);
@@ -92,8 +100,6 @@ export function WorkshopsPage() {
 			</section>
 		);
 	}
-
-	const data = workshops.data?.workshops ?? [];
 
 	return (
 		<div className="space-y-4">
@@ -142,18 +148,28 @@ export function WorkshopsPage() {
 					>
 						<thead>
 							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3">Nombre</th>
-								<th className="px-4 py-3">Creado</th>
-								<th className="px-4 py-3">Perfiles</th>
-								<th className="px-4 py-3">Onboardeados</th>
-								<th className="px-4 py-3">Suscripción</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("name")}>
+									Nombre <SortArrow active={sortKey === "name"} dir={sortDir} />
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("createdAt")}>
+									Creado <SortArrow active={sortKey === "createdAt"} dir={sortDir} />
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("profileCount")}>
+									Perfiles <SortArrow active={sortKey === "profileCount"} dir={sortDir} />
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("onboardedProfileCount")}>
+									Onboardeados <SortArrow active={sortKey === "onboardedProfileCount"} dir={sortDir} />
+								</th>
+								<th className="px-4 py-3 cursor-pointer select-none hover:text-ink" onClick={() => toggleSort("subscriptionStatus")}>
+									Suscripción <SortArrow active={sortKey === "subscriptionStatus"} dir={sortDir} />
+								</th>
 								<th className="px-4 py-3">
 									<span className="sr-only">Acciones</span>
 								</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-line">
-							{data.map((workshop) => (
+							{sorted.map((workshop) => (
 								<tr
 									key={workshop.id}
 									className="bg-cp-surface transition-colors hover:bg-cp-bg2"
