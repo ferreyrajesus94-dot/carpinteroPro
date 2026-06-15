@@ -27,8 +27,16 @@ export interface AdminWorkshopsResponse {
 	workshops: AdminWorkshopSummary[];
 }
 
+export interface AdminWorkshopProfile {
+	id: string;
+	onboardedAt: string | null;
+	email: string | null;
+}
+
 export interface AdminWorkshopDetailResponse {
-	workshop: AdminWorkshopSummary;
+	workshop: AdminWorkshopSummary & {
+		profiles: AdminWorkshopProfile[];
+	};
 }
 
 export interface AdminSubscriptionSummary {

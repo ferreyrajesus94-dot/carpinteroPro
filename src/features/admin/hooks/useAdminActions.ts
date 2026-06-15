@@ -6,6 +6,7 @@ import {
 	retryWebhook,
 	forceOnboarding,
 	toggleMaintenance,
+	toggleWorkshop,
 } from "../api/actions";
 import { ADMIN_SUBSCRIPTIONS_KEY } from "./useAdminSubscriptions";
 import { ADMIN_SUPPORT_DIAGNOSTICS_KEY } from "./useAdminSupportDiagnostics";
@@ -65,6 +66,24 @@ export function useForceOnboarding() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: [ADMIN_WORKSHOPS_KEY] });
 			toast.success("Onboarding forzado");
+		},
+		onError: (e: Error) => toast.error(e.message),
+	});
+}
+
+export function useToggleWorkshop() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: ({
+			workshopId,
+			active,
+		}: {
+			workshopId: string;
+			active: boolean;
+		}) => toggleWorkshop(workshopId, active),
+		onSuccess: (data) => {
+			queryClient.invalidateQueries({ queryKey: [ADMIN_WORKSHOPS_KEY] });
+			toast.success(data.isActive ? "Taller activado" : "Taller desactivado");
 		},
 		onError: (e: Error) => toast.error(e.message),
 	});

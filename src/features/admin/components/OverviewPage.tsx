@@ -69,8 +69,8 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 				</div>
 				<i
 					className={`fi ${icon} text-2xl leading-none ${
-					variant === "warning" ? "text-amber-600" : "text-cp-accent"
-				}`}
+						variant === "warning" ? "text-amber-600" : "text-cp-accent"
+					}`}
 					aria-hidden="true"
 				/>
 			</div>
@@ -136,9 +136,7 @@ export function OverviewPage() {
 					</p>
 				</div>
 				{lastUpdated && (
-					<p className="text-xs text-ink3">
-						Actualizado {lastUpdated}
-					</p>
+					<p className="text-xs text-ink3">Actualizado {lastUpdated}</p>
 				)}
 			</header>
 
@@ -210,13 +208,9 @@ export function OverviewPage() {
 										key={status}
 										className={cn(
 											"flex items-center justify-between rounded-lg border px-4 py-3",
-											isActive &&
-												"border-emerald-200 bg-emerald-50",
-											isWarning &&
-												"border-amber-200 bg-amber-50",
-											!isActive &&
-												!isWarning &&
-												"border-red-200 bg-red-50",
+											isActive && "border-emerald-200 bg-emerald-50",
+											isWarning && "border-amber-200 bg-amber-50",
+											!isActive && !isWarning && "border-red-200 bg-red-50",
 										)}
 									>
 										<span

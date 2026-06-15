@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { useAdminWorkshopDetail } from "../hooks/useAdminWorkshops";
+import { useToggleWorkshop, useForceOnboarding } from "../hooks/useAdminActions";
 import { cn } from "@/shared/lib/utils";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -37,6 +38,8 @@ function DetailSkeleton() {
 export function WorkshopDetailPage() {
 	const { workshopId } = useParams<{ workshopId: string }>();
 	const detail = useAdminWorkshopDetail(workshopId ?? "");
+	const toggleMutation = useToggleWorkshop();
+	const forceOnboardingMutation = useForceOnboarding();
 
 	if (detail.isPending) return <DetailSkeleton />;
 
@@ -134,6 +137,18 @@ export function WorkshopDetailPage() {
 							>
 								{workshop.isActive ? "Activo" : "Inactivo"}
 							</span>
+							<button
+								type="button"
+								onClick={() =>
+									toggleMutation.mutate({
+										workshopId: workshop.id,
+										active: !workshop.isActive,
+									})
+								}
+								className="text-[11px] text-ink3 hover:text-ink transition-colors"
+							>
+								{workshop.isActive ? "Desactivar" : "Activar"}
+							</button>
 							{workshop.subscriptionStatus && (
 								<span
 									className={cn(
@@ -186,6 +201,47 @@ export function WorkshopDetailPage() {
 						El dueño del taller aún no está identificado en el contrato de datos
 						actual.
 					</p>
+				)}
+
+				{workshop.profiles && workshop.profiles.length > 0 && (
+					<div className="mt-6">
+						<h3 className="text-sm font-semibold text-ink mb-3">Perfiles</h3>
+						<ul className="space-y-2">
+							{workshop.profiles.map((profile) => (
+								<li
+									key={profile.id}
+									className="flex items-center justify-between rounded-lg border border-line bg-cp-bg2 px-4 py-2.5"
+								>
+									<div className="min-w-0">
+										<p className="text-sm font-medium text-ink truncate">
+											{profile.email ?? "Sin email"}
+										</p>
+										<p className="text-[11px] text-ink3 font-mono">
+											{profile.id}
+										</p>
+									</div>
+									<div className="flex items-center gap-2 shrink-0">
+										{profile.onboardedAt ? (
+											<span className="rounded-full bg-emerald-100 text-emerald-700 px-2.5 py-0.5 text-[11px] font-medium">
+												Onboardeado
+											</span>
+										) : (
+											<button
+												type="button"
+												onClick={() =>
+													forceOnboardingMutation.mutate(profile.id)
+												}
+												disabled={forceOnboardingMutation.isPending}
+												className="text-[11px] font-medium text-cp-accent hover:underline disabled:opacity-50"
+											>
+												Forzar onboarding
+											</button>
+										)}
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
 				)}
 			</section>
 		</div>

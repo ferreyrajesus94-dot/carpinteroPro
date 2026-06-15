@@ -9,6 +9,7 @@ import {
 import type { Session } from "@supabase/supabase-js";
 import { cn } from "@/shared/lib/utils";
 import { OfflineBanner } from "@/shared/components/OfflineBanner";
+import { MaintenanceBanner } from "@/shared/components/MaintenanceBanner";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
@@ -199,6 +200,7 @@ function AuthenticatedAppShell({
 	const shell = wizard ? (
 		<div className="flex h-screen flex-col bg-background">
 			<OfflineBanner />
+			<MaintenanceBanner />
 			<main className="flex-1 overflow-y-auto">
 				<Outlet />
 			</main>
@@ -308,6 +310,7 @@ function AuthenticatedAppShell({
 			{/* === COLUMNA PRINCIPAL === */}
 			<div className="flex flex-1 flex-col overflow-hidden">
 				<OfflineBanner />
+				<MaintenanceBanner />
 
 				{/* Topbar desktop */}
 				<header className="hidden lg:flex h-14 items-center gap-3 px-6 border-b border-line bg-cp-surface/85 backdrop-blur sticky top-0 z-10">

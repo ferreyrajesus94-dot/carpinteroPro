@@ -123,6 +123,9 @@ describe("useAdminWorkshopDetail", () => {
 			profileCount: 4,
 			onboardedProfileCount: 3,
 			subscriptionStatus: "active",
+			profiles: [
+				{ id: "p-1", onboardedAt: "2026-01-16T00:00:00Z", email: "owner@test.com" },
+			],
 		},
 	};
 

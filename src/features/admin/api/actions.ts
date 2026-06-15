@@ -59,6 +59,20 @@ export async function forceOnboarding(
 	return data as AdminForceOnboardingResponse;
 }
 
+export async function toggleWorkshop(
+	workshopId: string,
+	active: boolean,
+): Promise<{ workshopId: string; isActive: boolean }> {
+	const { data, error } = await supabase.functions.invoke(
+		"admin-toggle-workshop",
+		{
+			body: { workshopId, active },
+		},
+	);
+	if (error) throw error;
+	return data as { workshopId: string; isActive: boolean };
+}
+
 export async function toggleMaintenance(
 	enabled: boolean,
 	message?: string,

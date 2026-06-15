@@ -136,7 +136,11 @@ async function loadRelatedRows(
 	};
 }
 
-function mapWorkshop(workshop: WorkshopRow, related: RelatedRows) {
+function mapWorkshop(
+	workshop: WorkshopRow,
+	related: RelatedRows,
+	includeProfiles: boolean,
+) {
 	const workshopProfiles = related.profiles.filter(
 		(profile: ProfileRow) => profile.workshop_id === workshop.id,
 	);
@@ -157,7 +161,7 @@ function mapWorkshop(workshop: WorkshopRow, related: RelatedRows) {
 		? (related.ownerEmailById.get(ownerProfile.id) ?? null)
 		: null;
 
-	return {
+	const result: Record<string, unknown> = {
 		id: workshop.id,
 		name: workshop.name,
 		createdAt: workshop.created_at,
@@ -167,6 +171,16 @@ function mapWorkshop(workshop: WorkshopRow, related: RelatedRows) {
 		onboardedProfileCount: onboardedProfiles.length,
 		subscriptionStatus: subscription?.status ?? null,
 	};
+
+	if (includeProfiles) {
+		result.profiles = workshopProfiles.map((p) => ({
+			id: p.id,
+			onboardedAt: p.onboarded_at,
+			email: related.ownerEmailById.get(p.id) ?? null,
+		}));
+	}
+
+	return result;
 }
 
 async function handleAuthorizedRequest(
@@ -191,11 +205,12 @@ async function handleAuthorizedRequest(
 
 	const related = await loadRelatedRows(workshopIds);
 	if (related instanceof Response) return related;
+	const isDetail = Boolean(body.workshopId);
 	const payload = workshopRows.map((workshop: WorkshopRow) =>
-		mapWorkshop(workshop, related),
+		mapWorkshop(workshop, related, isDetail),
 	);
 	return json(
-		body.workshopId ? { workshop: payload[0] } : { workshops: payload },
+		isDetail ? { workshop: payload[0] } : { workshops: payload },
 	);
 }
 

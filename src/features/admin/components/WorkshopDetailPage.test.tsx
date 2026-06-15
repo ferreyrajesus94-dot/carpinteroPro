@@ -13,6 +13,13 @@ vi.mock("../api/workshops", () => ({
 	fetchAdminWorkshopDetail: vi.fn(),
 }));
 
+const mockToggleMutate = vi.fn();
+const mockForceMutate = vi.fn();
+vi.mock("../hooks/useAdminActions", () => ({
+	useToggleWorkshop: () => ({ mutate: mockToggleMutate, isPending: false }),
+	useForceOnboarding: () => ({ mutate: mockForceMutate, isPending: false }),
+}));
+
 import * as workshopsApi from "../api/workshops";
 
 function renderWithQuery(ui: React.ReactElement) {
@@ -44,11 +51,16 @@ const MOCK_DETAIL = {
 		id: "ws-1",
 		name: "Carpintería del Sur",
 		createdAt: "2026-01-15T00:00:00Z",
-			isActive: true,
+		isActive: true,
 		ownerEmail: null,
 		profileCount: 4,
 		onboardedProfileCount: 3,
 		subscriptionStatus: "active",
+		profiles: [
+			{ id: "p-1", onboardedAt: "2026-01-16T00:00:00Z", email: "owner@test.com" },
+			{ id: "p-2", onboardedAt: "2026-01-17T00:00:00Z", email: "user2@test.com" },
+			{ id: "p-3", onboardedAt: null, email: "user3@test.com" },
+		],
 	},
 };
 
@@ -143,5 +155,90 @@ describe("WorkshopDetailPage", () => {
 		expect(
 			screen.getByRole("link", { name: "Volver a talleres" }),
 		).toHaveAttribute("href", "/admin/workshops");
+	});
+
+	it("shows deactivate button for active workshop", async () => {
+		vi.mocked(workshopsApi.fetchAdminWorkshopDetail).mockResolvedValue(
+			MOCK_DETAIL,
+		);
+
+		renderAtRoute("ws-1");
+
+		await screen.findByText("Carpintería del Sur");
+
+		expect(screen.getByText("Activo")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Desactivar" })).toBeInTheDocument();
+	});
+
+	it("shows activate button for inactive workshop", async () => {
+		vi.mocked(workshopsApi.fetchAdminWorkshopDetail).mockResolvedValue({
+			workshop: { ...MOCK_DETAIL.workshop, isActive: false },
+		});
+
+		renderAtRoute("ws-1");
+
+		await screen.findByText("Carpintería del Sur");
+
+		expect(screen.getByText("Inactivo")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Activar" })).toBeInTheDocument();
+	});
+
+	it("calls toggleWorkshop mutation on button click", async () => {
+		vi.mocked(workshopsApi.fetchAdminWorkshopDetail).mockResolvedValue(
+			MOCK_DETAIL,
+		);
+
+		renderAtRoute("ws-1");
+
+		await screen.findByText("Carpintería del Sur");
+
+		screen.getByRole("button", { name: "Desactivar" }).click();
+
+		expect(mockToggleMutate).toHaveBeenCalledWith({
+			workshopId: "ws-1",
+			active: false,
+		});
+	});
+
+	it("shows profiles list with onboarded status", async () => {
+		vi.mocked(workshopsApi.fetchAdminWorkshopDetail).mockResolvedValue(
+			MOCK_DETAIL,
+		);
+
+		renderAtRoute("ws-1");
+
+		await screen.findByText("Carpintería del Sur");
+
+		expect(screen.getByText("Perfiles")).toBeInTheDocument();
+		expect(screen.getByText("owner@test.com")).toBeInTheDocument();
+		expect(screen.getByText("user3@test.com")).toBeInTheDocument();
+		expect(screen.getAllByText("Onboardeado")).toHaveLength(2);
+	});
+
+	it("shows force onboarding button for non-onboarded profiles", async () => {
+		vi.mocked(workshopsApi.fetchAdminWorkshopDetail).mockResolvedValue(
+			MOCK_DETAIL,
+		);
+
+		renderAtRoute("ws-1");
+
+		await screen.findByText("Carpintería del Sur");
+
+		const forceButtons = screen.getAllByText("Forzar onboarding");
+		expect(forceButtons).toHaveLength(1);
+	});
+
+	it("calls forceOnboarding mutation on button click", async () => {
+		vi.mocked(workshopsApi.fetchAdminWorkshopDetail).mockResolvedValue(
+			MOCK_DETAIL,
+		);
+
+		renderAtRoute("ws-1");
+
+		await screen.findByText("Carpintería del Sur");
+
+		screen.getByText("Forzar onboarding").click();
+
+		expect(mockForceMutate).toHaveBeenCalledWith("p-3");
 	});
 });

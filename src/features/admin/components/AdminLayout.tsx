@@ -121,7 +121,10 @@ export function AdminLayout() {
 							aria-label="Actualizar datos"
 							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 						>
-							<i className="fi fi-rr-refresh text-base leading-none" aria-hidden="true" />
+							<i
+								className="fi fi-rr-refresh text-base leading-none"
+								aria-hidden="true"
+							/>
 						</button>
 						<Link
 							to="/dashboard"
@@ -156,5 +159,3 @@ export function AdminLayout() {
 		</div>
 	);
 }
-
-

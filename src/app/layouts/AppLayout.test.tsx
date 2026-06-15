@@ -43,6 +43,10 @@ vi.mock("@/app/layouts/nav-items", () => ({
 	NAV_ITEMS: [],
 }));
 
+vi.mock("@/shared/components/MaintenanceBanner", () => ({
+	MaintenanceBanner: () => null,
+}));
+
 import * as subscriptionModule from "@/features/billing/hooks/useSubscription";
 import * as billingActionsModule from "@/features/billing/hooks/useBillingActions";
 
