@@ -239,45 +239,45 @@ Each PR must include its own tests, validation evidence, rollback note, and chan
 
 ### Task 4.1 — Add admin API clients and hooks
 
-- [ ] Add `src/features/admin/api/overview.ts` and `workshops.ts` using Supabase function invocation.
-- [ ] Add `src/features/admin/hooks/useAdminOverview.ts` and `useAdminWorkshops.ts`.
-- [ ] Keep TanStack Query keys admin-local.
+- [x] Add `src/features/admin/api/overview.ts` and `workshops.ts` using Supabase function invocation.
+- [x] Add `src/features/admin/hooks/useAdminOverview.ts` and `useAdminWorkshops.ts`.
+- [x] Keep TanStack Query keys admin-local.
 
 **Verification:**
 - Hooks are disabled until guard/admin status allows them.
 
 ### Task 4.2 — Add overview screen
 
-- [ ] Add overview KPI cards and operational alerts.
-- [ ] Show total workshops, recent workshops, subscription status counts, and webhook failure count.
-- [ ] Add loading, empty, and error states.
+- [x] Add overview KPI cards and operational alerts.
+- [x] Show total workshops, recent workshops, subscription status counts, and webhook failure count.
+- [x] Add loading, empty, and error states.
 
 **Verification:**
 - UI tests cover loading/empty/error/success states.
 
 ### Task 4.3 — Add workshops table
 
-- [ ] Add searchable workshops table.
-- [ ] Show workshop id/name, created date, profile count, onboarded count, and subscription status.
-- [ ] Use shared table/input/badge primitives.
+- [x] Add searchable workshops table.
+- [x] Show workshop id/name, created date, profile count, onboarded count, and subscription status.
+- [x] Use shared table/input/badge primitives.
 
 **Verification:**
 - Search/filter behavior is tested at helper or component level.
 
 ### Task 4.4 — Add workshop detail screen
 
-- [ ] Add route for `/admin/workshops/:workshopId`.
-- [ ] Show safe support context for the selected workshop.
-- [ ] Include not-found and error states.
+- [x] Add route for `/admin/workshops/:workshopId`.
+- [x] Show safe support context for the selected workshop.
+- [x] Include not-found and error states.
 
 **Verification:**
 - Unknown workshop state is handled.
 
 ### Task 4.5 — Validate WU4
 
-- [ ] Run `npm test`.
-- [ ] Run `npm run lint`.
-- [ ] Confirm changed-line count; split if above 400.
+- [x] Run `npm test`.
+- [x] Run `npm run lint`.
+- [x] Confirm changed-line count; split if above 400.
 
 **Rollback:** Remove overview/workshop screen routes and hooks while preserving admin shell.
 
@@ -295,47 +295,47 @@ Each PR must include its own tests, validation evidence, rollback note, and chan
 
 ### Task 5.1 — Add admin subscriptions API client and hook
 
-- [ ] Add `src/features/admin/api/subscriptions.ts`.
-- [ ] Add `src/features/admin/hooks/useAdminSubscriptions.ts`.
-- [ ] Support status filtering.
+- [x] Add `src/features/admin/api/subscriptions.ts`.
+- [x] Add `src/features/admin/hooks/useAdminSubscriptions.ts`.
+- [x] Support status filtering.
 
 **Verification:**
 - Filter params are included in function invocation and tested.
 
 ### Task 5.2 — Add billing overview screen
 
-- [ ] Add read-only subscription table.
-- [ ] Show status badges and workshop links.
-- [ ] Do not expose cancel/retry/refund/plan-change actions.
-- [ ] Add loading, empty, and error states.
+- [x] Add read-only subscription table.
+- [x] Show status badges and workshop links.
+- [x] Do not expose cancel/retry/refund/plan-change actions.
+- [x] Add loading, empty, and error states.
 
 **Verification:**
 - Test asserts mutation buttons are absent.
 
 ### Task 5.3 — Add support diagnostics client/hook
 
-- [ ] Add `src/features/admin/api/support.ts`.
-- [ ] Add `src/features/admin/hooks/useAdminSupportDiagnostics.ts`.
-- [ ] Map recent webhook/payment diagnostic data to safe view models.
+- [x] Add `src/features/admin/api/support.ts`.
+- [x] Add `src/features/admin/hooks/useAdminSupportDiagnostics.ts`.
+- [x] Map recent webhook/payment diagnostic data to safe view models.
 
 **Verification:**
 - Mapping tests cover missing/unavailable fields.
 
 ### Task 5.4 — Add support diagnostics screen
 
-- [ ] Add support diagnostics list/detail UI.
-- [ ] Show timestamps, event ids, statuses, and safe error summaries.
-- [ ] Do not implement impersonation.
-- [ ] Do not implement destructive actions.
+- [x] Add support diagnostics list/detail UI.
+- [x] Show timestamps, event ids, statuses, and safe error summaries.
+- [x] Do not implement impersonation.
+- [x] Do not implement destructive actions.
 
 **Verification:**
 - UI tests cover unavailable/empty/error diagnostics.
 
 ### Task 5.5 — Validate WU5
 
-- [ ] Run `npm test`.
-- [ ] Run `npm run lint`.
-- [ ] Confirm changed-line count is within budget.
+- [x] Run `npm test`.
+- [x] Run `npm run lint`.
+- [x] Confirm changed-line count is within budget.
 
 **Rollback:** Remove billing/support screens and hooks while preserving admin overview if already merged.
 
@@ -343,12 +343,12 @@ Each PR must include its own tests, validation evidence, rollback note, and chan
 
 ## Final verification
 
-- [ ] All tasks completed or explicitly deferred.
-- [ ] `npm test` passes.
-- [ ] `npm run lint` passes.
-- [ ] `/admin/*` is inaccessible to unauthenticated/non-admin users.
-- [ ] Admin Edge Functions return 401 for missing JWT, 403 for non-admin JWT, and success for admin JWT.
-- [ ] Service-role key appears only in server/Edge Function code.
-- [ ] No admin feature cross-feature imports exist.
-- [ ] Review workload and PR split are documented.
-- [ ] Manual verification checklist includes normal user and platform admin flows.
+- [x] All tasks completed or explicitly deferred.
+- [x] `npm test` passes.
+- [x] `npm run lint` passes.
+- [x] `/admin/*` is inaccessible to unauthenticated/non-admin users.
+- [x] Admin Edge Functions return 401 for missing JWT, 403 for non-admin JWT, and success for admin JWT.
+- [x] Service-role key appears only in server/Edge Function code.
+- [x] No admin feature cross-feature imports exist.
+- [x] Review workload and PR split are documented.
+- [x] Manual verification checklist includes normal user and platform admin flows.
