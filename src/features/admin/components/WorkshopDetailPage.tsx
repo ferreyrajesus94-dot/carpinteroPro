@@ -146,7 +146,7 @@ export function WorkshopDetailPage() {
 										active: !workshop.isActive,
 									})
 								}
-								className="text-[11px] text-ink3 hover:text-ink transition-colors"
+								className="text-[11px] text-ink3 hover:text-ink transition-colors disabled:opacity-50"
 							>
 								{workshop.isActive ? "Desactivar" : "Activar"}
 							</button>
