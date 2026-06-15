@@ -139,6 +139,7 @@ export function WorkshopDetailPage() {
 							</span>
 							<button
 								type="button"
+								disabled={toggleMutation.isPending}
 								onClick={() =>
 									toggleMutation.mutate({
 										workshopId: workshop.id,

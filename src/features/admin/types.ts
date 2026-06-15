@@ -81,6 +81,11 @@ export interface AdminToggleSubscriptionResponse {
 	updatedAt: string;
 }
 
+export interface AdminToggleWorkshopResponse {
+	workshopId: string;
+	isActive: boolean;
+}
+
 export interface AdminRetryWebhookRequest {
 	eventId: string;
 }

@@ -16,7 +16,7 @@ export function MaintenanceBanner() {
 					className="fi fi-rr-triangle-warning mr-2 align-middle"
 					aria-hidden="true"
 				/>
-				{maintenance.message}
+				{maintenance.message || "Estamos en mantenimiento. Volvé pronto."}
 			</span>
 			<button
 				type="button"

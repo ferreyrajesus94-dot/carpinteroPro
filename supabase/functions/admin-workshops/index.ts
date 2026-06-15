@@ -41,6 +41,10 @@ interface RelatedRows {
 	ownerEmailById: Map<string, string>;
 }
 
+function escapeIlikeSearch(search: string): string {
+	return search.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_");
+}
+
 async function readBody(req: Request): Promise<AdminWorkshopsRequest> {
 	if (!req.body) return {};
 	const body: unknown = await req.json().catch(() => ({}));
@@ -63,7 +67,7 @@ function loadWorkshops(body: AdminWorkshopsRequest) {
 
 	if (body.workshopId) query = query.eq("id", body.workshopId);
 	if (!body.workshopId && body.search)
-		query = query.ilike("name", `%${body.search}%`);
+		query = query.ilike("name", `%${escapeIlikeSearch(body.search)}%`);
 
 	return query.returns<WorkshopRow[]>();
 }
@@ -107,24 +111,35 @@ async function loadRelatedRows(
 	// Fetch emails for owner profiles via GoTrue admin API
 	const ownerEmailById = new Map<string, string>();
 	if (ownerIds.size > 0) {
-		const authUrl = `${Deno.env.get("SUPABASE_URL")}/auth/v1/admin/users`;
+		const authUrl = new URL(
+			`${Deno.env.get("SUPABASE_URL")}/auth/v1/admin/users`,
+		);
 		const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+		const perPage = 1000;
+		let page = 1;
 		try {
-			const res = await fetch(authUrl, {
-				headers: {
-					Authorization: `Bearer ${serviceKey}`,
-					apikey: serviceKey,
-				},
-			});
-			if (res.ok) {
+			while (ownerEmailById.size < ownerIds.size) {
+				authUrl.searchParams.set("page", String(page));
+				authUrl.searchParams.set("per_page", String(perPage));
+				const res = await fetch(authUrl, {
+					headers: {
+						Authorization: `Bearer ${serviceKey}`,
+						apikey: serviceKey,
+					},
+				});
+				if (!res.ok) break;
 				const data = (await res.json()) as { users: UserRow[] };
-				for (const u of data.users ?? []) {
+				const users = data.users ?? [];
+				for (const u of users) {
 					if (ownerIds.has(u.id)) {
 						ownerEmailById.set(u.id, u.email);
 					}
 				}
+				if (users.length < perPage) break;
+				page += 1;
 			}
-		} catch {
+		} catch (error) {
+			console.error("admin-workshops: owner email lookup failed", error);
 			// Fall through — owner emails stay as empty map, DTO shows null
 		}
 	}

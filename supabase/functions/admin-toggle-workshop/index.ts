@@ -25,10 +25,12 @@ Deno.serve(async (req: Request) => {
 			);
 		}
 
-		const { error } = await serviceClient()
+		const { data, error } = await serviceClient()
 			.from("workshops")
 			.update({ is_active: body.active })
-			.eq("id", body.workshopId);
+			.eq("id", body.workshopId)
+			.select("id")
+			.returns<{ id: string }[]>();
 
 		if (error) {
 			console.error("admin-toggle-workshop: update failed", error);
@@ -37,6 +39,9 @@ Deno.serve(async (req: Request) => {
 				"No se pudo actualizar el taller",
 				500,
 			);
+		}
+		if (!data || data.length === 0) {
+			return structuredErr("workshop_not_found", "Taller no encontrado", 404);
 		}
 
 		return json({ workshopId: body.workshopId, isActive: body.active });

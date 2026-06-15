@@ -1,6 +1,7 @@
 import { supabase } from "@/shared/lib/supabase";
 import type {
 	AdminToggleSubscriptionResponse,
+	AdminToggleWorkshopResponse,
 	AdminRetryWebhookResponse,
 	AdminForceOnboardingResponse,
 	MaintenanceModeState,
@@ -62,7 +63,7 @@ export async function forceOnboarding(
 export async function toggleWorkshop(
 	workshopId: string,
 	active: boolean,
-): Promise<{ workshopId: string; isActive: boolean }> {
+): Promise<AdminToggleWorkshopResponse> {
 	const { data, error } = await supabase.functions.invoke(
 		"admin-toggle-workshop",
 		{
@@ -70,7 +71,7 @@ export async function toggleWorkshop(
 		},
 	);
 	if (error) throw error;
-	return data as { workshopId: string; isActive: boolean };
+	return data as AdminToggleWorkshopResponse;
 }
 
 export async function toggleMaintenance(
