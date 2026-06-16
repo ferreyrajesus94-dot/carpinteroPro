@@ -21,8 +21,8 @@ function createFakeSupabase(options: FakeSupabaseOptions): SupabaseQuery {
     inserted: null as QueryRow | null,
     from(table: string) {
       return {
-        select: (_columns: string) => ({
-          eq: (_column: string, _value: string) => ({
+        select: () => ({
+          eq: () => ({
             maybeSingle: async () => ({
               data: table === 'workshop_referrals' ? options.workshopRef : null,
               error: options.lookupError ?? null,
