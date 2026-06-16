@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
   buildCommissionCsv,
-  type CommissionFilters,
   type CommissionRow,
   validateCommissionsRequest,
 } from '../../../supabase/functions/admin-referral-commissions/mapping'
