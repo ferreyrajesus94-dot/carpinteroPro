@@ -12,6 +12,7 @@ import {
 	getPreapproval,
 } from "../_shared/mercadopago.ts";
 import { json, preflight, structuredErr } from "../_shared/response.ts";
+import { recordCommissionIfReferred } from "./commissions.ts";
 
 declare const Deno: {
 	serve(handler: (req: Request) => Response | Promise<Response>): void;
@@ -212,6 +213,59 @@ Deno.serve(async (req: Request) => {
 			"No se pudo actualizar la suscripción",
 			500,
 		);
+	}
+
+	// ── Commission recording for authorized payment ──────────────
+	if (resourceType === "authorized_payment") {
+		const paymentStatus = (providerResource?.status as string) || "";
+
+		if (paymentStatus.toLowerCase() === "approved") {
+			const paymentAmount =
+				(providerResource?.transaction_amount as number) ||
+				(providerResource?.charge as number) ||
+				0;
+			const occurredAt =
+				(providerResource?.date_created as string) ||
+				new Date().toISOString();
+
+			const result = await recordCommissionIfReferred(supabase, {
+				workshopId: subscription.workshop_id,
+				subscriptionId: subscription.id,
+				providerPaymentId: dataId,
+				paymentAmount,
+				occurredAt,
+			});
+
+			if (result.recorded) {
+				console.info("commission_recorded", {
+					workshopId: subscription.workshop_id,
+					providerPaymentId: dataId,
+				});
+			} else if (result.duplicate) {
+				console.log(
+					"commission_already_recorded",
+					{ providerPaymentId: dataId },
+				);
+				return json({ message: "Already processed" });
+			} else if (result.skipped) {
+				console.info(
+					`commission_skipped reason=${result.reason}`,
+					{ workshopId: subscription.workshop_id },
+				);
+			} else {
+				console.error("Failed to record commission", { reason: result.reason });
+				return structuredErr(
+					"commission_record_failed",
+					"No se pudo registrar la comisión",
+					500,
+				);
+			}
+		} else {
+			console.info(
+				"commission_skipped reason=payment_not_approved",
+				{ status: paymentStatus },
+			);
+		}
 	}
 
 	return json({ message: "OK" });
