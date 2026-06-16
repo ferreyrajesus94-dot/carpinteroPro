@@ -6,17 +6,15 @@ import {
 } from "../hooks/useReferrals";
 import { YoutuberDialog } from "./YoutuberDialog";
 import { CodesPanel } from "./CodesPanel";
-import { CommissionsTab } from "./CommissionsTab";
 import { useSort } from "../lib/useSort";
 import { cn } from "@/shared/lib/utils";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import type { CreateYoutuberRequest, YoutuberSummary } from "../types";
 
-type TabId = "youtubers" | "comisiones";
+type TabId = "youtubers";
 
 const TABS: { id: TabId; label: string }[] = [
 	{ id: "youtubers", label: "Youtubers" },
-	{ id: "comisiones", label: "Comisiones" },
 ];
 
 function formatARS(amount: number): string {
@@ -303,7 +301,6 @@ export function ReferidosPage() {
 			</div>
 
 			{activeTab === "youtubers" && <YoutubersTab />}
-			{activeTab === "comisiones" && <CommissionsTab />}
 		</div>
 	);
 }
