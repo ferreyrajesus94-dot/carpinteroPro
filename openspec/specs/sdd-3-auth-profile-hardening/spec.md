@@ -144,6 +144,84 @@ The system MUST pass project verification commands used by SDD verify (`npm test
 - WHEN a change reintroduces silent null-profile handling
 - THEN at least one auth/profile or AppLayout test fails
 
+
+### Requirement: Referral Code Accepted at Signup
+
+The `signUpWithEmail` API MUST accept an optional `referral_code` in the metadata object. The `handle_new_user` trigger MUST read `raw_user_meta_data->>'referral_code'`, look up the active `referral_codes` row case-insensitively, validate the code's `is_active = true`, block self-referral by comparing `auth.users.email` against `youtubers.contact_email`, and INSERT a `workshop_referrals` row on success. Unknown / inactive / self-referral codes MUST be silently ignored (no error to the user) and MUST log a structured warning.
+
+#### Scenario: Valid active code stamps attribution
+- GIVEN `referral_codes` row `code = 'PROMO20'`, `is_active = true`, `youtuber_id = Y1`
+- WHEN a new user signs up with `metadata = { referral_code: 'promo20' }`
+- THEN `handle_new_user` MUST insert one row into `workshop_referrals` with `referral_code_id`, `youtuber_id = Y1`, and the new `workshop_id`
+
+#### Scenario: Case-insensitive match
+- GIVEN the stored code is `PROMO20`
+- WHEN a user signs up with `referral_code = 'promo20'` or `'ProMo20'`
+- THEN the lookup MUST resolve to the same code
+
+#### Scenario: Unknown code silently ignored
+- GIVEN no row in `referral_codes` matches `INVALIDX`
+- WHEN a user signs up with `referral_code = 'INVALIDX'`
+- THEN no row is inserted into `workshop_referrals`
+- AND the trigger MUST log a warning with `reason = unknown_code`
+- AND the signup MUST complete normally (workshop + profile created)
+
+#### Scenario: Inactive code silently ignored
+- GIVEN a `referral_codes` row with `is_active = false`
+- WHEN a user signs up with that code
+- THEN no row is inserted into `workshop_referrals`
+- AND the trigger MUST log `reason = inactive`
+
+#### Scenario: Self-referral blocked
+- GIVEN a YouTuber with `contact_email = 'a@b.com'` and an active code
+- WHEN a new user signs up with `email = 'A@B.COM'` and the matching code
+- THEN no row is inserted into `workshop_referrals`
+- AND the trigger MUST log `reason = self_referral`
+- AND the user MUST be created normally
+
+#### Scenario: Missing referral_code key is a no-op
+- GIVEN the metadata object does NOT include `referral_code`
+- WHEN the user signs up
+- THEN the trigger MUST NOT touch `referral_codes` or `workshop_referrals`
+- AND the existing profile/workshop creation MUST behave exactly as before
+
+### Requirement: LoginPage Captures URL Referral Code
+
+The `LoginPage` component MUST read the `?ref=CODE` query param via `useSearchParams` and pass it as `referral_code` in the metadata object passed to `signUpWithEmail`. When no `?ref` is present, the metadata MUST NOT include `referral_code`.
+
+#### Scenario: URL with ref populates metadata
+- GIVEN the user visits `/login?ref=PROMO20`
+- WHEN the registration form is submitted
+- THEN the metadata passed to `signUpWithEmail` MUST include `referral_code: 'PROMO20'`
+
+#### Scenario: URL without ref leaves metadata clean
+- GIVEN the user visits `/login` (no query string)
+- WHEN the registration form is submitted
+- THEN the metadata MUST NOT include a `referral_code` key
+
+#### Scenario: Existing auth flow unchanged
+- GIVEN no `?ref` is present
+- WHEN the user signs up
+- THEN the existing `workshop_name`, `terms_accepted_at`, `privacy_accepted_at` metadata MUST be passed exactly as before
+- AND no other behavior MUST change
+
+### Requirement: Auth State Preserved With Attribution
+
+The system MUST NOT expose the YouTuber identity, email, or commission to the tenant auth context. The tenant `AuthProvider` MUST NOT add any new fields related to referral attribution. The `workshops` row MUST NOT receive new columns for YouTuber identity (it gets attribution via the separate `workshop_referrals` table, admin-only).
+
+#### Scenario: Auth context remains unchanged
+- GIVEN a tenant with an active attribution
+- WHEN `useAuth()` is consumed
+- THEN the returned object MUST contain only the existing fields (`session`, `workshopId`, `onboardedAt`, `loading`, `signOut`, `refreshProfile`)
+- AND no new `referral`, `youtuber`, or `commission` fields MUST be added
+
+#### Scenario: Workshops table receives no new YouTuber columns
+- GIVEN the SDD-3 migration that adds referral tables
+- WHEN inspected
+- THEN the `workshops` table MUST NOT gain columns for YouTuber identity, channel URL, or contact_email
+- AND the join happens via `workshop_referrals.referral_code_id` (admin-only) and `subscriptions.referred_by_referral_code_id` (tenant-visible as nullable FK)
+
+
 ## Success Criteria
 
 - Auth/profile inconsistency is explicit and testable.
