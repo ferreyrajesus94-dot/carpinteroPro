@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminGuard } from "./components/AdminGuard";
 import { AdminLayout } from "./components/AdminLayout";
@@ -6,6 +7,10 @@ import { WorkshopsPage } from "./components/WorkshopsPage";
 import { WorkshopDetailPage } from "./components/WorkshopDetailPage";
 import { BillingPage } from "./components/BillingPage";
 import { SupportPage } from "./components/SupportPage";
+
+const ReferidosPage = lazy(() =>
+	import("./components/ReferidosPage").then((m) => ({ default: m.ReferidosPage })),
+);
 
 export function AdminRoutes() {
 	return (
@@ -19,6 +24,7 @@ export function AdminRoutes() {
 						element={<WorkshopDetailPage />}
 					/>
 					<Route path="billing" element={<BillingPage />} />
+					<Route path="referidos" element={<ReferidosPage />} />
 					<Route path="support" element={<SupportPage />} />
 					<Route path="*" element={<Navigate to="/admin" replace />} />
 				</Route>

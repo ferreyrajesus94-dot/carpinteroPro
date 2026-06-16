@@ -111,3 +111,101 @@ export interface MaintenanceModeState {
 	enabled: boolean;
 	message: string;
 }
+
+// Referral types (SDD-11)
+export interface YoutuberSummary {
+	id: string;
+	displayName: string;
+	channelUrl: string | null;
+	contactEmail: string | null;
+	payoutMethod: string | null;
+	isActive: boolean;
+	codeCount: number;
+	activeReferredWorkshops: number;
+	lifetimeCommission: number;
+}
+
+export interface AdminYoutubersResponse {
+	youtubers: YoutuberSummary[];
+}
+
+export interface CreateYoutuberRequest {
+	displayName: string;
+	channelUrl?: string | null;
+	contactEmail?: string | null;
+	payoutMethod?: string | null;
+}
+
+export interface UpdateYoutuberRequest {
+	id: string;
+	displayName?: string;
+	channelUrl?: string | null;
+	contactEmail?: string | null;
+	payoutMethod?: string | null;
+}
+
+export interface ToggleYoutuberRequest {
+	id: string;
+	isActive: boolean;
+}
+
+export interface ReferralCodeSummary {
+	id: string;
+	youtuberId: string;
+	youtuberName: string | null;
+	code: string;
+	discountPct: number;
+	commissionPct: number;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface AdminReferralCodesResponse {
+	codes: ReferralCodeSummary[];
+}
+
+export interface CreateReferralCodeRequest {
+	youtuberId: string;
+	code: string;
+	discountPct: number;
+	commissionPct: number;
+}
+
+export interface CommissionSummary {
+	id: string;
+	workshopId: string;
+	youtuberId: string;
+	youtuberName: string | null;
+	referralCodeId: string;
+	code: string | null;
+	subscriptionId: string | null;
+	providerPaymentId: string;
+	paymentAmount: number;
+	commissionPct: number;
+	commissionAmount: number;
+	currency: string;
+	occurredAt: string;
+	workshopName: string | null;
+}
+
+export interface AdminCommissionsResponse {
+	commissions: CommissionSummary[];
+}
+
+export interface AdminCommissionsRequest {
+	youtuberId?: string;
+	fromDate?: string;
+	toDate?: string;
+	limit?: number;
+	format?: "json" | "csv";
+}
+
+export interface ApiSuccessResponse {
+	id: string;
+}
+
+export interface ApiToggleResponse {
+	id: string;
+	isActive: boolean;
+}
