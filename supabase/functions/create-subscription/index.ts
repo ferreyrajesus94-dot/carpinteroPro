@@ -1,6 +1,12 @@
 import { AuthError, getAuthContext, serviceClient } from "../_shared/auth.ts";
 import { createPreapproval, getPreapproval } from "../_shared/mercadopago.ts";
 import { json, preflight, structuredErr } from "../_shared/response.ts";
+import {
+	buildSubscriptionUpsertPayload,
+	computeSubscriptionAmount,
+	shouldComputeReferralDiscount,
+	type ReferralInfo,
+} from "./discount.ts";
 
 declare const Deno: {
 	serve(handler: (req: Request) => Response | Promise<Response>): void;
@@ -56,13 +62,67 @@ Deno.serve(async (req: Request) => {
 			});
 		}
 
-		console.info("creating MercadoPago preapproval", { workshopId, origin });
+		// ── Discount computation from referral attribution ─────────────
+		let transactionAmount = 4990;
+		let firstPeriodDiscountPct: number | null = null;
+		let referredByReferralCodeId: string | null = null;
+
+		// Only compute discount for first preapproval (no prior preapproval)
+		if (
+			shouldComputeReferralDiscount(
+				sub
+					? {
+							providerPreapprovalId: sub.provider_preapproval_id,
+							status: sub.status,
+						}
+					: null,
+			)
+		) {
+			const { data: workshopRef } = await supabase
+				.from("workshop_referrals")
+				.select("referral_code_id, referral_codes!inner(discount_pct, is_active)")
+				.eq("workshop_id", workshopId)
+				.maybeSingle();
+
+			if (workshopRef) {
+				const rc = workshopRef.referral_codes as {
+					discount_pct: number;
+					is_active: boolean;
+				};
+				const referral: ReferralInfo = {
+					discountPct: rc.discount_pct,
+					codeActive: rc.is_active,
+				};
+				const result = computeSubscriptionAmount(4990, referral);
+
+				if (result.discountApplied) {
+					transactionAmount = result.amount;
+					firstPeriodDiscountPct = result.discountPct;
+					referredByReferralCodeId = workshopRef.referral_code_id;
+					console.info("discount applied", {
+						workshopId,
+						discountPct: result.discountPct,
+						amount: result.amount,
+					});
+				} else {
+					console.info("discount_skipped reason=code_inactive", {
+						workshopId,
+					});
+				}
+			}
+		}
+
+		console.info("creating MercadoPago preapproval", {
+			workshopId,
+			origin,
+			transactionAmount,
+		});
 		const mp = await createPreapproval({
 			reason: "CarpinteroPro Pro Mensual",
 			auto_recurring: {
 				frequency: 1,
 				frequency_type: "months",
-				transaction_amount: 4990,
+				transaction_amount: transactionAmount,
 				currency_id: "ARS",
 			},
 			external_reference: sub?.id || workshopId,
@@ -73,14 +133,15 @@ Deno.serve(async (req: Request) => {
 
 		const nextStatus =
 			mp.status === "authorized" ? "active" : sub?.status || "trialing";
-		const payload = {
-			workshop_id: workshopId,
+		const payload = buildSubscriptionUpsertPayload({
+			workshopId,
 			status: nextStatus,
 			plan: sub?.plan || "pro_monthly",
-			provider: "mercadopago",
-			provider_preapproval_id: mp.id,
-			provider_status: mp.status,
-		};
+			providerPreapprovalId: mp.id,
+			providerStatus: mp.status,
+			firstPeriodDiscountPct,
+			referredByReferralCodeId,
+		});
 		const { error: upsertError } = await supabase
 			.from("subscriptions")
 			.upsert(payload, { onConflict: "workshop_id" });

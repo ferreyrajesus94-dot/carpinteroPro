@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, Navigate, Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
 import { checkGoogleEnabled, signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/features/auth/api'
+import { buildSignupMetadata } from '@/features/auth/lib/referralMetadata'
 import { useTheme } from '@/shared/hooks/useTheme'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
@@ -77,6 +78,8 @@ const STRENGTH_TEXT    = ['', 'text-destructive', 'text-orange-500', 'text-yello
 
 export function LoginPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const refCode = searchParams.get('ref')
   const { session, loading } = useAuth()
   const { theme, toggle } = useTheme()
   const [mode, setMode]               = useState<Mode>('login')
@@ -162,11 +165,13 @@ export function LoginPage() {
     setSubmitting(true)
 
     const now = new Date().toISOString()
-    const { error } = await signUpWithEmail(email, password, {
+    const baseMeta = {
       workshop_name: workshopName || 'Mi Taller',
       terms_accepted_at: now,
       privacy_accepted_at: now,
-    })
+    }
+    const metadata = buildSignupMetadata(baseMeta, refCode)
+    const { error } = await signUpWithEmail(email, password, metadata)
 
     if (error) {
       setError(error.message)
