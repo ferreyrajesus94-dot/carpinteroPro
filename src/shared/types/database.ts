@@ -12,6 +12,138 @@ export type Json =
 export type Database = {
 	public: {
 		Tables: {
+			youtubers: {
+				Row: {
+					id: string;
+					display_name: string;
+					channel_url: string | null;
+					contact_email: string | null;
+					payout_method: string | null;
+					is_active: boolean;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					display_name: string;
+					channel_url?: string | null;
+					contact_email?: string | null;
+					payout_method?: string | null;
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					display_name?: string;
+					channel_url?: string | null;
+					contact_email?: string | null;
+					payout_method?: string | null;
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			referral_codes: {
+				Row: {
+					id: string;
+					youtuber_id: string;
+					code: string;
+					discount_pct: number;
+					commission_pct: number;
+					is_active: boolean;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					youtuber_id: string;
+					code: string;
+					discount_pct: number;
+					commission_pct: number;
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					youtuber_id?: string;
+					code?: string;
+					discount_pct?: number;
+					commission_pct?: number;
+					is_active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			workshop_referrals: {
+				Row: {
+					workshop_id: string;
+					referral_code_id: string;
+					youtuber_id: string;
+					attributed_at: string;
+				};
+				Insert: {
+					workshop_id: string;
+					referral_code_id: string;
+					youtuber_id: string;
+					attributed_at?: string;
+				};
+				Update: {
+					workshop_id?: string;
+					referral_code_id?: string;
+					youtuber_id?: string;
+					attributed_at?: string;
+				};
+				Relationships: [];
+			};
+			referral_commissions: {
+				Row: {
+					id: string;
+					workshop_id: string;
+					youtuber_id: string;
+					referral_code_id: string;
+					subscription_id: string | null;
+					provider_payment_id: string;
+					payment_amount: number;
+					commission_pct: number;
+					commission_amount: number;
+					currency: string;
+					occurred_at: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					workshop_id: string;
+					youtuber_id: string;
+					referral_code_id: string;
+					subscription_id?: string | null;
+					provider_payment_id: string;
+					payment_amount: number;
+					commission_pct: number;
+					commission_amount: number;
+					currency?: string;
+					occurred_at: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					workshop_id?: string;
+					youtuber_id?: string;
+					referral_code_id?: string;
+					subscription_id?: string | null;
+					provider_payment_id?: string;
+					payment_amount?: number;
+					commission_pct?: number;
+					commission_amount?: number;
+					currency?: string;
+					occurred_at?: string;
+					created_at?: string;
+				};
+				Relationships: [];
+			};
 			workshops: {
 				Row: {
 					id: string;
@@ -89,6 +221,8 @@ export type Database = {
 					provider_status: string | null;
 					cancel_at_period_end: boolean;
 					cancelled_at: string | null;
+					first_period_discount_pct: number | null;
+					referred_by_referral_code_id: string | null;
 					created_at: string;
 					updated_at: string;
 				};
@@ -107,6 +241,8 @@ export type Database = {
 					provider_status?: string | null;
 					cancel_at_period_end?: boolean;
 					cancelled_at?: string | null;
+					first_period_discount_pct?: number | null;
+					referred_by_referral_code_id?: string | null;
 					created_at?: string;
 					updated_at?: string;
 				};
@@ -125,6 +261,8 @@ export type Database = {
 					provider_status?: string | null;
 					cancel_at_period_end?: boolean;
 					cancelled_at?: string | null;
+					first_period_discount_pct?: number | null;
+					referred_by_referral_code_id?: string | null;
 					created_at?: string;
 					updated_at?: string;
 				};
