@@ -11,6 +11,9 @@ import { BILLING_PRICE } from "@/shared/constants/billingPricing";
 const CANCEL_CONFIRM_MESSAGE =
 	"¿Querés cancelar la suscripción? Mantendrás el acceso hasta el fin del período si MercadoPago permite la cancelación diferida.";
 
+// Covers the trial period, MercadoPago processing delays, and calendar month variance.
+export const FIRST_PERIOD_BUFFER_DAYS = 45;
+
 interface BillingSettingsCardProps {
 	subscription: SubscriptionRow | null;
 	isLoading?: boolean;
@@ -36,6 +39,34 @@ function getErrorMessage(error: unknown): string | null {
 		: "No pudimos completar la acción. Intentá nuevamente.";
 }
 
+function isFirstPeriod(subscription: SubscriptionRow): boolean {
+	if (!subscription.current_period_starts_at) return true;
+	const periodStart = new Date(subscription.current_period_starts_at).getTime();
+	const created = new Date(subscription.created_at).getTime();
+	return periodStart - created < FIRST_PERIOD_BUFFER_DAYS * 24 * 60 * 60 * 1000;
+}
+
+function getDiscountLine(subscription: SubscriptionRow): string | null {
+	if (
+		subscription.first_period_discount_pct != null &&
+		isFirstPeriod(subscription)
+	) {
+		return `Descuento aplicado: ${subscription.first_period_discount_pct}% durante el primer período.`;
+	}
+	return null;
+}
+
+function appendDiscount(
+	details: string[],
+	subscription: SubscriptionRow,
+): string[] {
+	const line = getDiscountLine(subscription);
+	if (line) {
+		return [...details, line];
+	}
+	return details;
+}
+
 function getContent(subscription: SubscriptionRow | null, isLoading: boolean) {
 	if (isLoading)
 		return {
@@ -57,10 +88,13 @@ function getContent(subscription: SubscriptionRow | null, isLoading: boolean) {
 			title: "Cancelación programada",
 			description:
 				"Tu suscripción seguirá activa hasta el final del período ya abonado.",
-			details: [
+		details: appendDiscount(
+			[
 				`Acceso disponible hasta el ${formatDate(subscription.current_period_ends_at)}`,
 				`Plan actual: ${BILLING_PRICE.label}`,
 			],
+			subscription,
+		),
 			action: null,
 		};
 	if (subscription.status === "trialing")
@@ -68,10 +102,13 @@ function getContent(subscription: SubscriptionRow | null, isLoading: boolean) {
 			title: "Período de prueba",
 			description:
 				"Activá la suscripción antes del vencimiento para evitar el bloqueo automático.",
-			details: [
-				`Finaliza el ${formatDate(subscription.trial_ends_at)}`,
-				`Precio luego de la prueba: ${BILLING_PRICE.label}`,
-			],
+			details: appendDiscount(
+				[
+					`Finaliza el ${formatDate(subscription.trial_ends_at)}`,
+					`Precio luego de la prueba: ${BILLING_PRICE.label}`,
+				],
+				subscription,
+			),
 			action: "pay" as const,
 			label: "Empezar suscripción",
 		};
@@ -79,10 +116,13 @@ function getContent(subscription: SubscriptionRow | null, isLoading: boolean) {
 		return {
 			title: "Suscripción activa",
 			description: "Tu taller tiene acceso completo a CarpinteroPro.",
-			details: [
-				`Período actual: ${formatDate(subscription.current_period_starts_at)} al ${formatDate(subscription.current_period_ends_at)}`,
-				`Próximo cargo: ${BILLING_PRICE.label}`,
-			],
+			details: appendDiscount(
+				[
+					`Período actual: ${formatDate(subscription.current_period_starts_at)} al ${formatDate(subscription.current_period_ends_at)}`,
+					`Próximo cargo: ${BILLING_PRICE.label}`,
+				],
+				subscription,
+			),
 			action: "cancel" as const,
 			label: "Cancelar",
 		};
@@ -93,7 +133,10 @@ function getContent(subscription: SubscriptionRow | null, isLoading: boolean) {
 		description: needsUpdate
 			? "Actualizá el medio de pago para restaurar el acceso completo al taller."
 			: "El acceso completo está suspendido hasta que actives una nueva suscripción.",
-		details: [`Importe mensual: ${BILLING_PRICE.label}`],
+		details: appendDiscount(
+			[`Importe mensual: ${BILLING_PRICE.label}`],
+			subscription,
+		),
 		action: "pay" as const,
 		label: needsUpdate ? "Actualizar pago" : "Suscribirse",
 	};

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { BillingSettingsCard } from "./BillingSettingsCard";
+import { BillingSettingsCard, FIRST_PERIOD_BUFFER_DAYS } from "./BillingSettingsCard";
 import type { SubscriptionRow } from "@/features/billing/types";
 
 const createMutateAsync = vi.fn();
@@ -36,6 +36,8 @@ function makeSub(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
 		provider_subscription_id: null,
 		provider_preapproval_id: null,
 		provider_status: null,
+		first_period_discount_pct: null,
+		referred_by_referral_code_id: null,
 		cancel_at_period_end: false,
 		cancelled_at: null,
 		created_at: "2026-01-01T00:00:00Z",
@@ -61,6 +63,10 @@ beforeEach(() => {
 });
 
 describe("BillingSettingsCard", () => {
+	it("documents the first-period discount buffer as a named constant", () => {
+		expect(FIRST_PERIOD_BUFFER_DAYS).toBe(45);
+	});
+
 	it("shows trial, active, blocked, and scheduled-cancel states", () => {
 		const { rerender } = render(
 			<BillingSettingsCard subscription={makeSub()} />,
@@ -155,5 +161,67 @@ describe("BillingSettingsCard", () => {
 		expect(
 			await screen.findByText("MercadoPago no disponible"),
 		).toBeInTheDocument();
+	});
+
+	it("shows discount message during first period (trialing)", () => {
+		const sub = makeSub({
+			first_period_discount_pct: 20,
+			status: "trialing",
+			created_at: "2026-01-01T00:00:00Z",
+			trial_starts_at: "2026-01-01T00:00:00Z",
+			trial_ends_at: "2026-01-15T00:00:00Z",
+		});
+		render(<BillingSettingsCard subscription={sub} />);
+
+		// Discount message should appear
+		expect(
+			screen.getByText(/Descuento aplicado.*?20%.*?primer período/i),
+		).toBeInTheDocument();
+	});
+
+	it("shows discount message during first period (active)", () => {
+		const sub = makeSub({
+			first_period_discount_pct: 20,
+			status: "active",
+			created_at: "2026-01-01T00:00:00Z",
+			current_period_starts_at: "2026-01-01T00:00:00Z",
+			current_period_ends_at: "2026-02-01T00:00:00Z",
+		});
+		render(<BillingSettingsCard subscription={sub} />);
+
+		expect(
+			screen.getByText(/Descuento aplicado.*?20%.*?primer período/i),
+		).toBeInTheDocument();
+	});
+
+	it("hides discount message when first period has ended", () => {
+		// current_period_starts_at is 60 days after created_at = second period
+		const sub = makeSub({
+			first_period_discount_pct: 20,
+			status: "active",
+			created_at: "2026-01-01T00:00:00Z",
+			current_period_starts_at: "2026-03-02T00:00:00Z",
+			current_period_ends_at: "2026-04-01T00:00:00Z",
+		});
+		render(<BillingSettingsCard subscription={sub} />);
+
+		expect(
+			screen.queryByText(/Descuento aplicado.*?primer período/i),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not show discount message when first_period_discount_pct is null", () => {
+		const sub = makeSub({
+			first_period_discount_pct: null,
+			status: "active",
+			created_at: "2026-01-01T00:00:00Z",
+			current_period_starts_at: "2026-01-01T00:00:00Z",
+			current_period_ends_at: "2026-02-01T00:00:00Z",
+		});
+		render(<BillingSettingsCard subscription={sub} />);
+
+		expect(
+			screen.queryByText(/Descuento aplicado/i),
+		).not.toBeInTheDocument();
 	});
 });

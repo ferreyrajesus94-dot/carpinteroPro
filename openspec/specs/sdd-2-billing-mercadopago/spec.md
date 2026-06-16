@@ -121,6 +121,9 @@ Enable workshops to start recurring monthly payments through MercadoPago without
 ### Requirement: Server-Side Subscription Creation
 The system MUST create MercadoPago subscription or preapproval objects exclusively from a Supabase Edge Function using backend credentials.
 
+The system MUST read the active `workshop_referrals` row for the calling workshop, look up the `referral_codes.discount_pct` and `is_active`, and apply a first-period discount to `auto_recurring.transaction_amount` ONLY when (a) attribution exists, (b) the code is active, and (c) the workshop has no prior `provider_preapproval_id`. The discounted amount MUST be `round(4990 * (1 - discount_pct / 100), 2)`.
+(Previously: Always created preapproval with `transaction_amount: 4990`.)
+
 #### Scenario: Authenticated user initiates payment
 - GIVEN an authenticated user with a workshop that is in trial or unpaid
 - WHEN the user requests to start a subscription
@@ -128,6 +131,19 @@ The system MUST create MercadoPago subscription or preapproval objects exclusive
 - AND the Edge Function MUST derive the `workshop_id` from the authenticated JWT, not from client payload
 - AND the Edge Function MUST call the MercadoPago API with the backend access token
 - AND the Edge Function MUST create a provider-side recurring preapproval or subscription for ARS 4,990 monthly
+
+#### Scenario: Referred workshop first preapproval is discounted
+- GIVEN a workshop with an active `workshop_referrals` row to a code with `discount_pct = 20`
+- AND the workshop has no `provider_preapproval_id`
+- WHEN the Edge Function calls `createPreapproval`
+- THEN the `auto_recurring.transaction_amount` MUST be `3992` (round(4990 * 0.80, 2))
+- AND the `subscriptions` row MUST be upserted with `first_period_discount_pct = 20.00` and `referred_by_referral_code_id` set
+
+#### Scenario: Inactive referral code is ignored at subscription time
+- GIVEN the linked `referral_codes.is_active = false`
+- WHEN the Edge Function runs
+- THEN the full price `4990` MUST be used
+- AND a log line `discount_skipped reason=code_inactive` MUST be written
 
 ### Requirement: No Secret Exposure
 The system MUST NOT embed or expose the MercadoPago access token, webhook secrets, or Supabase service role key in frontend code or environment variables accessible to the browser.
@@ -140,12 +156,25 @@ The system MUST NOT embed or expose the MercadoPago access token, webhook secret
 ### Requirement: Subscription Record Linkage
 After a successful provider-side creation, the Edge Function MUST persist the provider identifiers in the workshop’s subscription row.
 
+The Edge Function MUST additionally persist `first_period_discount_pct numeric(5,2) NULL` and `referred_by_referral_code_id uuid NULL` on the upserted `subscriptions` row when the preapproval is the first one for the workshop.
+
 #### Scenario: Link provider preapproval
 - GIVEN the Edge Function successfully creates a MercadoPago preapproval
 - WHEN the function persists state
 - THEN the corresponding `subscriptions` row MUST have `provider_preapproval_id` populated
 - AND `status` MUST transition to `active` (or remain `trialing` if still within trial and payment method is captured early)
 - AND `current_period_starts_at` and `current_period_ends_at` MUST reflect the provider’s billing period
+
+#### Scenario: Discount columns populated on first preapproval
+- GIVEN a referred workshop with `discount_pct = 20` and a fresh preapproval
+- WHEN the subscription is upserted
+- THEN `first_period_discount_pct` MUST equal `20.00`
+- AND `referred_by_referral_code_id` MUST equal the code's id
+
+#### Scenario: Discount columns null on subsequent calls
+- GIVEN the workshop already has a `provider_preapproval_id` and the function returns the existing checkout URL
+- WHEN the response is sent
+- THEN `first_period_discount_pct` MUST remain unchanged (not overwritten)
 
 ---
 
@@ -195,11 +224,32 @@ The system MUST handle duplicate webhook events without corrupting subscription 
 ### Requirement: State Reconciliation
 The system MUST map incoming events to the correct workshop and update the subscription record accurately.
 
+The system MUST, in addition to existing subscription updates, INSERT into `referral_commissions` whenever the `authorized_payment` branch processes an `approved` payment for a referred workshop. The insert MUST be idempotent (unique `provider_payment_id`).
+
 #### Scenario: Payment success activates subscription
 - GIVEN a `preapproval.updated` or `payment` event indicating a successful recurring charge
 - WHEN the event is processed
 - THEN the matching subscription (by `provider_preapproval_id`) MUST have `status` set to `active`
 - AND `current_period_starts_at` / `current_period_ends_at` MUST be updated to match the provider period
+
+#### Scenario: Authorized payment records commission
+- GIVEN an `authorized_payment` event with `status = approved` for a referred workshop
+- AND the code’s `commission_pct = 15`
+- WHEN the webhook runs
+- THEN a `referral_commissions` row MUST be inserted with `payment_amount`, `commission_pct = 15.00`, and `commission_amount = round(payment_amount * 0.15, 2)`
+- AND the response MUST be HTTP 200
+
+#### Scenario: Duplicate authorized payment is ignored
+- GIVEN a commission row already exists for the same `provider_payment_id`
+- WHEN the webhook is redelivered
+- THEN the insert MUST fail with `23505`
+- AND the webhook MUST return HTTP 200 with log `commission_already_recorded`
+
+#### Scenario: Preapproval branch does not record commission
+- GIVEN a `preapproval.updated` event for a referred workshop
+- WHEN the webhook runs
+- THEN no insert into `referral_commissions` MUST occur
+- AND subscription `status` MUST still be updated per the existing flow
 
 #### Scenario: Payment failure sets past_due
 - GIVEN a provider event indicating a failed charge or expired card
