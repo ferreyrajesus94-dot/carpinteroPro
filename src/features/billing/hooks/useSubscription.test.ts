@@ -35,6 +35,8 @@ const MOCK_SUB: SubscriptionRow = {
 	provider_status: null,
 	cancel_at_period_end: false,
 	cancelled_at: null,
+	first_period_discount_pct: null,
+	referred_by_referral_code_id: null,
 	created_at: "2026-01-01T00:00:00Z",
 	updated_at: "2026-01-01T00:00:00Z",
 };
