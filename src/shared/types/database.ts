@@ -12,13 +12,19 @@ export type Json =
 export type Database = {
 	public: {
 		Tables: {
-			youtubers: {
+				youtubers: {
 				Row: {
 					id: string;
 					display_name: string;
 					channel_url: string | null;
 					contact_email: string | null;
 					payout_method: string | null;
+					payout_cbu: string | null;
+					payout_cvu: string | null;
+					payout_alias: string | null;
+					payout_bank_name: string | null;
+					payout_holder_name: string | null;
+					payout_holder_cuit: string | null;
 					is_active: boolean;
 					created_at: string;
 					updated_at: string;
@@ -29,6 +35,12 @@ export type Database = {
 					channel_url?: string | null;
 					contact_email?: string | null;
 					payout_method?: string | null;
+					payout_cbu?: string | null;
+					payout_cvu?: string | null;
+					payout_alias?: string | null;
+					payout_bank_name?: string | null;
+					payout_holder_name?: string | null;
+					payout_holder_cuit?: string | null;
 					is_active?: boolean;
 					created_at?: string;
 					updated_at?: string;
@@ -39,6 +51,12 @@ export type Database = {
 					channel_url?: string | null;
 					contact_email?: string | null;
 					payout_method?: string | null;
+					payout_cbu?: string | null;
+					payout_cvu?: string | null;
+					payout_alias?: string | null;
+					payout_bank_name?: string | null;
+					payout_holder_name?: string | null;
+					payout_holder_cuit?: string | null;
 					is_active?: boolean;
 					created_at?: string;
 					updated_at?: string;
@@ -111,6 +129,10 @@ export type Database = {
 					commission_pct: number;
 					commission_amount: number;
 					currency: string;
+					status: string;
+					paid_at: string | null;
+					payout_reference: string | null;
+					payout_run_id: string | null;
 					occurred_at: string;
 					created_at: string;
 				};
@@ -125,6 +147,10 @@ export type Database = {
 					commission_pct: number;
 					commission_amount: number;
 					currency?: string;
+					status?: string;
+					paid_at?: string | null;
+					payout_reference?: string | null;
+					payout_run_id?: string | null;
 					occurred_at: string;
 					created_at?: string;
 				};
@@ -139,6 +165,10 @@ export type Database = {
 					commission_pct?: number;
 					commission_amount?: number;
 					currency?: string;
+					status?: string;
+					paid_at?: string | null;
+					payout_reference?: string | null;
+					payout_run_id?: string | null;
 					occurred_at?: string;
 					created_at?: string;
 				};
@@ -965,6 +995,44 @@ export type Database = {
 					updated_at?: string;
 				};
 				Relationships: [];
+			};
+			payout_runs: {
+				Row: {
+					id: string;
+					created_by: string;
+					total_amount: number;
+					commission_count: number;
+					reference: string | null;
+					notes: string | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					created_by: string;
+					total_amount: number;
+					commission_count: number;
+					reference?: string | null;
+					notes?: string | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					created_by?: string;
+					total_amount?: number;
+					commission_count?: number;
+					reference?: string | null;
+					notes?: string | null;
+					created_at?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "payout_runs_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "profiles";
+						referencedColumns: ["id"];
+					},
+				];
 			};
 		};
 		Views: {

@@ -1,8 +1,5 @@
-import { useState } from "react";
-import {
-	useAdminCommissions,
-	useAdminYoutubers,
-} from "../hooks/useReferrals";
+import { useState, useMemo } from "react";
+import { useAdminCommissions, useAdminYoutubers } from "../hooks/useReferrals";
 import { exportCommissionsCsv } from "../api/referrals";
 
 function formatARS(amount: number): string {
@@ -40,6 +37,21 @@ function CommissionsSkeleton() {
 	);
 }
 
+const STALE_DAYS_THRESHOLD = 30;
+
+function countStaleCommissions(
+	commissions: Array<{ occurredAt: string; status: string }>,
+): number {
+	const now = new Date();
+	return commissions.filter((c) => {
+		if (c.status !== "pending") return false;
+		const occurred = new Date(c.occurredAt);
+		const diffDays =
+			(now.getTime() - occurred.getTime()) / (1000 * 60 * 60 * 24);
+		return diffDays > STALE_DAYS_THRESHOLD;
+	}).length;
+}
+
 export function CommissionsTab() {
 	const [youtuberFilter, setYoutuberFilter] = useState("");
 	const [fromDate, setFromDate] = useState("");
@@ -54,8 +66,13 @@ export function CommissionsTab() {
 	const commissions = useAdminCommissions(filters);
 	const youtubers = useAdminYoutubers();
 
-	const data = commissions.data?.commissions ?? [];
+	const data = useMemo(
+		() => commissions.data?.commissions ?? [],
+		[commissions.data?.commissions],
+	);
 	const youtuberOptions = youtubers.data?.youtubers ?? [];
+
+	const staleCount = useMemo(() => countStaleCommissions(data), [data]);
 
 	async function handleExportCsv() {
 		try {
@@ -152,6 +169,24 @@ export function CommissionsTab() {
 					Exportar CSV
 				</button>
 			</div>
+
+			{/* Stale commission badge */}
+			{staleCount > 0 && (
+				<div
+					role="alert"
+					aria-label={`${staleCount} comisiones vencidas`}
+					className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800"
+				>
+					<i
+						className="fi fi-rr-exclamation-triangle text-sm leading-none"
+						aria-hidden="true"
+					/>
+					<span className="font-medium">
+						{staleCount} comisión{staleCount !== 1 ? "es" : ""} {">"}30 días
+						pendiente{staleCount !== 1 ? "s" : ""}
+					</span>
+				</div>
+			)}
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">

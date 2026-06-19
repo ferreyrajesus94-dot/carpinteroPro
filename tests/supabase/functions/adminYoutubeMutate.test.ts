@@ -85,6 +85,54 @@ describe('admin-youtube-mutate / validateCreateYoutuber', () => {
     const result = validateCreateYoutuber(input)
     expect(result).toEqual({ ok: true, data: input })
   })
+
+  it('accepts valid bank details on create', () => {
+    const input: YoutuberCreateInput = {
+      displayName: 'Canal Madera',
+      payoutCbu: '1234567890123456789012',
+      payoutAlias: 'mi.alias.mp',
+      payoutHolderCuit: '20-12345678-9',
+    }
+
+    const result = validateCreateYoutuber(input)
+    expect(result).toEqual({ ok: true, data: input })
+  })
+
+  it('rejects invalid CBU on create', () => {
+    const input: YoutuberCreateInput = {
+      displayName: 'Canal Madera',
+      payoutCbu: '123',
+    }
+
+    const result = validateCreateYoutuber(input)
+    expect(result).toEqual({
+      ok: false,
+      error: { code: 'invalid_bank_details', message: 'CBU debe tener 22 dígitos' },
+    })
+  })
+
+  it('rejects invalid CUIT on create', () => {
+    const input: YoutuberCreateInput = {
+      displayName: 'Canal Madera',
+      payoutHolderCuit: 'invalid',
+    }
+
+    const result = validateCreateYoutuber(input)
+    expect(result).toEqual({
+      ok: false,
+      error: { code: 'invalid_bank_details', message: 'CUIT debe tener formato XX-XXXXXXXX-X' },
+    })
+  })
+
+  it('allows partial bank details on create', () => {
+    const input: YoutuberCreateInput = {
+      displayName: 'Canal Madera',
+      payoutAlias: 'otro.alias.mp',
+    }
+
+    const result = validateCreateYoutuber(input)
+    expect(result).toEqual({ ok: true, data: input })
+  })
 })
 
 describe('admin-youtube-mutate / validateUpdateYoutuber', () => {
@@ -107,7 +155,35 @@ describe('admin-youtube-mutate / validateUpdateYoutuber', () => {
       error: { code: 'validation_error', message: 'id is required for update' },
     })
   })
+
+  it('accepts bank details on update', () => {
+    const result = validateUpdateYoutuber('yt-1', {
+      payoutCbu: '1234567890123456789012',
+      payoutCvu: '12345678901234567890123',
+    })
+
+    expect(result).toEqual({
+      ok: true,
+      data: {
+        id: 'yt-1',
+        payoutCbu: '1234567890123456789012',
+        payoutCvu: '12345678901234567890123',
+      },
+    })
+  })
+
+  it('rejects invalid CVU on update', () => {
+    const result = validateUpdateYoutuber('yt-1', {
+      payoutCvu: 'abc',
+    })
+
+    expect(result).toEqual({
+      ok: false,
+      error: { code: 'invalid_bank_details', message: 'CVU debe tener 23 dígitos' },
+    })
+  })
 })
+
 
 describe('admin-youtube-mutate / validateToggleYoutuber', () => {
   it('accepts valid toggle input', () => {

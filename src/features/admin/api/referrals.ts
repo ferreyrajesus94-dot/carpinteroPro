@@ -132,3 +132,123 @@ export async function exportCommissionsCsv(
 	if (error) throw error;
 	return data as string;
 }
+
+/**
+ * Fetches pending commissions grouped by YouTuber.
+ */
+export async function getPayoutPending(
+	params?: { fromDate?: string; toDate?: string },
+): Promise<{ youtubers: Array<{
+	youtuberId: string;
+	displayName: string;
+	totalPendingAmount: number;
+	commissionCount: number;
+	commissions: Array<{
+		id: string;
+		commissionAmount: number;
+		occurredAt: string;
+		workshopName: string | null;
+	}>;
+}> }> {
+	const { data, error } = await supabase.functions.invoke(
+		"admin-referral-payouts",
+		{
+			body: { action: "pending-by-youtuber", ...params },
+		},
+	);
+	if (error) throw error;
+	return data as {
+		youtubers: Array<{
+			youtuberId: string;
+			displayName: string;
+			totalPendingAmount: number;
+			commissionCount: number;
+			commissions: Array<{
+				id: string;
+				commissionAmount: number;
+				occurredAt: string;
+				workshopName: string | null;
+			}>;
+		}>;
+	};
+}
+
+/**
+ * Marks commissions as paid (single or bulk).
+ */
+export async function markCommissionsPaid(
+	input: { commissionIds: string[]; payoutReference: string; notes?: string },
+): Promise<{
+	payoutRun: {
+		id: string;
+		totalAmount: number;
+		commissionCount: number;
+		reference: string | null;
+		createdAt: string;
+	};
+}> {
+	const { data, error } = await supabase.functions.invoke(
+		"admin-referral-payouts",
+		{
+			body: { action: "mark-paid", ...input },
+		},
+	);
+	if (error) throw error;
+	return data as {
+		payoutRun: {
+			id: string;
+			totalAmount: number;
+			commissionCount: number;
+			reference: string | null;
+			createdAt: string;
+		};
+	};
+}
+
+/**
+ * Fetches payout history with nested commission details.
+ */
+export async function getPayoutHistory(
+	params?: { limit?: number },
+): Promise<{
+	payoutRuns: Array<{
+		id: string;
+		createdAt: string;
+		totalAmount: number;
+		commissionCount: number;
+		reference: string | null;
+		notes: string | null;
+		createdBy: string | null;
+		commissions: Array<{
+			id: string;
+			commissionAmount: number;
+			youtuberName: string | null;
+			workshopName: string | null;
+		}>;
+	}>;
+}> {
+	const { data, error } = await supabase.functions.invoke(
+		"admin-referral-payouts",
+		{
+			body: { action: "payout-history", ...params },
+		},
+	);
+	if (error) throw error;
+	return data as {
+		payoutRuns: Array<{
+			id: string;
+			createdAt: string;
+			totalAmount: number;
+			commissionCount: number;
+			reference: string | null;
+			notes: string | null;
+			createdBy: string | null;
+			commissions: Array<{
+				id: string;
+				commissionAmount: number;
+				youtuberName: string | null;
+				workshopName: string | null;
+			}>;
+		}>;
+	};
+}
