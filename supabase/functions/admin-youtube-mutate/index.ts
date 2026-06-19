@@ -19,6 +19,13 @@ interface MutateRequest {
   contactEmail?: string;
   payoutMethod?: string;
   isActive?: boolean;
+  // Bank detail fields
+  payoutCbu?: string;
+  payoutCvu?: string;
+  payoutAlias?: string;
+  payoutBankName?: string;
+  payoutHolderName?: string;
+  payoutHolderCuit?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -49,6 +56,12 @@ Deno.serve(async (req: Request) => {
           channelUrl: body.channelUrl,
           contactEmail: body.contactEmail,
           payoutMethod: body.payoutMethod,
+          payoutCbu: body.payoutCbu,
+          payoutCvu: body.payoutCvu,
+          payoutAlias: body.payoutAlias,
+          payoutBankName: body.payoutBankName,
+          payoutHolderName: body.payoutHolderName,
+          payoutHolderCuit: body.payoutHolderCuit,
         });
         if (!validation.ok) {
           return json(validation.error, 400);
@@ -61,6 +74,12 @@ Deno.serve(async (req: Request) => {
             channel_url: validation.data.channelUrl || null,
             contact_email: validation.data.contactEmail || null,
             payout_method: validation.data.payoutMethod || null,
+            payout_cbu: validation.data.payoutCbu || null,
+            payout_cvu: validation.data.payoutCvu || null,
+            payout_alias: validation.data.payoutAlias || null,
+            payout_bank_name: validation.data.payoutBankName || null,
+            payout_holder_name: validation.data.payoutHolderName || null,
+            payout_holder_cuit: validation.data.payoutHolderCuit || null,
             is_active: true,
           })
           .select("id")
@@ -80,6 +99,12 @@ Deno.serve(async (req: Request) => {
           channelUrl: body.channelUrl,
           contactEmail: body.contactEmail,
           payoutMethod: body.payoutMethod,
+          payoutCbu: body.payoutCbu,
+          payoutCvu: body.payoutCvu,
+          payoutAlias: body.payoutAlias,
+          payoutBankName: body.payoutBankName,
+          payoutHolderName: body.payoutHolderName,
+          payoutHolderCuit: body.payoutHolderCuit,
         });
         if (!validation.ok) {
           return json(validation.error, 400);
@@ -97,6 +122,25 @@ Deno.serve(async (req: Request) => {
         }
         if (validation.data.payoutMethod !== undefined) {
           updateData.payout_method = validation.data.payoutMethod || null;
+        }
+        // Bank detail fields
+        if (validation.data.payoutCbu !== undefined) {
+          updateData.payout_cbu = validation.data.payoutCbu || null;
+        }
+        if (validation.data.payoutCvu !== undefined) {
+          updateData.payout_cvu = validation.data.payoutCvu || null;
+        }
+        if (validation.data.payoutAlias !== undefined) {
+          updateData.payout_alias = validation.data.payoutAlias || null;
+        }
+        if (validation.data.payoutBankName !== undefined) {
+          updateData.payout_bank_name = validation.data.payoutBankName || null;
+        }
+        if (validation.data.payoutHolderName !== undefined) {
+          updateData.payout_holder_name = validation.data.payoutHolderName || null;
+        }
+        if (validation.data.payoutHolderCuit !== undefined) {
+          updateData.payout_holder_cuit = validation.data.payoutHolderCuit || null;
         }
 
         const { error } = await serviceClient()

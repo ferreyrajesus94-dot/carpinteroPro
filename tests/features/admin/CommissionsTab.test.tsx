@@ -6,185 +6,279 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CommissionsTab } from "../../../src/features/admin/components/CommissionsTab";
 
 vi.mock("@/shared/providers/AuthProvider", () => ({
-  useAuth: () => ({ isPlatformAdmin: true }),
+	useAuth: () => ({ isPlatformAdmin: true }),
 }));
 
 vi.mock("@/shared/lib/supabase", () => ({
-  supabase: {
-    functions: {
-      invoke: vi.fn(),
-    },
-  },
+	supabase: {
+		functions: {
+			invoke: vi.fn(),
+		},
+	},
 }));
 
 vi.mock("@/features/admin/api/referrals", () => ({
-  fetchAdminCommissions: vi.fn(),
-  exportCommissionsCsv: vi.fn(),
+	fetchAdminCommissions: vi.fn(),
+	exportCommissionsCsv: vi.fn(),
 }));
 
 import * as referralsApi from "@/features/admin/api/referrals";
 
 function renderWithQuery(ui: ReactNode) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    createElement(
-      QueryClientProvider,
-      { client },
-      createElement(MemoryRouter, null, ui),
-    ),
-  );
+	const client = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
+	return render(
+		createElement(
+			QueryClientProvider,
+			{ client },
+			createElement(MemoryRouter, null, ui),
+		),
+	);
 }
 
 const MOCK_COMMISSIONS = {
-  commissions: [
-    {
-      id: "c1",
-      workshopId: "ws-1",
-      youtuberId: "yt-1",
-      youtuberName: "Canal Madera",
-      referralCodeId: "rc-1",
-      code: "PROMO20",
-      subscriptionId: "sub-1",
-      providerPaymentId: "mp_pay_1",
-      paymentAmount: 4990,
-      commissionPct: 15,
-      commissionAmount: 748.5,
-      currency: "ARS",
-      occurredAt: "2026-01-15T10:00:00Z",
-      workshopName: "Taller del Este",
-    },
-    {
-      id: "c2",
-      workshopId: "ws-2",
-      youtuberId: "yt-1",
-      youtuberName: "Canal Madera",
-      referralCodeId: "rc-1",
-      code: "PROMO20",
-      subscriptionId: "sub-2",
-      providerPaymentId: "mp_pay_2",
-      paymentAmount: 3992,
-      commissionPct: 15,
-      commissionAmount: 598.8,
-      currency: "ARS",
-      occurredAt: "2026-02-15T10:00:00Z",
-      workshopName: "Taller del Oeste",
-    },
-    {
-      id: "c3",
-      workshopId: "ws-3",
-      youtuberId: "yt-2",
-      youtuberName: "El Taller Carpintero",
-      referralCodeId: "rc-2",
-      code: "MADERA10",
-      subscriptionId: "sub-3",
-      providerPaymentId: "mp_pay_3",
-      paymentAmount: 4990,
-      commissionPct: 10,
-      commissionAmount: 499,
-      currency: "ARS",
-      occurredAt: "2026-03-01T00:00:00Z",
-      workshopName: "Mueblería Norte",
-    },
-  ],
+	commissions: [
+		{
+			id: "c1",
+			workshopId: "ws-1",
+			youtuberId: "yt-1",
+			youtuberName: "Canal Madera",
+			referralCodeId: "rc-1",
+			code: "PROMO20",
+			subscriptionId: "sub-1",
+			providerPaymentId: "mp_pay_1",
+			paymentAmount: 4990,
+			commissionPct: 15,
+			commissionAmount: 748.5,
+			currency: "ARS",
+			status: "pending",
+			occurredAt: "2026-01-15T10:00:00Z",
+			workshopName: "Taller del Este",
+		},
+		{
+			id: "c2",
+			workshopId: "ws-2",
+			youtuberId: "yt-1",
+			youtuberName: "Canal Madera",
+			referralCodeId: "rc-1",
+			code: "PROMO20",
+			subscriptionId: "sub-2",
+			providerPaymentId: "mp_pay_2",
+			paymentAmount: 3992,
+			commissionPct: 15,
+			commissionAmount: 598.8,
+			currency: "ARS",
+			status: "pending",
+			occurredAt: "2026-02-15T10:00:00Z",
+			workshopName: "Taller del Oeste",
+		},
+		{
+			id: "c3",
+			workshopId: "ws-3",
+			youtuberId: "yt-2",
+			youtuberName: "El Taller Carpintero",
+			referralCodeId: "rc-2",
+			code: "MADERA10",
+			subscriptionId: "sub-3",
+			providerPaymentId: "mp_pay_3",
+			paymentAmount: 4990,
+			commissionPct: 10,
+			commissionAmount: 499,
+			currency: "ARS",
+			status: "pending",
+			occurredAt: "2026-03-01T00:00:00Z",
+			workshopName: "Mueblería Norte",
+		},
+	],
 };
 
 describe("CommissionsTab", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(referralsApi.fetchAdminCommissions).mockResolvedValue(MOCK_COMMISSIONS);
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.mocked(referralsApi.fetchAdminCommissions).mockResolvedValue(
+			MOCK_COMMISSIONS,
+		);
+	});
 
-  it("renders a loading skeleton while data loads", () => {
-    vi.mocked(referralsApi.fetchAdminCommissions).mockImplementation(
-      () => new Promise(() => {}),
-    );
+	it("renders a loading skeleton while data loads", () => {
+		vi.mocked(referralsApi.fetchAdminCommissions).mockImplementation(
+			() => new Promise(() => {}),
+		);
 
-    renderWithQuery(<CommissionsTab />);
+		renderWithQuery(<CommissionsTab />);
 
-    expect(
-      screen.getByRole("status", { name: "Cargando comisiones" }),
-    ).toBeInTheDocument();
-  });
+		expect(
+			screen.getByRole("status", { name: "Cargando comisiones" }),
+		).toBeInTheDocument();
+	});
 
-  it("renders commission rows with youtuber name, code, workshop, amounts", async () => {
-    renderWithQuery(<CommissionsTab />);
+	it("renders commission rows with youtuber name, code, workshop, amounts", async () => {
+		renderWithQuery(<CommissionsTab />);
 
-    const canalMadera = await screen.findAllByText("Canal Madera");
-    expect(canalMadera.length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText("Taller del Este")).toBeInTheDocument();
-    const promoElements = screen.getAllByText("PROMO20");
-    expect(promoElements.length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText("El Taller Carpintero")).toBeInTheDocument();
-    expect(screen.getByText("MADERA10")).toBeInTheDocument();
-    expect(screen.getByText("Mueblería Norte")).toBeInTheDocument();
-  });
+		const canalMadera = await screen.findAllByText("Canal Madera");
+		expect(canalMadera.length).toBeGreaterThanOrEqual(2);
+		expect(screen.getByText("Taller del Este")).toBeInTheDocument();
+		const promoElements = screen.getAllByText("PROMO20");
+		expect(promoElements.length).toBeGreaterThanOrEqual(2);
+		expect(screen.getByText("El Taller Carpintero")).toBeInTheDocument();
+		expect(screen.getByText("MADERA10")).toBeInTheDocument();
+		expect(screen.getByText("Mueblería Norte")).toBeInTheDocument();
+	});
 
-  it("renders formatted payment and commission amounts", async () => {
-    renderWithQuery(<CommissionsTab />);
+	it("renders formatted payment and commission amounts", async () => {
+		renderWithQuery(<CommissionsTab />);
 
-    await screen.findByText("Taller del Este");
+		await screen.findByText("Taller del Este");
 
-    // ARS formatted amounts
-    const amounts = screen.getAllByText(/\$\s*4\.990,00/);
-    expect(amounts.length).toBeGreaterThanOrEqual(2); // c1 and c3 both have 4990
-    expect(screen.getByText(/\$\s*3\.992,00/)).toBeInTheDocument();
-    expect(screen.getByText(/\$\s*748,50/)).toBeInTheDocument();
-    expect(screen.getByText(/\$\s*598,80/)).toBeInTheDocument();
-  });
+		// ARS formatted amounts
+		const amounts = screen.getAllByText(/\$\s*4\.990,00/);
+		expect(amounts.length).toBeGreaterThanOrEqual(2); // c1 and c3 both have 4990
+		expect(screen.getByText(/\$\s*3\.992,00/)).toBeInTheDocument();
+		expect(screen.getByText(/\$\s*748,50/)).toBeInTheDocument();
+		expect(screen.getByText(/\$\s*598,80/)).toBeInTheDocument();
+	});
 
-  it('renders Exportar CSV button', async () => {
-    renderWithQuery(<CommissionsTab />);
+	it("renders Exportar CSV button", async () => {
+		renderWithQuery(<CommissionsTab />);
 
-    await screen.findByText("Taller del Este");
+		await screen.findByText("Taller del Este");
 
-    expect(
-      screen.getByRole("button", { name: /Exportar CSV/i }),
-    ).toBeInTheDocument();
-  });
+		expect(
+			screen.getByRole("button", { name: /Exportar CSV/i }),
+		).toBeInTheDocument();
+	});
 
-  it('shows YouTuber filter select', async () => {
-    renderWithQuery(<CommissionsTab />);
+	it("shows YouTuber filter select", async () => {
+		renderWithQuery(<CommissionsTab />);
 
-    await screen.findByText("Todos los youtubers");
+		await screen.findByText("Todos los youtubers");
 
-    expect(
-      screen.getByRole("combobox", { name: /Filtrar por youtuber/i }),
-    ).toBeInTheDocument();
-  });
+		expect(
+			screen.getByRole("combobox", { name: /Filtrar por youtuber/i }),
+		).toBeInTheDocument();
+	});
 
-  it("renders empty state when no commissions exist", async () => {
-    vi.mocked(referralsApi.fetchAdminCommissions).mockResolvedValue({
-      commissions: [],
-    });
+	// SDD-12: Stale badge
+	it("shows stale badge when commissions are older than 30 days", async () => {
+		// All mock commissions have occurredAt >30 days ago (Jan/Feb/Mar 2026, now is June 2026)
+		renderWithQuery(<CommissionsTab />);
 
-    renderWithQuery(<CommissionsTab />);
+		await screen.findByText("Taller del Este");
 
-    await screen.findByText("No se encontraron comisiones");
-  });
+		// Stale badge should appear
+		expect(
+			screen.getByRole("alert", { name: /comisiones vencidas/i }),
+		).toBeInTheDocument();
+		expect(screen.getByText(/30 días pendiente/i)).toBeInTheDocument();
+	});
 
-  it("renders error state when API fails", async () => {
-    vi.mocked(referralsApi.fetchAdminCommissions).mockRejectedValue(
-      new Error("Failed to load"),
-    );
+	it("shows correct count in stale badge", async () => {
+		renderWithQuery(<CommissionsTab />);
 
-    renderWithQuery(<CommissionsTab />);
+		// The badge should say "3 comisiones >30 días pendientes"
+		const badge = await screen.findByRole("alert", { name: /3 comisiones/i });
+		expect(badge).toBeInTheDocument();
+	});
 
-    await screen.findByRole("alert", { name: "Error al cargar comisiones" });
-    expect(
-      screen.getByText(/No se pudieron cargar las comisiones/),
-    ).toBeInTheDocument();
-  });
+	it("hides stale badge when all commissions are recent", async () => {
+		vi.mocked(referralsApi.fetchAdminCommissions).mockResolvedValue({
+			commissions: [
+				{
+					id: "c4",
+					workshopId: "ws-4",
+					youtuberId: "yt-3",
+					youtuberName: "Canal Reciente",
+					referralCodeId: "rc-3",
+					code: "NUEVO10",
+					subscriptionId: "sub-4",
+					providerPaymentId: "mp_pay_4",
+					paymentAmount: 4990,
+					commissionPct: 10,
+					commissionAmount: 499,
+					currency: "ARS",
+					status: "pending",
+					occurredAt: new Date().toISOString(), // today
+					workshopName: "Taller Nuevo",
+				},
+			],
+		});
 
-  it("renders filter select with option to select a youtuber", async () => {
-    renderWithQuery(<CommissionsTab />);
+		renderWithQuery(<CommissionsTab />);
 
-    await screen.findByText("Taller del Este");
+		await screen.findByText("Taller Nuevo");
 
-    // Filter select should be present
-    const select = screen.getByRole("combobox", { name: /Filtrar por youtuber/i });
-    expect(select).toBeInTheDocument();
-    expect(select).toHaveValue("");
-  });
+		// No stale badge should be present
+		expect(
+			screen.queryByRole("alert", { name: /comisiones vencidas/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("does not count paid old commissions as stale", async () => {
+		vi.mocked(referralsApi.fetchAdminCommissions).mockResolvedValue({
+			commissions: [
+				{
+					id: "c5",
+					workshopId: "ws-5",
+					youtuberId: "yt-3",
+					youtuberName: "Canal Pagado",
+					referralCodeId: "rc-3",
+					code: "PAGO10",
+					subscriptionId: "sub-5",
+					providerPaymentId: "mp_pay_5",
+					paymentAmount: 4990,
+					commissionPct: 10,
+					commissionAmount: 499,
+					currency: "ARS",
+					status: "paid",
+					occurredAt: "2026-01-01T00:00:00Z",
+					workshopName: "Taller Pagado",
+				},
+			],
+		});
+
+		renderWithQuery(<CommissionsTab />);
+
+		await screen.findByText("Taller Pagado");
+
+		expect(
+			screen.queryByRole("alert", { name: /comisiones vencidas/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders empty state when no commissions exist", async () => {
+		vi.mocked(referralsApi.fetchAdminCommissions).mockResolvedValue({
+			commissions: [],
+		});
+
+		renderWithQuery(<CommissionsTab />);
+
+		await screen.findByText("No se encontraron comisiones");
+	});
+
+	it("renders error state when API fails", async () => {
+		vi.mocked(referralsApi.fetchAdminCommissions).mockRejectedValue(
+			new Error("Failed to load"),
+		);
+
+		renderWithQuery(<CommissionsTab />);
+
+		await screen.findByRole("alert", { name: "Error al cargar comisiones" });
+		expect(
+			screen.getByText(/No se pudieron cargar las comisiones/),
+		).toBeInTheDocument();
+	});
+
+	it("renders filter select with option to select a youtuber", async () => {
+		renderWithQuery(<CommissionsTab />);
+
+		await screen.findByText("Taller del Este");
+
+		// Filter select should be present
+		const select = screen.getByRole("combobox", {
+			name: /Filtrar por youtuber/i,
+		});
+		expect(select).toBeInTheDocument();
+		expect(select).toHaveValue("");
+	});
 });

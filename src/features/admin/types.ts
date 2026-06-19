@@ -119,6 +119,12 @@ export interface YoutuberSummary {
 	channelUrl: string | null;
 	contactEmail: string | null;
 	payoutMethod: string | null;
+	payoutCbu: string | null;
+	payoutCvu: string | null;
+	payoutAlias: string | null;
+	payoutBankName: string | null;
+	payoutHolderName: string | null;
+	payoutHolderCuit: string | null;
 	isActive: boolean;
 	codeCount: number;
 	activeReferredWorkshops: number;
@@ -134,6 +140,12 @@ export interface CreateYoutuberRequest {
 	channelUrl?: string | null;
 	contactEmail?: string | null;
 	payoutMethod?: string | null;
+	payoutCbu?: string | null;
+	payoutCvu?: string | null;
+	payoutAlias?: string | null;
+	payoutBankName?: string | null;
+	payoutHolderName?: string | null;
+	payoutHolderCuit?: string | null;
 }
 
 export interface UpdateYoutuberRequest {
@@ -142,6 +154,12 @@ export interface UpdateYoutuberRequest {
 	channelUrl?: string | null;
 	contactEmail?: string | null;
 	payoutMethod?: string | null;
+	payoutCbu?: string | null;
+	payoutCvu?: string | null;
+	payoutAlias?: string | null;
+	payoutBankName?: string | null;
+	payoutHolderName?: string | null;
+	payoutHolderCuit?: string | null;
 }
 
 export interface ToggleYoutuberRequest {
@@ -185,6 +203,7 @@ export interface CommissionSummary {
 	commissionPct: number;
 	commissionAmount: number;
 	currency: string;
+	status: string;
 	occurredAt: string;
 	workshopName: string | null;
 }

@@ -10,6 +10,9 @@ import {
 	createReferralCode,
 	deactivateReferralCode,
 	fetchAdminCommissions,
+	getPayoutPending,
+	markCommissionsPaid,
+	getPayoutHistory,
 } from "../api/referrals";
 import type {
 	CreateYoutuberRequest,
@@ -22,6 +25,8 @@ import type {
 export const ADMIN_YOUTUBERS_KEY = "admin-youtubers" as const;
 export const ADMIN_REFERRAL_CODES_KEY = "admin-referral-codes" as const;
 export const ADMIN_COMMISSIONS_KEY = "admin-referral-commissions" as const;
+export const ADMIN_PAYOUT_PENDING_KEY = "admin-payout-pending" as const;
+export const ADMIN_PAYOUT_HISTORY_KEY = "admin-payout-history" as const;
 
 export function useAdminYoutubers(search?: string) {
 	const { isPlatformAdmin } = useAuth();
@@ -120,5 +125,66 @@ export function useAdminCommissions(filters: AdminCommissionsRequest = {}) {
 		queryFn: () => fetchAdminCommissions(filters),
 		enabled: isPlatformAdmin,
 		staleTime: 60_000,
+	});
+}
+
+// ── SDD-12: Payout hooks ──────────────────────────────────────────
+
+/**
+ * Fetches pending commissions grouped by YouTuber.
+ */
+export function useAdminPayoutPending(params?: {
+	fromDate?: string;
+	toDate?: string;
+}) {
+	const { isPlatformAdmin } = useAuth();
+
+	return useQuery({
+		queryKey: [ADMIN_PAYOUT_PENDING_KEY, params],
+		queryFn: () => getPayoutPending(params),
+		enabled: isPlatformAdmin,
+		staleTime: 30_000,
+	});
+}
+
+/**
+ * Marks commissions as paid (single or bulk) and invalidates related queries.
+ */
+export function useMarkCommissionsPaid() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (input: {
+			commissionIds: string[];
+			payoutReference: string;
+			notes?: string;
+		}) => markCommissionsPaid(input),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [ADMIN_PAYOUT_PENDING_KEY],
+			});
+			queryClient.invalidateQueries({
+				queryKey: [ADMIN_PAYOUT_HISTORY_KEY],
+			});
+			queryClient.invalidateQueries({
+				queryKey: [ADMIN_COMMISSIONS_KEY],
+			});
+			toast.success("Pago registrado exitosamente");
+		},
+		onError: (e: Error) => toast.error(e.message),
+	});
+}
+
+/**
+ * Fetches payout history with nested commission details.
+ */
+export function usePayoutHistory(params?: { limit?: number }) {
+	const { isPlatformAdmin } = useAuth();
+
+	return useQuery({
+		queryKey: [ADMIN_PAYOUT_HISTORY_KEY, params],
+		queryFn: () => getPayoutHistory(params),
+		enabled: isPlatformAdmin,
+		staleTime: 30_000,
 	});
 }
