@@ -1,9 +1,10 @@
 sdd_version: "1.0"
 project: carpinteropro
-execution_mode: interactive
-artifact_store: openspec
+execution_mode: auto
+artifact_store: both
 chained_pr_strategy: auto-forecast
 review_budget_changed_lines: 400
+sdd_initialized_at: "2026-06-20"
 
 stack:
   frontend:
