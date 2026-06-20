@@ -227,7 +227,7 @@ function AuthenticatedAppShell({
 							to={to}
 							className={({ isActive }) =>
 								cn(
-									"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors",
+									"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors focus-ring",
 									isActive
 										? "bg-cp-accent-soft text-cp-accent"
 										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
@@ -245,7 +245,7 @@ function AuthenticatedAppShell({
 							to="/admin"
 							className={({ isActive }) =>
 								cn(
-									"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors",
+									"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors focus-ring",
 									isActive
 										? "bg-cp-accent-soft text-cp-accent"
 										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
@@ -260,7 +260,7 @@ function AuthenticatedAppShell({
 						to="/settings"
 						className={({ isActive }) =>
 							cn(
-								"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors",
+								"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors focus-ring",
 								isActive
 									? "bg-cp-accent-soft text-cp-accent"
 									: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
@@ -272,7 +272,7 @@ function AuthenticatedAppShell({
 					</NavLink>
 					<Link
 						to="/profile"
-						className="mt-1 flex items-center gap-2 rounded-md px-2 py-2 hover:bg-cp-bg2 transition-colors"
+						className="mt-1 flex items-center gap-2 rounded-md px-2 py-2 hover:bg-cp-bg2 transition-colors focus-ring"
 					>
 						<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cp-accent text-[var(--cp-accent-ink)] font-mono text-[11px] font-semibold">
 							{initials}
@@ -327,10 +327,14 @@ function AuthenticatedAppShell({
 							placeholder="Buscar clientes, presupuestos, materiales…"
 							className="h-9 w-full rounded-md border border-line bg-cp-bg2 pl-9 pr-12 text-[13px] text-ink placeholder:text-ink3 focus:outline-none focus:border-accent"
 							disabled
+							aria-describedby="search-disabled-reason"
 						/>
-						<kbd className="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-line bg-cp-surface px-1.5 py-0.5 font-mono text-[10px] text-ink3">
-							⌘K
-						</kbd>
+						<span
+							id="search-disabled-reason"
+							className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-cp-accent/30 bg-cp-accent-soft px-2 py-0.5 text-[10px] font-medium text-cp-accent"
+						>
+							Pronto
+						</span>
 					</div>
 					<button
 						type="button"
@@ -338,7 +342,7 @@ function AuthenticatedAppShell({
 						aria-label={
 							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
 						}
-						className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer"
+						className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer focus-ring"
 					>
 						<i
 							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
@@ -360,7 +364,7 @@ function AuthenticatedAppShell({
 						aria-label={
 							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
 						}
-						className="grid h-8 w-8 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer"
+						className="grid h-11 w-11 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer focus-ring"
 					>
 						<i
 							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
@@ -372,7 +376,7 @@ function AuthenticatedAppShell({
 							aria-label="Admin"
 							className={({ isActive }) =>
 								cn(
-									"grid h-8 w-8 place-items-center rounded-md transition-colors",
+									"grid h-11 w-11 place-items-center rounded-md transition-colors focus-ring",
 									isActive
 										? "bg-cp-accent-soft text-cp-accent"
 										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
@@ -387,7 +391,7 @@ function AuthenticatedAppShell({
 						aria-label="Ajustes"
 						className={({ isActive }) =>
 							cn(
-								"grid h-8 w-8 place-items-center rounded-md transition-colors",
+								"grid h-11 w-11 place-items-center rounded-md transition-colors focus-ring",
 								isActive
 									? "bg-cp-accent-soft text-cp-accent"
 									: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
@@ -399,7 +403,7 @@ function AuthenticatedAppShell({
 					<Link
 						to="/profile"
 						aria-label="Mi perfil"
-						className="grid h-8 w-8 place-items-center rounded-full bg-cp-accent text-[var(--cp-accent-ink)] font-mono text-[11px] font-semibold hover:opacity-90 transition-opacity"
+						className="grid h-11 w-11 place-items-center rounded-full bg-cp-accent text-[var(--cp-accent-ink)] font-mono text-[11px] font-semibold hover:opacity-90 transition-opacity focus-ring"
 					>
 						{initials}
 					</Link>
@@ -414,7 +418,7 @@ function AuthenticatedAppShell({
 					<button
 						type="button"
 						onClick={handleFab}
-						className="fixed left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-cp-accent px-5 text-[14px] font-medium text-[var(--cp-accent-ink)] shadow-xl transition-transform hover:scale-[1.02] active:scale-95 lg:hidden"
+						className="fixed left-1/2 z-30 flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-cp-accent px-5 text-[14px] font-medium text-[var(--cp-accent-ink)] shadow-xl transition-transform hover:scale-[1.02] active:scale-95 lg:hidden focus-ring"
 						style={{
 							bottom: "calc(72px + env(safe-area-inset-bottom) + 14px)",
 						}}
@@ -436,7 +440,7 @@ function AuthenticatedAppShell({
 							to={to}
 							className={({ isActive }) =>
 								cn(
-									"flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors",
+									"flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors focus-ring",
 									isActive ? "text-ink" : "text-ink3 hover:text-ink2",
 								)
 							}

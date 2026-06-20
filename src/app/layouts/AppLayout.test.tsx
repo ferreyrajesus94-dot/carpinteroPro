@@ -39,8 +39,12 @@ vi.mock("@/shared/lib/fab", () => ({
 	dispatchFab: vi.fn(),
 }));
 
+const navItemsMock = vi.hoisted(() => [
+	{ to: "/dashboard", label: "Inicio", icon: "fi-rr-apps" },
+]);
+
 vi.mock("@/app/layouts/nav-items", () => ({
-	NAV_ITEMS: [],
+	NAV_ITEMS: navItemsMock,
 }));
 
 vi.mock("@/shared/components/MaintenanceBanner", () => ({
@@ -405,5 +409,144 @@ describe("AppLayout billing integration", () => {
 
 		expect(subscriptionModule.useSubscription).not.toHaveBeenCalled();
 		expect(billingActionsModule.useCreateSubscription).not.toHaveBeenCalled();
+	});
+
+	it("shows 'Pronto' badge on disabled topbar search indicating unavailability", () => {
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		// The search input should be disabled (feature not available yet)
+		const searchInput = screen.getByPlaceholderText(
+			"Buscar clientes, presupuestos, materiales…",
+		);
+		expect(searchInput).toBeDisabled();
+
+		// aria-describedby associates the Pronto badge with the disabled input
+		expect(searchInput).toHaveAttribute(
+			"aria-describedby",
+			"search-disabled-reason",
+		);
+
+		// The "Pronto" badge communicates unavailability instead of just disabled attribute
+		const badge = screen.getByText("Pronto");
+		expect(badge).toBeInTheDocument();
+		expect(badge).toHaveAttribute("id", "search-disabled-reason");
+	});
+
+	it("renders mobile theme toggle with accessible aria-label", () => {
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		// Both desktop and mobile theme toggles should exist
+		// With theme="light" mock, label is "Activar modo oscuro"
+		const toggles = screen.getAllByRole("button", {
+			name: /Activar modo (oscuro|claro)/i,
+		});
+		expect(toggles.length).toBeGreaterThanOrEqual(2);
+
+		// The mobile toggle should be interactive (accessible button)
+		expect(toggles[1]).toBeEnabled();
+	});
+
+	it("renders mobile interactive controls with focus-ring class", () => {
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		// Mobile theme toggle button — icon-only, needs focus-ring
+		const mobileToggle = screen.getAllByRole("button", {
+			name: /Activar modo (oscuro|claro)/i,
+		});
+		// The mobile toggle is the last button (mobile header renders after desktop)
+		const mobileToggleEl = mobileToggle[mobileToggle.length - 1];
+		expect(mobileToggleEl.className).toContain("focus-ring");
+
+		// The mobile header settings link uses aria-label="Ajustes"
+		const settingsLinks = screen.getAllByRole("link", { name: "Ajustes" });
+		// Find the mobile version by testing for h-11 w-11 (mobile icon-only style)
+		const mobileSettings = settingsLinks.find(
+			(l) =>
+				l.className.includes("h-11") && l.className.includes("w-11"),
+		);
+		expect(mobileSettings).toBeTruthy();
+		expect(mobileSettings!.className).toContain("focus-ring");
+
+		// Mobile profile link has aria-label and focus-ring
+		const profileLink = screen.getByRole("link", { name: "Mi perfil" });
+		expect(profileLink.className).toContain("focus-ring");
+	});
+
+	it("renders all interactive nav elements with focus-ring class", () => {
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		// Verify that every link/button in the shell has focus-ring
+		// There are two "Inicio" links: sidebar + bottom nav
+		const inicioLinks = screen.getAllByRole("link", { name: "Inicio" });
+		expect(inicioLinks.length).toBe(2);
+		for (const link of inicioLinks) {
+			expect(link.className).toContain("focus-ring");
+		}
+
+		// Sidebar settings NavLink must have focus-ring
+		const settingsLinks = screen.getAllByRole("link", { name: "Ajustes" });
+		// The desktop sidebar settings does NOT have h-11 (it uses h-9 with text label)
+		const sidebarSettings = settingsLinks.find(
+			(l) => !l.className.includes("h-11"),
+		);
+		expect(sidebarSettings).toBeTruthy();
+		expect(sidebarSettings!.className).toContain("focus-ring");
+
+		// Sidebar profile Link must have focus-ring
+		const profileLink = screen.getByRole("link", { name: "Mi perfil" });
+		expect(profileLink.className).toContain("focus-ring");
+	});
+
+	it("renders mobile settings and profile nav links with accessible labels", () => {
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		// There are two "Ajustes" links (desktop sidebar + mobile header with aria-label)
+		const ajustesLinks = screen.getAllByRole("link", { name: "Ajustes" });
+		expect(ajustesLinks.length).toBeGreaterThanOrEqual(2);
+
+		// The mobile header link has aria-label="Mi perfil"
+		expect(
+			screen.getByRole("link", { name: "Mi perfil" }),
+		).toBeInTheDocument();
 	});
 });
