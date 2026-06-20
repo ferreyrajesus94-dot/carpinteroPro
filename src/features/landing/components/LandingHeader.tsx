@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Zap } from "lucide-react";
 import type { NavItem, LandingCta } from "../data/landingContent";
 
 interface LandingHeaderProps {
@@ -40,7 +39,7 @@ export function LandingHeader({
 					aria-label="CarpinteroPro inicio"
 				>
 					<span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cp-accent text-[var(--cp-accent-ink)]">
-						<Zap className="h-5 w-5" aria-hidden="true" />
+						<i className="fi fi-br-hammer text-base leading-none" aria-hidden="true" />
 					</span>
 					<span className="font-display text-lg font-semibold tracking-tight text-ink">
 						CarpinteroPro

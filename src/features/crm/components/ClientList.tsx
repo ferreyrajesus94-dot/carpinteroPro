@@ -17,7 +17,7 @@ import { CLIENT_SOURCE_LABELS } from "@/features/crm/types";
 import { formatCurrency } from "@/shared/lib/formatters";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Skeleton } from "@/shared/ui/skeleton";
+import { ErrorState, LoadingState } from "@/shared/ui/feedback-state";
 import { SectionHowto } from "@/shared/ui/section-howto";
 import { EmptyState } from "@/shared/ui/empty-state";
 import { ClientForm } from "./ClientForm";
@@ -84,22 +84,15 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 
 	if (isError) {
 		return (
-			<p className="py-8 text-center text-sm text-destructive">
-				Error al cargar los clientes. Revisá tu conexión e intentá de nuevo.
-			</p>
+			<ErrorState
+				title="Error al cargar los clientes"
+				description="Revisá tu conexión e intentá de nuevo."
+			/>
 		);
 	}
 
 	if (isLoading && !result) {
-		return (
-			<div className="space-y-3 p-4 md:p-6">
-				<Skeleton className="h-8 w-40" />
-				<Skeleton className="h-10 w-full" />
-				{[...Array(5)].map((_, i) => (
-					<Skeleton key={i} className="h-20 w-full rounded-xl" />
-				))}
-			</div>
-		);
+		return <LoadingState label="Cargando clientes..." />;
 	}
 
 	return (

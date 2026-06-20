@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { captureException } from "@/shared/lib/errorReporter";
+import { ErrorState } from "@/shared/ui/feedback-state";
 import {
 	getSupportEmail,
 	getSupportMailtoHref,
@@ -61,31 +62,30 @@ export function ErrorBoundaryFallback({
 	});
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-			<div className="max-w-md rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
-				<p className="text-lg font-semibold text-red-700">Algo salió mal</p>
-				<p className="mt-2 text-sm text-slate-600">
-					Podés reintentar la acción. Si el problema continúa, contactá a
-					soporte.
-				</p>
-				<div className="mt-5 flex flex-col justify-center gap-3 sm:flex-row">
-					<button
-						className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-						onClick={onRetry}
-						type="button"
-					>
-						Reintentar
-					</button>
-					{supportHref ? (
-						<a
-							className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-							href={supportHref}
+		<div className="flex min-h-screen flex-col items-center justify-center p-8">
+			<ErrorState
+				title="Algo salió mal"
+				description="Podés reintentar la acción. Si el problema continúa, contactá a soporte."
+				action={
+					<div className="flex flex-col justify-center gap-3 sm:flex-row">
+						<button
+							className="inline-flex h-10 items-center justify-center rounded-md bg-cp-accent px-4 text-sm font-medium text-[var(--cp-accent-ink)] hover:opacity-90"
+							onClick={onRetry}
+							type="button"
 						>
-							Contactar soporte
-						</a>
-					) : null}
-				</div>
-			</div>
+							Reintentar
+						</button>
+						{supportHref ? (
+							<a
+								className="inline-flex h-10 items-center justify-center rounded-md border border-line px-4 text-sm font-medium text-ink2 hover:bg-cp-bg2"
+								href={supportHref}
+							>
+								Contactar soporte
+							</a>
+						) : null}
+					</div>
+				}
+			/>
 		</div>
 	);
 }

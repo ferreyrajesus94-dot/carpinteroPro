@@ -3,11 +3,11 @@ import { Pencil, Trash2, TrendingUp, AlertTriangle, Search, PackagePlus, History
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
 import { Input } from '@/shared/ui/input'
-import { Skeleton } from '@/shared/ui/skeleton'
 import { Switch } from '@/shared/ui/switch'
 import { Label } from '@/shared/ui/label'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState } from '@/shared/ui/empty-state'
+import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/shared/ui/table'
@@ -155,20 +155,15 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
 
   if (isError) {
     return (
-      <p className="py-8 text-center text-sm text-destructive">
-        Error al cargar los materiales. Revisá tu conexión e intentá de nuevo.
-      </p>
+      <ErrorState
+        title="Error al cargar los materiales"
+        description="Revisá tu conexión e intentá de nuevo."
+      />
     )
   }
 
   if (isLoading) {
-    return (
-      <div className="space-y-2">
-        {[...Array(5)].map((_, i) => (
-          <Skeleton key={i} className="h-24 w-full rounded-xl" />
-        ))}
-      </div>
-    )
+    return <LoadingState label="Cargando materiales..." />
   }
 
   const actions = (material: Material) => {

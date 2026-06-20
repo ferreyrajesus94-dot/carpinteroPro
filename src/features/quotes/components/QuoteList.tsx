@@ -6,11 +6,11 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { Button } from '@/shared/ui/button'
-import { Skeleton } from '@/shared/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState } from '@/shared/ui/empty-state'
+import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useQuotes, useQuotesPaginated, useDeleteQuote, useUpdateQuote } from '../hooks/useQuotes'
@@ -158,22 +158,15 @@ export function QuoteList() {
 
   if (isError) {
     return (
-      <p className="py-8 text-center text-sm text-destructive">
-        Error al cargar los presupuestos. Revisá tu conexión e intentá de nuevo.
-      </p>
+      <ErrorState
+        title="Error al cargar los presupuestos"
+        description="Revisá tu conexión e intentá de nuevo."
+      />
     )
   }
 
   if (isLoading && !result) {
-    return (
-      <div className="space-y-4 p-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-9 w-24" />
-        </div>
-        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-md" />)}
-      </div>
-    )
+    return <LoadingState label="Cargando presupuestos..." />
   }
 
   return (

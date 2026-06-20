@@ -43,6 +43,10 @@
     --cp-danger:  oklch(58% 0.19 25);
     --cp-info:    oklch(60% 0.12 230);
 
+    --chart-up:      oklch(52% 0.16 145);
+    --chart-down:    oklch(52% 0.20 25);
+    --chart-neutral: oklch(55% 0.01 0);
+
     --cp-radius:    10px;
     --cp-radius-sm: 6px;
     --cp-radius-lg: 14px;
@@ -88,6 +92,28 @@
     --cp-accent-soft: oklch(93% 0.03 50);
   }
 
+  /* theme-sawdust BEFORE .dark so .dark's same-specificity rules win in cascade */
+  .theme-sawdust {
+    --bg:         oklch(97.5% 0.008 70);
+    --bg-2:       oklch(94.8% 0.012 70);
+    --surface:    oklch(99% 0.004 70);
+    --ink:        oklch(22% 0.018 50);
+    --ink-2:      oklch(38% 0.014 55);
+    --ink-3:      oklch(55% 0.010 60);
+    --line:       oklch(89% 0.010 60);
+    --line-2:     oklch(82% 0.012 60);
+    --cp-accent:  oklch(62% 0.18 48);
+    --cp-accent-ink:  oklch(99% 0 0);
+    --cp-accent-soft: oklch(94% 0.04 55);
+    --cp-success: oklch(58% 0.14 155);
+    --cp-warn:    oklch(72% 0.16 75);
+    --cp-danger:  oklch(58% 0.19 25);
+    --cp-info:    oklch(60% 0.12 230);
+    --chart-up:      oklch(52% 0.16 145);
+    --chart-down:    oklch(52% 0.20 25);
+    --chart-neutral: oklch(55% 0.01 0);
+  }
+
   .dark {
     --background: 20 14% 8%;
     --foreground: 30 20% 94%;
@@ -128,6 +154,10 @@
   .dark.theme-graphite {
     --cp-accent: oklch(68% 0.12 45);
   }
+  .dark.theme-sawdust {
+    --cp-accent:      oklch(72% 0.17 48);
+    --cp-accent-ink:  oklch(16% 0.012 55);
+  }
 }
 
 @layer base {
@@ -164,6 +194,37 @@
   .bg-cp-accent-soft { background: var(--cp-accent-soft); color: var(--cp-accent); }
   .ring-cp-accent { --tw-ring-color: var(--cp-accent); }
 
+  /* Status color utilities (palette-safe, used by feedback-state) */
+  .bg-cp-danger        { background: var(--cp-danger); }
+  .bg-cp-danger\/10    { background: color-mix(in oklch, var(--cp-danger) 10%, transparent); }
+  .text-cp-danger      { color: var(--cp-danger); }
+  .bg-cp-success       { background: var(--cp-success); }
+  .text-cp-success     { color: var(--cp-success); }
+  .bg-cp-warn          { background: var(--cp-warn); }
+  .text-cp-warn        { color: var(--cp-warn); }
+  .bg-cp-info          { background: var(--cp-info); }
+  .text-cp-info        { color: var(--cp-info); }
+
+  /* Chart color tokens */
+  .stroke-chart-up      { stroke: var(--chart-up); }
+  .stroke-chart-down    { stroke: var(--chart-down); }
+  .stroke-chart-neutral { stroke: var(--chart-neutral); }
+
+  /* Status chip roles (palette-safe) */
+  .chip-warn   { background: var(--cp-warn); color: oklch(from var(--cp-warn) 0.15 0.02 0); }
+  .chip-success { background: var(--cp-success); color: oklch(from var(--cp-success) 0.15 0.02 0); }
+  .chip-info   { background: var(--cp-info); color: oklch(from var(--cp-info) 0.15 0.02 0); }
+
+  /* Focus-visible ring utility */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--cp-accent);
+    outline-offset: 2px;
+    border-radius: var(--cp-radius-sm);
+  }
+
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { scrollbar-width: none; }
 
@@ -180,4 +241,22 @@
   .dark .chip-en_produccion { background: oklch(28% 0.07 55);  color: oklch(75% 0.14 55); }
   .dark .chip-entregado     { background: oklch(26% 0.06 155); color: oklch(72% 0.12 155); }
   .dark .chip-cancelado     { background: oklch(26% 0.03 25);  color: oklch(72% 0.08 25); }
+}
+
+/* Reduced-motion guard: suppress decorative animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse,
+  .animate-bounce,
+  .animate-spin {
+    animation: none !important;
+  }
+
+  /* Landing page demos & transitions */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

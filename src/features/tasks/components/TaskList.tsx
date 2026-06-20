@@ -14,9 +14,9 @@ import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useTasks } from '@/features/tasks/hooks/useTasks'
 import { Button } from '@/shared/ui/button'
-import { Skeleton } from '@/shared/ui/skeleton'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState } from '@/shared/ui/empty-state'
+import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
 import {
   TASK_CATEGORY_LABELS,
   TASK_PRIORITY_RANK,
@@ -135,22 +135,15 @@ export function TaskList() {
 
   if (isError) {
     return (
-      <p className="py-8 text-center text-sm text-destructive">
-        Error al cargar las tareas. Revisá tu conexión e intentá de nuevo.
-      </p>
+      <ErrorState
+        title="Error al cargar las tareas"
+        description="Revisá tu conexión e intentá de nuevo."
+      />
     )
   }
 
   if (isLoading) {
-    return (
-      <div className="space-y-3 p-4 md:p-6">
-        <Skeleton className="h-8 w-40" />
-        <Skeleton className="h-10 w-full" />
-        {[...Array(4)].map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full rounded-xl" />
-        ))}
-      </div>
-    )
+    return <LoadingState label="Cargando tareas..." />
   }
 
   return (

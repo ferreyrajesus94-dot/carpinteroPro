@@ -19,10 +19,10 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/shared/ui/select";
-import { Skeleton } from "@/shared/ui/skeleton";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { SectionHowto } from "@/shared/ui/section-howto";
 import { EmptyState } from "@/shared/ui/empty-state";
+import { LoadingState } from "@/shared/ui/feedback-state";
 import {
 	useFurnitureTemplates,
 	useDeleteFurnitureTemplate,
@@ -92,13 +92,7 @@ export function MuebleList({
 	}, [templates, search, categoryFilter]);
 
 	if (isLoading) {
-		return (
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-				{[...Array(6)].map((_, i) => (
-					<Skeleton key={i} className="h-64 w-full rounded-md" />
-				))}
-			</div>
-		);
+		return <LoadingState label="Cargando muebles..." />;
 	}
 
 	if (templates.length === 0) {
