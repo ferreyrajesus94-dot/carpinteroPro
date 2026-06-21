@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
+import { PageHeader } from '@/shared/ui/page-header'
 import { useFabAction } from '@/shared/lib/fab'
 import {
   Dialog,
@@ -35,13 +36,15 @@ export function InventoryRoutes() {
 
   return (
     <div className="space-y-4 p-4 md:p-6 pb-24 md:pb-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">Inventario</h1>
-        <Button onClick={() => openFor('form', null)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo material
-        </Button>
-      </div>
+      <PageHeader
+        title="Inventario"
+        actions={
+          <Button onClick={() => openFor('form', null)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nuevo material
+          </Button>
+        }
+      />
 
       <MaterialList
         onEdit={(m) => openFor('form', m)}

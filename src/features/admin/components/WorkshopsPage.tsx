@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { PageHeader } from "@/shared/ui/page-header";
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
 import { useSort } from "../lib/useSort";
 import { downloadCsv } from "../lib/downloadCsv";
@@ -110,57 +111,53 @@ export function WorkshopsPage() {
 
 	return (
 		<div className="space-y-4">
-			<header className="flex flex-wrap items-baseline justify-between gap-2">
-				<div>
-					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-						Talleres
-					</h2>
-					<p className="text-xs text-ink3">
-						{data.length} taller{data.length !== 1 ? "es" : ""}
-						{lastUpdated && ` · Actualizado ${lastUpdated}`}
-					</p>
-				</div>
-				<div className="flex items-center gap-2">
-					{data.length > 0 && (
-						<button
-							type="button"
-							onClick={() =>
-								downloadCsv(
-									["Nombre", "Dueño", "Creado", "Perfiles", "Onboardeados", "Suscripción"],
-									data.map((w) => [
-										w.name,
-										w.ownerEmail ?? "",
-										w.createdAt,
-										String(w.profileCount),
-										String(w.onboardedProfileCount),
-										w.subscriptionStatus ?? "",
-									]),
-									"talleres.csv",
-								)
-							}
-							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-						>
-							<i className="fi fi-rr-download text-sm leading-none" aria-hidden="true" />
-							Exportar
-						</button>
-					)}
-				<div className="relative">
-					<i
-						className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink3"
-						aria-hidden="true"
-					/>
-					<input
-						type="search"
-						role="searchbox"
-						aria-label="Buscar talleres"
-						placeholder="Buscar por nombre..."
-						value={search}
-						onChange={(e) => handleSearchChange(e.target.value)}
-						className="h-9 rounded-lg border border-line bg-cp-surface pl-9 pr-3 text-[13.5px] text-ink placeholder:text-ink3 focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
-					/>
-				</div>
-				</div>
-			</header>
+			<PageHeader
+				level="h2"
+				title="Talleres"
+				subtitle={`${data.length} taller${data.length !== 1 ? "es" : ""}${lastUpdated ? ` · Actualizado ${lastUpdated}` : ""}`}
+				actions={
+					<div className="flex items-center gap-2">
+						{data.length > 0 && (
+							<button
+								type="button"
+								onClick={() =>
+									downloadCsv(
+										["Nombre", "Dueño", "Creado", "Perfiles", "Onboardeados", "Suscripción"],
+										data.map((w) => [
+											w.name,
+											w.ownerEmail ?? "",
+											w.createdAt,
+											String(w.profileCount),
+											String(w.onboardedProfileCount),
+											w.subscriptionStatus ?? "",
+										]),
+										"talleres.csv",
+									)
+								}
+								className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+							>
+								<i className="fi fi-rr-download text-sm leading-none" aria-hidden="true" />
+								Exportar
+							</button>
+						)}
+					<div className="relative">
+						<i
+							className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink3"
+							aria-hidden="true"
+						/>
+						<input
+							type="search"
+							role="searchbox"
+							aria-label="Buscar talleres"
+							placeholder="Buscar por nombre..."
+							value={search}
+							onChange={(e) => handleSearchChange(e.target.value)}
+							className="h-9 rounded-lg border border-line bg-cp-surface pl-9 pr-3 text-[13.5px] text-ink placeholder:text-ink3 focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
+						/>
+					</div>
+					</div>
+				}
+			/>
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">

@@ -37,14 +37,14 @@ Chain strategy: stacked-to-main
 - [x] 1.9 Migrate error/loading states in `features/{quotes,inventory,recipes,clients,tasks}` (5 files) to shared wrappers. NOTE: `dashboard` NOT in PR A — dashboard is PR B/C scope.
 - [x] 1.10 Create `verify-report.md` with honest evidence gap documentation.
 
-## Phase 2: Headers & A11y (PR B) ✅ (PR B sub-slice complete)
+## Phase 2: Headers & A11y (PR B) ✅ (header migration complete; E2E guard pending)
 
 - [x] 2.1 Create `src/shared/ui/page-header.tsx` with `PageHeader` (eyebrow/title/subtitle/actions), Sawdust type.
-- [ ] 2.2 Migrate top headers in `features/{dashboard,inventory,quotes,recipes,clients,tasks}` to `PageHeader`.
-- [ ] 2.3 Migrate `admin/components/{BillingPage,SupportPage,WorkshopsPage}.tsx` headers to `PageHeader`.
+- [x] 2.2 Migrate top headers in `features/{dashboard,inventory,quotes,recipes,clients,tasks}` to `PageHeader`.
+- [x] 2.3 Migrate `admin/components/{BillingPage,SupportPage,WorkshopsPage}.tsx` headers to `PageHeader`.
 - [x] 2.4 `AppLayout.tsx`: add "Pronto" badge with `aria-describedby` to disabled topbar search.
 - [x] 2.5 `AppLayout.tsx`: raise mobile icon-only controls to ≥44×44 CSS px with focus ring.
-- [ ] 2.6 Playwright: focus + reduced-motion snapshot tests for new headers.
+- [ ] 2.6 Playwright: focus + reduced-motion guard tests for PageHeader pages. NOTE: deferred to a separate verification slice because the first draft exceeded the review budget and did not prove the visible focus/reduced-motion contract strongly enough.
 - [x] 2.7 Verify global `focus-visible` ring; suppress `animate-pulse`/landing demos under reduced motion. NOTE: `.focus-ring` utility and `@media (prefers-reduced-motion: reduce)` guard already exist from PR A. Added `focus-ring` class to interactive elements in AppLayout (desktop + mobile toggles, mobile nav links). CSS verification: reduced-motion guard suppresses `animate-pulse`/`animate-bounce`/`animate-spin` globally; landing transitions zeroed.
 
 ## Phase 3: Tables — App (PR C1)

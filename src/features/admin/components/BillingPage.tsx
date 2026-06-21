@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { PageHeader } from "@/shared/ui/page-header";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
 import {
 	useCancelSubscription,
@@ -111,17 +112,12 @@ export function BillingPage() {
 
 	return (
 		<div className="space-y-4">
-			<header className="flex flex-wrap items-baseline justify-between gap-2">
-				<div>
-					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-						Suscripciones
-					</h2>
-					<p className="text-xs text-ink3">
-						{data.length} suscripción{data.length !== 1 ? "es" : ""}
-						{lastUpdated && ` · Actualizado ${lastUpdated}`}
-					</p>
-				</div>
-				<div className="flex items-center gap-2">
+			<PageHeader
+				level="h2"
+				title="Suscripciones"
+				subtitle={`${data.length} suscripción${data.length !== 1 ? "es" : ""}${lastUpdated ? ` · Actualizado ${lastUpdated}` : ""}`}
+				actions={
+					<div className="flex items-center gap-2">
 					{data.length > 0 && (
 						<button
 							type="button"
@@ -168,7 +164,8 @@ export function BillingPage() {
 						))}
 					</select>
 				</div>
-			</header>
+			}
+		/>
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">

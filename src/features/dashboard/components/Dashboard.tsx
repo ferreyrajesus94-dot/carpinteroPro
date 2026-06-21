@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Clock, FileText, Package, Armchair, Users } from 'lucide-react'
 import { formatCurrency } from '@/shared/lib/formatters'
 import { QUOTE_STATUS_LABELS } from '@/shared/types/quotes'
+import { PageHeader } from '@/shared/ui/page-header'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { KPICards } from './KPICards'
 import { RevenueChart } from './RevenueChart'
@@ -64,28 +65,29 @@ export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
 
   const maxRev = Math.max(...stats.revenueByMonth.map(d => d.total), 1)
 
-  return (
+	return (
     <div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6">
-      {/* Period selector */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="font-display text-2xl font-semibold tracking-tight text-ink">Dashboard</h1>
-        <div className="flex rounded-lg border border-line bg-cp-bg2 p-1 gap-1">
-          {PERIOD_OPTIONS.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => setPeriod(opt.value)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                period === opt.value
-                  ? 'bg-surface text-ink shadow-sm'
-                  : 'text-ink3 hover:text-ink'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        actions={
+          <div className="flex rounded-lg border border-line bg-cp-bg2 p-1 gap-1">
+            {PERIOD_OPTIONS.map(opt => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setPeriod(opt.value)}
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  period === opt.value
+                    ? 'bg-surface text-ink shadow-sm'
+                    : 'text-ink3 hover:text-ink'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <SectionHowto
         storageKey="dashboard"

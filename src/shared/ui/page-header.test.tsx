@@ -3,11 +3,28 @@ import { describe, expect, it } from "vitest";
 import { PageHeader } from "./page-header";
 
 describe("PageHeader", () => {
-	it("renders title as heading", () => {
+	it("renders title as h1 by default", () => {
 		render(<PageHeader title="Dashboard" />);
 
 		const heading = screen.getByRole("heading", { name: "Dashboard" });
 		expect(heading).toBeInTheDocument();
+		expect(heading.tagName).toBe("H1");
+	});
+
+	it("renders title as h2 when level is h2", () => {
+		render(<PageHeader title="Admin section" level="h2" />);
+
+		const heading = screen.getByRole("heading", { name: "Admin section" });
+		expect(heading).toBeInTheDocument();
+		expect(heading.tagName).toBe("H2");
+	});
+
+	it("renders title as h3 when level is h3", () => {
+		render(<PageHeader title="Sub section" level="h3" />);
+
+		const heading = screen.getByRole("heading", { name: "Sub section" });
+		expect(heading).toBeInTheDocument();
+		expect(heading.tagName).toBe("H3");
 	});
 
 	it("renders subtitle when provided", () => {

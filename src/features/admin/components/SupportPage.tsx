@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { PageHeader } from "@/shared/ui/page-header";
 import { useAdminSupportDiagnostics } from "../hooks/useAdminSupportDiagnostics";
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
 import { useRetryWebhook } from "../hooks/useAdminActions";
@@ -88,31 +89,26 @@ export function SupportPage() {
 
 	return (
 		<div className="space-y-4">
-			<header className="flex flex-wrap items-baseline justify-between gap-2">
-				<div>
-					<h2 className="font-display text-xl font-semibold tracking-tight text-ink">
-						Diagnósticos de soporte
-					</h2>
-					<p className="text-xs text-ink3">
-						Últimos 50 eventos de webhook · {data.length} evento
-						{data.length !== 1 ? "s" : ""}
-						{lastUpdated && ` · Actualizado ${lastUpdated}`}
-					</p>
-				</div>
-				<select
-					aria-label="Filtrar por taller"
-					value={workshopFilter}
-					onChange={(e) => setWorkshopFilter(e.target.value)}
-					className="h-9 rounded-lg border border-line bg-cp-surface px-3 text-[13.5px] text-ink focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
-				>
-					<option value="">Todos los talleres</option>
-					{workshopOptions.map((w) => (
-						<option key={w.id} value={w.id}>
-							{w.name}
-						</option>
-					))}
-				</select>
-			</header>
+			<PageHeader
+				level="h2"
+				title="Diagnósticos de soporte"
+				subtitle={`Últimos 50 eventos de webhook · ${data.length} evento${data.length !== 1 ? "s" : ""}${lastUpdated ? ` · Actualizado ${lastUpdated}` : ""}`}
+				actions={
+					<select
+						aria-label="Filtrar por taller"
+						value={workshopFilter}
+						onChange={(e) => setWorkshopFilter(e.target.value)}
+						className="h-9 rounded-lg border border-line bg-cp-surface px-3 text-[13.5px] text-ink focus:border-cp-accent focus:outline-none focus:ring-1 focus:ring-cp-accent"
+					>
+						<option value="">Todos los talleres</option>
+						{workshopOptions.map((w) => (
+							<option key={w.id} value={w.id}>
+								{w.name}
+							</option>
+						))}
+					</select>
+				}
+			/>
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">

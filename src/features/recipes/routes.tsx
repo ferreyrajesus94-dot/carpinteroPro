@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import { PageHeader } from "@/shared/ui/page-header";
 import { useFabAction } from "@/shared/lib/fab";
 import {
 	Dialog,
@@ -37,23 +38,21 @@ export function RecipesRoutes() {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-bold">Muebles</h1>
-					<p className="text-muted-foreground text-sm">
-						Plantillas de muebles con lista de materiales y costo estimado.
-					</p>
-				</div>
-				<Button
-					onClick={() => {
-						setSelectedTemplate(null);
-						setFormOpen(true);
-					}}
-				>
-					<Plus className="h-4 w-4 mr-2" />
-					Nuevo mueble
-				</Button>
-			</div>
+			<PageHeader
+				title="Muebles"
+				subtitle="Plantillas de muebles con lista de materiales y costo estimado."
+				actions={
+					<Button
+						onClick={() => {
+							setSelectedTemplate(null);
+							setFormOpen(true);
+						}}
+					>
+						<Plus className="h-4 w-4 mr-2" />
+						Nuevo mueble
+					</Button>
+				}
+			/>
 
 			{/* MuebleList requires materials/priceHistory/settings from app page */}
 			<MuebleList

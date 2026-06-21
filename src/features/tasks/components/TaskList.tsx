@@ -14,6 +14,7 @@ import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useTasks } from '@/features/tasks/hooks/useTasks'
 import { Button } from '@/shared/ui/button'
+import { PageHeader } from '@/shared/ui/page-header'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
@@ -148,20 +149,16 @@ export function TaskList() {
 
   return (
     <div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink3">Taller</div>
-          <h1 className="font-display text-2xl md:text-[32px] font-semibold tracking-tight text-ink mt-1">
-            Tareas
-          </h1>
-          <p className="text-[13px] text-ink3 mt-1">
-            {counts.hoy} para hoy · {counts.semana} esta semana
-          </p>
-        </div>
-        <Button size="sm" disabled={!isOnline} onClick={openCreate}>
-          + Nueva
-        </Button>
-      </div>
+      <PageHeader
+        eyebrow="Taller"
+        title="Tareas"
+        subtitle={`${counts.hoy} para hoy · ${counts.semana} esta semana`}
+        actions={
+          <Button size="sm" disabled={!isOnline} onClick={openCreate}>
+            + Nueva
+          </Button>
+        }
+      />
 
       <SectionHowto
         storageKey="tasks"

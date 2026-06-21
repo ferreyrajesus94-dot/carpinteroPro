@@ -6,6 +6,7 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core'
 import { Button } from '@/shared/ui/button'
+import { PageHeader } from '@/shared/ui/page-header'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { SectionHowto } from '@/shared/ui/section-howto'
@@ -183,15 +184,17 @@ export function QuoteList() {
         isPending={deleteMutation.isPending}
       />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Presupuestos</h1>
-        <Button asChild disabled={!isOnline}>
-          <Link to="/quotes/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo
-          </Link>
-        </Button>
-      </div>
+      <PageHeader
+        title="Presupuestos"
+        actions={
+          <Button asChild disabled={!isOnline}>
+            <Link to="/quotes/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Nuevo
+            </Link>
+          </Button>
+        }
+      />
 
       <SectionHowto
         storageKey="presupuestos"

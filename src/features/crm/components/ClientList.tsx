@@ -17,6 +17,7 @@ import { CLIENT_SOURCE_LABELS } from "@/features/crm/types";
 import { formatCurrency } from "@/shared/lib/formatters";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { PageHeader } from "@/shared/ui/page-header";
 import { ErrorState, LoadingState } from "@/shared/ui/feedback-state";
 import { SectionHowto } from "@/shared/ui/section-howto";
 import { EmptyState } from "@/shared/ui/empty-state";
@@ -97,27 +98,20 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 
 	return (
 		<div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6">
-			<div className="flex items-start justify-between gap-3">
-				<div>
-					<div className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink3">
-						CRM
-					</div>
-					<h1 className="font-display text-2xl md:text-[32px] font-semibold tracking-tight text-ink mt-1">
-						Clientes
-					</h1>
-					<p className="text-[13px] text-ink3 mt-1">
-						{totalCount} contacto{totalCount === 1 ? "" : "s"} activo
-						{totalCount === 1 ? "" : "s"}
-					</p>
-				</div>
-				<Button
-					size="sm"
-					disabled={!isOnline}
-					onClick={() => setFormOpen(true)}
-				>
-					+ Nuevo
-				</Button>
-			</div>
+			<PageHeader
+				eyebrow="CRM"
+				title="Clientes"
+				subtitle={`${totalCount} contacto${totalCount === 1 ? "" : "s"} activo${totalCount === 1 ? "" : "s"}`}
+				actions={
+					<Button
+						size="sm"
+						disabled={!isOnline}
+						onClick={() => setFormOpen(true)}
+					>
+						+ Nuevo
+					</Button>
+				}
+			/>
 
 			<SectionHowto
 				storageKey="crm"
