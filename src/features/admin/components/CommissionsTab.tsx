@@ -1,25 +1,8 @@
-import { useState, useMemo } from "react";
+import { useRef, useState, useMemo } from "react";
 import { useAdminCommissions, useAdminYoutubers } from "../hooks/useReferrals";
 import { exportCommissionsCsv } from "../api/referrals";
-
-function formatARS(amount: number): string {
-	return new Intl.NumberFormat("es-AR", {
-		style: "currency",
-		currency: "ARS",
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(amount);
-}
-
-function formatDate(iso: string): string {
-	return new Intl.DateTimeFormat("es-AR", {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	}).format(new Date(iso));
-}
+import { formatARS, formatDate } from "../lib/format";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 function CommissionsSkeleton() {
 	return (
@@ -56,6 +39,7 @@ export function CommissionsTab() {
 	const [youtuberFilter, setYoutuberFilter] = useState("");
 	const [fromDate, setFromDate] = useState("");
 	const [toDate, setToDate] = useState("");
+	const downloadRef = useRef<HTMLAnchorElement>(null);
 
 	const filters = {
 		...(youtuberFilter ? { youtuberId: youtuberFilter } : {}),
@@ -79,13 +63,15 @@ export function CommissionsTab() {
 			const csv = await exportCommissionsCsv(filters);
 			const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
 			const url = URL.createObjectURL(blob);
-			const a = document.createElement("a");
-			a.href = url;
-			a.download = `referral-commissions-${new Date().toISOString().slice(0, 10)}.csv`;
-			a.click();
+			const link = downloadRef.current;
+			if (link) {
+				link.href = url;
+				link.download = `referral-commissions-${new Date().toISOString().slice(0, 10)}.csv`;
+				link.click();
+			}
 			URL.revokeObjectURL(url);
 		} catch (err) {
-			console.error("CSV export failed", err);
+			console.error("CSV export falló", err);
 		}
 	}
 
@@ -116,6 +102,12 @@ export function CommissionsTab() {
 
 	return (
 		<div className="space-y-4">
+			<a
+				ref={downloadRef}
+				className="hidden"
+				aria-hidden="true"
+				tabIndex={-1}
+			/>
 			<div className="flex flex-wrap items-end gap-3">
 				<div className="min-w-[180px]">
 					<label className="block text-[11px] font-medium text-ink3 mb-1">
@@ -203,49 +195,45 @@ export function CommissionsTab() {
 					</p>
 				</section>
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-line">
-					<table
-						className="w-full text-left text-sm"
-						role="table"
-						aria-label="Comisiones"
-					>
-						<thead>
-							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-4 py-3">Fecha</th>
-								<th className="px-4 py-3">YouTuber</th>
-								<th className="px-4 py-3">Código</th>
-								<th className="px-4 py-3">Taller</th>
-								<th className="px-4 py-3 text-right">Pago</th>
-								<th className="px-4 py-3 text-right">Comisión</th>
-								<th className="px-4 py-3">Moneda</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-line">
+				<div className="overflow-hidden rounded-xl border border-line">
+					<Table aria-label="Comisiones">
+						<TableHeader>
+							<TableRow>
+								<TableHead>Fecha</TableHead>
+								<TableHead>YouTuber</TableHead>
+								<TableHead>Código</TableHead>
+								<TableHead>Taller</TableHead>
+								<TableHead className="text-right">Pago</TableHead>
+								<TableHead className="text-right">Comisión</TableHead>
+								<TableHead>Moneda</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{data.map((c) => (
-								<tr key={c.id} className="bg-cp-surface">
-									<td className="px-4 py-3 text-xs text-ink2 whitespace-nowrap">
+								<TableRow key={c.id}>
+									<TableCell className="whitespace-nowrap">
 										{formatDate(c.occurredAt)}
-									</td>
-									<td className="px-4 py-3 font-medium text-ink">
+									</TableCell>
+									<TableCell className="font-medium text-ink">
 										{c.youtuberName ?? "—"}
-									</td>
-									<td className="px-4 py-3 font-mono text-xs text-ink2">
+									</TableCell>
+									<TableCell className="font-mono text-xs text-ink2">
 										{c.code ?? "—"}
-									</td>
-									<td className="px-4 py-3 text-ink2">
+									</TableCell>
+									<TableCell className="text-ink2">
 										{c.workshopName ?? "—"}
-									</td>
-									<td className="px-4 py-3 text-right font-mono text-xs text-ink">
+									</TableCell>
+									<TableCell className="text-right font-mono text-xs text-ink">
 										{formatARS(c.paymentAmount)}
-									</td>
-									<td className="px-4 py-3 text-right font-mono text-xs text-ink">
+									</TableCell>
+									<TableCell className="text-right font-mono text-xs text-ink">
 										{formatARS(c.commissionAmount)}
-									</td>
-									<td className="px-4 py-3 text-xs text-ink2">{c.currency}</td>
-								</tr>
+									</TableCell>
+									<TableCell className="text-xs text-ink2">{c.currency}</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

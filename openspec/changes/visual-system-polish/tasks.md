@@ -61,7 +61,7 @@ Chain strategy: stacked-to-main
 - [x] 4.2 Migrate `SupportPage.tsx` + `WorkshopsPage.tsx` to `Table*` + shared feedback states.
 - [ ] 4.3 Re-run Playwright snapshots for admin BillingPage (light + dark); record in verify report. **NOT RUN**: Playwright snapshot infrastructure not yet set up. Snapshots are tracked as a per-PR verification gap in Phase 5.
 - [x] 4.4 Update `verify-report.md` with reduced-motion + chart/status contrast status. NOTE: Report was updated documenting both as pending — actual checks deferred to Phase 5 verification.
-- [ ] 4.5 Migrate remaining referral-admin ad-hoc tables (`CodesPanel`, `CommissionsTab`, `PayoutsTab`) to `Table*`. **FUTURE WORK**: These tables are outside PR C2 scope as defined here; they remain explicit debt and must not be counted as completed by this change.
+- [x] 4.5 Migrate remaining referral-admin ad-hoc tables (`CodesPanel`, `CommissionsTab`, `PayoutsTab`) to `Table*`. NOTE: `PayoutsTab` expanded payout details (`colSpan` cell) render a raw nested `<table>` instead of `Table*` components. This is semantically valid — it's a standalone summary table inside a table cell — and was accepted by review. Converting it would require `Table*` to support a non-header variant or a generic container-mode, which is out of scope for this migration.
 
 ## Phase 5: Verification (per PR)
 

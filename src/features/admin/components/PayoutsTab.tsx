@@ -4,25 +4,8 @@ import {
 	useAdminPayoutPending,
 	useMarkCommissionsPaid,
 } from "../hooks/useReferrals";
-
-function formatARS(amount: number): string {
-	return new Intl.NumberFormat("es-AR", {
-		style: "currency",
-		currency: "ARS",
-		minimumFractionDigits: 2,
-		maximumFractionDigits: 2,
-	}).format(amount);
-}
-
-function formatDate(iso: string): string {
-	return new Intl.DateTimeFormat("es-AR", {
-		day: "2-digit",
-		month: "2-digit",
-		year: "numeric",
-		hour: "2-digit",
-		minute: "2-digit",
-	}).format(new Date(iso));
-}
+import { formatARS, formatDate } from "../lib/format";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 
 function PayoutsSkeleton() {
 	return (
@@ -338,62 +321,66 @@ export function PayoutsTab() {
 					</p>
 				</section>
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-line">
-					<table
-						className="w-full text-left text-sm"
-						role="table"
-						aria-label="Historial de pagos"
-					>
-						<thead>
-							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="w-8 px-4 py-3" />
-								<th className="px-4 py-3">Fecha</th>
-								<th className="px-4 py-3 text-right">Total</th>
-								<th className="px-4 py-3 text-right">Comisiones</th>
-								<th className="px-4 py-3">Referencia</th>
-								<th className="px-4 py-3">Admin</th>
-								<th className="px-4 py-3">Notas</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-line">
+				<div className="overflow-hidden rounded-xl border border-line">
+					<Table aria-label="Historial de pagos">
+						<TableHeader>
+							<TableRow>
+								<TableHead className="w-8" />
+								<TableHead>Fecha</TableHead>
+								<TableHead className="text-right">Total</TableHead>
+								<TableHead className="text-right">Comisiones</TableHead>
+								<TableHead>Referencia</TableHead>
+								<TableHead>Admin</TableHead>
+								<TableHead>Notas</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{runs.map((run) => {
 								const isExpanded = expandedRunId === run.id;
 								return (
 									<Fragment key={run.id}>
-										<tr
-											className="bg-cp-surface cursor-pointer hover:bg-cp-bg2/50 transition-colors"
+										<TableRow
+											tabIndex={0}
+											aria-expanded={isExpanded}
+											className="cursor-pointer"
 											onClick={() =>
 												setExpandedRunId(isExpanded ? null : run.id)
 											}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													setExpandedRunId(isExpanded ? null : run.id);
+												}
+											}}
 										>
-											<td className="px-4 py-3">
+											<TableCell>
 												<i
 													className={`fi fi-rr-${isExpanded ? "chevron-down" : "chevron-right"} text-xs text-ink3 transition-transform`}
 													aria-hidden="true"
 												/>
-											</td>
-											<td className="px-4 py-3 text-xs text-ink2 whitespace-nowrap">
+											</TableCell>
+											<TableCell className="whitespace-nowrap">
 												{formatDate(run.createdAt)}
-											</td>
-											<td className="px-4 py-3 text-right font-mono text-xs text-ink">
+											</TableCell>
+											<TableCell className="text-right font-mono text-xs text-ink">
 												{formatARS(run.totalAmount)}
-											</td>
-											<td className="px-4 py-3 text-right text-xs text-ink2">
+											</TableCell>
+											<TableCell className="text-right text-xs text-ink2">
 												{run.commissionCount}
-											</td>
-											<td className="px-4 py-3 font-mono text-xs text-ink2">
+											</TableCell>
+											<TableCell className="font-mono text-xs text-ink2">
 												{run.reference ?? "—"}
-											</td>
-											<td className="px-4 py-3 text-xs text-ink2">
+											</TableCell>
+											<TableCell className="text-xs text-ink2">
 												{run.createdBy ?? "—"}
-											</td>
-											<td className="px-4 py-3 text-xs text-ink3">
+											</TableCell>
+											<TableCell className="text-xs text-ink3">
 												{run.notes ?? "—"}
-											</td>
-										</tr>
+											</TableCell>
+										</TableRow>
 										{isExpanded && (
-											<tr key={`${run.id}-expanded`}>
-												<td colSpan={7} className="bg-cp-bg2/30 px-4 py-3">
+											<TableRow key={`${run.id}-expanded`}>
+												<TableCell colSpan={7} className="bg-cp-bg2/30">
 													<div className="space-y-1">
 														{run.commissions.length === 0 ? (
 															<p className="text-xs text-ink3">
@@ -432,14 +419,14 @@ export function PayoutsTab() {
 															</table>
 														)}
 													</div>
-												</td>
-											</tr>
+												</TableCell>
+											</TableRow>
 										)}
 									</Fragment>
 								);
 							})}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 

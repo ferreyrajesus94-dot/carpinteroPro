@@ -1,5 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useReferralCodes, useCreateReferralCode, useDeactivateReferralCode } from "../hooks/useReferrals";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { EmptyState, ErrorState } from "@/shared/ui/feedback-state";
+import { cn } from "@/shared/lib/utils";
 
 interface CodesPanelProps {
 	youtuberId: string;
@@ -40,7 +43,11 @@ export function CodesPanel({ youtuberId, youtuberName }: CodesPanelProps) {
 
 	if (isLoading) {
 		return (
-			<div className="mt-3 animate-pulse space-y-2">
+			<div
+				role="status"
+				aria-label="Cargando códigos"
+				className="mt-3 animate-pulse space-y-2"
+			>
 				<div className="h-4 w-32 rounded bg-cp-bg2" />
 				<div className="h-3 w-48 rounded bg-cp-bg2" />
 			</div>
@@ -48,11 +55,7 @@ export function CodesPanel({ youtuberId, youtuberName }: CodesPanelProps) {
 	}
 
 	if (isError) {
-		return (
-			<p className="mt-3 text-xs text-destructive">
-				Error al cargar códigos
-			</p>
-		);
+		return <ErrorState title="Error al cargar códigos" />;
 	}
 
 	return (
@@ -140,59 +143,56 @@ export function CodesPanel({ youtuberId, youtuberName }: CodesPanelProps) {
 			)}
 
 			{codes.length === 0 && !showCreate && (
-				<p className="text-xs text-ink3">
-					Sin códigos aún
-				</p>
+				<EmptyState variant="empty-feature" title="Sin códigos aún" />
 			)}
 
 			{codes.length > 0 && (
-				<div className="overflow-x-auto rounded-lg border border-line">
-					<table className="w-full text-left text-xs">
-						<thead>
-							<tr className="border-b border-line bg-cp-bg2 text-[10px] font-semibold uppercase tracking-wider text-ink3">
-								<th className="px-3 py-2">Código</th>
-								<th className="px-3 py-2">Dto</th>
-								<th className="px-3 py-2">Com</th>
-								<th className="px-3 py-2">Activo</th>
-								<th className="px-3 py-2">
+				<div className="overflow-hidden rounded-lg border border-line">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Código</TableHead>
+								<TableHead>Dto</TableHead>
+								<TableHead>Com</TableHead>
+								<TableHead>Activo</TableHead>
+								<TableHead>
 									<span className="sr-only">Acciones</span>
-								</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-line">
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{codes.map((c) => (
-								<tr key={c.id} className="bg-cp-surface">
-									<td className="px-3 py-2 font-mono font-medium text-ink">
+								<TableRow key={c.id}>
+									<TableCell className="font-mono font-medium text-ink">
 										{c.code}
-									</td>
-									<td className="px-3 py-2 text-ink2">{c.discountPct}%</td>
-									<td className="px-3 py-2 text-ink2">{c.commissionPct}%</td>
-									<td className="px-3 py-2">
+									</TableCell>
+									<TableCell className="text-ink2">{c.discountPct}%</TableCell>
+									<TableCell className="text-ink2">{c.commissionPct}%</TableCell>
+									<TableCell>
 										<span
-											className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-												c.isActive
-													? "bg-emerald-100 text-emerald-700"
-													: "bg-red-100 text-red-700"
-											}`}
+											className={cn(
+												"rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+												c.isActive ? "chip-success" : "chip-danger",
+											)}
 										>
 											{c.isActive ? "Sí" : "No"}
 										</span>
-									</td>
-									<td className="px-3 py-2">
+									</TableCell>
+									<TableCell>
 										{c.isActive && (
 											<button
 												type="button"
 												onClick={() => deactivateMutation.mutate(c.id)}
-												className="text-[10px] text-red-600 hover:underline"
+												className="text-[11px] text-red-600 hover:underline"
 											>
 												Desactivar
 											</button>
 										)}
-									</td>
-								</tr>
+									</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

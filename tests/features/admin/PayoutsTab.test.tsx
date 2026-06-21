@@ -123,6 +123,32 @@ describe("PayoutsTab", () => {
     expect(screen.getByText("Taller del Oeste")).toBeInTheDocument();
   });
 
+  it("supports keyboard expand via Enter key", async () => {
+    renderWithQuery(<PayoutsTab />);
+
+    await screen.findByText("TRANSFER-001");
+
+    const dataRow = screen.getAllByRole("row")[1];
+    dataRow.focus();
+    await userEvent.keyboard("{Enter}");
+
+    expect(await screen.findByText("Taller del Este")).toBeInTheDocument();
+    expect(screen.getByText("Taller del Oeste")).toBeInTheDocument();
+  });
+
+  it("supports keyboard expand via Space key", async () => {
+    renderWithQuery(<PayoutsTab />);
+
+    await screen.findByText("TRANSFER-001");
+
+    const dataRow = screen.getAllByRole("row")[1];
+    dataRow.focus();
+    await userEvent.keyboard(" ");
+
+    expect(await screen.findByText("Taller del Este")).toBeInTheDocument();
+    expect(screen.getByText("Taller del Oeste")).toBeInTheDocument();
+  });
+
   it('shows "Nuevo pago" button', async () => {
     renderWithQuery(<PayoutsTab />);
 
