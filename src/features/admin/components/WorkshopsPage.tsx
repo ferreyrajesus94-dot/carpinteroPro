@@ -4,7 +4,15 @@ import { PageHeader } from "@/shared/ui/page-header";
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
 import { useSort } from "../lib/useSort";
 import { downloadCsv } from "../lib/downloadCsv";
-import { cn } from "@/shared/lib/utils";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/shared/ui/table";
+import { EmptyState, ErrorState } from "@/shared/ui/feedback-state";
 
 function SortArrow({ active, dir }: { active: boolean; dir: "asc" | "desc" }) {
 	if (!active) return <span className="ml-1 text-ink3">↕</span>;
@@ -30,14 +38,14 @@ function statusBadge(status: string | null) {
 	}
 	return (
 		<span
-			className={cn(
-				"rounded-full px-2.5 py-0.5 text-[11px] font-medium",
-				status === "active" || status === "trial"
-					? "bg-emerald-100 text-emerald-700"
+			className={
+				"rounded-full px-2.5 py-0.5 text-[11px] font-medium " +
+				(status === "active" || status === "trial"
+					? "chip-success"
 					: status === "paused"
-						? "bg-amber-100 text-amber-700"
-						: "bg-red-100 text-red-700",
-			)}
+						? "chip-warn"
+						: "chip-danger")
+			}
 		>
 			{STATUS_LABELS[status] ?? status}
 		</span>
@@ -89,22 +97,16 @@ export function WorkshopsPage() {
 	if (workshops.isError) {
 		return (
 			<section
-				role="alert"
 				aria-label="Error al cargar talleres"
-				className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-destructive"
-					aria-hidden="true"
+				<ErrorState
+					title="No se pudieron cargar los talleres"
+					description={
+						workshops.error instanceof Error
+							? workshops.error.message
+							: "Error desconocido"
+					}
 				/>
-				<h2 className="font-display text-lg font-semibold text-ink">
-					No se pudieron cargar los talleres
-				</h2>
-				<p className="mt-1 text-sm text-ink2">
-					{workshops.error instanceof Error
-						? workshops.error.message
-						: "Error desconocido"}
-				</p>
 			</section>
 		);
 	}
@@ -160,56 +162,47 @@ export function WorkshopsPage() {
 			/>
 
 			{data.length === 0 ? (
-				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
-					<i
-						className="fi fi-rr-building mb-3 block text-3xl text-ink3"
-						aria-hidden="true"
-					/>
-					<p className="text-sm font-medium text-ink2">
-						No se encontraron talleres
-					</p>
-					<p className="mt-1 text-xs text-ink3">
-						{debouncedSearch
+				<EmptyState
+					variant={debouncedSearch ? "no-results" : "empty-feature"}
+					title="No se encontraron talleres"
+					description={
+						debouncedSearch
 							? `No hay resultados para "${debouncedSearch}"`
-							: "Aún no hay talleres registrados en la plataforma"}
-					</p>
-				</section>
+							: "Aún no hay talleres registrados en la plataforma"
+					}
+				/>
 			) : (
 				<div
-					className="overflow-x-auto rounded-xl border border-line"
+					className="rounded-xl border border-line overflow-hidden"
 					role="region"
 					aria-label="Tabla de talleres con scroll horizontal"
 					tabIndex={0}
 				>
-					<table
-						className="w-full text-left text-sm"
-						role="table"
-						aria-label="Talleres"
-					>
-						<thead>
-							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+					<Table aria-label="Talleres">
+						<TableHeader>
+							<TableRow>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("name")}
 								>
 									Nombre <SortArrow active={sortKey === "name"} dir={sortDir} />
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("ownerEmail")}
 								>
 									Dueño{" "}
 									<SortArrow active={sortKey === "ownerEmail"} dir={sortDir} />
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("createdAt")}
 								>
 									Creado{" "}
 									<SortArrow active={sortKey === "createdAt"} dir={sortDir} />
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("profileCount")}
 								>
 									Perfiles{" "}
@@ -217,9 +210,9 @@ export function WorkshopsPage() {
 										active={sortKey === "profileCount"}
 										dir={sortDir}
 									/>
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("onboardedProfileCount")}
 								>
 									Onboardeados{" "}
@@ -227,9 +220,9 @@ export function WorkshopsPage() {
 										active={sortKey === "onboardedProfileCount"}
 										dir={sortDir}
 									/>
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("subscriptionStatus")}
 								>
 									Suscripción{" "}
@@ -237,41 +230,38 @@ export function WorkshopsPage() {
 										active={sortKey === "subscriptionStatus"}
 										dir={sortDir}
 									/>
-								</th>
-								<th className="px-4 py-3">
+								</TableHead>
+								<TableHead>
 									<span className="sr-only">Acciones</span>
-								</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-line">
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{sorted.map((workshop) => (
-								<tr
-									key={workshop.id}
-									className="bg-cp-surface transition-colors hover:bg-cp-bg2"
-								>
-									<td className="px-4 py-3 font-medium text-ink">
+								<TableRow key={workshop.id}>
+									<TableCell className="font-medium text-ink">
 										{workshop.name}
-									</td>
-									<td className="px-4 py-3 text-ink2 max-w-[160px] truncate" title={workshop.ownerEmail ?? undefined}>
+									</TableCell>
+									<TableCell className="text-ink2 max-w-[160px] truncate" title={workshop.ownerEmail ?? undefined}>
 										{workshop.ownerEmail ?? "—"}
-									</td>
-									<td className="px-4 py-3 text-ink2">
+									</TableCell>
+									<TableCell className="text-ink2">
 										{new Date(workshop.createdAt).toLocaleDateString("es-AR", {
 											day: "numeric",
 											month: "short",
 											year: "numeric",
 										})}
-									</td>
-									<td className="px-4 py-3 font-mono text-ink">
+									</TableCell>
+									<TableCell className="font-mono text-ink">
 										{workshop.profileCount}
-									</td>
-									<td className="px-4 py-3 font-mono text-ink">
+									</TableCell>
+									<TableCell className="font-mono text-ink">
 										{workshop.onboardedProfileCount}
-									</td>
-									<td className="px-4 py-3">
+									</TableCell>
+									<TableCell>
 										{statusBadge(workshop.subscriptionStatus)}
-									</td>
-									<td className="px-4 py-3">
+									</TableCell>
+									<TableCell>
 										<Link
 											to={`/admin/workshops/${workshop.id}`}
 											className="text-[13px] font-medium text-cp-accent hover:underline"
@@ -279,11 +269,11 @@ export function WorkshopsPage() {
 										>
 											Detalle
 										</Link>
-									</td>
-								</tr>
+									</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

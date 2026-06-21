@@ -117,9 +117,7 @@ describe("WorkshopsPage", () => {
 
 		renderWithQuery(<WorkshopsPage />);
 
-		await screen.findByRole("alert", {
-			name: "Error al cargar talleres",
-		});
+		await screen.findByRole("alert");
 		expect(
 			screen.getByText(/No se pudieron cargar los talleres/),
 		).toBeInTheDocument();
