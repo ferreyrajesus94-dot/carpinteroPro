@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/shared/ui/page-header";
 import { useAdminSubscriptions } from "../hooks/useAdminSubscriptions";
@@ -9,6 +9,15 @@ import {
 import { useSort } from "../lib/useSort";
 import { downloadCsv } from "../lib/downloadCsv";
 import { cn } from "@/shared/lib/utils";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/shared/ui/table";
+import { EmptyState, ErrorState } from "@/shared/ui/feedback-state";
 
 const STATUS_LABELS: Record<string, string> = {
 	active: "activa",
@@ -34,10 +43,10 @@ function statusBadge(status: string) {
 			className={cn(
 				"rounded-full px-2.5 py-0.5 text-[11px] font-medium",
 				status === "active" || status === "trial"
-					? "bg-emerald-100 text-emerald-700"
+					? "chip-success"
 					: status === "paused"
-						? "bg-amber-100 text-amber-700"
-						: "bg-red-100 text-red-700",
+						? "chip-warn"
+						: "chip-danger",
 			)}
 		>
 			{STATUS_LABELS[status] ?? status}
@@ -90,22 +99,16 @@ export function BillingPage() {
 	if (subscriptions.isError) {
 		return (
 			<section
-				role="alert"
 				aria-label="Error al cargar suscripciones"
-				className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-destructive"
-					aria-hidden="true"
+				<ErrorState
+					title="No se pudieron cargar las suscripciones"
+					description={
+						subscriptions.error instanceof Error
+							? subscriptions.error.message
+							: "Error desconocido"
+					}
 				/>
-				<h2 className="font-display text-lg font-semibold text-ink">
-					No se pudieron cargar las suscripciones
-				</h2>
-				<p className="mt-1 text-sm text-ink2">
-					{subscriptions.error instanceof Error
-						? subscriptions.error.message
-						: "Error desconocido"}
-				</p>
 			</section>
 		);
 	}
@@ -168,95 +171,85 @@ export function BillingPage() {
 		/>
 
 			{data.length === 0 ? (
-				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
-					<i
-						className="fi fi-rr-credit-card mb-3 block text-3xl text-ink3"
-						aria-hidden="true"
-					/>
-					<p className="text-sm font-medium text-ink2">
-						No se encontraron suscripciones
-					</p>
-				</section>
+				<EmptyState
+					variant="empty-feature"
+					title="No se encontraron suscripciones"
+				/>
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-line">
-					<table
-						className="w-full text-left text-sm"
-						role="table"
-						aria-label="Suscripciones"
-					>
-						<thead>
-							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+				<div className="rounded-xl border border-line overflow-hidden">
+					<Table aria-label="Suscripciones">
+						<TableHeader>
+							<TableRow>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("workshopName")}
 								>
 									Taller{" "}
 									{sortKey === "workshopName" &&
 										(sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("plan")}
 								>
 									Plan {sortKey === "plan" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("provider")}
 								>
 									Proveedor{" "}
 									{sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("status")}
 								>
 									Estado{" "}
 									{sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("currentPeriodEnd")}
 								>
 									Vence{" "}
 									{sortKey === "currentPeriodEnd" &&
 										(sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("updatedAt")}
 								>
 									Actualizado{" "}
 									{sortKey === "updatedAt" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th className="px-4 py-3">
+								</TableHead>
+								<TableHead>
 									<span className="sr-only">Taller</span>
-								</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-line">
+								</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{sorted.map((sub) => {
 								const isExpanded = expandedId === sub.id;
 								return (
-									<>
-										<tr
-											key={sub.id}
+									<Fragment key={sub.id}>
+										<TableRow
 											onClick={() => setExpandedId(isExpanded ? null : sub.id)}
-											className="cursor-pointer bg-cp-surface transition-colors hover:bg-cp-bg2"
+											className="cursor-pointer"
 										>
-											<td className="px-4 py-3 font-medium text-ink">
+											<TableCell className="font-medium text-ink">
 												{sub.workshopName}
-											</td>
-											<td className="px-4 py-3 text-ink2 capitalize">
+											</TableCell>
+											<TableCell className="text-ink2 capitalize">
 												{sub.plan}
-											</td>
-											<td className="px-4 py-3 text-ink2">
+											</TableCell>
+											<TableCell className="text-ink2">
 												{sub.provider === "mercadopago"
 													? "MercadoPago"
 													: sub.provider}
-											</td>
-											<td className="px-4 py-3">{statusBadge(sub.status)}</td>
-											<td className="px-4 py-3 text-ink2">
+											</TableCell>
+											<TableCell>{statusBadge(sub.status)}</TableCell>
+											<TableCell className="text-ink2">
 												{sub.currentPeriodEnd
 													? new Date(sub.currentPeriodEnd).toLocaleDateString(
 															"es-AR",
@@ -267,15 +260,15 @@ export function BillingPage() {
 															},
 														)
 													: "—"}
-											</td>
-											<td className="px-4 py-3 text-ink2">
+											</TableCell>
+											<TableCell className="text-ink2">
 												{new Date(sub.updatedAt).toLocaleDateString("es-AR", {
 													day: "numeric",
 													month: "short",
 													year: "numeric",
 												})}
-											</td>
-											<td className="px-4 py-3">
+											</TableCell>
+											<TableCell>
 												<div className="flex items-center gap-2">
 													<Link
 														to={`/admin/workshops/${sub.workshopId}`}
@@ -345,11 +338,11 @@ export function BillingPage() {
 														</>
 													)}
 												</div>
-											</td>
-										</tr>
+											</TableCell>
+										</TableRow>
 										{isExpanded && (
-											<tr key={`${sub.id}-detail`} className="bg-cp-bg2">
-												<td colSpan={7} className="px-4 py-3">
+											<TableRow className="bg-cp-bg2">
+												<TableCell colSpan={7} className="px-4 py-3">
 													<div className="grid gap-2 text-xs sm:grid-cols-3">
 														<div>
 															<span className="font-medium text-ink3">
@@ -384,14 +377,14 @@ export function BillingPage() {
 															</p>
 														</div>
 													</div>
-												</td>
-											</tr>
+												</TableCell>
+											</TableRow>
 										)}
-									</>
+									</Fragment>
 								);
 							})}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

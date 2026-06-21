@@ -214,6 +214,7 @@
   .chip-warn   { background: var(--cp-warn); color: oklch(from var(--cp-warn) 0.15 0.02 0); }
   .chip-success { background: var(--cp-success); color: oklch(from var(--cp-success) 0.15 0.02 0); }
   .chip-info   { background: var(--cp-info); color: oklch(from var(--cp-info) 0.15 0.02 0); }
+  .chip-danger  { background: var(--cp-danger); color: oklch(from var(--cp-danger) 0.15 0.02 0); }
 
   /* Focus-visible ring utility */
   .focus-ring {

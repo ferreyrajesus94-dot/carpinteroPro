@@ -158,9 +158,7 @@ describe("BillingPage", () => {
 
 		renderPage();
 
-		await screen.findByRole("alert", {
-			name: "Error al cargar suscripciones",
-		});
+		await screen.findByRole("alert");
 		expect(
 			screen.getByText(/No se pudieron cargar las suscripciones/),
 		).toBeInTheDocument();
