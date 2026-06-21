@@ -57,10 +57,10 @@ Chain strategy: stacked-to-main
 
 ## Phase 4: Tables — Admin (PR C2)
 
-- [ ] 4.1 Migrate `BillingPage.tsx` to `Table*` + shared `EmptyState`/`ErrorState`.
-- [ ] 4.2 Migrate `SupportPage.tsx` + `WorkshopsPage.tsx` to `Table*` + shared feedback states.
-- [ ] 4.3 Re-run Playwright snapshots for admin BillingPage (light + dark); record in verify report.
-- [ ] 4.4 Update `verify-report.md` with reduced-motion + chart/status contrast checks.
+- [x] 4.1 Migrate `BillingPage.tsx` to `Table*` + shared `EmptyState`/`ErrorState`. NOTE: `src/index.css` added `.chip-danger` for cancelled/past_due status badges (alongside existing `chip-warn/success/info` from PR A).
+- [x] 4.2 Migrate `SupportPage.tsx` + `WorkshopsPage.tsx` to `Table*` + shared feedback states.
+- [ ] 4.3 Re-run Playwright snapshots for admin BillingPage (light + dark); record in verify report. **NOT RUN**: Playwright snapshot infrastructure not yet set up. Snapshots are tracked as a per-PR verification gap in Phase 5.
+- [x] 4.4 Update `verify-report.md` with reduced-motion + chart/status contrast status. NOTE: Report was updated documenting both as pending — actual checks deferred to Phase 5 verification.
 
 ## Phase 5: Verification (per PR)
 

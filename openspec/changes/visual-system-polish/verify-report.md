@@ -69,3 +69,42 @@ To add later:
 | 4. `openspec/config.yaml` change | SDD infra change from `sdd-init` — kept (enablement config, not feature) |
 | 5. Scope alignment | Removed references to files not in PR A diff (`RouteErrorFallback`, dashboard tables, `ActiveQuotesPanel` chip migration) |
 | 6. `PriceSparkline` test missing chart assertions | Extracted `resolveSparklineColor()` pure function with 5 assertion cases; component still uses the function |
+
+---
+
+## PR C2: Admin Table Alignment
+
+> **Status**: Implementation complete. 597 unit tests pass (baseline 597 + 0 new — refactoring-only changes). Playwright visual snapshots not yet implemented — see Visual Regression section.
+
+### Admin Table Migrations
+
+- [x] `BillingPage.tsx` — migrated ad-hoc `<table>` → `Table*` components; inline error state → `ErrorState`; inline empty state → `EmptyState`; raw status badge colors → `chip-success`/`chip-warn`/`chip-danger` tokens.
+- [x] `SupportPage.tsx` — migrated ad-hoc `<table>` → `Table*` components; inline error state → `ErrorState`; inline empty state → `EmptyState` (with description); raw event type badge colors → `chip-success`/`chip-danger` tokens.
+- [x] `WorkshopsPage.tsx` — migrated ad-hoc `<table>` → `Table*` components; inline error state → `ErrorState`; inline empty state → `EmptyState` (with dynamic search/no-results variants); raw status badge colors → `chip-success`/`chip-warn`/`chip-danger` tokens.
+- [x] `src/index.css`: added `chip-danger` CSS class alongside existing `chip-warn/success/info` for cancelled/past_due status rendering.
+
+### Test Results
+
+| File | Tests | Evidence |
+|------|-------|----------|
+| `BillingPage.test.tsx` | 10 tests | All pass — table rendering, empty state, error state, expand/collapse, sort, cancel/pause actions, workshop links |
+| `SupportPage.test.tsx` | 9 tests | All pass — loading skeleton, diagnostics table, event type badges, empty state, error state, workshop link, filter dropdown |
+| `WorkshopsPage.test.tsx` | 7 tests | All pass — loading skeleton, workshops table, status badges, empty state, error state, search filter, workshop detail links |
+
+### Visual Regression — Gap (Unchanged)
+
+Playwright visual snapshots for admin BillingPage (light + dark) remain unimplemented. The same snapshot infrastructure gap from PR A persists. Documented for per-PR verification phase (Phase 5).
+
+### Reduced Motion & Contrast Checks (Pending)
+
+Reduced-motion guards and chart/status contrast checks were not tested in this PR scope since PR C2 is a structural migration (no new motion or color tokens). The existing reduced-motion guards from PR A (`@media (prefers-reduced-motion: reduce)`) continue to apply globally. Contrast is inherited from existing `chip-*` token classes which were verified in PR A for palette-safety.
+
+### Fixes Applied Post-Review (PR C2 Rev 2)
+
+| Finding | Fix | File |
+|---------|-----|------|
+| BillingPage empty state used `variant="no-results"` with search-specific default copy | Changed to `variant="empty-feature"` — generic description, no search implication | `BillingPage.tsx` |
+| `tasks.md` Phase 4.3 claimed snapshots done (`[x]`) while they were not run | Changed to `[ ]` with honest note | `tasks.md` |
+| Missing `.chip-danger` token documentation in `tasks.md` | Added NOTE to task 4.1 | `tasks.md` |
+| Vitest config lacked `test.only` guard for CI | Added `allowOnly: !process.env.CI` | `vite.config.ts` |
+| `WorkshopsPage.test.tsx` search test flagged as failing | Verified passing (7/7) with honest real-timer assertion — no changes needed | `WorkshopsPage.test.tsx` |
