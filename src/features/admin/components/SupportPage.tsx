@@ -5,18 +5,25 @@ import { useAdminSupportDiagnostics } from "../hooks/useAdminSupportDiagnostics"
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
 import { useRetryWebhook } from "../hooks/useAdminActions";
 import { useSort } from "../lib/useSort";
-import { cn } from "@/shared/lib/utils";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/shared/ui/table";
+import { EmptyState, ErrorState } from "@/shared/ui/feedback-state";
 
 function eventTypeBadge(eventType: string) {
 	const isFailure = eventType.toLowerCase().includes("fail");
 	return (
 		<span
-			className={cn(
-				"rounded-full px-2.5 py-0.5 text-[11px] font-medium",
+			className={
 				isFailure
-					? "bg-red-100 text-red-700"
-					: "bg-emerald-100 text-emerald-700",
-			)}
+					? "chip-danger rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+					: "chip-success rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+			}
 		>
 			{eventType}
 		</span>
@@ -67,22 +74,16 @@ export function SupportPage() {
 	if (diagnostics.isError) {
 		return (
 			<section
-				role="alert"
 				aria-label="Error al cargar diagnósticos"
-				className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-destructive"
-					aria-hidden="true"
+				<ErrorState
+					title="No se pudieron cargar los diagnósticos"
+					description={
+						diagnostics.error instanceof Error
+							? diagnostics.error.message
+							: "Error desconocido"
+					}
 				/>
-				<h2 className="font-display text-lg font-semibold text-ink">
-					No se pudieron cargar los diagnósticos
-				</h2>
-				<p className="mt-1 text-sm text-ink2">
-					{diagnostics.error instanceof Error
-						? diagnostics.error.message
-						: "Error desconocido"}
-				</p>
 			</section>
 		);
 	}
@@ -111,79 +112,65 @@ export function SupportPage() {
 			/>
 
 			{data.length === 0 ? (
-				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
-					<i
-						className="fi fi-rr-life-ring mb-3 block text-3xl text-ink3"
-						aria-hidden="true"
-					/>
-					<p className="text-sm font-medium text-ink2">
-						No se encontraron diagnósticos
-					</p>
-					<p className="mt-1 text-xs text-ink3">
-						Aún no hay eventos de webhook registrados
-					</p>
-				</section>
+				<EmptyState
+					variant="no-results"
+					title="No se encontraron diagnósticos"
+					description="Aún no hay eventos de webhook registrados"
+				/>
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-line">
-					<table
-						className="w-full text-left text-sm"
-						role="table"
-						aria-label="Diagnósticos de soporte"
-					>
-						<thead>
-							<tr className="border-b border-line bg-cp-bg2 text-[11px] font-semibold uppercase tracking-wider text-ink3">
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+				<div className="rounded-xl border border-line overflow-hidden">
+					<Table aria-label="Diagnósticos de soporte">
+						<TableHeader>
+							<TableRow>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("providerEventId")}
 								>
 									Evento{" "}
 									{sortKey === "providerEventId" &&
 										(sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("eventType")}
 								>
 									Tipo{" "}
 									{sortKey === "eventType" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("provider")}
 								>
 									Proveedor{" "}
 									{sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th className="px-4 py-3">Recurso</th>
-								<th
-									className="px-4 py-3 cursor-pointer select-none hover:text-ink"
+								</TableHead>
+								<TableHead>Recurso</TableHead>
+								<TableHead
+									className="cursor-pointer select-none hover:text-ink"
 									onClick={() => toggleSort("processedAt")}
 								>
 									Procesado{" "}
 									{sortKey === "processedAt" && (sortDir === "asc" ? "↑" : "↓")}
-								</th>
-								<th className="px-4 py-3">Taller</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-line">
+								</TableHead>
+								<TableHead>Taller</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{sorted.map((evt) => (
-								<tr
-									key={evt.id}
-									className="bg-cp-surface transition-colors hover:bg-cp-bg2"
-								>
-									<td className="px-4 py-3 font-mono text-xs text-ink">
+								<TableRow key={evt.id}>
+									<TableCell className="font-mono text-xs text-ink">
 										{evt.providerEventId}
-									</td>
-									<td className="px-4 py-3">{eventTypeBadge(evt.eventType)}</td>
-									<td className="px-4 py-3 text-ink2">
+									</TableCell>
+									<TableCell>{eventTypeBadge(evt.eventType)}</TableCell>
+									<TableCell className="text-ink2">
 										{evt.provider === "mercadopago"
 											? "MercadoPago"
 											: evt.provider}
-									</td>
-									<td className="px-4 py-3 font-mono text-xs text-ink2">
+									</TableCell>
+									<TableCell className="font-mono text-xs text-ink2">
 										{evt.providerResourceId ?? "—"}
-									</td>
-									<td className="px-4 py-3 text-ink2">
+									</TableCell>
+									<TableCell className="text-ink2">
 										{new Date(evt.processedAt).toLocaleDateString("es-AR", {
 											day: "numeric",
 											month: "short",
@@ -191,8 +178,8 @@ export function SupportPage() {
 											hour: "2-digit",
 											minute: "2-digit",
 										})}
-									</td>
-									<td className="px-4 py-3">
+									</TableCell>
+									<TableCell>
 										<div className="flex items-center gap-2">
 											<Link
 												to={`/admin/workshops/${evt.workshopId}`}
@@ -211,11 +198,11 @@ export function SupportPage() {
 												</button>
 											)}
 										</div>
-									</td>
-								</tr>
+									</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				</div>
 			)}
 		</div>

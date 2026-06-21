@@ -173,9 +173,7 @@ describe("SupportPage", () => {
 
 		renderPage();
 
-		await screen.findByRole("alert", {
-			name: "Error al cargar diagnósticos",
-		});
+		await screen.findByRole("alert");
 		expect(
 			screen.getByText(/No se pudieron cargar los diagnósticos/),
 		).toBeInTheDocument();
