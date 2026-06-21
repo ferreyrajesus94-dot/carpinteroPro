@@ -224,7 +224,7 @@ export function BillingPage() {
 									{sortKey === "updatedAt" && (sortDir === "asc" ? "↑" : "↓")}
 								</TableHead>
 								<TableHead>
-									<span className="sr-only">Taller</span>
+									<span className="sr-only">Acciones</span>
 								</TableHead>
 							</TableRow>
 						</TableHeader>

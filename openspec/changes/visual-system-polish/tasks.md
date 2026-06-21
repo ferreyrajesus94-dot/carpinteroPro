@@ -22,7 +22,7 @@ Chain strategy: stacked-to-main
 | A | Tokens, feedback, ErrorBoundary, brand | PR A | — |
 | B | PageHeader, a11y, topbar search badge | PR B | A |
 | C1 | Table* + quotes/dashboard tables | PR C1 | A |
-| C2 | Admin tables | PR C2 | C1 |
+| C2 | Admin Billing/Support/Workshops tables | PR C2 | C1 |
 
 ## Phase 1: Tokens & Feedback (PR A) ✅
 
@@ -44,7 +44,7 @@ Chain strategy: stacked-to-main
 - [x] 2.3 Migrate `admin/components/{BillingPage,SupportPage,WorkshopsPage}.tsx` headers to `PageHeader`.
 - [x] 2.4 `AppLayout.tsx`: add "Pronto" badge with `aria-describedby` to disabled topbar search.
 - [x] 2.5 `AppLayout.tsx`: raise mobile icon-only controls to ≥44×44 CSS px with focus ring.
-- [x] 2.6 Playwright: focus + reduced-motion guard tests for PageHeader pages. Created `tests/e2e/browser/visual-polish-a11y.spec.ts` with 3 assertion-based tests: (1) focus-ring sidebar NavLink receives visible outline via keyboard Tab; (2) PageHeader period buttons are keyboard-reachable and focusable; (3) `animate-pulse`/`animate-spin` suppressed under `prefers-reduced-motion: reduce` (test-element + stylesheet guard verification). 3/3 passing with `VITE_USE_LOCAL_MOCKS=true`. No hardcoded credentials. No admin pages tested (mock is not platform admin). No snapshot infrastructure used.
+- [x] 2.6 Playwright: focus + reduced-motion guard tests for PageHeader pages. Created `tests/e2e/browser/visual-polish-a11y.spec.ts` with 3 assertion-based tests: (1) focus-ring sidebar NavLink receives visible outline via keyboard Tab; (2) PageHeader period buttons are keyboard-reachable and focusable; (3) `animate-pulse`/`animate-spin` suppressed under `prefers-reduced-motion: reduce` (test-element + stylesheet guard verification). The default Playwright config now runs this spec only in the `chromium-local-mocks` project, whose dev server sets `VITE_USE_LOCAL_MOCKS=true`. No hardcoded credentials. No admin pages tested (mock is not platform admin). No snapshot infrastructure used.
 - [x] 2.7 Verify global `focus-visible` ring; suppress `animate-pulse`/landing demos under reduced motion. NOTE: `.focus-ring` utility and `@media (prefers-reduced-motion: reduce)` guard already exist from PR A. Added `focus-ring` class to interactive elements in AppLayout (desktop + mobile toggles, mobile nav links). CSS verification: reduced-motion guard suppresses `animate-pulse`/`animate-bounce`/`animate-spin` globally; landing transitions zeroed.
 
 ## Phase 3: Tables — App (PR C1) 🟢 (complete)
@@ -61,6 +61,7 @@ Chain strategy: stacked-to-main
 - [x] 4.2 Migrate `SupportPage.tsx` + `WorkshopsPage.tsx` to `Table*` + shared feedback states.
 - [ ] 4.3 Re-run Playwright snapshots for admin BillingPage (light + dark); record in verify report. **NOT RUN**: Playwright snapshot infrastructure not yet set up. Snapshots are tracked as a per-PR verification gap in Phase 5.
 - [x] 4.4 Update `verify-report.md` with reduced-motion + chart/status contrast status. NOTE: Report was updated documenting both as pending — actual checks deferred to Phase 5 verification.
+- [ ] 4.5 Migrate remaining referral-admin ad-hoc tables (`CodesPanel`, `CommissionsTab`, `PayoutsTab`) to `Table*`. **FUTURE WORK**: These tables are outside PR C2 scope as defined here; they remain explicit debt and must not be counted as completed by this change.
 
 ## Phase 5: Verification (per PR)
 

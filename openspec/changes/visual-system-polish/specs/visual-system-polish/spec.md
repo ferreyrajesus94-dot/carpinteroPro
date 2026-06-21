@@ -31,15 +31,16 @@ Status, feedback, and chart UI MUST consume Sawdust tokens (`--cp-*`, `bg-cp-*`,
 
 ### Requirement: Page Header & Data Table Primitives
 
-`shared/ui/page-header.tsx` MUST expose `<PageHeader>` (eyebrow, title, subtitle, actions). `Table*` MUST be the single data-table contract. All app/admin headers MUST use `<PageHeader>`; all data tables in quotes, dashboard, and admin MUST use `Table*`.
+`shared/ui/page-header.tsx` MUST expose `<PageHeader>` (eyebrow, title, subtitle, actions). `Table*` MUST be the single data-table contract for this change's scoped migrations. All app/admin headers in scope MUST use `<PageHeader>`. Data tables in quotes, dashboard, and admin Billing/Support/Workshops MUST use `Table*`. Referral-admin tables in `CodesPanel`, `CommissionsTab`, and `PayoutsTab` are explicitly out of this change scope and MUST remain tracked as future work until migrated.
 
-#### Scenario: Headers and tables are uniform
+#### Scenario: Scoped headers and tables are uniform
 
-- GIVEN a feature or admin page renders
+- GIVEN a scoped feature or admin page renders
 - WHEN it mounts
 - THEN its top header uses `<PageHeader>` with consistent hierarchy
-- AND any tabular data uses `Table*` with consistent padding, header, and hover
-- AND no ad-hoc `<table>` markup remains in feature or admin code
+- AND scoped tabular data uses `Table*` with consistent padding, header, and hover
+- AND no ad-hoc `<table>` markup remains in the scoped feature/admin pages
+- AND any remaining referral-admin ad-hoc tables are recorded as a future migration gap
 
 ### Requirement: Icon System Boundary & Brand Mark
 
@@ -78,11 +79,11 @@ Links, icon-only buttons, and toggles MUST show a visible focus ring. Decorative
 
 ### Requirement: Visual Regression Validation
 
-PRs touching tokens, feedback states, or page/table primitives MUST ship Playwright snapshots for `Dashboard`, `QuoteList`, and admin `BillingPage` in light and dark. Snapshots MUST pass before merge.
+PRs touching tokens, feedback states, or page/table primitives MUST ship deterministic Playwright visual/accessibility guards for high-impact pages. Until snapshot infrastructure exists, assertion-based guards MAY satisfy this change, and missing snapshots for `Dashboard`, `QuoteList`, and admin `BillingPage` in light and dark MUST be recorded as an explicit verification gap. Snapshot infrastructure remains future verification work and MUST NOT be marked complete until snapshots exist and pass.
 
-#### Scenario: Snapshots cover high-impact pages
+#### Scenario: Assertion guards cover high-impact pages while snapshots are pending
 
 - GIVEN a PR touches tokens, feedback states, or page/table primitives
 - WHEN verification runs
-- THEN Playwright snapshots exist for those pages in both themes
-- AND they're recorded in the change's verify report
+- THEN assertion-based Playwright guards cover focus/reduced-motion behavior on high-impact app pages
+- AND missing light/dark snapshots for `Dashboard`, `QuoteList`, and admin `BillingPage` are recorded in the change's verify report until snapshot infrastructure is implemented

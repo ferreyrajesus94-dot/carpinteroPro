@@ -218,7 +218,7 @@ function AuthenticatedAppShell({
 					</span>
 				</div>
 				<nav
-					aria-label="Navegación principal"
+					aria-label="Navegación principal lateral"
 					className="flex-1 overflow-y-auto p-2 space-y-0.5"
 				>
 					{NAV_ITEMS.map(({ to, label, icon }) => (
@@ -430,7 +430,7 @@ function AuthenticatedAppShell({
 
 				{/* Bottom tabs mobile */}
 				<nav
-					aria-label="Navegación principal"
+					aria-label="Navegación principal inferior"
 					className="fixed bottom-0 left-0 right-0 z-20 flex border-t border-line bg-cp-surface/95 backdrop-blur lg:hidden"
 					style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
 				>

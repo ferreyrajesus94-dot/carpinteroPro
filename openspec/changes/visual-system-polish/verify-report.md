@@ -1,7 +1,7 @@
 # Verify Report: Visual System Polish — PR A
 
-> **Status**: Ready for review. All unit tests pass (577 total, 572 baseline + 5 new).
-> Playwright visual snapshots are not yet implemented — see Visual Regression section.
+> **Status**: Ready for review with documented verification gaps. All unit tests listed below passed when recorded.
+> Playwright visual snapshots are not implemented — see Visual Regression section.
 
 ## Token & Color Role Consistency
 
@@ -45,7 +45,7 @@ No Playwright visual snapshot tests exist for this PR scope. The existing E2E te
 
 ### Gap: Playwright Visual Snapshots (NOT YET IMPLEMENTED)
 
-PR A touches visual tokens and feedback states, but no Playwright visual regression snapshots exist yet. The visual snapshot requirement (per spec) will be fulfilled as part of per-PR verification (Phase 5) when Playwright snapshot infrastructure is set up.
+PR A touches visual tokens and feedback states, but no Playwright visual regression snapshots exist yet. Snapshot verification remains pending until Playwright snapshot infrastructure is set up; do not treat snapshots as complete for this change.
 
 To add later:
 - Dashboard (light + dark): verify `ActiveQuotesPanel` chip colors, sparkline token resolution
@@ -74,7 +74,7 @@ To add later:
 
 ## PR C2: Admin Table Alignment
 
-> **Status**: Implementation complete. 597 unit tests pass (baseline 597 + 0 new — refactoring-only changes). Playwright visual snapshots not yet implemented — see Visual Regression section.
+> **Status**: Scoped implementation complete for Billing/Support/Workshops admin tables. 597 unit tests passed when recorded (baseline 597 + 0 new — refactoring-only changes). Playwright visual snapshots not implemented — see Visual Regression section.
 
 ### Admin Table Migrations
 
@@ -82,6 +82,10 @@ To add later:
 - [x] `SupportPage.tsx` — migrated ad-hoc `<table>` → `Table*` components; inline error state → `ErrorState`; inline empty state → `EmptyState` (with description); raw event type badge colors → `chip-success`/`chip-danger` tokens.
 - [x] `WorkshopsPage.tsx` — migrated ad-hoc `<table>` → `Table*` components; inline error state → `ErrorState`; inline empty state → `EmptyState` (with dynamic search/no-results variants); raw status badge colors → `chip-success`/`chip-warn`/`chip-danger` tokens.
 - [x] `src/index.css`: added `chip-danger` CSS class alongside existing `chip-warn/success/info` for cancelled/past_due status rendering.
+
+### Admin Table Scope — Remaining Future Work
+
+`CodesPanel.tsx`, `CommissionsTab.tsx`, and `PayoutsTab.tsx` still contain ad-hoc `<table>` markup under the referral-admin UI. They were not migrated in PR C2. The spec/tasks now define PR C2 scope as Billing/Support/Workshops and track these referral-admin tables as explicit future work, not completed verification.
 
 ### Test Results
 
@@ -93,11 +97,15 @@ To add later:
 
 ### Visual Regression — Gap (Unchanged)
 
-Playwright visual snapshots for admin BillingPage (light + dark) remain unimplemented. The same snapshot infrastructure gap from PR A persists. Documented for per-PR verification phase (Phase 5).
+Playwright visual snapshots for admin BillingPage (light + dark) remain unimplemented. The same snapshot infrastructure gap from PR A persists. This is a pending verification gap for Phase 5, not completed evidence.
+
+### Playwright Assertion Guard — Local Mocks
+
+`tests/e2e/browser/visual-polish-a11y.spec.ts` requires local Supabase mocks because it verifies authenticated app-shell focus and reduced-motion behavior without test credentials. The default Playwright config runs that spec only in the `chromium-local-mocks` project, whose dev server sets `VITE_USE_LOCAL_MOCKS=true`. Other E2E specs remain on the normal `chromium` project.
 
 ### Reduced Motion & Contrast Checks (Pending)
 
-Reduced-motion guards and chart/status contrast checks were not tested in this PR scope since PR C2 is a structural migration (no new motion or color tokens). The existing reduced-motion guards from PR A (`@media (prefers-reduced-motion: reduce)`) continue to apply globally. Contrast is inherited from existing `chip-*` token classes which were verified in PR A for palette-safety.
+Reduced-motion behavior is covered by the assertion-based Playwright guard above. Manual or screenshot-based contrast checks across `sawdust`, `workshop`, `graphite` × light/dark remain pending; do not treat contrast snapshots/screenshots as existing evidence.
 
 ### Fixes Applied Post-Review (PR C2 Rev 2)
 
@@ -108,3 +116,17 @@ Reduced-motion guards and chart/status contrast checks were not tested in this P
 | Missing `.chip-danger` token documentation in `tasks.md` | Added NOTE to task 4.1 | `tasks.md` |
 | Vitest config lacked `test.only` guard for CI | Added `allowOnly: !process.env.CI` | `vite.config.ts` |
 | `WorkshopsPage.test.tsx` search test flagged as failing | Verified passing (7/7) with honest real-timer assertion — no changes needed | `WorkshopsPage.test.tsx` |
+| Visual E2E only passed when manually setting `VITE_USE_LOCAL_MOCKS=true` | Added a dedicated `chromium-local-mocks` Playwright project and mock dev server for `visual-polish-a11y.spec.ts` | `playwright.config.ts` |
+| Duplicate desktop/mobile navigation labels | Changed labels to distinct lateral/inferior navigation names | `AppLayout.tsx` |
+| BillingPage action column announced as `Taller` | Changed sr-only header to `Acciones` | `BillingPage.tsx` |
+| Spec over-scoped all admin tables and snapshot MUSTs | Narrowed current table scope, documented referral-admin tables as future work, and converted snapshot requirement to an explicit pending verification gap until infrastructure exists | `spec.md`, `tasks.md` |
+
+### Post-Judgment Fix Verification (2026-06-21)
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npm run test:e2e -- tests/e2e/browser/visual-polish-a11y.spec.ts` | PASS — 3/3 | Ran under `chromium-local-mocks` project from default Playwright config |
+| `VITE_USE_LOCAL_MOCKS=true npm run test:e2e -- tests/e2e/browser/visual-polish-a11y.spec.ts` | PASS — 3/3 | Explicit env still passes; no credentials required |
+| `npm run lint` | PASS with 6 existing React Compiler warnings | Warnings are unrelated `react-hook-form watch()` compiler-skip notices |
+| `npm test` | PASS — 597/597 | Existing test stderr warnings remain, no failures |
+| `npm run build` | PASS | Production build completed |
