@@ -104,7 +104,7 @@ export function QuoteList() {
   const [page, setPage] = useState(0)
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | 'all'>('all')
   const { data: allQuotes = [] } = useQuotes(workshopId)
-  const { data: result, isLoading, isError } = useQuotesPaginated(workshopId, page)
+  const { data: result, isLoading, isError, refetch } = useQuotesPaginated(workshopId, page)
   const deleteMutation = useDeleteQuote(workshopId)
   const updateMutation = useUpdateQuote(workshopId)
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; quoteNumber: string } | null>(null)
@@ -163,6 +163,15 @@ export function QuoteList() {
       <ErrorState
         title="Error al cargar los presupuestos"
         description="Revisá tu conexión e intentá de nuevo."
+        action={
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+          >
+            Reintentar
+          </button>
+        }
       />
     )
   }

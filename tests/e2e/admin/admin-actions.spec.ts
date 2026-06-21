@@ -1,7 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
+import { hasAdminCredentials, getAdminEmail, getAdminPassword } from "../envCheck";
 
-const ADMIN_EMAIL = "admin@carpinteropro.dev";
-const ADMIN_PASSWORD = "CarpPro#2024";
+const ADMIN_EMAIL = getAdminEmail();
+const ADMIN_PASSWORD = getAdminPassword();
 
 async function loginAsAdmin(page: Page) {
 	await page.goto("/login");
@@ -12,6 +13,7 @@ async function loginAsAdmin(page: Page) {
 }
 
 test.describe("Admin Actions E2E", () => {
+	test.skip(!hasAdminCredentials(), "E2E_ADMIN_EMAIL / E2E_ADMIN_PASSWORD not set");
 	test("workshop detail shows activate/deactivate toggle", async ({ page }) => {
 		await loginAsAdmin(page);
 		await page.goto("/admin/workshops");

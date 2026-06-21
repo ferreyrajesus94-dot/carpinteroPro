@@ -34,12 +34,11 @@ export const MOCK_USER: User = {
 };
 
 export const MOCK_SESSION: Session = {
-	access_token:
-		"mock_access_token_eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock",
+	access_token: "mock_session_token_noop_base64",
 	token_type: "bearer",
 	expires_in: 3600,
 	expires_at: Math.floor(Date.now() / 1000) + 3600,
-	refresh_token: "mock_refresh_token",
+	refresh_token: "mock_refresh_token_noop",
 	user: MOCK_USER,
 };
 

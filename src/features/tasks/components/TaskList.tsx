@@ -94,7 +94,7 @@ function sortTasks(tasks: Task[]): Task[] {
 export function TaskList() {
   const workshopId = useWorkshopId()
   const isOnline = useOnlineStatus()
-  const { data: tasks = [], isLoading, isError } = useTasks(workshopId)
+  const { data: tasks = [], isLoading, isError, refetch } = useTasks(workshopId)
 
   const [tab, setTab] = useState<TabKey>('hoy')
   const [categoryFilter, setCategoryFilter] = useState<'todas' | TaskCategory>('todas')
@@ -139,6 +139,15 @@ export function TaskList() {
       <ErrorState
         title="Error al cargar las tareas"
         description="Revisá tu conexión e intentá de nuevo."
+        action={
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+          >
+            Reintentar
+          </button>
+        }
       />
     )
   }

@@ -61,6 +61,7 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 		data: result,
 		isLoading,
 		isError,
+		refetch,
 	} = useClientsPaginated(workshopId, page);
 	const [formOpen, setFormOpen] = useState(false);
 	useFabAction(
@@ -88,6 +89,15 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 			<ErrorState
 				title="Error al cargar los clientes"
 				description="Revisá tu conexión e intentá de nuevo."
+				action={
+					<button
+						type="button"
+						onClick={() => refetch()}
+						className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
+					>
+						Reintentar
+					</button>
+				}
 			/>
 		);
 	}
