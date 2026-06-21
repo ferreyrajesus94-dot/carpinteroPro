@@ -12,6 +12,7 @@ import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState } from '@/shared/ui/empty-state'
 import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useQuotes, useQuotesPaginated, useDeleteQuote, useUpdateQuote } from '../hooks/useQuotes'
@@ -300,18 +301,18 @@ export function QuoteList() {
 
           {/* Desktop: table */}
           <div className="hidden sm:block rounded-lg border border-line overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-cp-bg2 text-ink2 text-xs uppercase font-medium border-b border-line">
-                <tr>
-                  <th className="px-4 py-3 text-left">N°</th>
-                  <th className="px-4 py-3 text-left">Cliente</th>
-                  <th className="px-4 py-3 text-left">Mueble</th>
-                  <th className="px-4 py-3 text-right">Total</th>
-                  <th className="px-4 py-3 text-left">Estado</th>
-                  <th className="px-4 py-3 text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>N°</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Mueble</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {listaQuotes.map((q) => {
                   const { salePrice } = calculateQuote({
                     recipeCost: q.recipe_cost,
@@ -320,13 +321,13 @@ export function QuoteList() {
                     marginPct: q.margin_pct,
                   })
                   return (
-                    <tr key={q.id} className="hover:bg-cp-bg2/40 transition-colors">
-                      <td className="px-4 py-3 font-mono font-medium text-ink2">{q.quote_number}</td>
-                      <td className="px-4 py-3">{q.client?.name ?? <span className="text-muted-foreground">—</span>}</td>
-                      <td className="px-4 py-3">{q.furniture_name}</td>
-                      <td className="px-4 py-3 text-right font-display font-semibold">{formatCurrency(salePrice)}</td>
-                      <td className="px-4 py-3"><QuoteStatusBadge status={q.status} /></td>
-                      <td className="px-4 py-3 text-right">
+                    <TableRow key={q.id}>
+                      <TableCell className="font-mono font-medium">{q.quote_number}</TableCell>
+                      <TableCell>{q.client?.name ?? <span className="text-muted-foreground">—</span>}</TableCell>
+                      <TableCell>{q.furniture_name}</TableCell>
+                      <TableCell className="text-right font-display font-semibold">{formatCurrency(salePrice)}</TableCell>
+                      <TableCell><QuoteStatusBadge status={q.status} /></TableCell>
+                      <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="icon" asChild className="h-8 w-8">
                             <Link to={`/quotes/${q.id}/contract`}><FileText className="h-4 w-4" /></Link>
@@ -344,12 +345,12 @@ export function QuoteList() {
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )
                 })}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
           {totalPages > 1 && (

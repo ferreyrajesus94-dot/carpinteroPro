@@ -3,6 +3,7 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { formatCurrency } from '@/shared/lib/formatters'
 import { QUOTE_STATUS_COLORS, QUOTE_STATUS_LABELS } from '@/shared/types/quotes'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table'
 import { getSalePrice, type DashboardStats } from '../hooks/useDashboardStats'
 
 interface Props {
@@ -50,37 +51,37 @@ export function ActiveQuotesPanel({ quotes }: Props) {
           </div>
 
           {/* Desktop: table */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground">
-                  <th className="px-5 py-3 font-medium">Nº</th>
-                  <th className="px-5 py-3 font-medium">Mueble</th>
-                  <th className="px-5 py-3 font-medium">Cliente</th>
-                  <th className="px-5 py-3 font-medium text-right">Total</th>
-                  <th className="px-5 py-3 font-medium">Estado</th>
-                  <th className="px-5 py-3 font-medium">Fecha</th>
-                </tr>
-              </thead>
-              <tbody>
+          <div className="hidden sm:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nº</TableHead>
+                  <TableHead>Mueble</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Fecha</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {quotes.map(quote => (
-                  <tr
+                  <TableRow
                     key={quote.id}
-                    className="cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/40"
+                    className="cursor-pointer"
                     onClick={() => navigate(`/quotes/${quote.id}`)}
                   >
-                    <td className="px-5 py-3 font-mono text-xs">{quote.quote_number}</td>
-                    <td className="px-5 py-3">{quote.furniture_name}</td>
-                    <td className="px-5 py-3 text-muted-foreground">{quote.client?.name ?? '—'}</td>
-                    <td className="px-5 py-3 text-right font-medium">{formatCurrency(getSalePrice(quote))}</td>
-                    <td className="px-5 py-3"><DashboardQuoteStatusBadge status={quote.status} /></td>
-                    <td className="px-5 py-3 text-muted-foreground">
+                    <TableCell className="font-mono text-xs">{quote.quote_number}</TableCell>
+                    <TableCell>{quote.furniture_name}</TableCell>
+                    <TableCell className="text-muted-foreground">{quote.client?.name ?? '—'}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(getSalePrice(quote))}</TableCell>
+                    <TableCell><DashboardQuoteStatusBadge status={quote.status} /></TableCell>
+                    <TableCell className="text-muted-foreground">
                       {format(new Date(quote.created_at), 'd MMM yyyy', { locale: es })}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </>
       )}
