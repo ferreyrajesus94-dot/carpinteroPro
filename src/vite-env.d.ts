@@ -6,6 +6,7 @@ interface ImportMetaEnv {
 	readonly VITE_USE_LOCAL_MOCKS?: string;
 	readonly VITE_SENTRY_DSN?: string;
 	readonly VITE_SUPPORT_EMAIL?: string;
+	readonly VITE_MOCK_ADMIN?: string;
 }
 
 interface ImportMeta {

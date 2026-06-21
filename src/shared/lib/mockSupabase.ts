@@ -251,6 +251,49 @@ function notifyListeners(event: string, session: Session | null) {
 	}
 }
 
+// ─── Mock data for admin functions ────────────────────────────────────────
+
+const MOCK_ADMIN_SUBSCRIPTIONS = {
+	subscriptions: [
+		{
+			id: "mock-sub-001",
+			workshopId: "00000000-0000-0000-0000-000000000010",
+			workshopName: "Carpintería El Ñandú",
+			status: "active",
+			plan: "pro",
+			provider: "mercadopago",
+			providerPreapprovalId: "preapp-mock-001",
+			providerStatus: "authorized",
+			currentPeriodEnd: "2026-07-20T12:00:00Z",
+			updatedAt: "2026-06-20T12:00:00Z",
+		},
+		{
+			id: "mock-sub-002",
+			workshopId: "00000000-0000-0000-0000-000000000011",
+			workshopName: "Mueblería La Estancia",
+			status: "trialing",
+			plan: "starter",
+			provider: "mercadopago",
+			providerPreapprovalId: "preapp-mock-002",
+			providerStatus: "authorized",
+			currentPeriodEnd: "2026-09-20T12:00:00Z",
+			updatedAt: "2026-06-19T10:00:00Z",
+		},
+		{
+			id: "mock-sub-003",
+			workshopId: "00000000-0000-0000-0000-000000000012",
+			workshopName: "Taller del Sur",
+			status: "cancelled",
+			plan: "pro",
+			provider: "mercadopago",
+			providerPreapprovalId: null,
+			providerStatus: "cancelled",
+			currentPeriodEnd: null,
+			updatedAt: "2026-06-15T08:00:00Z",
+		},
+	],
+};
+
 export const mockSupabase = {
 	auth: {
 		getSession: async (): Promise<{
@@ -300,6 +343,22 @@ export const mockSupabase = {
 	},
 	from: (table: string): MockQueryBuilder => {
 		return createQueryBuilder(table);
+	},
+	functions: {
+		invoke: async (
+			name: string,
+			_options?: { body?: unknown },
+		): Promise<{ data: unknown; error: { message: string; code: string } | null }> => {
+			void _options;
+			if (name === "admin-subscriptions") {
+				return { data: MOCK_ADMIN_SUBSCRIPTIONS, error: null };
+			}
+			// Fail loudly for any admin function not explicitly needed by the current test
+			return {
+				data: null,
+				error: { message: `Mock function not implemented: ${name}`, code: "NOT_MOCKED" },
+			};
+		},
 	},
 	rpc: async (
 		fn: string,

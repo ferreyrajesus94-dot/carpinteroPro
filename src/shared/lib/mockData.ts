@@ -411,10 +411,22 @@ export function getMockTableRecords(
 	const values = Object.values(records);
 
 	if (table === "profiles") {
-		return values.filter(
+		let results = values.filter(
 			(v) =>
 				(v as Record<string, unknown>).workshop_id === _eqValue || _eqColumn === "id",
 		);
+		// Allow VITE_MOCK_ADMIN=true to elevate profile to platform admin for snapshot tests
+		try {
+			if (
+				typeof import.meta !== "undefined" &&
+				import.meta.env?.VITE_MOCK_ADMIN === "true"
+			) {
+				results = results.map((r) => ({ ...r, is_platform_admin: true }));
+			}
+		} catch {
+			/* not in Vite env — ignore */
+		}
+		return results;
 	}
 
 	return values.filter(

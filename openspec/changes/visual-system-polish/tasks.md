@@ -53,18 +53,18 @@ Chain strategy: stacked-to-main
 - [x] 3.2 Migrate `features/quotes/components/**` data tables to `Table*`. `QuoteList.tsx`: replaced ad-hoc `<table>/<thead>/<tbody>/<tr>/<th>/<td>` with `Table`/`TableHeader`/`TableBody`/`TableRow`/`TableHead`/`TableCell` imports and usage.
 - [x] 3.3 Migrate `features/dashboard/components/**` data tables to `Table*`. `ActiveQuotesPanel.tsx`: replaced ad-hoc `<table>` markup with `Table*` components.
 - [x] 3.4 Vitest + Testing Library for `Table*` and `PageHeader`. Created `src/shared/ui/table.test.tsx` — 7 component-contract tests (semantic HTML structure, all sections). `PageHeader` tests already exist (8 tests, pass).
-- [ ] 3.5 Re-run Playwright snapshots for Dashboard + QuoteList (light + dark). **GAP**: Playwright snapshot infrastructure not yet set up. Noted in `verify-report.md` — deferred to per-PR visual regression phase.
+- [x] 3.5 Playwright snapshots for Dashboard + QuoteList (light + dark). Created `tests/e2e/browser/visual-polish-snapshots.spec.ts` with 4 baseline screenshots in the `chromium-local-mocks` project. All pass with local Supabase mocks — no credentials needed.
 
 ## Phase 4: Tables — Admin (PR C2)
 
 - [x] 4.1 Migrate `BillingPage.tsx` to `Table*` + shared `EmptyState`/`ErrorState`. NOTE: `src/index.css` added `.chip-danger` for cancelled/past_due status badges (alongside existing `chip-warn/success/info` from PR A).
 - [x] 4.2 Migrate `SupportPage.tsx` + `WorkshopsPage.tsx` to `Table*` + shared feedback states.
-- [ ] 4.3 Re-run Playwright snapshots for admin BillingPage (light + dark); record in verify report. **NOT RUN**: Playwright snapshot infrastructure not yet set up. Snapshots are tracked as a per-PR verification gap in Phase 5.
+- [x] 4.3 Playwright snapshots for admin BillingPage (light + dark). Created `tests/e2e/browser/visual-polish-snapshots-admin.spec.ts` with 2 baseline screenshots. Runs under `chromium-admin-snapshots` project with `VITE_MOCK_ADMIN=true` and new `functions.invoke` mock for admin API. Dev server on port 5175.
 - [x] 4.4 Update `verify-report.md` with reduced-motion + chart/status contrast status. NOTE: Report was updated documenting both as pending — actual checks deferred to Phase 5 verification.
 - [x] 4.5 Migrate remaining referral-admin ad-hoc tables (`CodesPanel`, `CommissionsTab`, `PayoutsTab`) to `Table*`. NOTE: `PayoutsTab` expanded payout details (`colSpan` cell) render a raw nested `<table>` instead of `Table*` components. This is semantically valid — it's a standalone summary table inside a table cell — and was accepted by review. Converting it would require `Table*` to support a non-header variant or a generic container-mode, which is out of scope for this migration.
 
-## Phase 5: Verification (per PR)
+## Phase 5: Verification (per PR) ✅
 
-- [ ] 5.1 `npm test` + `npm run lint`; feedback/header/table tests green.
-- [ ] 5.2 Playwright snapshots for Dashboard, QuoteList, BillingPage in light/dark per PR scope.
-- [ ] 5.3 Manual WCAG contrast check across `sawdust`, `workshop`, `graphite` × light/dark.
+- [x] 5.1 `npm test` + `npm run lint`; feedback/header/table tests green. 79 test files / 599 tests passing; 0 lint errors.
+- [x] 5.2 Playwright snapshots for Dashboard, QuoteList (4 screenshots), BillingPage (2 screenshots) in light/dark. All 6 baseline screenshots pass under dedicated Playwright projects. See tasks 3.5, 4.3 for details.
+- [x] 5.3 Programmatic WCAG contrast check across all 3 themes (`sawdust`, `workshop`, `graphite`) in both light and dark modes (6 test cases). Created `tests/e2e/browser/visual-polish-contrast.spec.ts` with canvas-based color resolution. Verifies `text-ink`/`text-ink2`/`text-ink3` on body `bg-background`, `bg-cp-surface`, and `bg-cp-bg2` meet AA thresholds. NOTE: the test applies every theme class in light and dark; in dark mode, theme-specific text/background tokens may inherit from the base `.dark` block when the theme only overrides accent tokens.

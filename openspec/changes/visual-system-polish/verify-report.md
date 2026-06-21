@@ -1,7 +1,6 @@
 # Verify Report: Visual System Polish — PR A
 
-> **Status**: Ready for review with documented verification gaps. All unit tests listed below passed when recorded.
-> Playwright visual snapshots are not implemented — see Visual Regression section.
+> **Status**: Ready for review. Unit tests, lint, build, assertion-based visual guards, contrast checks, and first-generation Playwright snapshots passed when recorded. See Phase 5 for the final verification evidence.
 
 ## Token & Color Role Consistency
 
@@ -31,9 +30,9 @@
 - [x] `ClientList` → migrated to `ErrorState` + `LoadingState`.
 - [x] `MuebleList` → migrated to `LoadingState`.
 
-## Visual Regression — Evidence & Gaps
+## Visual Regression — Evidence
 
-No Playwright visual snapshot tests exist for this PR scope. The existing E2E tests cover business flows (billing, referral, admin) but not visual regression.
+Playwright visual snapshots were added in Phase 5 for Dashboard, QuoteList, and BillingPage in light/dark mode. Earlier PR-slice notes below are historical context; the final verification evidence is recorded in Phase 5.
 
 ### Verified with Unit Tests (JSDOM)
 
@@ -43,21 +42,18 @@ No Playwright visual snapshot tests exist for this PR scope. The existing E2E te
 | `PriceSparkline.test.tsx` | 9 tests | 4 container tests + 5 `resolveSparklineColor()` tests asserting `--chart-up/down/neutral` |
 | `ErrorBoundary.test.tsx` | 4 tests | Existing tests pass (Safety Net baseline) |
 
-### Gap: Playwright Visual Snapshots (NOT YET IMPLEMENTED)
+### Playwright Visual Snapshots
 
-PR A touches visual tokens and feedback states, but no Playwright visual regression snapshots exist yet. Snapshot verification remains pending until Playwright snapshot infrastructure is set up; do not treat snapshots as complete for this change.
-
-To add later:
-- Dashboard (light + dark): verify `ActiveQuotesPanel` chip colors, sparkline token resolution
-- QuoteList (light + dark): verify `ErrorState` / `LoadingState` rendering with dark palette
-- This is tracked in PR verification scope, not PR A implementation scope.
+PR-slice snapshot verification was deferred during implementation and completed in Phase 5. The final snapshot scope is:
+- Dashboard (light + dark)
+- QuoteList (light + dark)
+- BillingPage (light + dark)
 
 ## Known Gaps (Out of PR A Scope)
 
 - `ActiveQuotesPanel` status chip migration — belongs to PR C (tables/dashboard scope).
 - `StockHistoryDialog`, `InventoryStats`, `PriceHistoryChart` still use inline Skeleton loading.
 - `ExtraItemsSection` / `WoodItemsSection` in recipes have inline "No hay" empty text.
-- Playwright visual snapshots for Dashboard/QuoteList — deferred to per-PR verification phase.
 
 ## Findings Resolved in This Batch
 
@@ -74,7 +70,7 @@ To add later:
 
 ## PR C2: Admin Table Alignment
 
-> **Status**: Scoped implementation complete for Billing/Support/Workshops admin tables. 597 unit tests passed when recorded (baseline 597 + 0 new — refactoring-only changes). Playwright visual snapshots not implemented — see Visual Regression section.
+> **Status**: Scoped implementation complete for Billing/Support/Workshops admin tables. 597 unit tests passed when recorded (baseline 597 + 0 new — refactoring-only changes). BillingPage visual snapshots were completed in Phase 5.
 
 ### Admin Table Migrations
 
@@ -95,17 +91,17 @@ To add later:
 | `SupportPage.test.tsx` | 9 tests | All pass — loading skeleton, diagnostics table, event type badges, empty state, error state, workshop link, filter dropdown |
 | `WorkshopsPage.test.tsx` | 7 tests | All pass — loading skeleton, workshops table, status badges, empty state, error state, search filter, workshop detail links |
 
-### Visual Regression — Gap (Unchanged)
+### Visual Regression — Phase 5 Evidence
 
-Playwright visual snapshots for admin BillingPage (light + dark) remain unimplemented. The same snapshot infrastructure gap from PR A persists. This is a pending verification gap for Phase 5, not completed evidence.
+Playwright visual snapshots for admin BillingPage (light + dark) were implemented and passed in Phase 5 under the dedicated `chromium-admin-snapshots` project.
 
 ### Playwright Assertion Guard — Local Mocks
 
 `tests/e2e/browser/visual-polish-a11y.spec.ts` requires local Supabase mocks because it verifies authenticated app-shell focus and reduced-motion behavior without test credentials. The default Playwright config runs that spec only in the `chromium-local-mocks` project, whose dev server sets `VITE_USE_LOCAL_MOCKS=true`. Other E2E specs remain on the normal `chromium` project.
 
-### Reduced Motion & Contrast Checks (Pending)
+### Reduced Motion & Contrast Checks
 
-Reduced-motion behavior is covered by the assertion-based Playwright guard above. Manual or screenshot-based contrast checks across `sawdust`, `workshop`, `graphite` × light/dark remain pending; do not treat contrast snapshots/screenshots as existing evidence.
+Reduced-motion behavior is covered by the assertion-based Playwright guard above. Programmatic contrast checks across `sawdust`, `workshop`, `graphite` × light/dark are now covered by `visual-polish-contrast.spec.ts` — see §5.3 for results.
 
 ### Fixes Applied Post-Review (PR C2 Rev 2)
 
@@ -121,12 +117,54 @@ Reduced-motion behavior is covered by the assertion-based Playwright guard above
 | BillingPage action column announced as `Taller` | Changed sr-only header to `Acciones` | `BillingPage.tsx` |
 | Spec over-scoped all admin tables and snapshot MUSTs | Narrowed current table scope, documented referral-admin tables as future work, and converted snapshot requirement to an explicit pending verification gap until infrastructure exists | `spec.md`, `tasks.md` |
 
+## Phase 5 Verification Tasks — Resolved (2026-06-21)
+
+### 5.1 `npm test` + `npm run lint`
+
+| Command | Result | Notes |
+|---------|--------|-------|
+| `npm test` | PASS — 599/599 | 79 test files, all passing |
+| `npm run lint` | PASS — 0 errors, 6 warnings | Warnings are pre-existing React Compiler `react-hook-form watch()` notices, unchanged |
+
+### 5.2 Playwright Snapshots — Dashboard, QuoteList, BillingPage (light + dark)
+
+Created 3 new test spec files with 12 total tests:
+
+| Spec | Tests | Baseline Path | Status |
+|------|-------|---------------|--------|
+| `visual-polish-snapshots.spec.ts` | 4 dashboard + quotelist screenshots | `*-snapshots.spec.ts-snapshots/*-chromium-local-mocks-linux.png` | ✅ PASS |
+| `visual-polish-snapshots-admin.spec.ts` | 2 billing page screenshots | `*-snapshots-admin.spec.ts-snapshots/*-chromium-admin-snapshots-linux.png` | ✅ PASS |
+| `visual-polish-contrast.spec.ts` | 6 WCAG contrast checks (3 themes × 2 modes) | Assertion-based (no screenshots) | ✅ PASS |
+
+Infrastructure changes:
+- **VITE_MOCK_ADMIN**: New env var (`src/vite-env.d.ts` + `mockData.ts`) elevates mock profile `is_platform_admin` to `true`.
+- **functions.invoke mock**: Added to `mockSupabase.ts` — returns mock subscription data for admin BillingPage.
+- **Third dev server + project**: `playwright.config.ts` adds port 5175 with `VITE_MOCK_ADMIN=true` and `chromium-admin-snapshots` project.
+- All snapshot baselines committed as first-generation references; `maxDiffPixelRatio: 0.01` tolerance for anti-aliasing.
+
+### 5.3 WCAG Contrast Check
+
+Programmatic check verifies token contrast ratios using canvas-based color resolution. Now covers all 3 themes (`sawdust`, `workshop`, `graphite`) in both light and dark modes (6 test cases total):
+
+All 6 token pairs are tested per combination:
+- `text-ink` on body `bg-background` — AA normal (4.5:1)
+- `text-ink2` on body `bg-background` — AA normal (4.5:1)
+- `text-ink2` on `bg-cp-surface` — AA normal (4.5:1)
+- `text-ink2` on `bg-cp-bg2` — AA normal (4.5:1)
+- `text-ink` on `bg-cp-bg2` — AA normal (4.5:1)
+- `text-ink3` on body `bg-background` — AA large (3:1)
+
+All 36 assertions (6 combinations × 6 pairs) pass. See `visual-polish-contrast.spec.ts` for exact ratios per combination.
+
+> **Note**: Base `.dark` defines `--ink`, `--ink-2`, `--ink-3`, `--bg`, `--bg-2`, and `--surface` for all themes. Theme-specific dark overrides (`.dark.theme-workshop`, `.dark.theme-graphite`, `.dark.theme-sawdust`) only adjust accent tokens (`--cp-accent`, `--cp-accent-ink`). Text/background tokens in dark mode inherit from the base `.dark` block unless overridden. The test verifies each combination independently as rendered by the browser.
+
 ### Post-Judgment Fix Verification (2026-06-21)
 
 | Command | Result | Notes |
 |---------|--------|-------|
-| `npm run test:e2e -- tests/e2e/browser/visual-polish-a11y.spec.ts` | PASS — 3/3 | Ran under `chromium-local-mocks` project from default Playwright config |
+| `npm run test:e2e -- tests/e2e/browser/visual-polish-a11y.spec.ts` | PASS — 3/3 | Ran under `chromium-local-mocks` project |
 | `VITE_USE_LOCAL_MOCKS=true npm run test:e2e -- tests/e2e/browser/visual-polish-a11y.spec.ts` | PASS — 3/3 | Explicit env still passes; no credentials required |
-| `npm run lint` | PASS with 6 existing React Compiler warnings | Warnings are unrelated `react-hook-form watch()` compiler-skip notices |
-| `npm test` | PASS — 597/597 | Existing test stderr warnings remain, no failures |
+| `npm run lint` | PASS with 6 existing React Compiler warnings | Pre-existing, unchanged |
+| `npm test` | PASS — 599/599 | Up from 597 in prior run (2 more tests from table.test.tsx?) |
 | `npm run build` | PASS | Production build completed |
+| `npx playwright test --project=chromium-local-mocks --project=chromium-admin-snapshots` | PASS — 15/15 | All visual polish E2E tests (incl. pre-existing a11y spec) |
