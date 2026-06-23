@@ -36,6 +36,10 @@ jobs:
 
       - name: Run tests
         run: npm test
+        env:
+          VITE_USE_LOCAL_MOCKS: "true"
+          VITE_SUPABASE_URL: "http://stub.local"
+          VITE_SUPABASE_ANON_KEY: "stub-anon-key"
 
       - name: Run lint
         run: npm run lint

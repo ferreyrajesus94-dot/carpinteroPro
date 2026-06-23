@@ -224,7 +224,7 @@ export function GlobalSearch() {
 					onSelect={handleSelect}
 					onNavigateAll={handleNavigateAll}
 					onRetry={() => {
-						void refetch()
+						void refetch();
 					}}
 					containerId={PANEL_ID}
 				/>
