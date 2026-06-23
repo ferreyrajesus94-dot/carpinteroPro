@@ -151,6 +151,13 @@ export const router = createBrowserRouter([
 							})),
 					},
 					{
+						path: "/buscar",
+						lazy: () =>
+							import("@/features/search").then((m) => ({
+								Component: m.SearchRoutes,
+							})),
+					},
+					{
 						path: "/tareas/*",
 						lazy: () =>
 							import("@/features/tasks/routes").then((m) => ({

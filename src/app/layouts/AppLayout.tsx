@@ -16,6 +16,7 @@ import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { useSubscription } from "@/features/billing/hooks/useSubscription";
 import { useCreateSubscription } from "@/features/billing/hooks/useBillingActions";
 import { BillingGate } from "@/features/billing/components/BillingGate";
+import { GlobalSearch } from "@/features/search";
 import { NAV_ITEMS, type NavItem } from "./nav-items";
 import { dispatchFab } from "@/shared/lib/fab";
 
@@ -320,22 +321,7 @@ function AuthenticatedAppShell({
 						<span className="text-ink2">{sectionTitle}</span>
 					</div>
 					<div className="flex-1" />
-					<div className="relative w-[320px] hidden xl:block">
-						<i className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-ink3 text-xs" />
-						<input
-							type="search"
-							placeholder="Buscar clientes, presupuestos, materiales…"
-							className="h-9 w-full rounded-md border border-line bg-cp-bg2 pl-9 pr-12 text-[13px] text-ink placeholder:text-ink3 focus:outline-none focus:border-accent"
-							disabled
-							aria-describedby="search-disabled-reason"
-						/>
-						<span
-							id="search-disabled-reason"
-							className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full border border-cp-accent/30 bg-cp-accent-soft px-2 py-0.5 text-[10px] font-medium text-cp-accent"
-						>
-							Pronto
-						</span>
-					</div>
+					<GlobalSearch />
 					<button
 						type="button"
 						onClick={toggle}
@@ -358,6 +344,20 @@ function AuthenticatedAppShell({
 					<span className="font-display font-semibold text-[14px] tracking-tight text-ink truncate flex-1">
 						{sectionTitle}
 					</span>
+					<NavLink
+						to="/buscar"
+						aria-label="Buscar"
+						className={({ isActive }) =>
+							cn(
+								"grid h-11 w-11 place-items-center rounded-md transition-colors focus-ring",
+								isActive
+									? "bg-cp-accent-soft text-cp-accent"
+									: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
+							)
+						}
+					>
+						<i className="fi fi-rr-search text-base leading-none" />
+					</NavLink>
 					<button
 						type="button"
 						onClick={toggle}

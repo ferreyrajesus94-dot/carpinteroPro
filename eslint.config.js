@@ -31,6 +31,7 @@ const featureBoundaryZones = [
 	featureZone("onboarding"),
 	// SDD9 complete: quotes has no remaining feature exceptions.
 	featureZone("quotes"),
+	featureZone("search"),
 	// SDD9 WU7 complete: recipes no longer imports inventory or settings.
 	featureZone("recipes"),
 	featureZone("settings"),

@@ -212,6 +212,60 @@ export const MOCK_MATERIALS: Database["public"]["Tables"]["materials"]["Row"][] 
 		updated_at: "2026-02-01T08:00:00Z",
 	}));
 
+// ─── Furniture templates (muebles) ───────────────────────────────────────────
+
+export const MOCK_FURNITURE_TEMPLATES: Database["public"]["Tables"]["furniture_templates"]["Row"][] =
+	[
+		{
+			id: "00000000-0000-0000-0000-000000000401",
+			workshop_id: MOCK_WORKSHOP_ID,
+			name: "Mesa de comedor 1.80m",
+			notes: null,
+			category: "Mesas",
+			tags: ["comedor", "melamina"],
+			height_cm: 75,
+			width_cm: 180,
+			depth_cm: 90,
+			photo_url: null,
+			suggested_margin_pct: 35,
+			params: [],
+			created_at: "2026-01-10T08:00:00Z",
+			updated_at: "2026-01-10T08:00:00Z",
+		},
+		{
+			id: "00000000-0000-0000-0000-000000000402",
+			workshop_id: MOCK_WORKSHOP_ID,
+			name: "Estantería industrial metálica y madera",
+			notes: null,
+			category: "Estanterías",
+			tags: ["industrial", "hierro", "melamina"],
+			height_cm: 200,
+			width_cm: 120,
+			depth_cm: 40,
+			photo_url: null,
+			suggested_margin_pct: 40,
+			params: [],
+			created_at: "2026-02-05T08:00:00Z",
+			updated_at: "2026-02-05T08:00:00Z",
+		},
+		{
+			id: "00000000-0000-0000-0000-000000000403",
+			workshop_id: MOCK_WORKSHOP_ID,
+			name: "Biblioteca de pared 3 cuerpos",
+			notes: null,
+			category: "Bibliotecas",
+			tags: ["melamina"],
+			height_cm: 220,
+			width_cm: 240,
+			depth_cm: 35,
+			photo_url: null,
+			suggested_margin_pct: 35,
+			params: [],
+			created_at: "2026-03-15T08:00:00Z",
+			updated_at: "2026-03-15T08:00:00Z",
+		},
+	];
+
 // ─── Quotes ──────────────────────────────────────────────────────────────────
 
 const CLIENT_IDS = CLIENTS_DATA.map((c) => c.id);
@@ -279,26 +333,28 @@ const QUOTES_RAW = [
 	},
 ];
 
-const QUOTE_EXTRAS_MAP: Record<string, { amount: number; show_in_quote: boolean }[]> =
-	{
-		"00000000-0000-0000-0000-000000000301": [
-			{ amount: 8000, show_in_quote: true },
-			{ amount: 3500, show_in_quote: true },
-		],
-		"00000000-0000-0000-0000-000000000302": [
-			{ amount: 5000, show_in_quote: true },
-		],
-		"00000000-0000-0000-0000-000000000303": [
-			{ amount: 12000, show_in_quote: true },
-			{ amount: 2200, show_in_quote: false },
-		],
-		"00000000-0000-0000-0000-000000000304": [
-			{ amount: 15000, show_in_quote: true },
-			{ amount: 6000, show_in_quote: true },
-		],
-		"00000000-0000-0000-0000-000000000305": [],
-		"00000000-0000-0000-0000-000000000306": [],
-	};
+const QUOTE_EXTRAS_MAP: Record<
+	string,
+	{ amount: number; show_in_quote: boolean }[]
+> = {
+	"00000000-0000-0000-0000-000000000301": [
+		{ amount: 8000, show_in_quote: true },
+		{ amount: 3500, show_in_quote: true },
+	],
+	"00000000-0000-0000-0000-000000000302": [
+		{ amount: 5000, show_in_quote: true },
+	],
+	"00000000-0000-0000-0000-000000000303": [
+		{ amount: 12000, show_in_quote: true },
+		{ amount: 2200, show_in_quote: false },
+	],
+	"00000000-0000-0000-0000-000000000304": [
+		{ amount: 15000, show_in_quote: true },
+		{ amount: 6000, show_in_quote: true },
+	],
+	"00000000-0000-0000-0000-000000000305": [],
+	"00000000-0000-0000-0000-000000000306": [],
+};
 
 function buildQuoteExtras(
 	quoteId: string,
@@ -310,11 +366,7 @@ function buildQuoteExtras(
 		workshop_id: MOCK_WORKSHOP_ID,
 		quote_id: quoteId,
 		description:
-			i === 0
-				? "Flete y montaje"
-				: i === 1
-					? "Pintura personalizada"
-					: "Extra",
+			i === 0 ? "Flete y montaje" : i === 1 ? "Pintura personalizada" : "Extra",
 		amount: e.amount,
 		show_in_quote: e.show_in_quote,
 		sort_order: i,
@@ -343,7 +395,7 @@ export interface MockQuoteWithExtras {
 
 export const MOCK_QUOTES: MockQuoteWithExtras[] = QUOTES_RAW.map((q, idx) => {
 	const clientData = q.client_id
-		? MOCK_CLIENTS.find((c) => c.id === q.client_id) ?? null
+		? (MOCK_CLIENTS.find((c) => c.id === q.client_id) ?? null)
 		: null;
 	return {
 		...q,
@@ -363,7 +415,13 @@ export const MOCK_QUOTES: MockQuoteWithExtras[] = QUOTES_RAW.map((q, idx) => {
 
 export type MockTableName = keyof Pick<
 	Database["public"]["Tables"],
-	"profiles" | "workshops" | "subscriptions" | "clients" | "materials" | "quotes"
+	| "profiles"
+	| "workshops"
+	| "subscriptions"
+	| "clients"
+	| "materials"
+	| "quotes"
+	| "furniture_templates"
 >;
 
 export const MOCK_DATA_MAP: Record<
@@ -381,14 +439,22 @@ export const MOCK_DATA_MAP: Record<
 		[MOCK_WORKSHOP_ID]: MOCK_WORKSHOP as unknown as Record<string, unknown>,
 	},
 	subscriptions: {
-		[MOCK_SUBSCRIPTION_ID]:
-			MOCK_SUBSCRIPTION as unknown as Record<string, unknown>,
+		[MOCK_SUBSCRIPTION_ID]: MOCK_SUBSCRIPTION as unknown as Record<
+			string,
+			unknown
+		>,
 	},
 	clients: Object.fromEntries(
 		MOCK_CLIENTS.map((c) => [c.id, c as unknown as Record<string, unknown>]),
 	),
 	materials: Object.fromEntries(
 		MOCK_MATERIALS.map((m) => [m.id, m as unknown as Record<string, unknown>]),
+	),
+	furniture_templates: Object.fromEntries(
+		MOCK_FURNITURE_TEMPLATES.map((r) => [
+			r.id,
+			r as unknown as Record<string, unknown>,
+		]),
 	),
 	quotes: Object.fromEntries(
 		MOCK_QUOTES.map((q) => [q.id, q as unknown as Record<string, unknown>]),
@@ -412,7 +478,8 @@ export function getMockTableRecords(
 	if (table === "profiles") {
 		let results = values.filter(
 			(v) =>
-				(v as Record<string, unknown>).workshop_id === _eqValue || _eqColumn === "id",
+				(v as Record<string, unknown>).workshop_id === _eqValue ||
+				_eqColumn === "id",
 		);
 		// Allow VITE_MOCK_ADMIN=true to elevate profile to platform admin for snapshot tests
 		try {
