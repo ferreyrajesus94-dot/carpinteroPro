@@ -10,6 +10,7 @@ import {
 
 const DROPDOWN_LIMIT = 5;
 const PAGE_LIMIT = 50;
+const MAX_QUERY_LENGTH = 200;
 
 /**
  * Escape a user-supplied term for safe use inside a PostgREST `.or()` filter
@@ -154,6 +155,9 @@ export async function globalSearch(
 ): Promise<SearchResults> {
 	const term = rawQuery.trim();
 	if (term.length < 2) return EMPTY_SEARCH_RESULTS;
+	// Cap query length to avoid blowing up PostgREST URL limits and to
+	// prevent expensive btree-like scans on a single 50 kB term.
+	if (term.length > MAX_QUERY_LENGTH) return EMPTY_SEARCH_RESULTS;
 
 	const limit = scope === "page" ? PAGE_LIMIT : DROPDOWN_LIMIT;
 

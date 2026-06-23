@@ -152,6 +152,7 @@ export const router = createBrowserRouter([
 					},
 					{
 						path: "/buscar",
+						errorElement: <RouteErrorFallback />,
 						lazy: () =>
 							import("@/features/search").then((m) => ({
 								Component: m.SearchRoutes,

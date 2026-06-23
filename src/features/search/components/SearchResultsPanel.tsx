@@ -14,6 +14,7 @@ interface Props {
 	onHoverIndex: (index: number) => void;
 	onSelect: (hit: SearchHit) => void;
 	onNavigateAll: () => void;
+	onRetry?: () => void;
 	containerId: string;
 }
 
@@ -39,6 +40,7 @@ export function SearchResultsPanel({
 	onHoverIndex,
 	onSelect,
 	onNavigateAll,
+	onRetry,
 	containerId,
 }: Props) {
 	// Pre-compute the global index offset for each section so we can map a flat
@@ -80,6 +82,17 @@ export function SearchResultsPanel({
 				<div className="px-4 py-3 text-[13px] text-ink2">
 					No pudimos buscar ahora. Probá de nuevo en unos segundos.
 				</div>
+				{onRetry ? (
+					<div className="border-t border-line bg-cp-bg2/40 px-2 py-1.5">
+						<button
+							type="button"
+							onClick={onRetry}
+							className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[12.5px] text-ink2 transition-colors hover:bg-cp-bg2 hover:text-ink focus:outline-none focus-ring"
+						>
+							<span>Reintentar</span>
+						</button>
+					</div>
+				) : null}
 			</div>
 		);
 	}

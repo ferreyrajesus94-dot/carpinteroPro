@@ -37,7 +37,7 @@ export function GlobalSearch() {
 	// instant the user clears the field, even before the debounce fires.
 	const meetsMin = trimmed.length >= MIN_QUERY_LENGTH;
 
-	const { data, isLoading, isError, isFetching } = useGlobalSearch(
+	const { data, isLoading, isError, isFetching, refetch } = useGlobalSearch(
 		workshopId,
 		debouncedQuery,
 		"dropdown",
@@ -223,6 +223,9 @@ export function GlobalSearch() {
 					onHoverIndex={setActiveIndex}
 					onSelect={handleSelect}
 					onNavigateAll={handleNavigateAll}
+					onRetry={() => {
+						void refetch()
+					}}
 					containerId={PANEL_ID}
 				/>
 			) : null}
