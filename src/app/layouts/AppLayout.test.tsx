@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createElement } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppLayout } from "./AppLayout";
 import type { AuthStatus, ProfileIssue } from "@/shared/providers/AuthProvider";
 
@@ -55,16 +58,23 @@ import * as subscriptionModule from "@/features/billing/hooks/useSubscription";
 import * as billingActionsModule from "@/features/billing/hooks/useBillingActions";
 
 function renderWithRouter() {
+	const queryClient = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
 	return render(
-		<MemoryRouter initialEntries={["/dashboard"]}>
-			<Routes>
-				<Route path="/dashboard" element={<AppLayout />}>
-					<Route index element={<div>Contenido protegido</div>} />
-				</Route>
-				<Route path="/login" element={<div>Página de login</div>} />
-				<Route path="/onboarding" element={<div>Página de onboarding</div>} />
-			</Routes>
-		</MemoryRouter>,
+		createElement(
+			QueryClientProvider,
+			{ client: queryClient },
+			<MemoryRouter initialEntries={["/dashboard"]}>
+				<Routes>
+					<Route path="/dashboard" element={<AppLayout />}>
+						<Route index element={<div>Contenido protegido</div>} />
+					</Route>
+					<Route path="/login" element={<div>Página de login</div>} />
+					<Route path="/onboarding" element={<div>Página de onboarding</div>} />
+				</Routes>
+			</MemoryRouter>,
+		),
 	);
 }
 
@@ -94,6 +104,12 @@ const activeSubscription = {
 describe("AppLayout billing integration", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Use the local mock supabase client so the search feature's queries
+		// resolve against the in-memory mock data instead of trying to hit a
+		// real Supabase instance from jsdom.
+		vi.stubEnv("VITE_USE_LOCAL_MOCKS", "true");
+		vi.stubEnv("VITE_SUPABASE_URL", "http://stub.local");
+		vi.stubEnv("VITE_SUPABASE_ANON_KEY", "stub-anon-key");
 		setAuthState({
 			session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } },
 			loading: false,
@@ -411,7 +427,7 @@ describe("AppLayout billing integration", () => {
 		expect(billingActionsModule.useCreateSubscription).not.toHaveBeenCalled();
 	});
 
-	it("shows 'Pronto' badge on disabled topbar search indicating unavailability", () => {
+	it("renders enabled topbar search with accessible label and placeholder", () => {
 		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
 			data: activeSubscription,
 			isLoading: false,
@@ -422,22 +438,44 @@ describe("AppLayout billing integration", () => {
 
 		renderWithRouter();
 
-		// The search input should be disabled (feature not available yet)
+		// The search input should be enabled and exposed to assistive tech
 		const searchInput = screen.getByPlaceholderText(
 			"Buscar clientes, presupuestos, materiales…",
 		);
-		expect(searchInput).toBeDisabled();
+		expect(searchInput).toBeEnabled();
+		expect(searchInput).toHaveAttribute("aria-label", "Buscar en tu taller");
+		expect(searchInput).toHaveAttribute("aria-autocomplete", "list");
+		expect(searchInput).toHaveAttribute("aria-controls", "global-search-panel");
+	});
 
-		// aria-describedby associates the Pronto badge with the disabled input
-		expect(searchInput).toHaveAttribute(
-			"aria-describedby",
-			"search-disabled-reason",
+	it("opens the search panel when the user types a query", async () => {
+		const user = userEvent.setup();
+		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
+			data: activeSubscription,
+			isLoading: false,
+			isError: false,
+			isSuccess: true,
+			status: "success",
+		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+
+		renderWithRouter();
+
+		const searchInput = screen.getByPlaceholderText(
+			"Buscar clientes, presupuestos, materiales…",
+		) as HTMLInputElement;
+
+		await user.type(searchInput, "mesa");
+
+		// Debounce is 250ms; give the panel a bit longer to settle.
+		// We just verify the input claims the panel is open via aria-expanded
+		// — the panel's exact contents depend on the runtime supabase config
+		// (mock vs. real) and are covered by dedicated search-feature unit tests.
+		await waitFor(
+			() => {
+				expect(searchInput).toHaveAttribute("aria-expanded", "true");
+			},
+			{ timeout: 4000 },
 		);
-
-		// The "Pronto" badge communicates unavailability instead of just disabled attribute
-		const badge = screen.getByText("Pronto");
-		expect(badge).toBeInTheDocument();
-		expect(badge).toHaveAttribute("id", "search-disabled-reason");
 	});
 
 	it("renders mobile theme toggle with accessible aria-label", () => {
@@ -485,8 +523,7 @@ describe("AppLayout billing integration", () => {
 		const settingsLinks = screen.getAllByRole("link", { name: "Ajustes" });
 		// Find the mobile version by testing for h-11 w-11 (mobile icon-only style)
 		const mobileSettings = settingsLinks.find(
-			(l) =>
-				l.className.includes("h-11") && l.className.includes("w-11"),
+			(l) => l.className.includes("h-11") && l.className.includes("w-11"),
 		);
 		expect(mobileSettings).toBeTruthy();
 		expect(mobileSettings!.className).toContain("focus-ring");
@@ -545,8 +582,6 @@ describe("AppLayout billing integration", () => {
 		expect(ajustesLinks.length).toBeGreaterThanOrEqual(2);
 
 		// The mobile header link has aria-label="Mi perfil"
-		expect(
-			screen.getByRole("link", { name: "Mi perfil" }),
-		).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Mi perfil" })).toBeInTheDocument();
 	});
 });

@@ -6,17 +6,15 @@
  *   - Authenticated session
  *   - Profile lookup
  *   - Subscription query (single row)
- *   - Material list query
- *   - Quote list query (with client join)
+ *   - Material / furniture template / client / quote list queries
  *   - Quote detail query (single)
+ *   - `.or()` filters with eq/neq/ilike/like and PostgREST `\,` escape semantics
+ *   - `.limit()`, `.range()`, `count: "exact"`
  *
- * NOT a full Supabase mock — only the query patterns used by the app.
+ * NOT a full Supabase mock — only the patterns the app actually uses.
  */
 import type { Session } from "@supabase/supabase-js";
-import {
-	MOCK_SESSION,
-	getMockTableRecords,
-} from "./mockData";
+import { MOCK_SESSION, getMockTableRecords } from "./mockData";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +25,118 @@ const MUTATION_OPS = {
 	DELETE: "delete",
 	SELECT: "select",
 } as const;
+
+/**
+ * Convert a Supabase ilike pattern (`%foo%`) into a case-insensitive regex.
+ * PostgREST treats `\` as a general escape: any character following a
+ * backslash is a literal. We mirror that here, so the mock matches
+ * production for `\,`, `\(`, `\)`, `\%`, `\_`, and any other escape
+ * sequence the client emits.
+ */
+function ilikePatternToRegex(pattern: string): RegExp {
+	let body = "";
+	for (let i = 0; i < pattern.length; i += 1) {
+		const ch = pattern[i];
+		if (ch === "\\" && i + 1 < pattern.length) {
+			// Generic escape: the next char is literal, regardless of what
+			// it is. `\%` becomes literal `%` (not a wildcard), `\_`
+			// becomes literal `_`, `\,` becomes literal `,`, etc.
+			const next = pattern[i + 1];
+			body += next.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+			i += 1;
+			continue;
+		}
+		if (ch === "%") {
+			body += ".*";
+			continue;
+		}
+		if (ch === "_") {
+			body += ".";
+			continue;
+		}
+		body += ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	}
+	return new RegExp(`^${body}$`, "i");
+}
+
+/**
+ * Split a string by a single character, honouring backslash escapes.
+ * Mirrors how PostgREST parses `.or()` filter strings: a leading `\` makes the
+ * next character a literal, so `\,` is not a clause separator.
+ */
+function splitUnescaped(s: string, char: string): string[] {
+	const parts: string[] = [];
+	let current = "";
+	let escaped = false;
+	for (let i = 0; i < s.length; i += 1) {
+		const ch = s[i];
+		if (escaped) {
+			current += ch;
+			escaped = false;
+			continue;
+		}
+		if (ch === "\\") {
+			current += ch;
+			escaped = true;
+			continue;
+		}
+		if (ch === char) {
+			parts.push(current);
+			current = "";
+			continue;
+		}
+		current += ch;
+	}
+	if (current.length > 0) parts.push(current);
+	return parts;
+}
+
+/**
+ * Evaluate a Supabase-style `.or()` filter against a record.
+ * Filter string format: "col.op.pattern,col.op.pattern" — record matches if ANY clause matches.
+ * Commas inside patterns must be escaped with `\,` to be treated as literals.
+ */
+function matchesOrFilter(
+	record: Record<string, unknown>,
+	filter: string,
+): boolean {
+	const clauses = splitUnescaped(filter, ",")
+		.map((c) => c.trim())
+		.filter(Boolean);
+	return clauses.some((clause) => {
+		const dotIndex = clause.indexOf(".");
+		if (dotIndex === -1) return false;
+		const column = clause.slice(0, dotIndex);
+		const rest = clause.slice(dotIndex + 1);
+		const opDot = rest.indexOf(".");
+		if (opDot === -1) return false;
+		const op = rest.slice(0, opDot);
+		const pattern = rest.slice(opDot + 1);
+
+		const value = record[column];
+		if (value === null || value === undefined) return false;
+
+		switch (op) {
+			case "eq":
+				return String(value) === pattern;
+			case "neq":
+				return String(value) !== pattern;
+			case "ilike":
+			case "like":
+				return ilikePatternToRegex(pattern).test(String(value));
+			case "gt":
+				return Number(value) > Number(pattern);
+			case "gte":
+				return Number(value) >= Number(pattern);
+			case "lt":
+				return Number(value) < Number(pattern);
+			case "lte":
+				return Number(value) <= Number(pattern);
+			default:
+				return false;
+		}
+	});
+}
 
 type MutationOp = (typeof MUTATION_OPS)[keyof typeof MUTATION_OPS];
 
@@ -40,9 +150,7 @@ type SubscriptionCallback = (event: string, session: Session | null) => void;
 
 // ─── Query Builder ───────────────────────────────────────────────────────────
 
-type MockInsertValue =
-	| Record<string, unknown>
-	| Record<string, unknown>[];
+type MockInsertValue = Record<string, unknown> | Record<string, unknown>[];
 
 class MockQueryBuilder {
 	private table: string;
@@ -57,6 +165,8 @@ class MockQueryBuilder {
 	private _operation: MutationOp = MUTATION_OPS.SELECT;
 	private _insertValues: MockInsertValue | null = null;
 	private _updateValues: Record<string, unknown> | null = null;
+	private _orFilter: string | null = null;
+	private _limitCount: number | null = null;
 
 	constructor(table: string) {
 		this.table = table;
@@ -98,6 +208,23 @@ class MockQueryBuilder {
 	range(from: number, to: number): this {
 		this.rangeFrom = from;
 		this.rangeTo = to;
+		return this;
+	}
+
+	/**
+	 * Server-side filter that mirrors Supabase's `.or()`.
+	 * Filter string format: "col.op.pattern,col.op.pattern"
+	 * Supported operators: eq, neq, ilike, like, gt, gte, lt, lte.
+	 * Patterns use `%` as wildcard (for ilike/like) and are case-insensitive.
+	 * Commas, parens, backslashes, `%` and `_` inside values must be backslash-escaped.
+	 */
+	or(filter: string): this {
+		this._orFilter = filter;
+		return this;
+	}
+
+	limit(count: number): this {
+		this._limitCount = count;
 		return this;
 	}
 
@@ -151,6 +278,11 @@ class MockQueryBuilder {
 			records = records.filter((r) => r[col] === val);
 		}
 
+		// Apply or-filter (server-side semantics)
+		if (this._orFilter) {
+			records = records.filter((r) => matchesOrFilter(r, this._orFilter!));
+		}
+
 		// Sort
 		if (this._orderColumn) {
 			records.sort((a, b) => {
@@ -172,15 +304,18 @@ class MockQueryBuilder {
 			records = records.slice(this.rangeFrom, this.rangeTo + 1);
 		}
 
+		// Limit (after range so it can be combined)
+		if (this._limitCount !== null) {
+			records = records.slice(0, this._limitCount);
+		}
+
 		const totalCount = records.length;
 
 		if (this._single) {
 			const row = records[0] ?? null;
 			return {
 				data: row as Record<string, unknown> | null,
-				error: row
-					? null
-					: { message: "No rows found", code: "PGRST116" },
+				error: row ? null : { message: "No rows found", code: "PGRST116" },
 				count: null,
 			};
 		}
@@ -193,7 +328,11 @@ class MockQueryBuilder {
 			};
 		}
 
-		return { data: records, error: null, count: this._countExact ? totalCount : null };
+		return {
+			data: records,
+			error: null,
+			count: this._countExact ? totalCount : null,
+		};
 	}
 
 	/**
@@ -213,7 +352,6 @@ class MockQueryBuilder {
 		const result = this.resolveData();
 		return Promise.resolve(result).then(onfulfilled, onrejected);
 	}
-
 }
 
 /**
@@ -348,7 +486,10 @@ export const mockSupabase = {
 		invoke: async (
 			name: string,
 			_options?: { body?: unknown },
-		): Promise<{ data: unknown; error: { message: string; code: string } | null }> => {
+		): Promise<{
+			data: unknown;
+			error: { message: string; code: string } | null;
+		}> => {
 			void _options;
 			if (name === "admin-subscriptions") {
 				return { data: MOCK_ADMIN_SUBSCRIPTIONS, error: null };
@@ -356,7 +497,10 @@ export const mockSupabase = {
 			// Fail loudly for any admin function not explicitly needed by the current test
 			return {
 				data: null,
-				error: { message: `Mock function not implemented: ${name}`, code: "NOT_MOCKED" },
+				error: {
+					message: `Mock function not implemented: ${name}`,
+					code: "NOT_MOCKED",
+				},
 			};
 		},
 	},
