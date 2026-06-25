@@ -12,7 +12,7 @@ export type Json =
 export type Database = {
 	public: {
 		Tables: {
-				youtubers: {
+			youtubers: {
 				Row: {
 					id: string;
 					display_name: string;
@@ -199,6 +199,7 @@ export type Database = {
 				Row: {
 					id: string;
 					workshop_id: string;
+					workshop_role: Database["public"]["Enums"]["workshop_user_role"];
 					display_name: string | null;
 					onboarded_at: string | null;
 					is_platform_admin: boolean;
@@ -209,6 +210,7 @@ export type Database = {
 				Insert: {
 					id: string;
 					workshop_id: string;
+					workshop_role?: Database["public"]["Enums"]["workshop_user_role"];
 					display_name?: string | null;
 					onboarded_at?: string | null;
 					is_platform_admin?: boolean;
@@ -219,6 +221,7 @@ export type Database = {
 				Update: {
 					id?: string;
 					workshop_id?: string;
+					workshop_role?: Database["public"]["Enums"]["workshop_user_role"];
 					display_name?: string | null;
 					onboarded_at?: string | null;
 					is_platform_admin?: boolean;
@@ -938,6 +941,12 @@ export type Database = {
 					quote_id: string | null;
 					created_at: string;
 					created_by: string | null;
+					reversal_of_movement_id: string | null;
+					reversal_reason: string | null;
+					reversed_original_reason:
+						| Database["public"]["Enums"]["stock_movement_reason"]
+						| null;
+					reversal_request_id: string | null;
 				};
 				Insert: {
 					id?: string;
@@ -949,6 +958,12 @@ export type Database = {
 					quote_id?: string | null;
 					created_at?: string;
 					created_by?: string | null;
+					reversal_of_movement_id?: string | null;
+					reversal_reason?: string | null;
+					reversed_original_reason?:
+						| Database["public"]["Enums"]["stock_movement_reason"]
+						| null;
+					reversal_request_id?: string | null;
 				};
 				Update: {
 					id?: string;
@@ -960,6 +975,12 @@ export type Database = {
 					quote_id?: string | null;
 					created_at?: string;
 					created_by?: string | null;
+					reversal_of_movement_id?: string | null;
+					reversal_reason?: string | null;
+					reversed_original_reason?:
+						| Database["public"]["Enums"]["stock_movement_reason"]
+						| null;
+					reversal_request_id?: string | null;
 				};
 				Relationships: [
 					{
@@ -974,6 +995,13 @@ export type Database = {
 						columns: ["quote_id"];
 						isOneToOne: false;
 						referencedRelation: "quotes";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "stock_movements_reversal_of_movement_id_fkey";
+						columns: ["reversal_of_movement_id"];
+						isOneToOne: false;
+						referencedRelation: "stock_movements";
 						referencedColumns: ["id"];
 					},
 				];
@@ -1053,6 +1081,77 @@ export type Database = {
 				};
 				Returns: number;
 			};
+			get_stock_movement_ledger: {
+				Args: {
+					p_reason?:
+						| Database["public"]["Enums"]["stock_movement_reason"]
+						| null;
+					p_material_id?: string | null;
+					p_creator_id?: string | null;
+					p_from?: string | null;
+					p_to?: string | null;
+					p_search?: string | null;
+					p_limit?: number | null;
+					p_offset?: number | null;
+				};
+				Returns: {
+					id: string;
+					workshop_id: string;
+					material_id: string;
+					material_name: string;
+					material_unit: Database["public"]["Enums"]["unit_of_measure"];
+					delta: number;
+					reason: Database["public"]["Enums"]["stock_movement_reason"];
+					note: string | null;
+					quote_id: string | null;
+					quote_number: string | null;
+					created_at: string;
+					created_by: string | null;
+					creator_name: string | null;
+					reversal_of_movement_id: string | null;
+					reversal_reason: string | null;
+					reversed_original_reason:
+						| Database["public"]["Enums"]["stock_movement_reason"]
+						| null;
+					is_reversal: boolean;
+					reversed_by_movement_id: string | null;
+				}[];
+			};
+			get_stock_movement_detail: {
+				Args: { p_movement_id: string };
+				Returns: {
+					id: string;
+					workshop_id: string;
+					material_id: string;
+					material_name: string;
+					material_unit: Database["public"]["Enums"]["unit_of_measure"];
+					delta: number;
+					reason: Database["public"]["Enums"]["stock_movement_reason"];
+					note: string | null;
+					quote_id: string | null;
+					quote_number: string | null;
+					created_at: string;
+					created_by: string | null;
+					creator_name: string | null;
+					reversal_of_movement_id: string | null;
+					reversal_reason: string | null;
+					reversed_original_reason:
+						| Database["public"]["Enums"]["stock_movement_reason"]
+						| null;
+					reversal_request_id: string | null;
+					is_reversal: boolean;
+					reversed_by_movement_id: string | null;
+					can_reverse: boolean;
+				}[];
+			};
+			reverse_stock_movement: {
+				Args: {
+					p_movement_id: string;
+					p_reversal_reason: string;
+					p_reversal_request_id?: string | null;
+				};
+				Returns: string;
+			};
 		};
 		Enums: {
 			material_category:
@@ -1095,7 +1194,9 @@ export type Database = {
 				| "consumo"
 				| "merma"
 				| "ajuste"
-				| "descuento_presupuesto";
+				| "descuento_presupuesto"
+				| "reversion";
+			workshop_user_role: "admin" | "operational" | "viewer";
 			task_priority: "alta" | "normal" | "baja";
 			task_status: "pendiente" | "hecha";
 			task_category: "compras" | "produccion" | "administrativo" | "otros";
