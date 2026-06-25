@@ -20,6 +20,12 @@ describe("cachePrivacy", () => {
 		expect(isPersistableQueryKey(["stock_movements", "material-1"])).toBe(
 			false,
 		);
+		expect(isPersistableQueryKey(["stock_movements", "ledger", {}])).toBe(
+			false,
+		);
+		expect(isPersistableQueryKey(["stock_movements", "detail", "mov-1"])).toBe(
+			false,
+		);
 		expect(isPersistableQueryKey(["price_history", "material-1"])).toBe(false);
 		expect(isPersistableQueryKey(["price_history_all", "workshop-1", 30])).toBe(
 			false,
