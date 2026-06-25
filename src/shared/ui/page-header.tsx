@@ -8,7 +8,8 @@ const PAGE_HEADER_LEVEL = {
 	H3: "h3",
 } as const;
 
-type PageHeaderLevel = (typeof PAGE_HEADER_LEVEL)[keyof typeof PAGE_HEADER_LEVEL];
+type PageHeaderLevel =
+	(typeof PAGE_HEADER_LEVEL)[keyof typeof PAGE_HEADER_LEVEL];
 
 export type { PageHeaderLevel };
 
@@ -28,14 +29,14 @@ export function PageHeader({
 	level = "h1",
 }: PageHeaderProps) {
 	return (
-		<div className="flex flex-col gap-1 pb-4">
+		<div className="flex min-w-0 flex-col gap-1 pb-4">
 			{eyebrow && (
 				<span className="text-xs font-medium uppercase tracking-wider text-ink3">
 					{eyebrow}
 				</span>
 			)}
-			<div className="flex items-start justify-between gap-4">
-				<div className="flex flex-col">
+			<div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+				<div className="flex min-w-0 flex-col">
 					{createElement(
 						level,
 						{
@@ -44,12 +45,12 @@ export function PageHeader({
 						},
 						title,
 					)}
-					{subtitle && (
-						<p className="mt-0.5 text-sm text-ink2">{subtitle}</p>
-					)}
+					{subtitle && <p className="mt-0.5 text-sm text-ink2">{subtitle}</p>}
 				</div>
 				{actions && (
-					<div className="flex shrink-0 items-center gap-2">{actions}</div>
+					<div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end">
+						{actions}
+					</div>
 				)}
 			</div>
 		</div>
