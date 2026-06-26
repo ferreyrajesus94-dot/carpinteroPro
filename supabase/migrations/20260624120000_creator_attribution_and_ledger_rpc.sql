@@ -167,3 +167,17 @@ COMMENT ON FUNCTION get_stock_movement_ledger IS
   'current authenticated user. SECURITY INVOKER. Does not accept a workshop_id parameter. '
   'All filters are optional. Limit is clamped to [1, 500], offset to >= 0. '
   'Returns denormalized rows with material name, unit, quote number, and creator name.';
+
+-- ---------------------------------------------------------------------------
+-- profiles: allow workshop-mates to see each other's display_name
+-- ---------------------------------------------------------------------------
+--
+-- Without this policy the SECURITY INVOKER ledger/detail RPCs only see the
+-- current user's own profile row, so creator_name is NULL for any movement
+-- the caller did not create. This policy keeps the existing
+-- profiles_select_own (the only path for cross-tenant isolation) and adds
+-- a same-workshop read so the ledger can attribute movements to peer users.
+DROP POLICY IF EXISTS profiles_select_same_workshop ON public.profiles;
+CREATE POLICY profiles_select_same_workshop ON public.profiles
+  FOR SELECT
+  USING (workshop_id = public.get_current_workshop_id());

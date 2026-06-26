@@ -3,6 +3,15 @@
 -- Adds the minimal workshop role model needed to authorize stock movement
 -- reversals server-side, then adds append-only reversal metadata and RPCs.
 -- Original stock movement rows remain immutable for authenticated users.
+--
+-- Rollback notes (see also: R4-M5 of the pre-PR review):
+-- * ALTER TYPE ... ADD VALUE is not safely rollback-able in older Postgres
+--   versions and persists across partial-transaction failures. The new
+--   'reversion' value can be removed with ALTER TYPE ... RENAME VALUE
+--   'reversion' TO 'reversion_unused' on rollback, or by recreating the
+--   enum. Document in any down migration that ships.
+-- * All other schema changes use IF NOT EXISTS / CREATE OR REPLACE so the
+--   migration is idempotent and individually re-runnable.
 
 -- ---------------------------------------------------------------------------
 -- Part 1: Minimal workshop role model
@@ -30,7 +39,7 @@ SET search_path = public, auth
 AS $$
 BEGIN
   IF OLD.workshop_role IS DISTINCT FROM NEW.workshop_role
-     AND auth.role() = 'authenticated' THEN
+     AND auth.uid() IS NOT NULL THEN
     RAISE EXCEPTION 'profiles.workshop_role cannot be changed by authenticated users'
       USING ERRCODE = '42501';
   END IF;
@@ -99,6 +108,21 @@ CREATE INDEX IF NOT EXISTS stock_movements_reversal_lookup_idx
 
 -- ---------------------------------------------------------------------------
 -- Part 3: Preserve movement immutability for authenticated callers
+--
+-- The trigger below is the second enforcement point for the append-only
+-- contract on stock_movements. The primary enforcement is the original
+-- stock_movements_update / stock_movements_delete RLS policies from
+-- 0007_stock_movements.sql, which scope UPDATE/DELETE to the caller's
+-- workshop. The trigger adds defense in depth: if a future migration
+-- re-introduces a permissive policy by mistake, the trigger still blocks
+-- any authenticated UPDATE/DELETE.
+--
+-- Why we keep the original RLS policies (instead of dropping them as the
+-- pre-PR review initially suggested): the reverse_stock_movement RPC
+-- uses SELECT ... FOR UPDATE on the original movement to serialize
+-- concurrent reversal attempts, and FOR UPDATE requires UPDATE permission
+-- under RLS. Deny-by-default RLS would silently fail the FOR UPDATE and
+-- the RPC would never see the row.
 -- ---------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION public.prevent_authenticated_stock_movement_mutation()
@@ -108,7 +132,7 @@ SECURITY DEFINER
 SET search_path = public, auth
 AS $$
 BEGIN
-  IF auth.role() = 'authenticated' THEN
+  IF auth.uid() IS NOT NULL THEN
     RAISE EXCEPTION 'stock_movements are immutable; use reverse_stock_movement instead'
       USING ERRCODE = '42501';
   END IF;

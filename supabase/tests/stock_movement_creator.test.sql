@@ -5,7 +5,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(5);
+select plan(7);
 
 create temporary table _test_ids (
   key text primary key,
@@ -120,6 +120,28 @@ select results_eq(
   $$select count(*)::bigint from stock_movements where material_id = (select id from _test_ids where key = 'material_a')$$,
   array[1::bigint],
   'user_a can see their own movement row'
+);
+
+-- ==========================================================================
+-- T2: apply_stock_movement rejects delta = 0
+-- ==========================================================================
+select throws_ok(
+  $$select apply_stock_movement(
+    (select id from _test_ids where key = 'material_a'),
+    0,
+    'compra'::stock_movement_reason,
+    'zero-delta attempt',
+    null
+  )$$,
+  null,
+  null,
+  'T2.1: apply_stock_movement rejects delta = 0 with an exception'
+);
+
+select results_eq(
+  $$select count(*)::bigint from stock_movements where note = 'zero-delta attempt'$$,
+  array[0::bigint],
+  'T2.2: no stock_movement row is inserted when delta = 0 is rejected'
 );
 
 select * from finish();
