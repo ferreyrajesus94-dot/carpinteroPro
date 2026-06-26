@@ -39,3 +39,4 @@ research/
 
 # Playwright MCP artifacts
 .playwright-mcp/
+.4r-out/
