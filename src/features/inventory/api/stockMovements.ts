@@ -100,6 +100,14 @@ export async function applyStockMovement(
 	return data as number;
 }
 
+// Per-material history dialog cap. A high-usage material (e.g. MDF) can
+// accumulate thousands of rows over months; without a cap the JSON
+// payload and React render grow linearly and degrade p95 latency. The
+// stock_movements_material_idx (material_id, created_at DESC) index
+// supports this pagination key. Raise only after adding a 'see more'
+// CTA in StockHistoryDialog.
+const PER_MATERIAL_HISTORY_LIMIT = 200;
+
 export async function fetchStockMovements(
 	materialId: string,
 ): Promise<StockMovement[]> {
@@ -107,7 +115,8 @@ export async function fetchStockMovements(
 		.from("stock_movements")
 		.select("*")
 		.eq("material_id", materialId)
-		.order("created_at", { ascending: false });
+		.order("created_at", { ascending: false })
+		.limit(PER_MATERIAL_HISTORY_LIMIT);
 	if (error) throw error;
 	return data ?? [];
 }
