@@ -5,7 +5,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(5);
+select plan(7);
 
 create temporary table _test_ids (
   key text primary key,
@@ -86,7 +86,7 @@ select is(
    where material_id = (select id from _test_ids where key = 'material_a')
    order by created_at desc limit 1),
   (select id from _test_ids where key = 'user_a'),
-  'created_by should equal the authenticated user (RED — expected to fail until migration)'
+  'created_by should equal the authenticated user (RED)'
 );
 
 -- T1.5: Cross-workshop denial (also tested here for TRIANGULATE)
@@ -103,9 +103,9 @@ select throws_ok(
     'cross-workshop attempt',
     null
   )$$,
+  'P0001',
   null,
-  null,
-  'user_a cannot apply stock movement on workshop_b material (cross-workshop denial)'
+  'T1.5: user_a cannot apply stock movement on workshop_b material (cross-workshop denial — material invisible through RLS, message verified by the SQLSTATE P0001 alone)'
 );
 
 -- Assert no movement row was inserted for that cross-workshop attempt
@@ -120,6 +120,28 @@ select results_eq(
   $$select count(*)::bigint from stock_movements where material_id = (select id from _test_ids where key = 'material_a')$$,
   array[1::bigint],
   'user_a can see their own movement row'
+);
+
+-- ==========================================================================
+-- T2: apply_stock_movement rejects delta = 0
+-- ==========================================================================
+select throws_ok(
+  $$select apply_stock_movement(
+    (select id from _test_ids where key = 'material_a'),
+    0,
+    'compra'::stock_movement_reason,
+    'zero-delta attempt',
+    null
+  )$$,
+  'P0001',
+  'delta cannot be zero',
+  'T2.1: apply_stock_movement rejects delta = 0 with the documented SQLSTATE P0001'
+);
+
+select results_eq(
+  $$select count(*)::bigint from stock_movements where note = 'zero-delta attempt'$$,
+  array[0::bigint],
+  'T2.2: no stock_movement row is inserted when delta = 0 is rejected'
 );
 
 select * from finish();

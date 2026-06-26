@@ -48,6 +48,14 @@ describe("buildStockMovementCsv", () => {
 		expect(csv.charCodeAt(0)).toBe(0xfeff);
 	});
 
+	it("empty list emits exactly one line (the header) with no trailing CRLF", () => {
+		const csv = buildStockMovementCsv([]);
+		// Strip BOM, then split on CRLF. The empty result is one header line.
+		const lines = csv.slice(1).split("\r\n").filter(Boolean);
+		expect(lines).toHaveLength(1);
+		expect(csv.endsWith("\r\n")).toBe(false);
+	});
+
 	it("first line after BOM contains stable headers", () => {
 		const csv = buildStockMovementCsv([]);
 		const firstLine = csv.slice(1).split("\r\n")[0];

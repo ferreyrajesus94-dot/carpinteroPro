@@ -14,7 +14,19 @@ import {
 const STOCK_MOVEMENTS_KEY = "stock_movements";
 const STOCK_MOVEMENT_LEDGER_KEY = [STOCK_MOVEMENTS_KEY, "ledger"] as const;
 const STOCK_MOVEMENT_DETAIL_KEY = [STOCK_MOVEMENTS_KEY, "detail"] as const;
-const MATERIALS_KEY = "materials";
+
+function generateRequestId(): string {
+	// Browser crypto is the standard source; the global is typed loosely.
+	if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+		return crypto.randomUUID();
+	}
+	// Fallback for jsdom + older test envs: 32 hex chars from Math.random.
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+		const r = (Math.random() * 16) | 0;
+		const v = c === "x" ? r : (r & 0x3) | 0x8;
+		return v.toString(16);
+	});
+}
 
 export function useStockMovements(materialId: string | null) {
 	return useQuery({
@@ -32,6 +44,7 @@ export function useStockMovementLedger(
 		queryKey: [...STOCK_MOVEMENT_LEDGER_KEY, filters],
 		queryFn: () => fetchStockMovementLedger(filters),
 		enabled: options?.enabled ?? true,
+		staleTime: 30_000,
 	});
 }
 
@@ -40,25 +53,31 @@ export function useStockMovementDetail(movementId: string | null) {
 		queryKey: [...STOCK_MOVEMENT_DETAIL_KEY, movementId],
 		queryFn: () => fetchStockMovementDetail(movementId!),
 		enabled: Boolean(movementId),
+		staleTime: 30_000,
 	});
 }
 
 export interface ReverseStockMovementMutationInput
-	extends ReverseStockMovementInput {
+	extends Omit<ReverseStockMovementInput, "requestId"> {
 	materialId: string;
+	// Optional caller-supplied request id for cross-process idempotency.
+	// If omitted, the hook generates a fresh UUID per mutate() call.
+	requestId?: string;
 }
 
-export function useReverseStockMovement(workshopId: string) {
+export function useReverseStockMovement() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (input: ReverseStockMovementMutationInput) =>
 			reverseStockMovement({
 				movementId: input.movementId,
 				reason: input.reason,
-				requestId: input.requestId,
+				requestId: input.requestId ?? generateRequestId(),
 			}),
 		onSuccess: (_reversalMovementId, input) => {
-			queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] });
+			// Invalidate the per-material history and the ledger; the caller
+			// is responsible for invalidating any ['materials', workshopId]
+			// query if it cares about updated stock.
 			queryClient.invalidateQueries({
 				queryKey: [STOCK_MOVEMENTS_KEY, input.materialId],
 			});
@@ -72,12 +91,11 @@ export function useReverseStockMovement(workshopId: string) {
 	});
 }
 
-export function useApplyStockMovement(workshopId: string) {
+export function useApplyStockMovement() {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: (input: ApplyStockMovementInput) => applyStockMovement(input),
 		onSuccess: (_newStock, input) => {
-			queryClient.invalidateQueries({ queryKey: [MATERIALS_KEY, workshopId] });
 			queryClient.invalidateQueries({
 				queryKey: [STOCK_MOVEMENTS_KEY, input.materialId],
 			});

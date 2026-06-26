@@ -20,7 +20,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(24);
+select plan(29);
 
 create temporary table _test_ids (
   key text primary key,
@@ -265,7 +265,7 @@ select has_column(
   'public',
   'stock_movements',
   'reversal_of_movement_id',
-  'RED: stock_movements.reversal_of_movement_id must exist (will fail — not implemented yet)'
+  'stock_movements.reversal_of_movement_id must exist (will fail — not implemented yet)'
 );
 
 -- T0.2: reversal reason column must exist
@@ -274,7 +274,7 @@ select has_column(
   'public',
   'stock_movements',
   'reversal_reason',
-  'RED: stock_movements.reversal_reason must exist (will fail — not implemented yet)'
+  'stock_movements.reversal_reason must exist (will fail — not implemented yet)'
 );
 
 -- T0.3: idempotency request column must exist
@@ -283,7 +283,7 @@ select has_column(
   'public',
   'stock_movements',
   'reversal_request_id',
-  'RED: stock_movements.reversal_request_id must exist (will fail — not implemented yet)'
+  'stock_movements.reversal_request_id must exist (will fail — not implemented yet)'
 );
 
 -- ==========================================================================
@@ -294,7 +294,7 @@ select has_column(
 -- RED expectation: function does not exist → this test will fail
 select has_function(
   'reverse_stock_movement',
-  'RED: reverse_stock_movement RPC must exist (will fail — not implemented yet)'
+  'reverse_stock_movement RPC must exist (will fail — not implemented yet)'
 );
 
 -- T1.2: Admin user can reverse an eligible original movement
@@ -307,7 +307,7 @@ select lives_ok(
     (select id from _test_ids where key = 'movement_orig'),
     'Corrección por error en cantidad'
   )$$,
-  'RED: admin_a can reverse movement_orig (will fail — RPC does not exist)'
+  'admin_a can reverse movement_orig '
 );
 
 -- ==========================================================================
@@ -327,19 +327,19 @@ select set_config('request.jwt.claim.sub', (select id::text from _test_ids where
 select is(
   (select delta from stock_movements where id = (select id from _test_ids where key = 'movement_orig')),
   10::numeric,
-  'RED: original movement delta must remain unchanged after reversal'
+  'original movement delta must remain unchanged after reversal'
 );
 
 select is(
   (select reason::text from stock_movements where id = (select id from _test_ids where key = 'movement_orig')),
   'compra',
-  'RED: original movement reason must remain unchanged after reversal'
+  'original movement reason must remain unchanged after reversal'
 );
 
 select is(
   (select note from stock_movements where id = (select id from _test_ids where key = 'movement_orig')),
   'Original test purchase',
-  'RED: original movement note must remain unchanged after reversal'
+  'original movement note must remain unchanged after reversal'
 );
 
 -- ==========================================================================
@@ -357,21 +357,67 @@ select set_config('request.jwt.claim.sub', (select id::text from _test_ids where
 select results_eq(
   $$select pg_temp._reversal_count((select id from _test_ids where key = 'movement_orig'))$$,
   array[1::bigint],
-  'GREEN: one reversal row exists for movement_orig after the admin RPC call'
+  'T3.1: one reversal row exists for movement_orig after the admin RPC call'
 );
 
 -- Once RPC exists, the reversal row should have:
 
--- T3.2: Reversal row delta = original.delta * -1 (future check)
--- T3.3: Reversal row has reason = 'reversion' (future check, enum value may not exist)
--- T3.4: reversal_reason is populated (future check)
+-- T3.2: Reversal row delta = original.delta * -1
+select is(
+  (
+    select delta from stock_movements
+    where reversal_of_movement_id = (select id from _test_ids where key = 'movement_orig')
+  )::text,
+  '-10.00',
+  'T3.2: reversal row delta equals the original negated (-10.00 = -(+10.00))'
+);
 
--- T3.5: Double reversal of the same original is rejected
--- RED expectation: unique index does not exist, but RPC should enforce this
--- Structure the assertion as a block that would be meaningful once RPC exists
+-- T3.3: Reversal row has reason = 'reversion'
+select is(
+  (
+    select reason::text from stock_movements
+    where reversal_of_movement_id = (select id from _test_ids where key = 'movement_orig')
+  ),
+  'reversion',
+  'T3.3: reversal row has reason = reversion'
+);
+
+-- T3.4: reversal_reason is populated with the user-supplied text
+select is(
+  (
+    select reversal_reason from stock_movements
+    where reversal_of_movement_id = (select id from _test_ids where key = 'movement_orig')
+  ),
+  'Corrección por error en cantidad',
+  'T3.4: reversal row reversal_reason matches the caller-supplied text'
+);
+
+-- T3.5: Double reversal of the same original is rejected with 23505
+select throws_ok(
+  $$select reverse_stock_movement(
+    (select id from _test_ids where key = 'movement_orig'),
+    'Second reversal attempt — must be rejected'
+  )$$,
+  '23505',
+  'stock movement has already been reversed',
+  'T3.5: a second reversal of the same original is rejected with 23505 by the unique index'
+);
 
 -- T3.6: Reversal row itself cannot be reversed
--- A reversal row (reversal_of_movement_id IS NOT NULL) should be ineligible
+-- The reversal row's reversal_of_movement_id IS NOT NULL, so the RPC guard
+-- at line 218-220 of the reversals migration raises an exception.
+select throws_ok(
+  $$select reverse_stock_movement(
+    (
+      select id from stock_movements
+      where reversal_of_movement_id = (select id from _test_ids where key = 'movement_orig')
+    ),
+    'Attempting to reverse a reversal'
+  )$$,
+  'P0001',
+  'reversal movements cannot be reversed',
+  'T3.6: a reversal row is ineligible for another reversal'
+);
 
 -- ==========================================================================
 -- RED TEST GROUP 4: Tenant isolation
@@ -388,16 +434,16 @@ select throws_ok(
     (select id from _test_ids where key = 'movement_orig'),
     'Attempted cross-workshop reversal'
   )$$,
-  null,
-  null,
-  'RED: user_b cannot reverse workshop_a movement (cross-workshop — will fail, RPC does not exist)'
+  '42501',
+  'not authorized to reverse stock movements',
+  'T4.1: user_b (viewer) cannot reverse any movement (role check fires before workshop check)'
 );
 
 -- T4.2: No reversal row was inserted for the cross-workshop attempt
 select results_eq(
   $$select pg_temp._reversal_count((select id from _test_ids where key = 'movement_b'))$$,
   array[0::bigint],
-  'GREEN: cross-workshop attempt does not create a reversal for movement_b'
+  'cross-workshop attempt does not create a reversal for movement_b'
 );
 
 -- ==========================================================================
@@ -417,14 +463,14 @@ select throws_ok(
   )$$,
   42501,
   null,
-  'RED: viewer_a cannot reverse (role check — will fail, RPC does not exist)'
+  'viewer_a cannot reverse (role check — will fail, RPC does not exist)'
 );
 
 -- T5.3: No reversal row was inserted for unauthorized attempt
 select results_eq(
   $$select pg_temp._reversal_count((select id from _test_ids where key = 'movement_orig'))$$,
   array[1::bigint],
-  'GREEN: unauthorized user did not add another reversal for movement_orig'
+  'unauthorized user did not add another reversal for movement_orig'
 );
 
 -- T5.4: Operational user can reverse (should succeed once RPC exists)
@@ -436,7 +482,7 @@ select lives_ok(
     (select id from _test_ids where key = 'movement_neg'),
     'Operational user reversing'
   )$$,
-  'GREEN: op_a can reverse movement_neg'
+  'op_a can reverse movement_neg'
 );
 
 -- ==========================================================================
@@ -473,14 +519,14 @@ select throws_ok(
   )$$,
   null,
   null,
-  'RED: reversal that would make stock negative is rejected (will fail — RPC does not exist)'
+  'reversal that would make stock negative is rejected '
 );
 
 -- Verify stock was NOT changed (remains at 3)
 select is(
   (select stock from materials where id = (select id from _test_ids where key = 'material_a')),
   3::numeric,
-  'RED: material_a stock remains 3 after failed reversal'
+  'material_a stock remains 3 after failed reversal'
 );
 
 -- Restore material_a stock for subsequent tests
@@ -500,7 +546,7 @@ where id = (select id from _test_ids where key = 'material_a');
 select is(
   (select stock from materials where id = (select id from _test_ids where key = 'material_a')),
   25::numeric,
-  'GREEN: material_a stock is 25 before movement_stock reversal'
+  'material_a stock is 25 before movement_stock reversal'
 );
 
 -- Perform reversal (in a separate transaction simulation)
@@ -513,7 +559,7 @@ select lives_ok(
     (select id from _test_ids where key = 'movement_stock'),
     'Error de compra, revirtiendo movimiento separado'
   )$$,
-  'GREEN: admin_a reverses movement_stock'
+  'admin_a reverses movement_stock'
 );
 
 -- Check stock was updated (in a separate transaction for simple RPC call)
@@ -521,7 +567,7 @@ select lives_ok(
 select is(
   (select stock from materials where id = (select id from _test_ids where key = 'material_a')),
   15::numeric,
-  'GREEN: material_a stock decreased by 10 after reversal of movement_stock'
+  'material_a stock decreased by 10 after reversal of movement_stock'
 );
 
 -- T7.2: Reversal of negative delta INCREASES stock
@@ -542,9 +588,9 @@ select throws_ok(
     (select id from _test_ids where key = 'movement_orig'),
     ''
   )$$,
-  null,
-  null,
-  'RED: reversal with empty reason is rejected (will fail — RPC does not exist)'
+  'P0001',
+  'reversal reason is required',
+  'T8.1a: reversal with empty reason is rejected'
 );
 
 select throws_ok(
@@ -552,9 +598,9 @@ select throws_ok(
     (select id from _test_ids where key = 'movement_orig'),
     '   '
   )$$,
-  null,
-  null,
-  'RED: reversal with blank reason is rejected (will fail — RPC does not exist)'
+  'P0001',
+  'reversal reason is required',
+  'T8.1b: reversal with blank reason is rejected (whitespace-only)'
 );
 
 -- T8.2: Reversal with null reason is rejected
@@ -563,9 +609,9 @@ select throws_ok(
     (select id from _test_ids where key = 'movement_orig'),
     null
   )$$,
-  null,
-  null,
-  'RED: reversal with null reason is rejected (will fail — RPC does not exist)'
+  'P0001',
+  'reversal reason is required',
+  'T8.2: reversal with null reason is rejected'
 );
 
 -- ==========================================================================
@@ -575,7 +621,7 @@ select throws_ok(
 -- T9.1: get_stock_movement_detail RPC must exist
 select has_function(
   'get_stock_movement_detail',
-  'RED: get_stock_movement_detail RPC must exist (will fail — not implemented yet)'
+  'get_stock_movement_detail RPC must exist (will fail — not implemented yet)'
 );
 
 -- T9.2: Detail RPC returns reversal linkage fields for same-workshop movement
@@ -589,7 +635,7 @@ select set_config('request.jwt.claim.sub', (select id::text from _test_ids where
 select results_eq(
   $$select * from pg_temp._movement_detail_ids((select id from _test_ids where key = 'movement_b'))$$,
   $$select id from public.stock_movements where false$$,
-  'RED: cross-workshop movement detail returns no rows once detail RPC exists'
+  'cross-workshop movement detail returns no rows once detail RPC exists'
 );
 
 -- ==========================================================================

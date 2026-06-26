@@ -14,7 +14,8 @@ import type { StockMovementLedgerFilters as Filters } from "../api/stockMovement
 export function StockMovementLedgerPage() {
 	const [filters, setFilters] = useState<Filters>({});
 
-	const { data: rows = [], isLoading, error } = useStockMovementLedger(filters);
+	const { data: rows = [], isLoading, error, refetch } =
+		useStockMovementLedger(filters);
 
 	const handleFiltersChange = (newFilters: Filters) => {
 		setFilters(newFilters);
@@ -30,10 +31,14 @@ export function StockMovementLedgerPage() {
 			exportStockMovementCsv(data);
 			if (data.length >= EXPORT_LIMIT) {
 				toast.warning(
-					"Exportación limitada a 500 registros. Ajustá los filtros para exportar menos datos.",
+					`Exportación limitada a ${EXPORT_LIMIT} registros. Ajustá los filtros para exportar menos datos.`,
 				);
 			}
-		} catch {
+		} catch (err) {
+			// Surface the error to Sentry/the global error reporter. The
+			// direct fetch path bypasses the React Query MutationCache, so
+			// the global handler in queryClient.ts does not fire here.
+			console.error("stock-movement.csv-export failed", err);
 			toast.error("Error al exportar");
 		}
 	};
@@ -72,6 +77,7 @@ export function StockMovementLedgerPage() {
 				rows={rows}
 				isLoading={isLoading}
 				error={error}
+				onRetry={refetch}
 			/>
 		</div>
 	);

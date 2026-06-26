@@ -25,6 +25,15 @@ export function isPreservedLocalStorageKey(key: string): boolean {
 	);
 }
 
+/**
+ * Returns true only for query keys that are safe to persist to
+ * localStorage or IndexedDB. The current implementation is a defensive
+ * kill-switch: nothing is persistable. The function exists so that the
+ * persister wiring, if it is ever enabled, cannot accidentally leak
+ * workshop data to disk. If a future feature needs persistent cache for
+ * non-sensitive data (UI prefs, theme), add it to the allowlist here
+ * AND wire the persister in queryClient.ts.
+ */
 export function isPersistableQueryKey(queryKey: readonly unknown[]): boolean {
 	void queryKey;
 	return false;

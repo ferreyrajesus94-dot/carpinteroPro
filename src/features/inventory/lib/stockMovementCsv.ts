@@ -1,7 +1,5 @@
-import type {
-	StockMovementLedgerRow,
-	StockMovementReason,
-} from "../api/stockMovements";
+import type { StockMovementLedgerRow } from "../api/stockMovements";
+import { REASON_LABELS } from "./stockMovementLabels";
 
 export const EXPORT_LIMIT = 500;
 
@@ -19,15 +17,6 @@ const HEADERS = [
 	"revertido_por_movimiento_id",
 ] as const;
 
-const REASON_LABELS: Record<StockMovementReason, string> = {
-	compra: "Compra",
-	consumo: "Consumo",
-	merma: "Merma",
-	ajuste: "Ajuste",
-	descuento_presupuesto: "Descuento presupuesto",
-	reversion: "Reversión",
-};
-
 function escape(value: unknown): string {
 	if (value === null || value === undefined) return "";
 	const s = String(value);
@@ -43,6 +32,8 @@ export function buildStockMovementCsv(rows: StockMovementLedgerRow[]): string {
 			r.created_at,
 			r.material_id,
 			r.material_name,
+			// Intentionally non-localized: the CSV is meant to be opened in
+			// spreadsheets where a fixed decimal separator is more reliable.
 			r.delta > 0 ? `+${r.delta}` : String(r.delta),
 			REASON_LABELS[r.reason] ?? r.reason,
 			r.note ?? "",

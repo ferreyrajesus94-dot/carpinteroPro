@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createElement } from "react";
 
@@ -15,7 +15,9 @@ vi.mock("../api/stockMovements", () => ({
 import * as stockMovementsApi from "../api/stockMovements";
 import type {
 	StockMovementDetail,
+	StockMovementLedgerFilters,
 	StockMovementLedgerRow,
+	StockMovementReason,
 } from "../api/stockMovements";
 
 const WORKSHOP_ID = "00000000-0000-0000-0000-000000000001";
@@ -160,20 +162,74 @@ describe("useStockMovementLedger", () => {
 		expect(stockMovementsApi.fetchStockMovementLedger).not.toHaveBeenCalled();
 	});
 
-	it("has query key starting with stock_movements, ledger", async () => {
+	it("uses the canonical query key ['stock_movements', 'ledger', filters]", async () => {
 		vi.mocked(stockMovementsApi.fetchStockMovementLedger).mockResolvedValue([
 			MOCK_LEDGER_ROW,
 		]);
 
 		const { useStockMovementLedger } = await import("./useStockMovements");
-		const { result } = renderHook(() => useStockMovementLedger({}), {
-			wrapper: makeQueryWrapper(),
+		const queryClient = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		const wrapper = ({ children }: { children: React.ReactNode }) =>
+			createElement(QueryClientProvider, { client: queryClient }, children);
+
+		const filters = { reason: "compra" as const };
+		renderHook(() => useStockMovementLedger(filters), { wrapper });
+
+		await waitFor(() => {
+			const all = queryClient
+				.getQueryCache()
+				.findAll({ queryKey: ["stock_movements", "ledger"] });
+			expect(all.length).toBeGreaterThan(0);
 		});
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
+		const cached = queryClient
+			.getQueryCache()
+			.findAll({ queryKey: ["stock_movements", "ledger"] });
+		expect(cached[0].queryKey).toEqual(["stock_movements", "ledger", filters]);
+	});
 
-		// Access the query key through react-query internals
-		expect(result.current.data).toEqual([MOCK_LEDGER_ROW]);
+	it("creates a new query entry when filters change", async () => {
+		vi.mocked(stockMovementsApi.fetchStockMovementLedger).mockResolvedValue([
+			MOCK_LEDGER_ROW,
+		]);
+
+		const { useStockMovementLedger } = await import("./useStockMovements");
+		const queryClient = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		const wrapper = ({ children }: { children: React.ReactNode }) =>
+			createElement(QueryClientProvider, { client: queryClient }, children);
+
+		const { rerender } = renderHook(
+			({ filters }: { filters: StockMovementLedgerFilters }) =>
+				useStockMovementLedger(filters),
+			{
+				wrapper,
+				initialProps: {
+					filters: { reason: "compra" as StockMovementReason },
+				},
+			},
+		);
+
+		await waitFor(() => {
+			const all = queryClient
+				.getQueryCache()
+				.findAll({ queryKey: ["stock_movements", "ledger"] });
+			expect(all.length).toBe(1);
+		});
+
+		rerender({
+			filters: { reason: "ajuste" as StockMovementReason },
+		});
+
+		await waitFor(() => {
+			const all = queryClient
+				.getQueryCache()
+				.findAll({ queryKey: ["stock_movements", "ledger"] });
+			expect(all.length).toBe(2);
+		});
 	});
 
 	it("returns error when API fails", async () => {
@@ -191,12 +247,12 @@ describe("useStockMovementLedger", () => {
 	});
 });
 
-describe("useReverseStockMovement invalidation", () => {
+describe("useReverseStockMovement", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("invalidates ledger, movement detail, material movements, and materials on success", async () => {
+	it("takes no workshopId parameter and invalidates per-material, ledger, and detail on success", async () => {
 		vi.mocked(stockMovementsApi.reverseStockMovement).mockResolvedValue(
 			"rev-1",
 		);
@@ -210,21 +266,28 @@ describe("useReverseStockMovement invalidation", () => {
 
 		const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-		const { result } = renderHook(() => useReverseStockMovement(WORKSHOP_ID), {
-			wrapper,
+		// No argument — the hook no longer takes a workshopId
+		const { result } = renderHook(() => useReverseStockMovement(), { wrapper });
+
+		await act(async () => {
+			await result.current.mutateAsync({
+				movementId: "mov-1",
+				materialId: MATERIAL_ID,
+				reason: "Error de carga",
+			});
 		});
 
-		await result.current.mutateAsync({
-			movementId: "mov-1",
-			materialId: MATERIAL_ID,
-			reason: "Error de carga",
-		});
+		// requestId is auto-generated as a UUID v4
+		const callArg = vi.mocked(stockMovementsApi.reverseStockMovement).mock
+			.calls[0][0];
+		expect(callArg.movementId).toBe("mov-1");
+		expect(callArg.reason).toBe("Error de carga");
+		expect(callArg.requestId).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+		);
 
-		expect(stockMovementsApi.reverseStockMovement).toHaveBeenCalledWith({
-			movementId: "mov-1",
-			reason: "Error de carga",
-		});
-		expect(invalidateSpy).toHaveBeenCalledWith(
+		// The hook no longer invalidates the ['materials', workshopId] bucket
+		expect(invalidateSpy).not.toHaveBeenCalledWith(
 			expect.objectContaining({ queryKey: ["materials", WORKSHOP_ID] }),
 		);
 		expect(invalidateSpy).toHaveBeenCalledWith(
@@ -239,14 +302,40 @@ describe("useReverseStockMovement invalidation", () => {
 			}),
 		);
 	});
+
+	it("preserves a caller-supplied requestId for cross-process idempotency", async () => {
+		vi.mocked(stockMovementsApi.reverseStockMovement).mockResolvedValue(
+			"rev-1",
+		);
+
+		const { useReverseStockMovement } = await import("./useStockMovements");
+		const wrapper = makeQueryWrapper();
+
+		const { result } = renderHook(() => useReverseStockMovement(), { wrapper });
+
+		await act(async () => {
+			await result.current.mutateAsync({
+				movementId: "mov-1",
+				materialId: MATERIAL_ID,
+				reason: "Error de carga",
+				requestId: "11111111-2222-4333-8444-555555555555",
+			});
+		});
+
+		expect(stockMovementsApi.reverseStockMovement).toHaveBeenCalledWith({
+			movementId: "mov-1",
+			reason: "Error de carga",
+			requestId: "11111111-2222-4333-8444-555555555555",
+		});
+	});
 });
 
-describe("useApplyStockMovement invalidation", () => {
+describe("useApplyStockMovement", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it("invalidates ledger and material queries on success", async () => {
+	it("takes no workshopId parameter and invalidates per-material and ledger on success", async () => {
 		vi.mocked(stockMovementsApi.applyStockMovement).mockResolvedValue(15);
 
 		const { useApplyStockMovement } = await import("./useStockMovements");
@@ -258,14 +347,14 @@ describe("useApplyStockMovement invalidation", () => {
 
 		const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
 
-		const { result } = renderHook(() => useApplyStockMovement(WORKSHOP_ID), {
-			wrapper,
-		});
+		const { result } = renderHook(() => useApplyStockMovement(), { wrapper });
 
-		await result.current.mutateAsync({
-			materialId: MATERIAL_ID,
-			delta: 5,
-			reason: "compra",
+		await act(async () => {
+			await result.current.mutateAsync({
+				materialId: MATERIAL_ID,
+				delta: 5,
+				reason: "compra",
+			});
 		});
 
 		expect(stockMovementsApi.applyStockMovement).toHaveBeenCalledWith({
@@ -274,8 +363,8 @@ describe("useApplyStockMovement invalidation", () => {
 			reason: "compra",
 		});
 
-		// Verify invalidation was called for ledger, materials, and per-material stock
-		expect(invalidateSpy).toHaveBeenCalledWith(
+		// The hook no longer invalidates the ['materials', workshopId] bucket
+		expect(invalidateSpy).not.toHaveBeenCalledWith(
 			expect.objectContaining({ queryKey: ["materials", WORKSHOP_ID] }),
 		);
 		expect(invalidateSpy).toHaveBeenCalledWith(

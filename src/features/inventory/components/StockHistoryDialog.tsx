@@ -3,23 +3,14 @@ import { es } from "date-fns/locale";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { useStockMovements } from "../hooks/useStockMovements";
-import type { StockMovementReason } from "../api/stockMovements";
+import { formatSignedQuantity, REASON_LABELS } from "../lib/stockMovementLabels";
 import type { Material } from "../types";
 
 interface StockHistoryDialogProps {
 	material: Material;
 }
 
-const REASON_LABELS: Record<StockMovementReason, string> = {
-	compra: "Compra",
-	consumo: "Consumo",
-	merma: "Merma",
-	ajuste: "Ajuste",
-	descuento_presupuesto: "Descuento por presupuesto",
-	reversion: "Reversión",
-};
-
-const formatNum = (n: number) =>
+const formatStock = (n: number) =>
 	new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(n);
 
 export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
@@ -46,7 +37,7 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 	return (
 		<div className="space-y-2">
 			<p className="text-xs text-muted-foreground">
-				Stock actual: <strong>{formatNum(material.stock)}</strong>{" "}
+				Stock actual: <strong>{formatStock(material.stock)}</strong>{" "}
 				{material.unit} · {movements.length} movimiento
 				{movements.length > 1 ? "s" : ""}
 			</p>
@@ -74,8 +65,7 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 									<span
 										className={`font-mono font-semibold ${isIn ? "text-green-600" : "text-destructive"}`}
 									>
-										{isIn ? "+" : ""}
-										{formatNum(m.delta)}
+										{formatSignedQuantity(m.delta)}
 									</span>
 								</div>
 								<p className="text-xs text-muted-foreground">

@@ -5,7 +5,7 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(11);
+select plan(16);
 
 create temporary table _test_ids (
   key text primary key,
@@ -245,6 +245,40 @@ select results_eq(
   $$select count(*)::bigint from get_stock_movement_ledger() where created_by is not null and creator_name is not null$$,
   array[4::bigint],
   'all rows with non-null created_by have a creator_name'
+);
+
+-- R3-M6 boundary tests: 2-char search is silently ignored (length < 3 gate);
+-- 3-char search is the boundary that engages the ILIKE filter.
+select results_eq(
+  $$select count(*)::bigint from get_stock_movement_ledger(p_search => 'be')$$,
+  array[5::bigint],
+  'T12: p_search with 2 chars is silently ignored (length<3 gate)'
+);
+
+select results_eq(
+  $$select count(*)::bigint from get_stock_movement_ledger(p_search => 'bet')$$,
+  array[1::bigint],
+  'T13: p_search with 3 chars (boundary) matches Ledger Material Beta'
+);
+
+-- Pagination clamp boundaries: p_limit=0 and p_limit=-5 both clamp to 1;
+-- deep p_offset returns an empty set.
+select results_eq(
+  $$select count(*)::bigint from get_stock_movement_ledger(p_limit => 0)$$,
+  array[1::bigint],
+  'T14: p_limit=0 is clamped to 1, returns first row'
+);
+
+select results_eq(
+  $$select count(*)::bigint from get_stock_movement_ledger(p_limit => -5)$$,
+  array[1::bigint],
+  'T15: p_limit=-5 is clamped to 1, returns first row'
+);
+
+select results_eq(
+  $$select count(*)::bigint from get_stock_movement_ledger(p_offset => 99999)$$,
+  array[0::bigint],
+  'T16: deep p_offset returns empty set'
 );
 
 select * from finish();

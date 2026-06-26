@@ -301,13 +301,15 @@ describe("fetchStockMovements", () => {
 	beforeEach(() => {
 		resetMocks();
 		// Default: empty success
-		const orderFn = vi.fn(() => makeThenable({ data: [], error: null }));
+		const limitFn = vi.fn(() => makeThenable({ data: [], error: null }));
+		const orderFn = vi.fn(() => ({ limit: limitFn }));
 		const eqFn = vi.fn(() => ({ order: orderFn }));
 		fromResult = { select: vi.fn(() => ({ eq: eqFn })) };
 	});
 
-	it("calls from with correct table and filter", async () => {
-		const orderFn = vi.fn(() => makeThenable({ data: [], error: null }));
+	it("calls from with correct table and filter and a bounded limit", async () => {
+		const limitFn = vi.fn(() => makeThenable({ data: [], error: null }));
+		const orderFn = vi.fn(() => ({ limit: limitFn }));
 		const eqFn = vi.fn(() => ({ order: orderFn }));
 		const selectFn = vi.fn(() => ({ eq: eqFn }));
 		fromResult = { select: selectFn };
@@ -316,12 +318,15 @@ describe("fetchStockMovements", () => {
 
 		expect(selectFn).toHaveBeenCalledWith("*");
 		expect(eqFn).toHaveBeenCalledWith("material_id", "mat-1");
+		expect(orderFn).toHaveBeenCalledWith("created_at", { ascending: false });
+		expect(limitFn).toHaveBeenCalledWith(200);
 	});
 
 	it("throws on Supabase error", async () => {
-		const orderFn = vi.fn(() =>
+		const limitFn = vi.fn(() =>
 			makeThenable({ data: null, error: new Error("DB error") }),
 		);
+		const orderFn = vi.fn(() => ({ limit: limitFn }));
 		const eqFn = vi.fn(() => ({ order: orderFn }));
 		const selectFn = vi.fn(() => ({ eq: eqFn }));
 		fromResult = { select: selectFn };
@@ -343,7 +348,8 @@ describe("fetchStockMovements", () => {
 				created_by: null,
 			},
 		];
-		const orderFn = vi.fn(() => makeThenable({ data: testData, error: null }));
+		const limitFn = vi.fn(() => makeThenable({ data: testData, error: null }));
+		const orderFn = vi.fn(() => ({ limit: limitFn }));
 		const eqFn = vi.fn(() => ({ order: orderFn }));
 		const selectFn = vi.fn(() => ({ eq: eqFn }));
 		fromResult = { select: selectFn };

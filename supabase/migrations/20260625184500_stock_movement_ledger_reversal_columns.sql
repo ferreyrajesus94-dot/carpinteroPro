@@ -52,6 +52,13 @@ BEGIN
   FROM public.profiles AS p
   WHERE p.id = auth.uid();
 
+  -- R4-M1: same guard as the original get_stock_movement_ledger.
+  -- A missing workshop (no profile, deleted user, stale header) must
+  -- return an empty result with no rows, not silently degrade.
+  IF v_current_workshop_id IS NULL THEN
+    RETURN;
+  END IF;
+
   v_limit := LEAST(GREATEST(COALESCE(p_limit, 50), 1), 500);
   v_offset := GREATEST(COALESCE(p_offset, 0), 0);
 
@@ -94,7 +101,7 @@ BEGIN
     AND (p_creator_id IS NULL OR sm.created_by = p_creator_id)
     AND (p_from IS NULL OR sm.created_at >= p_from)
     AND (p_to IS NULL OR sm.created_at < p_to)
-    AND (p_search IS NULL OR p_search = '' OR m.name ILIKE '%' || p_search || '%')
+    AND (p_search IS NULL OR length(p_search) < 3 OR m.name ILIKE '%' || p_search || '%')
   ORDER BY sm.created_at DESC, sm.id DESC
   LIMIT v_limit
   OFFSET v_offset;

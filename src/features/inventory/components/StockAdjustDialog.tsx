@@ -8,7 +8,6 @@ import {
 } from '@/shared/ui/select'
 import { Switch } from '@/shared/ui/switch'
 import { useApplyStockMovement } from '../hooks/useStockMovements'
-import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import type { Material } from '../types'
 import type { StockMovementReason } from '../api/stockMovements'
 
@@ -32,8 +31,7 @@ const REASONS_OUT: { value: StockMovementReason; label: string }[] = [
 ]
 
 export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjustDialogProps) {
-  const workshopId = useWorkshopId()
-  const mutation = useApplyStockMovement(workshopId)
+  const mutation = useApplyStockMovement()
 
   const [direction, setDirection] = useState<Direction>('in')
   const [amount, setAmount] = useState('')
