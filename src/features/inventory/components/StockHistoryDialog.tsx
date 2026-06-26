@@ -16,6 +16,7 @@ const REASON_LABELS: Record<StockMovementReason, string> = {
   merma: 'Merma',
   ajuste: 'Ajuste',
   descuento_presupuesto: 'Descuento por presupuesto',
+  reversion: 'Reversión',
 }
 
 const formatNum = (n: number) =>

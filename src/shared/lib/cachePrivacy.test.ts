@@ -12,27 +12,36 @@ describe("cachePrivacy", () => {
 		vi.unstubAllGlobals();
 	});
 
-	it("fails closed for sensitive and unknown query keys", () => {
-		expect(isPersistableQueryKey(["quotes", "workshop-1"])).toBe(false);
-		expect(isPersistableQueryKey(["clients", "workshop-1"])).toBe(false);
-		expect(isPersistableQueryKey(["tasks", "workshop-1"])).toBe(false);
-		expect(isPersistableQueryKey(["materials", "workshop-1"])).toBe(false);
-		expect(isPersistableQueryKey(["stock_movements", "material-1"])).toBe(
-			false,
-		);
-		expect(isPersistableQueryKey(["price_history", "material-1"])).toBe(false);
-		expect(isPersistableQueryKey(["price_history_all", "workshop-1", 30])).toBe(
-			false,
-		);
-		expect(isPersistableQueryKey(["subscription", "workshop-1"])).toBe(false);
-		expect(isPersistableQueryKey(["recipes", "workshop-1"])).toBe(false);
-		expect(isPersistableQueryKey(["contract_templates", "workshop-1"])).toBe(
-			false,
-		);
-		expect(isPersistableQueryKey(["workshop_settings", "workshop-1"])).toBe(
-			false,
-		);
-		expect(isPersistableQueryKey(["brand-new-query", "value"])).toBe(false);
+	it("fails closed for every query key (defensive kill-switch)", () => {
+		// The current contract is: no key is persistable. The function exists
+		// as a safety net so a future persister wiring cannot accidentally
+		// leak workshop data. If a future feature needs persistent cache for
+		// non-sensitive data (UI prefs, theme), it must be added to the
+		// allowlist in cachePrivacy.ts and wired in queryClient.ts.
+		const sensitiveKeys: unknown[][] = [
+			["quotes", "workshop-1"],
+			["clients", "workshop-1"],
+			["tasks", "workshop-1"],
+			["materials", "workshop-1"],
+			["stock_movements", "material-1"],
+			["stock_movements", "ledger", {}],
+			["stock_movements", "detail", "mov-1"],
+			["price_history", "material-1"],
+			["price_history_all", "workshop-1", 30],
+			["subscription", "workshop-1"],
+			["recipes", "workshop-1"],
+			["contract_templates", "workshop-1"],
+			["workshop_settings", "workshop-1"],
+			["brand-new-query", "value"],
+			// Edge cases the kill-switch must also cover:
+			[],
+			["theme"],
+			["ui", "palette", "amber"],
+		];
+
+		for (const key of sensitiveKeys) {
+			expect(isPersistableQueryKey(key)).toBe(false);
+		}
 	});
 
 	it("purges targeted app cache state while preserving auth and non-app keys", async () => {
