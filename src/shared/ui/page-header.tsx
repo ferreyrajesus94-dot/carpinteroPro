@@ -1,17 +1,7 @@
 import type { ReactNode } from "react";
 import { createElement } from "react";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const PAGE_HEADER_LEVEL = {
-	H1: "h1",
-	H2: "h2",
-	H3: "h3",
-} as const;
-
-type PageHeaderLevel =
-	(typeof PAGE_HEADER_LEVEL)[keyof typeof PAGE_HEADER_LEVEL];
-
-export type { PageHeaderLevel };
+export type PageHeaderLevel = "h1" | "h2" | "h3";
 
 export interface PageHeaderProps {
 	eyebrow?: string;
