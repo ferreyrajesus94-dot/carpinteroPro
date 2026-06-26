@@ -9,23 +9,7 @@ import {
 	useReverseStockMovement,
 	useStockMovementDetail,
 } from "../hooks/useStockMovements";
-import type { StockMovementReason } from "../api/stockMovements";
-
-const REASON_LABELS: Record<StockMovementReason, string> = {
-	compra: "Compra",
-	consumo: "Consumo",
-	merma: "Merma",
-	ajuste: "Ajuste",
-	descuento_presupuesto: "Descuento presupuesto",
-	reversion: "Reversión",
-};
-
-function formatDelta(delta: number): string {
-	const sign = delta > 0 ? "+" : "";
-	return `${sign}${new Intl.NumberFormat("es-AR", {
-		maximumFractionDigits: 2,
-	}).format(delta)}`;
-}
+import { formatSignedQuantity, REASON_LABELS } from "../lib/stockMovementLabels";
 
 function getDetailText(movement: {
 	is_reversal: boolean;
@@ -50,8 +34,9 @@ export function StockMovementDetailPage() {
 		data: movement,
 		isLoading,
 		error,
+		refetch,
 	} = useStockMovementDetail(movementId ?? null);
-	const reverseMutation = useReverseStockMovement(movement?.workshop_id ?? "");
+	const reverseMutation = useReverseStockMovement();
 
 	const handleReverse = async () => {
 		if (!movement) return;
@@ -85,9 +70,20 @@ export function StockMovementDetailPage() {
 				<PageHeader title="Detalle de movimiento" />
 				<div
 					role="alert"
-					className="rounded-xl border border-line bg-cp-bg2 p-4 text-sm text-ink2"
+					className="flex flex-col items-start gap-3 rounded-xl border border-line bg-cp-bg2 p-4 text-sm text-ink2"
 				>
-					{error.message || "No se pudo cargar el movimiento."}
+					<p>{error.message || "No se pudo cargar el movimiento."}</p>
+					{refetch ? (
+						<button
+							type="button"
+							onClick={() => {
+								void refetch();
+							}}
+							className="rounded-md border border-line bg-cp-bg px-3 py-1.5 text-sm font-medium text-ink hover:bg-cp-bg2"
+						>
+							Reintentar
+						</button>
+					) : null}
 				</div>
 			</div>
 		);
@@ -129,7 +125,7 @@ export function StockMovementDetailPage() {
 					<div>
 						<p className="text-xs uppercase tracking-wide text-ink3">Delta</p>
 						<p className="font-mono font-semibold text-ink">
-							{formatDelta(movement.delta)}
+							{formatSignedQuantity(movement.delta)}
 						</p>
 					</div>
 					<div>

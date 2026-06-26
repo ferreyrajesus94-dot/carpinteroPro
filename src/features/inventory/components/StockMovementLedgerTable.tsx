@@ -11,29 +11,14 @@ import {
 	TableRow,
 } from "@/shared/ui/table";
 import { Skeleton } from "@/shared/ui/skeleton";
-import type {
-	StockMovementLedgerRow,
-	StockMovementReason,
-} from "../api/stockMovements";
+import type { StockMovementLedgerRow } from "../api/stockMovements";
+import { formatSignedQuantity, REASON_LABELS } from "../lib/stockMovementLabels";
 
 interface StockMovementLedgerTableProps {
 	rows: StockMovementLedgerRow[];
 	isLoading?: boolean;
 	error?: Error | null;
-}
-
-const REASON_LABELS: Record<StockMovementReason, string> = {
-	compra: "Compra",
-	consumo: "Consumo",
-	merma: "Merma",
-	ajuste: "Ajuste",
-	descuento_presupuesto: "Descuento presupuesto",
-	reversion: "Reversión",
-};
-
-function formatNum(n: number): string {
-	const sign = n > 0 ? "+" : "";
-	return `${sign}${new Intl.NumberFormat("es-AR", { maximumFractionDigits: 2 }).format(n)}`;
+	onRetry?: () => void;
 }
 
 function formatDate(iso: string): string {
@@ -53,6 +38,7 @@ export function StockMovementLedgerTable({
 	rows,
 	isLoading,
 	error,
+	onRetry,
 }: StockMovementLedgerTableProps) {
 	if (error) {
 		return (
@@ -70,6 +56,15 @@ export function StockMovementLedgerTable({
 				<p className="mt-1 text-[13px] text-ink3">
 					{error.message || "Ocurrió un error inesperado."}
 				</p>
+				{onRetry ? (
+					<button
+						type="button"
+						onClick={onRetry}
+						className="mt-2 rounded-md border border-line bg-cp-bg px-3 py-1.5 text-sm font-medium text-ink hover:bg-cp-bg2"
+					>
+						Reintentar
+					</button>
+				) : null}
 			</div>
 		);
 	}
@@ -135,7 +130,7 @@ export function StockMovementLedgerTable({
 										row.delta > 0 ? "text-green-600" : "text-destructive"
 									}`}
 								>
-									{formatNum(row.delta)}
+									{formatSignedQuantity(row.delta)}
 								</span>
 							</TableCell>
 							<TableCell className="text-sm text-ink2">

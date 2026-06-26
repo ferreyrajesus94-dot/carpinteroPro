@@ -4,19 +4,12 @@ import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import type { StockMovementLedgerFilters as Filters, StockMovementReason } from "../api/stockMovements";
+import { REASON_OPTIONS } from "../lib/stockMovementLabels";
 
 interface StockMovementLedgerFiltersProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
 }
-
-const REASONS: { value: StockMovementReason; label: string }[] = [
-  { value: "compra", label: "Compra" },
-  { value: "consumo", label: "Consumo" },
-  { value: "merma", label: "Merma" },
-  { value: "ajuste", label: "Ajuste" },
-  { value: "descuento_presupuesto", label: "Descuento presupuesto" },
-];
 
 export function StockMovementLedgerFilters({
   filters,
@@ -55,7 +48,7 @@ export function StockMovementLedgerFilters({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
-            {REASONS.map((r) => (
+            {REASON_OPTIONS.map((r) => (
               <SelectItem key={r.value} value={r.value}>
                 {r.label}
               </SelectItem>
