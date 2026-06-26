@@ -155,7 +155,7 @@ BEGIN
     AND (p_creator_id IS NULL OR sm.created_by = p_creator_id)
     AND (p_from IS NULL OR sm.created_at >= p_from)
     AND (p_to IS NULL OR sm.created_at < p_to)
-    AND (p_search IS NULL OR p_search = '' OR m.name ILIKE '%' || p_search || '%')
+    AND (p_search IS NULL OR length(p_search) < 3 OR m.name ILIKE '%' || p_search || '%')
   ORDER BY sm.created_at DESC, sm.id DESC
   LIMIT v_limit
   OFFSET v_offset;
@@ -166,7 +166,16 @@ COMMENT ON FUNCTION get_stock_movement_ledger IS
   'Returns a workshop-scoped, filtered, paginated view of stock movements for the '
   'current authenticated user. SECURITY INVOKER. Does not accept a workshop_id parameter. '
   'All filters are optional. Limit is clamped to [1, 500], offset to >= 0. '
-  'Returns denormalized rows with material name, unit, quote number, and creator name.';
+  'Returns denormalized rows with material name, unit, quote number, and creator name. '
+  'The p_search filter is gated to >= 3 characters so the ILIKE wildcard query stays '
+  'within the planner budget; shorter inputs are silently ignored.';
+
+-- Trigram index for the p_search filter (R4-B2: avoid ILIKE '%…%' seq scans on
+-- large materials catalogs). pg_trgm is a default Supabase extension; the
+-- CREATE EXTENSION call is idempotent and lives in the public schema.
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS materials_name_trgm_idx
+  ON public.materials USING gin (name gin_trgm_ops);
 
 -- ---------------------------------------------------------------------------
 -- profiles: allow workshop-mates to see each other's display_name

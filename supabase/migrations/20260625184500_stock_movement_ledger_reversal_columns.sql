@@ -94,7 +94,7 @@ BEGIN
     AND (p_creator_id IS NULL OR sm.created_by = p_creator_id)
     AND (p_from IS NULL OR sm.created_at >= p_from)
     AND (p_to IS NULL OR sm.created_at < p_to)
-    AND (p_search IS NULL OR p_search = '' OR m.name ILIKE '%' || p_search || '%')
+    AND (p_search IS NULL OR length(p_search) < 3 OR m.name ILIKE '%' || p_search || '%')
   ORDER BY sm.created_at DESC, sm.id DESC
   LIMIT v_limit
   OFFSET v_offset;
