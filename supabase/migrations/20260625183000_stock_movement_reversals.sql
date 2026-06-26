@@ -25,11 +25,27 @@ BEGIN
 END;
 $$;
 
+-- R4-B1: default to 'viewer' (least-privilege). New signups cannot reverse
+-- stock movements until an existing admin explicitly promotes them via a
+-- service_role script or a future admin UI. Existing profiles are backfilled
+-- below to keep their pre-migration implicit admin behavior (one-user
+-- workshops are the common case; the few multi-user workshops need an
+-- explicit audit after this migration).
 ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS workshop_role public.workshop_user_role NOT NULL DEFAULT 'admin';
+  ADD COLUMN IF NOT EXISTS workshop_role public.workshop_user_role NOT NULL DEFAULT 'viewer';
+
+-- Backfill: every existing profile is promoted to 'admin' (preserves the
+-- implicit-admin behavior that pre-migration users relied on). This runs
+-- only on migration apply; future signups get the safe 'viewer' default
+-- from the column definition above. The prevent_profile_workshop_role_change
+-- trigger blocks authenticated downgrades, so only service_role maintenance
+-- scripts can demote after this point.
+UPDATE public.profiles
+SET workshop_role = 'admin'
+WHERE workshop_role = 'viewer';
 
 COMMENT ON COLUMN public.profiles.workshop_role IS
-  'Workshop-level role used for operational authorization. Stock movement reversals are allowed for admin and operational users only.';
+  'Workshop-level role used for operational authorization. Stock movement reversals are allowed for admin and operational users only. New signups default to viewer; existing profiles were backfilled to admin on migration apply.';
 
 CREATE OR REPLACE FUNCTION public.prevent_profile_workshop_role_change()
 RETURNS trigger

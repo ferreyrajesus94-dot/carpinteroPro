@@ -86,7 +86,7 @@ select is(
    where material_id = (select id from _test_ids where key = 'material_a')
    order by created_at desc limit 1),
   (select id from _test_ids where key = 'user_a'),
-  'created_by should equal the authenticated user (RED — expected to fail until migration)'
+  'created_by should equal the authenticated user (RED)'
 );
 
 -- T1.5: Cross-workshop denial (also tested here for TRIANGULATE)
@@ -103,9 +103,9 @@ select throws_ok(
     'cross-workshop attempt',
     null
   )$$,
+  'P0001',
   null,
-  null,
-  'user_a cannot apply stock movement on workshop_b material (cross-workshop denial)'
+  'T1.5: user_a cannot apply stock movement on workshop_b material (cross-workshop denial — material invisible through RLS, message verified by the SQLSTATE P0001 alone)'
 );
 
 -- Assert no movement row was inserted for that cross-workshop attempt
@@ -133,9 +133,9 @@ select throws_ok(
     'zero-delta attempt',
     null
   )$$,
-  null,
-  null,
-  'T2.1: apply_stock_movement rejects delta = 0 with an exception'
+  'P0001',
+  'delta cannot be zero',
+  'T2.1: apply_stock_movement rejects delta = 0 with the documented SQLSTATE P0001'
 );
 
 select results_eq(

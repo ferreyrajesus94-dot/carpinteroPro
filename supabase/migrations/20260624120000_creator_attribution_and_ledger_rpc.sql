@@ -120,6 +120,14 @@ BEGIN
   FROM public.profiles AS p
   WHERE p.id = auth.uid();
 
+  -- R4-M1: a missing workshop (no profile row, deleted user, or stale
+  -- x-workshop-id header) must surface as an empty result with a clear
+  -- signal, not silently return 0 rows for a "real" query. The early
+  -- return mirrors the pattern in get_stock_movement_detail.
+  IF v_current_workshop_id IS NULL THEN
+    RETURN;
+  END IF;
+
   -- Clamp pagination params
   v_limit := LEAST(GREATEST(COALESCE(p_limit, 50), 1), 500);
   v_offset := GREATEST(COALESCE(p_offset, 0), 0);
