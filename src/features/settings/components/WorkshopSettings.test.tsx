@@ -82,3 +82,17 @@ describe("WorkshopSettings composition contracts", () => {
 		).toBeDisabled();
 	});
 });
+
+describe("WorkshopSettings copy", () => {
+	it("renders production-start copy for auto_stock_discount", () => {
+		render(
+			<WorkshopSettings billingSlot={<div />} onResetOnboarding={vi.fn()} />,
+		);
+
+		expect(
+			screen.getByText(
+				/Descontar stock automáticamente al iniciar producción/i,
+			),
+		).toBeInTheDocument();
+	});
+});

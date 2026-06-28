@@ -7,6 +7,7 @@ import type {
   QuoteRecipeSnapshotInsert,
   QuoteLaborSnapshotInsert,
 } from '../types'
+import type { QuoteStatus } from '@/shared/types/quotes'
 
 const QUOTE_SELECT = `
   *,
@@ -135,6 +136,15 @@ export async function updateQuote(
   }
 
   await replaceSnapshots(id, recipeSnapshots, laborSnapshots)
+}
+
+/**
+ * Status-only quote update that does NOT replace extras or snapshots.
+ * Call this for pure status transitions (not full quote edits).
+ */
+export async function updateQuoteStatus(id: string, status: QuoteStatus): Promise<void> {
+  const { error } = await supabase.from('quotes').update({ status }).eq('id', id)
+  if (error) throw error
 }
 
 export async function deleteQuote(id: string): Promise<void> {

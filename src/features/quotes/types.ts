@@ -38,6 +38,9 @@ export type QuoteLaborSnapshot =
 export type QuoteLaborSnapshotInsert =
 	Database["public"]["Tables"]["quote_labor_snapshots"]["Insert"];
 
+export type ApprovedBomLine =
+	Database["public"]["Tables"]["quote_approved_bom_lines"]["Row"];
+
 // Quote completo con cliente y extras (viene del JOIN en la API)
 export type QuoteWithExtras = Quote & {
 	extras: QuoteExtra[];
