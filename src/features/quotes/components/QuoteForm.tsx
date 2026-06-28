@@ -15,6 +15,7 @@ import {
 } from "@/shared/ui/select";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useWorkshopId } from "@/shared/hooks/useWorkshopId";
+import { useWorkshopSettings } from "@/shared/hooks/useWorkshopSettings";
 import {
 	computeRecipeCost,
 	resolveItemQuantity,
@@ -39,6 +40,7 @@ import { QuoteLivePreview } from "./QuoteLivePreview";
 import { ClientDialog } from "./ClientDialog";
 import { FurnitureSection } from "./FurnitureSection";
 import { MarginSection } from "./MarginSection";
+import { ProductionStartReviewDialog } from "./ProductionStartReviewDialog";
 import type { ComponentType } from "react";
 
 const extraSchema = z.object({
@@ -105,9 +107,11 @@ export function QuoteForm({
 
 	const [step, setStep] = useState(1);
 	const [clientDialogOpen, setClientDialogOpen] = useState(false);
+	const [productionStartOpen, setProductionStartOpen] = useState(false);
 
 	const { data: existingQuote } = useQuote(id ?? null);
 	const { data: nextNumber } = useGenerateQuoteNumber(workshopId);
+	const { data: workshopSettings } = useWorkshopSettings(workshopId);
 	const createMutation = useCreateQuote(workshopId);
 	const updateMutation = useUpdateQuote(workshopId);
 
@@ -227,6 +231,70 @@ export function QuoteForm({
 			? existingQuote!.quote_number
 			: (nextNumber ?? "P-0001");
 
+		if (
+			isEditing &&
+			id &&
+			existingQuote?.status === "aprobado" &&
+			values.status === "en_produccion"
+		) {
+			// Save the form content first (keeping status as aprobado),
+			// then open the production-start dialog for the transition + deduction.
+			const saveData = {
+				workshop_id: workshopId,
+				quote_number: quoteNumber,
+				client_id: values.client_id || null,
+				furniture_template_id: values.furniture_template_id || null,
+				furniture_name: values.furniture_name,
+				recipe_cost: values.recipe_cost,
+				status: "aprobado" as QuoteStatus,
+				margin_mode: values.margin_mode as MarginMode,
+				margin_pct: values.margin_pct,
+				notes: values.notes || null,
+			};
+
+			const extrasData = values.extras.map((e) => ({
+				description: e.description,
+				amount: e.amount,
+				show_in_quote: e.show_in_quote,
+			}));
+
+			const tpl = values.furniture_template_id
+				? templates.find((t) => t.id === values.furniture_template_id)
+				: null;
+			const paramValues = tpl
+				? Object.fromEntries((tpl.params ?? []).map((p) => [p.name, p.default]))
+				: {};
+			const recipeSnapshots = tpl
+				? tpl.recipe_items.map((ri) => ({
+						material_id: ri.material_id,
+						material_name: ri.material.name,
+						material_unit: ri.material.unit,
+						material_category: ri.material.category,
+						quantity: resolveItemQuantity(ri, paramValues),
+						waste_pct: ri.waste_pct ?? 0,
+						price_per_unit: ri.material.price_per_unit,
+					}))
+				: [];
+			const laborSnapshots = tpl
+				? (tpl.labor_items ?? []).map((l) => ({
+						description: l.description,
+						hours: l.hours,
+						rate: l.rate,
+					}))
+				: [];
+
+			await updateMutation.mutateAsync({
+				id,
+				quote: saveData,
+				extras: extrasData,
+				recipeSnapshots,
+				laborSnapshots,
+			});
+
+			setProductionStartOpen(true);
+			return;
+		}
+
 		const quoteData = {
 			workshop_id: workshopId,
 			quote_number: quoteNumber,
@@ -294,6 +362,17 @@ export function QuoteForm({
 
 	return (
 		<div className="fixed inset-0 bg-background flex flex-col overflow-hidden z-50">
+			{isEditing && id && quoteNumber && (
+				<ProductionStartReviewDialog
+					key={id}
+					quoteId={id}
+					quoteNumber={quoteNumber}
+					open={productionStartOpen}
+					onOpenChange={setProductionStartOpen}
+					autoStockDiscount={workshopSettings?.auto_stock_discount ?? true}
+				/>
+			)}
+
 			{/* Header */}
 			<div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:px-6 sm:py-4">
 				<div>
