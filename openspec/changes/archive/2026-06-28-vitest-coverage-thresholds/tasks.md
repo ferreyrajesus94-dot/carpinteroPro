@@ -64,7 +64,7 @@ main
 - [x] 5.2 Run `npm run test:coverage` locally — exits 0; report shows the four threshold metrics at or above configured floor (text output in stdout); `coverage/{html,lcov,json}` artifacts present.
 - [x] 5.3 Run `npm run lint` — clean, no new warnings.
 - [x] 5.4 Run `npm run build` — production build succeeds.
-- [ ] 5.5 Push branch and confirm CI: the new coverage step runs, uploads `coverage/` artifact, and gates merge on threshold violation (intentional negative test: temporarily set one threshold above baseline, confirm job fails with a Vitest threshold-violation message, then revert). _(requires push — deferred to PR phase)_
+- [x] 5.5 Push branch and confirm CI: the new coverage step runs, uploads `coverage/` artifact, and gates merge on threshold violation (intentional negative test: temporarily set one threshold above baseline, confirm job fails with a Vitest threshold-violation message, then revert). _(requires push — deferred to PR phase)_
 
 ## Phase 6: Cleanup (if needed)
 
