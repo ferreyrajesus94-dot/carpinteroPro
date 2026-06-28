@@ -50,9 +50,19 @@ export function useStartQuoteProduction() {
 				queryKey: [PRODUCTION_DEDUCTION_KEY, "preview", variables.quoteId],
 			});
 			queryClient.invalidateQueries({ queryKey: ["quotes"] });
-			toast.success(
-				`Producción iniciada${_data.movements_created > 0 ? ` — ${_data.movements_created} movimiento(s) de stock creado(s)` : " — sin descuento automático"}`,
-			);
+
+			// Differentiate idempotent return (batch already exists) vs fresh start
+			if (_data.note?.includes("batch already exists")) {
+				toast.success(
+					"Producción ya iniciada — no se crearon nuevos movimientos",
+				);
+			} else if (_data.movements_created > 0) {
+				toast.success(
+					`Producción iniciada — ${_data.movements_created} movimiento(s) de stock creado(s)`,
+				);
+			} else {
+				toast.success("Producción iniciada — sin descuento automático");
+			}
 		},
 		onError: (error: Error) => toast.error(error.message),
 	});
