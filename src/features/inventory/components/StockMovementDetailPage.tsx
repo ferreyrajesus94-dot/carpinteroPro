@@ -6,10 +6,14 @@ import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
 import {
+	useReverseProductionDeduction,
 	useReverseStockMovement,
 	useStockMovementDetail,
 } from "../hooks/useStockMovements";
-import { formatSignedQuantity, REASON_LABELS } from "../lib/stockMovementLabels";
+import {
+	formatSignedQuantity,
+	REASON_LABELS,
+} from "../lib/stockMovementLabels";
 
 function getDetailText(movement: {
 	is_reversal: boolean;
@@ -37,6 +41,11 @@ export function StockMovementDetailPage() {
 		refetch,
 	} = useStockMovementDetail(movementId ?? null);
 	const reverseMutation = useReverseStockMovement();
+	const reverseProductionMutation = useReverseProductionDeduction();
+	const [productionReason, setProductionReason] = useState("");
+	const [productionValidation, setProductionValidation] = useState<
+		string | null
+	>(null);
 
 	const handleReverse = async () => {
 		if (!movement) return;
@@ -53,6 +62,22 @@ export function StockMovementDetailPage() {
 			reason: trimmedReason,
 		});
 		setReason("");
+	};
+
+	const handleBatchReverse = async () => {
+		if (!movement || !movement.production_deduction_id) return;
+		const trimmedReason = productionReason.trim();
+		if (!trimmedReason) {
+			setProductionValidation("Ingresá un motivo para revertir el lote.");
+			return;
+		}
+
+		setProductionValidation(null);
+		await reverseProductionMutation.mutateAsync({
+			deductionId: movement.production_deduction_id,
+			reversalReason: trimmedReason,
+		});
+		setProductionReason("");
 	};
 
 	if (isLoading) {
@@ -148,6 +173,49 @@ export function StockMovementDetailPage() {
 					<p className="text-sm text-ink2">{detailText.value}</p>
 				</div>
 			</section>
+
+			{movement.is_production_deduction && movement.production_deduction_id ? (
+				<section className="rounded-xl border border-cp-accent/30 bg-cp-accent/5 p-4">
+					<h2 className="font-medium text-ink">Descuento de producción</h2>
+					<p className="mt-1 text-sm text-ink3">
+						Este movimiento forma parte de un descuento de producción.
+						{/* No nbsp */}
+						{movement.production_deduction_status === "reversed"
+							? " El lote ya fue revertido."
+							: " Revertí el lote completo para corregir."}
+					</p>
+					{movement.production_deduction_status !== "reversed" &&
+						movement.can_reverse && (
+							<div className="mt-3 space-y-3">
+								<div className="space-y-2">
+									<Label htmlFor="production-reversal-reason">
+										Motivo de reversión del lote
+									</Label>
+									<Textarea
+										id="production-reversal-reason"
+										value={productionReason}
+										onChange={(event) =>
+											setProductionReason(event.target.value)
+										}
+										placeholder="Explicá por qué se revierte este lote"
+									/>
+									{productionValidation ? (
+										<p className="text-sm text-cp-danger">
+											{productionValidation}
+										</p>
+									) : null}
+								</div>
+								<Button
+									onClick={handleBatchReverse}
+									disabled={reverseProductionMutation.isPending}
+								>
+									<RotateCcw className="mr-2 h-4 w-4" />
+									Revertir lote completo
+								</Button>
+							</div>
+						)}
+				</section>
+			) : null}
 
 			<section className="rounded-xl border border-line bg-cp-bg2 p-4">
 				<h2 className="font-medium text-ink">Auditoría</h2>

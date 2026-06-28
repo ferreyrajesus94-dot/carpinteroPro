@@ -108,6 +108,38 @@ export async function applyStockMovement(
 // CTA in StockHistoryDialog.
 const PER_MATERIAL_HISTORY_LIMIT = 200;
 
+/**
+ * Input for production deduction batch reversal.
+ */
+export interface ReverseProductionDeductionInput {
+	deductionId: string;
+	reversalReason: string;
+	reversalRequestId?: string | null;
+}
+
+/**
+ * Reverse an entire production deduction batch.
+ *
+ * @param deductionId - The production deduction batch id
+ * @param reversalReason - Reason for the reversal
+ * @param reversalRequestId - Optional idempotency token for safe retries
+ */
+export async function reverseProductionDeduction(
+	input: ReverseProductionDeductionInput,
+): Promise<{ id: string }> {
+	const { data, error } = await supabase.rpc(
+		"reverse_production_stock_deduction",
+		{
+			p_deduction_id: input.deductionId,
+			p_reversal_reason: input.reversalReason,
+			p_reversal_request_id: input.reversalRequestId ?? null,
+		},
+	);
+
+	if (error) throw error;
+	return { id: data as unknown as string };
+}
+
 export async function fetchStockMovements(
 	materialId: string,
 ): Promise<StockMovement[]> {

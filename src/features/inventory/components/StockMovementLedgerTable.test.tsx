@@ -29,6 +29,9 @@ const ROW_WITH_CREATOR: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const ROW_WITHOUT_CREATOR: StockMovementLedgerRow = {
@@ -50,6 +53,9 @@ const ROW_WITHOUT_CREATOR: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const ROW_WITH_QUOTE: StockMovementLedgerRow = {
@@ -71,9 +77,26 @@ const ROW_WITH_QUOTE: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const MOCK_ROWS = [ROW_WITH_CREATOR, ROW_WITHOUT_CREATOR, ROW_WITH_QUOTE];
+
+const PRODUCTION_ROW: StockMovementLedgerRow = {
+	...ROW_WITH_CREATOR,
+	id: "mov-4",
+	material_name: "Melamina 18mm",
+	delta: -5,
+	reason: "consumo_produccion",
+	quote_id: "q-3",
+	quote_number: "P-2026-003",
+	note: "Inicio de producción",
+	production_deduction_id: "pd-1",
+	is_production_deduction: true,
+	production_deduction_status: "completed",
+};
 
 describe("StockMovementLedgerTable", () => {
 	it("renders material name, signed delta, reason label, note, timestamp, and creator name for each row", () => {
@@ -154,6 +177,15 @@ describe("StockMovementLedgerTable", () => {
 		);
 		const skeletons = container.querySelectorAll('[data-testid="skeleton"]');
 		expect(skeletons.length).toBeGreaterThan(0);
+	});
+
+	it("renders production indicator badge and quote reference for production-origin rows", () => {
+		render(<StockMovementLedgerTable rows={[PRODUCTION_ROW]} />, {
+			wrapper: Wrapper,
+		});
+
+		expect(screen.getByText("Consumo producción")).toBeInTheDocument();
+		expect(screen.getByText("P-2026-003")).toBeInTheDocument();
 	});
 
 	it("shows error message (Spanish copy) when query has an error", () => {

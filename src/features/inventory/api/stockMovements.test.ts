@@ -31,6 +31,7 @@ import {
 	applyStockMovement,
 	fetchStockMovements,
 	fetchStockMovementDetail,
+	reverseProductionDeduction,
 	reverseStockMovement,
 } from "./stockMovements";
 import type { StockMovementReason } from "./stockMovements";
@@ -356,5 +357,65 @@ describe("fetchStockMovements", () => {
 
 		const result = await fetchStockMovements("mat-1");
 		expect(result).toEqual(testData);
+	});
+});
+
+describe("reverseProductionDeduction", () => {
+	beforeEach(() => {
+		resetMocks();
+	});
+
+	it("calls reverse_production_stock_deduction rpc with correct parameters", async () => {
+		setRpcReturn(makeThenable({ data: "rev-1", error: null }));
+
+		await reverseProductionDeduction({
+			deductionId: "pd-1",
+			reversalReason: "Error de producción",
+		});
+
+		expect(rpcCallHistory.args[0][0]).toBe(
+			"reverse_production_stock_deduction",
+		);
+		expect(rpcCallHistory.args[0][1]).toEqual({
+			p_deduction_id: "pd-1",
+			p_reversal_reason: "Error de producción",
+			p_reversal_request_id: null,
+		});
+	});
+
+	it("passes reversal request id for idempotent retries", async () => {
+		setRpcReturn(makeThenable({ data: "rev-1", error: null }));
+
+		await reverseProductionDeduction({
+			deductionId: "pd-1",
+			reversalReason: "Error",
+			reversalRequestId: "req-1",
+		});
+
+		expect(rpcCallHistory.args[0][1]).toMatchObject({
+			p_reversal_request_id: "req-1",
+		});
+	});
+
+	it("throws when rpc fails", async () => {
+		setRpcReturn(makeThenable({ data: null, error: new Error("Not allowed") }));
+
+		await expect(
+			reverseProductionDeduction({
+				deductionId: "pd-1",
+				reversalReason: "Error",
+			}),
+		).rejects.toThrow("Not allowed");
+	});
+
+	it("returns the batch id on success", async () => {
+		setRpcReturn(makeThenable({ data: "rev-1", error: null }));
+
+		const result = await reverseProductionDeduction({
+			deductionId: "pd-1",
+			reversalReason: "Error",
+		});
+
+		expect(result).toEqual({ id: "rev-1" });
 	});
 });

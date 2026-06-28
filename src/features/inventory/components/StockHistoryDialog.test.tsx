@@ -71,10 +71,13 @@ describe("StockHistoryDialog", () => {
 			reversal_reason: null,
 			reversed_original_reason: null,
 			reversal_request_id: null,
+			production_deduction_id: null,
 		};
 		mockQuery([reversal], false);
 
-		render(<StockHistoryDialog material={MATERIAL} />, { wrapper: makeWrapper() });
+		render(<StockHistoryDialog material={MATERIAL} />, {
+			wrapper: makeWrapper(),
+		});
 
 		expect(screen.getByText("Reversión")).toBeInTheDocument();
 		expect(screen.getByText("-5")).toBeInTheDocument();
@@ -83,7 +86,9 @@ describe("StockHistoryDialog", () => {
 	it("renders the empty state when there are no movements", () => {
 		mockQuery([], false);
 
-		render(<StockHistoryDialog material={MATERIAL} />, { wrapper: makeWrapper() });
+		render(<StockHistoryDialog material={MATERIAL} />, {
+			wrapper: makeWrapper(),
+		});
 
 		expect(
 			screen.getByText("Todavía no hay movimientos para este material."),
@@ -118,6 +123,7 @@ describe("StockHistoryDialog", () => {
 				reversal_reason: null,
 				reversed_original_reason: null,
 				reversal_request_id: null,
+				production_deduction_id: null,
 			},
 			{
 				id: "m-2",
@@ -133,11 +139,14 @@ describe("StockHistoryDialog", () => {
 				reversal_reason: null,
 				reversed_original_reason: null,
 				reversal_request_id: null,
+				production_deduction_id: null,
 			},
 		];
 		mockQuery(movements, false);
 
-		render(<StockHistoryDialog material={MATERIAL} />, { wrapper: makeWrapper() });
+		render(<StockHistoryDialog material={MATERIAL} />, {
+			wrapper: makeWrapper(),
+		});
 
 		expect(screen.getByText("Compra")).toBeInTheDocument();
 		expect(screen.getByText("Consumo")).toBeInTheDocument();
