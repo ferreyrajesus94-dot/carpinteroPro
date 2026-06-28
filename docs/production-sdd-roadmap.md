@@ -172,6 +172,33 @@ Likely scope:
 - Move shared contracts to `src/shared` when truly shared.
 - Keep DB queries in feature `api/` and TanStack Query wrappers in feature `hooks/`.
 
+## Coverage regression gate
+
+**Status:** active (2026-06-28).
+
+A Vitest V8 coverage gate with global thresholds enforces a conservative floor on code coverage. The gate runs locally and in CI via `npm run test:coverage`.
+
+### Four-command verification contract
+
+Every SDD package touching source or tests must pass:
+
+1. `npm test` — full Vitest suite
+2. `npm run test:coverage` — coverage gate (fails if thresholds drop below baseline)
+3. `npm run lint` — ESLint with TypeScript rules
+4. `npm run build` — TypeScript compilation + Vite production build
+
+### Threshold ratchet expectation
+
+When a feature or fix adds meaningful test coverage, raise the thresholds in `vite.config.ts` `test.coverage.thresholds` to reflect the new baseline. This prevents silent regression. Per-feature coverage ownership is out of scope.
+
+### Configuration
+
+Coverage config lives in `vite.config.ts` under `test.coverage`. Initial thresholds at 50 for all four metrics (lines, branches, functions, statements), set conservatively below the measured baseline of ~64–73%. Excludes generated artifacts, test trees, build output, type declarations, Supabase functions/migrations, and config files.
+
+### Note
+
+This is a unit/integration coverage gate only. Playwright E2E coverage is separate and not part of this contract.
+
 ## Resume note
 
 When resuming, choose the next package and run the normal SDD flow: explore → proposal → spec → design → tasks → apply → verify → archive.
