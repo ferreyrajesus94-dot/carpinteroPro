@@ -40,7 +40,7 @@ Record every stock change (purchase, consumption, shrinkage, adjustment, quote d
 
 ### Requirement: Stock Movements Table
 
-The system MUST provide a `stock_movements` table with columns: `id uuid PK`, `workshop_id uuid NOT NULL`, `material_id uuid NOT NULL REFERENCES materials(id) ON DELETE CASCADE`, `delta NUMERIC(12,2) NOT NULL CHECK (delta <> 0)`, `reason stock_movement_reason NOT NULL`, `note text`, `quote_id uuid REFERENCES quotes(id) ON DELETE SET NULL`, `created_at timestamptz NOT NULL DEFAULT now()`, `created_by uuid`, and reversal audit columns `reversal_of_movement_id uuid`, `reversal_reason text`, `reversed_original_reason stock_movement_reason`, and `reversal_request_id uuid`. The table MUST have indexes on `(material_id, created_at DESC)`, `(workshop_id, created_at DESC)`, and reversal lookup/idempotency indexes. RLS MUST be enabled with all four policies (S/I/U/D) scoped by `get_current_workshop_id()`.
+The system MUST provide a `stock_movements` table with columns: `id uuid PK`, `workshop_id uuid NOT NULL`, `material_id uuid NOT NULL REFERENCES materials(id) ON DELETE CASCADE`, `delta NUMERIC(12,2) NOT NULL CHECK (delta <> 0)`, `reason stock_movement_reason NOT NULL`, `note text`, `quote_id uuid REFERENCES quotes(id) ON DELETE SET NULL`, `production_deduction_id uuid REFERENCES quote_production_stock_deductions(id) ON DELETE SET NULL`, `created_at timestamptz NOT NULL DEFAULT now()`, `created_by uuid`, and reversal audit columns `reversal_of_movement_id uuid`, `reversal_reason text`, `reversed_original_reason stock_movement_reason`, and `reversal_request_id uuid`. The `stock_movement_reason` enum MUST include `consumo_produccion` for production-start deductions and MUST retain `descuento_presupuesto` as a legacy value for historical rows. The table MUST have indexes on `(material_id, created_at DESC)`, `(workshop_id, created_at DESC)`, `(workshop_id, production_deduction_id)` where not null, and reversal lookup/idempotency indexes. RLS MUST be enabled with all four policies (S/I/U/D) scoped by `get_current_workshop_id()`.
 
 ### Requirement: Apply Stock Movement RPC
 
@@ -52,11 +52,12 @@ The system MUST provide `apply_stock_movement(p_material_id, p_delta, p_reason, 
 - WHEN the system invokes `apply_stock_movement`
 - THEN the new `stock_movements` row has `created_by` equal to the authenticated user's UUID
 
-#### Scenario: Quote auto-discount records creator
+#### Scenario: Approval does not invoke stock movement RPC
 
-- GIVEN an authenticated user transitions a quote to `aprobado` and `auto_stock_discount` is enabled
-- WHEN the system invokes `apply_stock_movement` for `descuento_presupuesto`
-- THEN the new movement row has `created_by` equal to the authenticated user's UUID
+- GIVEN a quote transitions to `aprobado`
+- WHEN the system processes the status change
+- THEN `apply_stock_movement` is NOT called
+- AND no stock movement is created for the approval transition
 
 #### Scenario: Cross-workshop mutation is rejected
 
@@ -297,9 +298,168 @@ The system MUST display reversal rows distinctly from original rows in the works
 - WHEN the current stock is computed
 - THEN the net effect equals the state before the original movement was applied
 
+## Domain: Production-Start Stock Deduction
+
+### Purpose
+
+Automate material consumption when a quote enters production (`aprobado` → `en_produccion`) through a controlled, auditable, and reversible production-deduction batch. The deduction source is an immutable approved BOM captured at quote-approval time, not the currently editable recipe or template rows. All production-deduction movements are distinct from manual stock movements and are visible in the inventory ledger with quote context and batch reversal guidance.
+
+### Requirements
+
+### Requirement: Setting Semantics — Automatic Production-Start Deduction
+
+The system MUST interpret `workshop_settings.auto_stock_discount` as automatic stock deduction when production starts, not when a quote is approved. User-facing copy MUST reflect this meaning (for example, "Descontar stock automáticamente al iniciar producción"). The system MUST read the setting value at production-start time and MUST NOT use it to deduct stock on quote approval.
+
+#### Scenario: Enabled setting triggers production-start review
+
+- GIVEN a workshop with `auto_stock_discount = true`
+- WHEN a user starts production on an approved quote
+- THEN the system presents a production-start review/confirmation flow before creating any stock movements
+
+#### Scenario: Disabled setting allows manual production start
+
+- GIVEN a workshop with `auto_stock_discount = false`
+- WHEN a user starts production on an approved quote
+- THEN no automatic stock movements are created
+- AND the quote status can still become `en_produccion`
+
+### Requirement: Production-Start Trigger
+
+Automatic stock deduction MUST be attempted only when a quote transitions from `aprobado` to `en_produccion`. The system MUST verify that the quote's current status is `aprobado` and the target status is `en_produccion` before treating the transition as production start.
+
+#### Scenario: Approved quote enters production
+
+- GIVEN a quote with `status = 'aprobado'`
+- AND the workshop has automatic production-start deduction enabled
+- WHEN the user changes the quote status to `en_produccion`
+- THEN the production deduction review flow runs
+
+#### Scenario: Non-approved quote cannot trigger deduction
+
+- GIVEN a quote with `status = 'presupuesto'`
+- WHEN the user changes the quote status directly to `en_produccion`
+- THEN the system does not treat this as production-start deduction
+- AND no automatic stock movements are created for that transition
+
+### Requirement: Approved BOM Snapshot Source of Truth
+
+Production deduction quantities MUST be calculated from the approved BOM snapshot captured at quote-approval time. The system MUST NOT use the currently editable recipe or template rows as the source of truth for deduction. Changing a recipe or template after quote approval MUST NOT affect the stock deducted for that approved quote.
+
+#### Scenario: Template change after approval does not alter deduction
+
+- GIVEN an approved quote whose approved BOM requires 4 units of material X
+- AND the workshop later edits the source recipe to require 6 units of material X
+- WHEN production starts and automatic deduction is confirmed
+- THEN the system deducts exactly 4 units of material X
+
+#### Scenario: BOM is frozen at approval time
+
+- GIVEN a quote is approved at time T1 and its approved BOM is captured
+- WHEN the user starts production at time T2
+- THEN deduction uses the approved BOM values from T1
+
+### Requirement: Incomplete BOM Line Handling
+
+If the approved BOM contains incomplete or unresolved lines (missing material, missing plate dimensions, invalid quantity), the system MUST show a strong warning and MUST allow production to start. Incomplete lines MUST NOT create stock movements. The incomplete state MUST be recorded in the production deduction batch audit context.
+
+#### Scenario: Missing BOM line warns but allows start
+
+- GIVEN an approved quote whose BOM lacks a required quantity for one material line
+- WHEN the user starts production with automatic deduction enabled
+- THEN the system shows a strong warning that deduction cannot be fully calculated
+- AND allows the user to confirm production start
+- AND records the incomplete state in the batch audit context
+- AND no movement is created for the incomplete line
+
+### Requirement: Insufficient Stock Warning and Controlled Negative Stock
+
+If any required material has less stock than the deduction quantity, the system MUST show a strong shortage warning before production starts. The user MUST still be able to confirm production start, and the system MUST allow the resulting stock to become negative for the controlled production-deduction path. The generated stock movements MUST remain auditable and reversible.
+
+#### Scenario: Shortage allows production start
+
+- GIVEN material A has a stock of 3
+- AND the approved BOM requires 8 units of material A
+- WHEN the user confirms production start
+- THEN the system shows a strong shortage warning
+- AND creates a movement that reduces material A stock to -5
+
+#### Scenario: Manual movement RPC remains strict
+
+- GIVEN a user attempts a manual `consumo` movement through `apply_stock_movement`
+- WHEN the resulting stock would be negative
+- THEN the RPC rejects the movement
+
+### Requirement: Idempotent Production Deduction
+
+The system MUST ensure that production stock deduction for a given quote happens at most once. Retrying the transition, refreshing the page, or re-entering `en_produccion` MUST NOT create duplicate movements.
+
+#### Scenario: Retry does not double deduct
+
+- GIVEN a quote already has a production deduction batch
+- WHEN the user retries the transition to `en_produccion`
+- THEN the system recognizes the existing batch
+- AND does not create new stock movements
+
+#### Scenario: Network retry is safe
+
+- GIVEN the first production-start request succeeds but the client does not receive the response
+- WHEN the client retries the request with the same request_id
+- THEN the idempotency check prevents duplicate movements
+
+### Requirement: Production-Origin Movement Auditability
+
+Production-start deductions MUST be recorded as append-only stock movements linked to the originating quote and production deduction batch. Each movement MUST have `reason = 'consumo_produccion'`, a non-null `production_deduction_id`, and a reference to the originating quote. Original movement rows MUST NOT be edited in place.
+
+#### Scenario: Production movement links to quote and batch
+
+- GIVEN automatic production-start deduction is confirmed
+- WHEN the system creates stock movements
+- THEN each movement has `reason = 'consumo_produccion'`
+- AND references the originating quote
+- AND belongs to a traceable production deduction batch
+
+### Requirement: Ledger and Detail Visibility for Production Movements
+
+Production-origin stock movements MUST be distinguishable in the inventory ledger and movement detail surface. They MUST display a production-origin indicator and the originating quote reference.
+
+#### Scenario: Ledger marks production-origin rows
+
+- GIVEN production stock movements exist for a quote
+- WHEN a user views the workshop-wide ledger
+- THEN production-origin rows show a production indicator and link to the originating quote
+
+### Requirement: CSV Export Includes Production Context
+
+The CSV export of the filtered ledger MUST include a production-origin indicator, the originating quote reference, and the production deduction batch identifier for each production-origin row.
+
+#### Scenario: CSV export preserves production context
+
+- GIVEN production stock movements exist
+- WHEN the user exports the filtered ledger to CSV
+- THEN the CSV includes production origin, quote reference, and production deduction batch columns
+
+### Requirement: Batch Reversal Guidance and Whole-Batch Reversal
+
+The system MUST guide users to reverse the whole quote production-deduction batch when correcting a production-start mistake. Reversal MUST create one compensating movement per original movement in the batch and MUST mark the batch as reversed. Individual movement reversal remains available for audit needs, but the primary correction path MUST target the batch.
+
+#### Scenario: Reverse production deduction batch
+
+- GIVEN a quote has a production deduction batch with multiple movements
+- WHEN an authorized user reverses the batch
+- THEN the system creates one compensating movement for each original movement in the batch
+- AND the original movements remain unchanged
+- AND the batch is marked as reversed
+
+#### Scenario: Individual reversal is still available
+
+- GIVEN a production-origin movement exists in the ledger
+- WHEN an authorized user reverses it individually through the movement detail
+- THEN a compensating movement is created for that movement only
+- AND the production deduction batch status remains unchanged
+
 ### Requirement: Deferred Scope
 
-Reversal/compensating-entry workflows are now permitted only as append-only reversals that preserve the original `stock_movements` row. Dashboard recent-movements widgets and settings UI wiring for `workshop_settings.auto_stock_discount` and `workshop_settings.stock_alert_enabled` remain explicitly out of scope for this canonical spec. In-place editing of historical movement quantity, item, reason, notes, timestamps, or other metadata remains forbidden.
+Reversal/compensating-entry workflows are now permitted only as append-only reversals that preserve the original `stock_movements` row. Dashboard recent-movements widgets remain explicitly out of scope for this canonical spec. In-place editing of historical movement quantity, item, reason, notes, timestamps, or other metadata remains forbidden. `workshop_settings.auto_stock_discount` now has defined production-start semantics as documented above; the `stock_alert_enabled` toggle remains unwired and out of scope.
 
 #### Scenario: Reversal is supported as an append-only correction
 
