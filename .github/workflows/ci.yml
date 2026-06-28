@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+    branches: [main, "feature/**", "feat/**"]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -17,6 +17,11 @@ jobs:
   verify:
     name: Test, lint, and build
     runs-on: ubuntu-latest
+
+    env:
+      VITE_USE_LOCAL_MOCKS: "true"
+      VITE_SUPABASE_URL: "http://stub.local"
+      VITE_SUPABASE_ANON_KEY: "stub-anon-key"
 
     steps:
       - name: Checkout
@@ -36,13 +41,20 @@ jobs:
 
       - name: Run tests
         run: npm test
-        env:
-          VITE_USE_LOCAL_MOCKS: "true"
-          VITE_SUPABASE_URL: "http://stub.local"
-          VITE_SUPABASE_ANON_KEY: "stub-anon-key"
+
+      - name: Run coverage
+        run: npm run test:coverage
 
       - name: Run lint
         run: npm run lint
 
       - name: Build
         run: npm run build
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
