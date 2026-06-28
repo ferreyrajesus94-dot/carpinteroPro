@@ -35,7 +35,7 @@ testing:
   environment: jsdom
   setup_file: tests/setup.ts
   globals: true
-  coverage_tool: "vitest built-in (not configured yet)"
+  coverage_tool: "@vitest/coverage-v8 (V8 provider) with global thresholds"
   existing_tests:
     - "tests/features/quotes/ (partial coverage only)"
   strict_tdd: true
@@ -48,6 +48,23 @@ testing:
     for frontend logic, add Vitest + Testing Library unit tests.
     If a package is purely structural (no runtime behavior change),
     document the exception in the SDD design doc.
+
+  coverage_gate: |
+    Every SDD package touching source or tests must pass four commands:
+    1. npm test
+    2. npm run test:coverage
+    3. npm run lint
+    4. npm run build
+    The coverage gate uses @vitest/coverage-v8 with global thresholds
+    (lines, branches, functions, statements) in vite.config.ts test.coverage.
+    Thresholds are set at a conservative floor; raise them before adding new
+    code below the current measured baseline. Never lower thresholds without
+    design review.
+  coverage_thresholds_policy: |
+    Ratchet expectation: when a feature or fix adds meaningful test coverage,
+    the thresholds in vite.config.ts test.coverage.thresholds should be raised
+    to reflect the new baseline. This prevents silent regression. Per-feature
+    coverage ownership is out of scope; global thresholds suffice.
 
 phase_rules:
   explore: "Review existing migrations, RLS policies, auth flow, and frontend tenant context."
