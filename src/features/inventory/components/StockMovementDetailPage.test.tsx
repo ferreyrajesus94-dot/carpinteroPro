@@ -42,9 +42,6 @@ const DETAIL: StockMovementDetail = {
 	is_production_deduction: false,
 	production_deduction_status: null,
 	can_reverse: true,
-	production_deduction_id: null,
-	is_production_deduction: false,
-	production_deduction_status: null,
 };
 
 function renderDetail(path = "/inventory/movements/mov-1") {
