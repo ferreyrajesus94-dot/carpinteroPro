@@ -52,6 +52,9 @@ const MOCK_ROW: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 function Wrapper({ children }: { children: React.ReactNode }) {
