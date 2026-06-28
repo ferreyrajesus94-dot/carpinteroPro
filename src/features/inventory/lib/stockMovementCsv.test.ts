@@ -123,6 +123,9 @@ describe("buildStockMovementCsv", () => {
 			reversed_original_reason: "compra",
 			is_reversal: true,
 			reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 		};
 		const csv = buildStockMovementCsv([row]);
 		const line = csv.slice(1).split("\r\n")[1];
