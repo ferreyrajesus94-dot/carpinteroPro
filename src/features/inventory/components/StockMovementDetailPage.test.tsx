@@ -6,10 +6,12 @@ import type { StockMovementDetail } from "../api/stockMovements";
 
 vi.mock("../hooks/useStockMovements", () => ({
 	useStockMovementDetail: vi.fn(),
+	useReverseProductionDeduction: vi.fn(),
 	useReverseStockMovement: vi.fn(),
 }));
 
 import {
+	useReverseProductionDeduction,
 	useReverseStockMovement,
 	useStockMovementDetail,
 } from "../hooks/useStockMovements";
@@ -62,6 +64,10 @@ describe("StockMovementDetailPage", () => {
 			mutateAsync: vi.fn().mockResolvedValue("rev-1"),
 			isPending: false,
 		} as unknown as ReturnType<typeof useReverseStockMovement>);
+		vi.mocked(useReverseProductionDeduction).mockReturnValue({
+			mutateAsync: vi.fn().mockResolvedValue({ id: "rev-batch" }),
+			isPending: false,
+		} as unknown as ReturnType<typeof useReverseProductionDeduction>);
 	});
 
 	it("shows loading state", () => {
@@ -206,5 +212,94 @@ describe("StockMovementDetailPage", () => {
 		expect(
 			screen.getByText(/Este movimiento no está disponible para reversión/),
 		).toBeInTheDocument();
+	});
+
+	describe("production-origin rows", () => {
+		const PRODUCTION_DETAIL: StockMovementDetail = {
+			...DETAIL,
+			reason: "consumo_produccion",
+			note: "Inicio de producción",
+			quote_id: "q-3",
+			quote_number: "P-2026-003",
+			production_deduction_id: "pd-1",
+			is_production_deduction: true,
+			production_deduction_status: "completed",
+		};
+
+		it("shows production batch context section", () => {
+			vi.mocked(useStockMovementDetail).mockReturnValue({
+				data: PRODUCTION_DETAIL,
+				isLoading: false,
+				error: null,
+			} as ReturnType<typeof useStockMovementDetail>);
+
+			renderDetail();
+
+			expect(screen.getByText("Descuento de producción")).toBeInTheDocument();
+			expect(
+				screen.getByText(/Revertí el lote completo para corregir/i),
+			).toBeInTheDocument();
+		});
+
+		it("shows batch reversal CTA for production rows", () => {
+			vi.mocked(useStockMovementDetail).mockReturnValue({
+				data: PRODUCTION_DETAIL,
+				isLoading: false,
+				error: null,
+			} as ReturnType<typeof useStockMovementDetail>);
+
+			renderDetail();
+
+			expect(
+				screen.getByRole("button", { name: /revertir lote completo/i }),
+			).toBeInTheDocument();
+		});
+
+		it("shows reversed state when production batch is reversed", () => {
+			vi.mocked(useStockMovementDetail).mockReturnValue({
+				data: {
+					...PRODUCTION_DETAIL,
+					production_deduction_status: "reversed",
+				},
+				isLoading: false,
+				error: null,
+			} as ReturnType<typeof useStockMovementDetail>);
+
+			renderDetail();
+
+			expect(screen.getByText(/El lote ya fue revertido/i)).toBeInTheDocument();
+			expect(
+				screen.queryByRole("button", { name: /revertir lote completo/i }),
+			).not.toBeInTheDocument();
+		});
+
+		it("calls batch reversal on confirm with reason", async () => {
+			vi.mocked(useStockMovementDetail).mockReturnValue({
+				data: PRODUCTION_DETAIL,
+				isLoading: false,
+				error: null,
+			} as ReturnType<typeof useStockMovementDetail>);
+			const mutateAsync = vi.fn().mockResolvedValue({ id: "rev-batch" });
+			vi.mocked(useReverseProductionDeduction).mockReturnValue({
+				mutateAsync,
+				isPending: false,
+			} as unknown as ReturnType<typeof useReverseProductionDeduction>);
+
+			renderDetail();
+
+			fireEvent.change(screen.getByLabelText("Motivo de reversión del lote"), {
+				target: { value: "Error en la producción" },
+			});
+			fireEvent.click(
+				screen.getByRole("button", { name: /revertir lote completo/i }),
+			);
+
+			await waitFor(() => {
+				expect(mutateAsync).toHaveBeenCalledWith({
+					deductionId: "pd-1",
+					reversalReason: "Error en la producción",
+				});
+			});
+		});
 	});
 });

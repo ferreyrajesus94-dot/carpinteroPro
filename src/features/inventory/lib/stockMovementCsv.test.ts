@@ -63,7 +63,7 @@ describe("buildStockMovementCsv", () => {
 		const csv = buildStockMovementCsv([]);
 		const firstLine = csv.slice(1).split("\r\n")[0];
 		expect(firstLine).toBe(
-			"fecha,material_id,material,delta,motivo,nota,creador,es_reversion,movimiento_original_id,motivo_reversion,revertido_por_movimiento_id",
+			"fecha,material_id,material,delta,motivo,nota,creador,es_reversion,movimiento_original_id,motivo_reversion,revertido_por_movimiento_id,origen_produccion,presupuesto,production_deduction_id",
 		);
 	});
 
@@ -142,7 +142,7 @@ describe("buildStockMovementCsv", () => {
 		const csv = buildStockMovementCsv([row]);
 		const line = csv.slice(1).split("\r\n")[1];
 
-		expect(line.endsWith(",no,,,rev-1")).toBe(true);
+		expect(line).toContain(",no,,,rev-1,no,,");
 	});
 
 	it("filename is movimientos-stock-YYYY-MM-DD.csv", () => {
@@ -153,6 +153,24 @@ describe("buildStockMovementCsv", () => {
 		const filename = `movimientos-stock-${yyyy}-${mm}-${dd}.csv`;
 		expect(filename).toMatch(/^movimientos-stock-\d{4}-\d{2}-\d{2}\.csv$/);
 	});
+});
+
+it("includes production columns for consumo_produccion rows", () => {
+	const productionRow: StockMovementLedgerRow = {
+		...BASE_ROW,
+		reason: "consumo_produccion" as StockMovementReason,
+		quote_id: "q-1",
+		quote_number: "P-2026-001",
+		production_deduction_id: "pd-1",
+		is_production_deduction: true,
+		production_deduction_status: "completed",
+	};
+	const csv = buildStockMovementCsv([productionRow]);
+	const line = csv.slice(1).split("\r\n")[1];
+
+	expect(line).toContain("Consumo producción");
+	expect(line).toContain("P-2026-001");
+	expect(line).toContain("pd-1");
 });
 
 describe("EXPORT_LIMIT", () => {

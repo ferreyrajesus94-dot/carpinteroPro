@@ -5,8 +5,10 @@ import {
 	fetchStockMovements,
 	fetchStockMovementLedger,
 	fetchStockMovementDetail,
+	reverseProductionDeduction,
 	reverseStockMovement,
 	type ApplyStockMovementInput,
+	type ReverseProductionDeductionInput,
 	type ReverseStockMovementInput,
 	type StockMovementLedgerFilters,
 } from "../api/stockMovements";
@@ -86,6 +88,32 @@ export function useReverseStockMovement() {
 				queryKey: [...STOCK_MOVEMENT_DETAIL_KEY, input.movementId],
 			});
 			toast.success("Movimiento revertido");
+		},
+		onError: (error: Error) => toast.error(error.message),
+	});
+}
+
+/**
+ * Reverse an entire production deduction batch.
+ * Generates a reversal_request_id internally for idempotency.
+ */
+export function useReverseProductionDeduction() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: ReverseProductionDeductionInput) =>
+			reverseProductionDeduction({
+				deductionId: input.deductionId,
+				reversalReason: input.reversalReason,
+				reversalRequestId: input.reversalRequestId ?? generateRequestId(),
+			}),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: [STOCK_MOVEMENTS_KEY, "ledger"],
+			});
+			queryClient.invalidateQueries({
+				queryKey: [STOCK_MOVEMENTS_KEY, "detail"],
+			});
+			toast.success("Lote de producción revertido");
 		},
 		onError: (error: Error) => toast.error(error.message),
 	});

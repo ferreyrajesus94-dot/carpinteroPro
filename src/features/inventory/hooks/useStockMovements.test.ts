@@ -9,6 +9,7 @@ vi.mock("../api/stockMovements", () => ({
 	fetchStockMovementDetail: vi.fn(),
 	fetchStockMovements: vi.fn(),
 	applyStockMovement: vi.fn(),
+	reverseProductionDeduction: vi.fn(),
 	reverseStockMovement: vi.fn(),
 }));
 
@@ -379,5 +380,83 @@ describe("useApplyStockMovement", () => {
 		expect(invalidateSpy).toHaveBeenCalledWith(
 			expect.objectContaining({ queryKey: ["stock_movements", "ledger"] }),
 		);
+	});
+});
+
+describe("useReverseProductionDeduction", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("calls reverseProductionDeduction with correct params and invalidates ledger and detail", async () => {
+		vi.mocked(stockMovementsApi.reverseProductionDeduction).mockResolvedValue({
+			id: "rev-1",
+		});
+
+		const { useReverseProductionDeduction } = await import(
+			"./useStockMovements"
+		);
+		const queryClient = new QueryClient({
+			defaultOptions: { queries: { retry: false } },
+		});
+		const wrapper = ({ children }: { children: React.ReactNode }) =>
+			createElement(QueryClientProvider, { client: queryClient }, children);
+
+		const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+		const { result } = renderHook(() => useReverseProductionDeduction(), {
+			wrapper,
+		});
+
+		await act(async () => {
+			await result.current.mutateAsync({
+				deductionId: "pd-1",
+				reversalReason: "Error de producción",
+			});
+		});
+
+		expect(stockMovementsApi.reverseProductionDeduction).toHaveBeenCalledWith({
+			deductionId: "pd-1",
+			reversalReason: "Error de producción",
+			reversalRequestId: expect.stringMatching(
+				/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+			),
+		});
+
+		expect(invalidateSpy).toHaveBeenCalledWith(
+			expect.objectContaining({ queryKey: ["stock_movements", "ledger"] }),
+		);
+		expect(invalidateSpy).toHaveBeenCalledWith(
+			expect.objectContaining({ queryKey: ["stock_movements", "detail"] }),
+		);
+	});
+
+	it("preserves a caller-supplied reversalRequestId", async () => {
+		vi.mocked(stockMovementsApi.reverseProductionDeduction).mockResolvedValue({
+			id: "rev-1",
+		});
+
+		const { useReverseProductionDeduction } = await import(
+			"./useStockMovements"
+		);
+		const wrapper = makeQueryWrapper();
+
+		const { result } = renderHook(() => useReverseProductionDeduction(), {
+			wrapper,
+		});
+
+		await act(async () => {
+			await result.current.mutateAsync({
+				deductionId: "pd-1",
+				reversalReason: "Error",
+				reversalRequestId: "req-1",
+			});
+		});
+
+		expect(stockMovementsApi.reverseProductionDeduction).toHaveBeenCalledWith({
+			deductionId: "pd-1",
+			reversalReason: "Error",
+			reversalRequestId: "req-1",
+		});
 	});
 });

@@ -84,6 +84,20 @@ const ROW_WITH_QUOTE: StockMovementLedgerRow = {
 
 const MOCK_ROWS = [ROW_WITH_CREATOR, ROW_WITHOUT_CREATOR, ROW_WITH_QUOTE];
 
+const PRODUCTION_ROW: StockMovementLedgerRow = {
+	...ROW_WITH_CREATOR,
+	id: "mov-4",
+	material_name: "Melamina 18mm",
+	delta: -5,
+	reason: "consumo_produccion",
+	quote_id: "q-3",
+	quote_number: "P-2026-003",
+	note: "Inicio de producción",
+	production_deduction_id: "pd-1",
+	is_production_deduction: true,
+	production_deduction_status: "completed",
+};
+
 describe("StockMovementLedgerTable", () => {
 	it("renders material name, signed delta, reason label, note, timestamp, and creator name for each row", () => {
 		render(<StockMovementLedgerTable rows={MOCK_ROWS} />, { wrapper: Wrapper });
@@ -163,6 +177,15 @@ describe("StockMovementLedgerTable", () => {
 		);
 		const skeletons = container.querySelectorAll('[data-testid="skeleton"]');
 		expect(skeletons.length).toBeGreaterThan(0);
+	});
+
+	it("renders production indicator badge and quote reference for production-origin rows", () => {
+		render(<StockMovementLedgerTable rows={[PRODUCTION_ROW]} />, {
+			wrapper: Wrapper,
+		});
+
+		expect(screen.getByText("Consumo producción")).toBeInTheDocument();
+		expect(screen.getByText("P-2026-003")).toBeInTheDocument();
 	});
 
 	it("shows error message (Spanish copy) when query has an error", () => {

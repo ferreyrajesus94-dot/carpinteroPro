@@ -9,6 +9,7 @@ export {
 	useStockMovementLedger,
 	useStockMovementDetail,
 	useReverseStockMovement,
+	useReverseProductionDeduction,
 } from "./hooks/useStockMovements";
 
 // API
@@ -17,6 +18,7 @@ export {
 	fetchStockMovements,
 	fetchStockMovementLedger,
 	fetchStockMovementDetail,
+	reverseProductionDeduction,
 	reverseStockMovement,
 } from "./api/stockMovements";
 
@@ -28,5 +30,6 @@ export type {
 	StockMovementLedgerFilters,
 	StockMovementLedgerRow,
 	StockMovementDetail,
+	ReverseProductionDeductionInput,
 	ReverseStockMovementInput,
 } from "./api/stockMovements";

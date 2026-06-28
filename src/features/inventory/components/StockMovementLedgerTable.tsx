@@ -1,7 +1,7 @@
 import { format, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 import { Link } from "react-router-dom";
-import { AlertTriangle, Inbox } from "lucide-react";
+import { AlertTriangle, Inbox, Factory } from "lucide-react";
 import {
 	Table,
 	TableBody,
@@ -12,7 +12,10 @@ import {
 } from "@/shared/ui/table";
 import { Skeleton } from "@/shared/ui/skeleton";
 import type { StockMovementLedgerRow } from "../api/stockMovements";
-import { formatSignedQuantity, REASON_LABELS } from "../lib/stockMovementLabels";
+import {
+	formatSignedQuantity,
+	REASON_LABELS,
+} from "../lib/stockMovementLabels";
 
 interface StockMovementLedgerTableProps {
 	rows: StockMovementLedgerRow[];
@@ -108,6 +111,7 @@ export function StockMovementLedgerTable({
 						<TableHead>Motivo</TableHead>
 						<TableHead>Nota</TableHead>
 						<TableHead>Creado por</TableHead>
+						<TableHead>Producción</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
@@ -141,6 +145,21 @@ export function StockMovementLedgerTable({
 							</TableCell>
 							<TableCell className="text-sm text-ink2">
 								{row.creator_name ?? "Sin registrar"}
+							</TableCell>
+							<TableCell className="text-sm text-ink2">
+								{row.is_production_deduction ? (
+									<div className="flex items-center gap-1.5">
+										<Factory
+											className="h-3.5 w-3.5 text-amber-600"
+											aria-hidden="true"
+										/>
+										<span className="text-xs text-amber-700">
+											{row.quote_number ?? "Producción"}
+										</span>
+									</div>
+								) : (
+									<span className="text-xs text-ink3">—</span>
+								)}
 							</TableCell>
 						</TableRow>
 					))}

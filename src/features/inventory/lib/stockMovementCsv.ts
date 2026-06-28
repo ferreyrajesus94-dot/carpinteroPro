@@ -15,6 +15,9 @@ const HEADERS = [
 	"movimiento_original_id",
 	"motivo_reversion",
 	"revertido_por_movimiento_id",
+	"origen_produccion",
+	"presupuesto",
+	"production_deduction_id",
 ] as const;
 
 function escape(value: unknown): string {
@@ -42,6 +45,9 @@ export function buildStockMovementCsv(rows: StockMovementLedgerRow[]): string {
 			r.reversal_of_movement_id ?? "",
 			r.reversal_reason ?? "",
 			r.reversed_by_movement_id ?? "",
+			r.is_production_deduction ? "si" : "no",
+			r.quote_number ?? "",
+			r.production_deduction_id ?? "",
 		]
 			.map(escape)
 			.join(",");
