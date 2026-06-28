@@ -947,6 +947,7 @@ export type Database = {
 						| Database["public"]["Enums"]["stock_movement_reason"]
 						| null;
 					reversal_request_id: string | null;
+					production_deduction_id: string | null;
 				};
 				Insert: {
 					id?: string;
@@ -964,6 +965,7 @@ export type Database = {
 						| Database["public"]["Enums"]["stock_movement_reason"]
 						| null;
 					reversal_request_id?: string | null;
+					production_deduction_id?: string | null;
 				};
 				Update: {
 					id?: string;
@@ -981,6 +983,7 @@ export type Database = {
 						| Database["public"]["Enums"]["stock_movement_reason"]
 						| null;
 					reversal_request_id?: string | null;
+					production_deduction_id?: string | null;
 				};
 				Relationships: [
 					{
@@ -1062,6 +1065,114 @@ export type Database = {
 					},
 				];
 			};
+			quote_approved_bom_lines: {
+				Row: {
+					id: string;
+					workshop_id: string;
+					quote_id: string;
+					line_number: number;
+					source_recipe_snapshot_id: string | null;
+					material_id: string | null;
+					material_name: string;
+					material_unit: string;
+					material_category: string;
+					deduction_quantity: number | null;
+					calculation_method: string;
+					is_complete: boolean;
+					warning_code: string | null;
+					calculation_context: Json;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					workshop_id: string;
+					quote_id: string;
+					line_number: number;
+					source_recipe_snapshot_id?: string | null;
+					material_id?: string | null;
+					material_name: string;
+					material_unit: string;
+					material_category: string;
+					deduction_quantity?: number | null;
+					calculation_method: string;
+					is_complete?: boolean;
+					warning_code?: string | null;
+					calculation_context?: Json;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					workshop_id?: string;
+					quote_id?: string;
+					line_number?: number;
+					source_recipe_snapshot_id?: string | null;
+					material_id?: string | null;
+					material_name?: string;
+					material_unit?: string;
+					material_category?: string;
+					deduction_quantity?: number | null;
+					calculation_method?: string;
+					is_complete?: boolean;
+					warning_code?: string | null;
+					calculation_context?: Json;
+					created_at?: string;
+				};
+				Relationships: [];
+			};
+			quote_production_stock_deductions: {
+				Row: {
+					id: string;
+					workshop_id: string;
+					quote_id: string;
+					request_id: string | null;
+					status: string;
+					auto_stock_discount_enabled: boolean;
+					snapshot_incomplete: boolean;
+					shortage_detected: boolean;
+					warning_summary: Json;
+					confirmed_by: string | null;
+					confirmed_at: string;
+					reversed_by: string | null;
+					reversed_at: string | null;
+					reversal_reason: string | null;
+					reversal_request_id: string | null;
+				};
+				Insert: {
+					id?: string;
+					workshop_id: string;
+					quote_id: string;
+					request_id?: string | null;
+					status?: string;
+					auto_stock_discount_enabled: boolean;
+					snapshot_incomplete?: boolean;
+					shortage_detected?: boolean;
+					warning_summary?: Json;
+					confirmed_by?: string | null;
+					confirmed_at?: string;
+					reversed_by?: string | null;
+					reversed_at?: string | null;
+					reversal_reason?: string | null;
+					reversal_request_id?: string | null;
+				};
+				Update: {
+					id?: string;
+					workshop_id?: string;
+					quote_id?: string;
+					request_id?: string | null;
+					status?: string;
+					auto_stock_discount_enabled?: boolean;
+					snapshot_incomplete?: boolean;
+					shortage_detected?: boolean;
+					warning_summary?: Json;
+					confirmed_by?: string | null;
+					confirmed_at?: string;
+					reversed_by?: string | null;
+					reversed_at?: string | null;
+					reversal_reason?: string | null;
+					reversal_request_id?: string | null;
+				};
+				Relationships: [];
+			};
 		};
 		Views: {
 			[_ in never]: never;
@@ -1070,6 +1181,10 @@ export type Database = {
 			generate_quote_number: {
 				Args: { p_workshop_id: string };
 				Returns: string;
+			};
+			capture_quote_approved_bom: {
+				Args: { p_quote_id: string };
+				Returns: undefined;
 			};
 			apply_stock_movement: {
 				Args: {
@@ -1115,6 +1230,9 @@ export type Database = {
 						| null;
 					is_reversal: boolean;
 					reversed_by_movement_id: string | null;
+					production_deduction_id: string | null;
+					is_production_deduction: boolean;
+					production_deduction_status: string | null;
 				}[];
 			};
 			get_stock_movement_detail: {
@@ -1142,7 +1260,44 @@ export type Database = {
 					is_reversal: boolean;
 					reversed_by_movement_id: string | null;
 					can_reverse: boolean;
+					production_deduction_id: string | null;
+					is_production_deduction: boolean;
+					production_deduction_status: string | null;
 				}[];
+			};
+			get_quote_production_deduction_preview: {
+				Args: { p_quote_id: string };
+				Returns: {
+					line_number: number;
+					material_id: string | null;
+					material_name: string;
+					material_unit: string;
+					material_category: string;
+					deduction_quantity: number | null;
+					current_stock: number | null;
+					projected_stock: number | null;
+					shortage_amount: number | null;
+					is_complete: boolean;
+					warning_code: string | null;
+					existing_batch_id: string | null;
+					existing_batch_status: string | null;
+				}[];
+			};
+			start_quote_production: {
+				Args: {
+					p_quote_id: string;
+					p_confirm_deduction: boolean;
+					p_request_id?: string;
+				};
+				Returns: Json;
+			};
+			reverse_production_stock_deduction: {
+				Args: {
+					p_deduction_id: string;
+					p_reversal_reason: string;
+					p_reversal_request_id?: string | null;
+				};
+				Returns: string;
 			};
 			reverse_stock_movement: {
 				Args: {
@@ -1195,7 +1350,8 @@ export type Database = {
 				| "merma"
 				| "ajuste"
 				| "descuento_presupuesto"
-				| "reversion";
+				| "reversion"
+				| "consumo_produccion";
 			workshop_user_role: "admin" | "operational" | "viewer";
 			task_priority: "alta" | "normal" | "baja";
 			task_status: "pendiente" | "hecha";
