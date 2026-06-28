@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
 *.local
 
 # Playwright artifacts
@@ -36,6 +37,9 @@ blob-report/
 
 # Personal research notes (not project code)
 research/
+
+# CodeGraph knowledge-graph indices (local to each machine)
+.codegraph/
 
 # Playwright MCP artifacts
 .playwright-mcp/
