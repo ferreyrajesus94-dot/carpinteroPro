@@ -29,6 +29,9 @@ const ROW_WITH_CREATOR: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const ROW_WITHOUT_CREATOR: StockMovementLedgerRow = {
@@ -50,6 +53,9 @@ const ROW_WITHOUT_CREATOR: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const ROW_WITH_QUOTE: StockMovementLedgerRow = {
@@ -71,6 +77,9 @@ const ROW_WITH_QUOTE: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const MOCK_ROWS = [ROW_WITH_CREATOR, ROW_WITHOUT_CREATOR, ROW_WITH_QUOTE];

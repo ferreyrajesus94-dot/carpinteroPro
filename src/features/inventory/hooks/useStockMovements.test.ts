@@ -50,6 +50,9 @@ const MOCK_LEDGER_ROW: StockMovementLedgerRow = {
 	reversed_original_reason: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 };
 
 const MOCK_DETAIL: StockMovementDetail = {
@@ -60,6 +63,9 @@ const MOCK_DETAIL: StockMovementDetail = {
 	reversal_request_id: null,
 	is_reversal: false,
 	reversed_by_movement_id: null,
+	production_deduction_id: null,
+	is_production_deduction: false,
+	production_deduction_status: null,
 	can_reverse: true,
 };
 

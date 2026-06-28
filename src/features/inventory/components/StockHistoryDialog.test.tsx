@@ -71,6 +71,7 @@ describe("StockHistoryDialog", () => {
 			reversal_reason: null,
 			reversed_original_reason: null,
 			reversal_request_id: null,
+			production_deduction_id: null,
 		};
 		mockQuery([reversal], false);
 
@@ -118,6 +119,7 @@ describe("StockHistoryDialog", () => {
 				reversal_reason: null,
 				reversed_original_reason: null,
 				reversal_request_id: null,
+			production_deduction_id: null,
 			},
 			{
 				id: "m-2",
@@ -133,6 +135,7 @@ describe("StockHistoryDialog", () => {
 				reversal_reason: null,
 				reversed_original_reason: null,
 				reversal_request_id: null,
+			production_deduction_id: null,
 			},
 		];
 		mockQuery(movements, false);
