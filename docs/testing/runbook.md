@@ -80,6 +80,21 @@ Fixtures use stable `e2e_sdd7_` identity names and workshop IDs documented in `s
 - `e2e_sdd7_workshop_b`
 - matching `profiles`, `subscriptions`, `clients`, `furniture_templates`, `recipe_items`, `labor_items`, `contract_templates`, `quotes`, `quote_extras`, quote snapshot rows, `materials`, `stock_movements`, and `billing_webhook_events` rows
 
+## Coverage gate
+
+A Vitest V8 coverage gate enforces global thresholds for the unit/integration test suite. Run it locally:
+
+```bash
+npm run test:coverage
+```
+
+The gate prints a text summary to stdout and writes `html`, `lcov`, and `json` report files to `coverage/`. Text output is not written to disk — use the HTML report or `lcov.info` for file-based review. Configuration lives in `vite.config.ts` under `test.coverage`.
+
+Coverage is part of the four-command verification contract for every SDD package:
+`npm test` → `npm run test:coverage` → `npm run lint` → `npm run build`.
+
+This gate is separate from Playwright E2E tests. E2E coverage is not measured by Vitest.
+
 ## CI expectations
 
 Run Playwright in a separate E2E job after `npm test`. The job should start local Supabase, export only test/sandbox credentials, run `npm run test:e2e`, and upload Playwright traces/screenshots on failure. Missing E2E env vars should fail the E2E job fast.
