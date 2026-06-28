@@ -340,10 +340,10 @@ export function WorkshopSettings({
 										htmlFor="auto-stock-discount"
 										className="cursor-pointer"
 									>
-										Descontar stock automáticamente al aprobar presupuestos
+										Descontar stock automáticamente al iniciar producción
 									</Label>
 									<p className="text-xs text-muted-foreground">
-										Cuando marques un presupuesto como Aprobado, los materiales
+										Cuando un presupuesto aprobado pase a En producción, los materiales
 										que componen el mueble se restarán del stock
 										automáticamente. Podés revertir el movimiento manualmente
 										desde el inventario.

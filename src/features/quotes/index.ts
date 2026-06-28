@@ -7,5 +7,6 @@ export {
 	useQuotes,
 	useCreateQuote,
 	useUpdateQuote,
+	useUpdateQuoteStatus,
 	useGenerateQuoteNumber,
 } from "./hooks/useQuotes";
