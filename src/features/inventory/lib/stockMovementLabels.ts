@@ -19,6 +19,7 @@ export const REASON_LABELS: Record<StockMovementReason, string> = {
 	ajuste: "Ajuste",
 	descuento_presupuesto: "Descuento presupuesto",
 	reversion: "Reversión",
+	consumo_produccion: "Consumo producción",
 };
 
 export const REASON_OPTIONS: ReadonlyArray<{
