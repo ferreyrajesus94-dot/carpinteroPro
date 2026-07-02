@@ -6,10 +6,17 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
+// `featureZone` limits cross-feature imports to the target feature's
+// public barrel (`src/features/<feature>/index.ts`). Self-imports stay
+// allowed through the feature directory so a feature can reach its own
+// internal files without opening the seam to other features.
 const featureZone = (feature, exceptions = []) => ({
 	target: `./src/features/${feature}`,
 	from: "./src/features",
-	except: [`./${feature}`, ...exceptions.map((name) => `./${name}`)],
+	except: [
+		`./${feature}`,
+		...exceptions.map((name) => `./${name}/index.ts`),
+	],
 });
 
 const featureBoundaryZones = [
@@ -22,17 +29,22 @@ const featureBoundaryZones = [
 	featureZone("auth"),
 	featureZone("admin"),
 	featureZone("billing"),
-	// SDD9 WU6 complete: CRM no longer imports from quotes feature.
+  // CRM may import the quotes feature only through its public barrel.
 	featureZone("crm"),
-	featureZone("dashboard"),
+  // Dashboard mounts `ProductionPipelineWidget`, so it may import the
+  // production feature only through its public barrel.
+	featureZone("dashboard", ["production"]),
 	featureZone("inventory"),
 	featureZone("landing"),
 	featureZone("legal"),
 	featureZone("onboarding"),
-	// SDD9 complete: quotes has no remaining feature exceptions.
-	featureZone("quotes"),
+  // Production stays isolated from other features; cross-feature
+  // consumers must go through the production barrel.
+	featureZone("production"),
+  // Quotes may import production through the public barrel for the
+  // "Iniciar producción" flow.
+	featureZone("quotes", ["production"]),
 	featureZone("search"),
-	// SDD9 WU7 complete: recipes no longer imports inventory or settings.
 	featureZone("recipes"),
 	featureZone("settings"),
 	featureZone("tasks"),
