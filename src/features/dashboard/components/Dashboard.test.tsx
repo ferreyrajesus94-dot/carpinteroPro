@@ -1,21 +1,13 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-// PR 8: the production pipeline widget is mounted on the home dashboard.
-// We mock the barrel export so the test focuses on the dashboard's
-// integration contract (the widget renders, is mounted exactly once, and
-// is also mounted in the loading skeleton state) and does not need to
-// re-test the widget's own render/loading/error branches (those are
-// exercised by `ProductionPipelineWidget.test.tsx`).
-vi.mock("@/features/production", () => ({
-	ProductionPipelineWidget: () => (
-		<div data-testid="dashboard-pipeline-widget">Pipeline mock</div>
-	),
-}));
-
 import { Dashboard } from "./Dashboard";
 import type { DashboardMaterial, DashboardQuote } from "../types";
+
+const dashboardPipelineWidget = (
+	<div data-testid="dashboard-pipeline-widget">Pipeline mock</div>
+);
 
 function makeQuote(overrides: Partial<DashboardQuote> = {}): DashboardQuote {
 	return {
@@ -51,6 +43,7 @@ describe("Dashboard prop contracts", () => {
 					quotes={[makeQuote()]}
 					materials={[makeMaterial()]}
 					isLoading={false}
+					productionPipelineWidget={dashboardPipelineWidget}
 				/>
 			</MemoryRouter>,
 		);
@@ -63,15 +56,18 @@ describe("Dashboard prop contracts", () => {
 	});
 
 	// The loading skeleton renders 4 outer dashboard pulses. The
-	// production pipeline widget is also mounted in the loading
-	// state (its own loading affordance is exercised in
-	// `ProductionPipelineWidget.test.tsx`); the widget is mocked to
-	// a static testid div in this test file, so the 4-pulse count
-	// here is the outer dashboard skeleton only.
+	// injected pipeline widget is exercised separately by its own
+	// feature tests, so the 4-pulse count here is the outer dashboard
+	// skeleton only.
 	it("renders the loading skeleton from the injected loading state", () => {
 		const { container } = render(
 			<MemoryRouter>
-				<Dashboard quotes={[]} materials={[]} isLoading />
+				<Dashboard
+					quotes={[]}
+					materials={[]}
+					isLoading
+					productionPipelineWidget={dashboardPipelineWidget}
+				/>
 			</MemoryRouter>,
 		);
 
@@ -79,14 +75,15 @@ describe("Dashboard prop contracts", () => {
 	});
 });
 
-describe("Dashboard — production pipeline widget integration (PR 8)", () => {
-	it("mounts the production pipeline widget from the production barrel on the home dashboard", () => {
+describe("Dashboard — production pipeline widget integration", () => {
+	it("mounts the injected production pipeline widget on the home dashboard", () => {
 		render(
 			<MemoryRouter>
 				<Dashboard
 					quotes={[makeQuote()]}
 					materials={[makeMaterial()]}
 					isLoading={false}
+					productionPipelineWidget={dashboardPipelineWidget}
 				/>
 			</MemoryRouter>,
 		);
@@ -104,6 +101,7 @@ describe("Dashboard — production pipeline widget integration (PR 8)", () => {
 					quotes={[makeQuote()]}
 					materials={[makeMaterial()]}
 					isLoading={false}
+					productionPipelineWidget={dashboardPipelineWidget}
 				/>
 			</MemoryRouter>,
 		);
@@ -112,16 +110,14 @@ describe("Dashboard — production pipeline widget integration (PR 8)", () => {
 	});
 
 	it("the production pipeline widget is still mounted in the loading skeleton state", () => {
-		// The dashboard keeps the 4-pulse outer loading skeleton
-		// when the outer quotes query is loading. The pipeline
-		// widget lives in the production feature and reads its own
-		// data through `useProductionPipelineStats`; the widget is
-		// shown to keep the dashboard layout stable while the outer
-		// quotes query fetches (the widget handles its own loading
-		// state inline).
 		render(
 			<MemoryRouter>
-				<Dashboard quotes={[]} materials={[]} isLoading />
+				<Dashboard
+					quotes={[]}
+					materials={[]}
+					isLoading
+					productionPipelineWidget={dashboardPipelineWidget}
+				/>
 			</MemoryRouter>,
 		);
 

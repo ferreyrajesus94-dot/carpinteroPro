@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
 	AlertTriangle,
@@ -12,7 +12,6 @@ import { formatCurrency } from "@/shared/lib/formatters";
 import { QUOTE_STATUS_LABELS } from "@/shared/types/quotes";
 import { PageHeader } from "@/shared/ui/page-header";
 import { SectionHowto } from "@/shared/ui/section-howto";
-import { ProductionPipelineWidget } from "@/features/production";
 import { KPICards } from "./KPICards";
 import { RevenueChart } from "./RevenueChart";
 import { ActiveQuotesPanel } from "./ActiveQuotesPanel";
@@ -45,9 +44,15 @@ export interface DashboardProps {
 	quotes: DashboardQuote[];
 	materials: DashboardMaterial[];
 	isLoading: boolean;
+	productionPipelineWidget: ReactNode;
 }
 
-export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
+export function Dashboard({
+	quotes,
+	materials,
+	isLoading,
+	productionPipelineWidget,
+}: DashboardProps) {
 	const navigate = useNavigate();
 	const [period, setPeriod] = useState<Period>("current_month");
 	const [staleQuotes, setStaleQuotes] = useState<typeof quotes>([]);
@@ -87,12 +92,7 @@ export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
 				{[...Array(4)].map((_, i) => (
 					<div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
 				))}
-				{/* PR 8: keep the pipeline widget mounted in the loading
-				    skeleton state so the widget can render its own
-				    loading affordance. The widget reads its own data
-				    through `useProductionPipelineStats` and does not
-				    depend on the outer quote/material fetch. */}
-				<ProductionPipelineWidget />
+				{productionPipelineWidget}
 			</div>
 		);
 	}
@@ -187,11 +187,7 @@ export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
 			{/* KPI grid 2×2 mobile / 4×1 desktop */}
 			<KPICards stats={stats} />
 
-			{/* PR 8: production pipeline widget — per-state order counts
-			    for the caller's workshop. Reads through the production
-			    barrel's `useProductionPipelineStats` hook (SECURITY
-			    INVOKER read RPC, RLS-scoped, cache-privacy-protected). */}
-			<ProductionPipelineWidget />
+			{productionPipelineWidget}
 
 			{/* Pipeline snapshot */}
 			{stats.byStatus.length > 0 && (
