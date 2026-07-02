@@ -15,6 +15,7 @@ export type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', label: 'Inicio',        icon: 'fi-rr-apps' },
   { to: '/inventory', label: 'Inventario',    icon: 'fi-rr-box-open',     fabLabel: 'Material',     fabAction: 'inventory:new' },
+  { to: '/production',label: 'Producción',    icon: 'fi-rr-tools' },
   { to: '/recipes',   label: 'Muebles',       icon: 'fi-rr-couch',        fabLabel: 'Mueble',       fabAction: 'recipes:new' },
   { to: '/quotes',    label: 'Presupuestos',  icon: 'fi-rr-file-invoice', fabLabel: 'Presupuesto',  fabHref: '/quotes/new' },
   { to: '/crm',       label: 'Clientes',      icon: 'fi-rr-users',        fabLabel: 'Cliente',      fabAction: 'crm:new' },
