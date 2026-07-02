@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/shared/ui/button";
@@ -75,6 +75,15 @@ const STEPS = [
 	{ n: 4, label: "Precio", key: "precio" },
 ];
 
+/**
+ * The form only exposes user-editable quote statuses. Production is
+ * entered through `ProductionStartReviewDialog`, so `en_produccion`
+ * stays out of the dropdown.
+ */
+const USER_EDITABLE_QUOTE_STATUSES: QuoteStatus[] = (
+	Object.keys(QUOTE_STATUS_LABELS) as QuoteStatus[]
+).filter((status) => status !== "en_produccion");
+
 interface ClientDialogFormProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
@@ -119,7 +128,6 @@ export function QuoteForm({
 		register,
 		handleSubmit,
 		control,
-		watch,
 		reset,
 		setValue,
 		formState: { errors, isSubmitting, isValid },
@@ -159,7 +167,7 @@ export function QuoteForm({
 		}
 	}, [existingQuote, reset]);
 
-	const templateIdWatch = watch("furniture_template_id");
+	const templateIdWatch = useWatch({ control, name: "furniture_template_id" });
 	useEffect(() => {
 		if (!templateIdWatch) return;
 		const tpl = templates.find((t) => t.id === templateIdWatch);
@@ -176,13 +184,13 @@ export function QuoteForm({
 		setValue("recipe_cost", cost.total);
 	}, [templateIdWatch, templates, setValue]);
 
-	const recipeCostWatch = watch("recipe_cost");
-	const extrasWatch = watch("extras");
-	const marginModeWatch = watch("margin_mode");
-	const marginPctWatch = watch("margin_pct");
-	const clientIdWatch = watch("client_id");
-	const statusWatch = watch("status");
-	const furnitureNameWatch = watch("furniture_name");
+	const recipeCostWatch = useWatch({ control, name: "recipe_cost" });
+	const extrasWatch = useWatch({ control, name: "extras" });
+	const marginModeWatch = useWatch({ control, name: "margin_mode" });
+	const marginPctWatch = useWatch({ control, name: "margin_pct" });
+	const clientIdWatch = useWatch({ control, name: "client_id" });
+	const statusWatch = useWatch({ control, name: "status" });
+	const furnitureNameWatch = useWatch({ control, name: "furniture_name" });
 
 	const { salePrice } = useMemo(() => {
 		return calculateQuote({
@@ -237,8 +245,8 @@ export function QuoteForm({
 			existingQuote?.status === "aprobado" &&
 			values.status === "en_produccion"
 		) {
-			// Save the form content first (keeping status as aprobado),
-			// then open the production-start dialog for the transition + deduction.
+			// Persist the quote as approved first, then open the production
+			// start dialog to handle the transition and stock deduction.
 			const saveData = {
 				workshop_id: workshopId,
 				quote_number: quoteNumber,
@@ -580,18 +588,13 @@ export function QuoteForm({
 										<SelectTrigger className="w-full">
 											<SelectValue />
 										</SelectTrigger>
-										<SelectContent>
-											{(
-												Object.entries(QUOTE_STATUS_LABELS) as [
-													QuoteStatus,
-													string,
-												][]
-											).map(([value, label]) => (
-												<SelectItem key={value} value={value}>
-													{label}
-												</SelectItem>
-											))}
-										</SelectContent>
+									<SelectContent>
+										{USER_EDITABLE_QUOTE_STATUSES.map((value) => (
+											<SelectItem key={value} value={value}>
+												{QUOTE_STATUS_LABELS[value]}
+											</SelectItem>
+										))}
+									</SelectContent>
 									</Select>
 								</div>
 
@@ -614,7 +617,7 @@ export function QuoteForm({
 					</div>
 				</form>
 
-				{/* Preview (desktop) */}
+			{/* Desktop preview */}
 				<div className="hidden lg:flex lg:w-72 lg:flex-col gap-4">
 					<div className="sticky top-4">
 						<QuoteLivePreview
@@ -629,7 +632,7 @@ export function QuoteForm({
 
 			{/* Footer with navigation */}
 			<div className="border-t border-line bg-surface px-4 py-3 sm:px-6 flex flex-col-reverse sm:flex-row gap-2 sm:gap-4 sm:items-center sm:justify-between">
-				{/* Mobile: Price preview */}
+			{/* Mobile price preview */}
 				<div className="lg:hidden text-center sm:text-left">
 					<p className="text-xs text-muted-foreground">Precio final</p>
 					<p className="font-display text-xl font-semibold">
