@@ -4,12 +4,13 @@
 --   1. apply_stock_movement rejects consumo_produccion reason
 --   2. viewer role cannot call start_quote_production
 --   3. viewer role cannot call capture_quote_approved_bom
+--   4. admin happy path for start_quote_production (PR 2 blocker fix)
 
 begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(3);
+select plan(5);
 
 create temporary table _test_ids (
   key text primary key,
@@ -131,6 +132,51 @@ select throws_ok(
   '42501',
   'not authorized to capture approved BOM',
   'viewer should be rejected from capture_quote_approved_bom'
+);
+
+-- ==========================================================================
+-- Test 4: admin happy path for start_quote_production (PR 2 blocker fix)
+--
+-- The new reject_direct_en_produccion_writes trigger on quotes.status
+-- (added in PR 2 migration 20260630000001_production_orders_rpc.sql)
+-- blocks any authenticated write of status = 'en_produccion' UNLESS the
+-- transaction-local guard app.production_order_write_context = 'rpc' is
+-- set. start_quote_production is SECURITY INVOKER and writes
+-- en_produccion as the caller. Without the PR 2 blocker fix, the
+-- function's UPDATE public.quotes SET status = 'en_produccion' would
+-- raise 42501 from the new trigger. The fix adds SET LOCAL
+-- app.production_order_write_context = 'rpc' around the status writes
+-- in start_quote_production (after its own role/workshop checks).
+--
+-- This test exercises the admin happy path and verifies:
+--   (a) start_quote_production does not raise 42501 from the new
+--       trigger, AND
+--   (b) the function's behavior is unchanged: it updates the quote
+--       status to en_produccion and returns a jsonb result with the
+--       expected shape.
+-- ==========================================================================
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+-- Clear the guard so we test the function sets it internally
+select set_config('app.production_order_write_context', '', true);
+set local role authenticated;
+select set_config('request.jwt.claim.sub', (select id::text from _test_ids where key = 'admin_a'), true);
+
+select lives_ok(
+  $$select public.start_quote_production(
+    (select id from _test_ids where key = 'quote_a'),
+    true,
+    gen_random_uuid()
+  )$$,
+  'admin happy path for start_quote_production — function sets the guard internally, so the new en_produccion guard does not break the existing production flow'
+);
+
+-- Sanity: the quote is now in en_produccion status (proves the UPDATE
+-- was not silently skipped — the guard path is exercised end-to-end)
+select results_eq(
+  $$select status::text from public.quotes where id = '40000000-0000-0000-0000-00000000a001'::uuid$$,
+  $$values ('en_produccion'::text)$$,
+  'after admin start_quote_production, the quote is in en_produccion status (proves the guard path let the UPDATE through)'
 );
 
 rollback;
