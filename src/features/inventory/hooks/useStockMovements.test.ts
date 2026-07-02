@@ -67,6 +67,7 @@ const MOCK_DETAIL: StockMovementDetail = {
 	production_deduction_id: null,
 	is_production_deduction: false,
 	production_deduction_status: null,
+	production_order_id: null,
 	can_reverse: true,
 };
 
