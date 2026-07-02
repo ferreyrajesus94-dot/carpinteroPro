@@ -150,7 +150,7 @@ describe("ProductionPipelineWidget — cache-privacy + RLS sanity (PR 8)", () =>
  * widget. The widget has no way to opt out of this; the test below
  * documents the structural guarantee.
  */
-describe("ProductionPipelineWidget — RLS sanity (PR 8)", () => {
+describe("ProductionPipelineWidget — RLS sanity", () => {
 	it("the widget accepts no workshop-id prop and reads exclusively through the hook (no manual workshop filter possible)", () => {
 		// The widget's `ProductionPipelineWidget` component must NOT
 		// accept a workshopId prop — workshop scoping is the SQL
@@ -168,4 +168,3 @@ describe("ProductionPipelineWidget — RLS sanity (PR 8)", () => {
 		expect(widgetSource).not.toMatch(/useWorkshopId/);
 	});
 });
-
