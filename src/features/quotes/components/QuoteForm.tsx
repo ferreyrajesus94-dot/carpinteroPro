@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -192,14 +192,12 @@ export function QuoteForm({
 	const statusWatch = useWatch({ control, name: "status" });
 	const furnitureNameWatch = useWatch({ control, name: "furniture_name" });
 
-	const { salePrice } = useMemo(() => {
-		return calculateQuote({
-			recipeCost: recipeCostWatch ?? 0,
-			extras: extrasWatch ?? [],
-			marginMode: marginModeWatch,
-			marginPct: marginPctWatch ?? 0,
-		});
-	}, [recipeCostWatch, extrasWatch, marginModeWatch, marginPctWatch]);
+	const { salePrice } = calculateQuote({
+		recipeCost: recipeCostWatch ?? 0,
+		extras: extrasWatch ?? [],
+		marginMode: marginModeWatch,
+		marginPct: marginPctWatch ?? 0,
+	});
 
 	function handleClientCreated(client: Client) {
 		setValue("client_id", client.id);
