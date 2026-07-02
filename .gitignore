@@ -44,3 +44,6 @@ research/
 # Playwright MCP artifacts
 .playwright-mcp/
 .4r-out/
+
+# Engram local memory cache (per-machine memory archive)
+.engram/
