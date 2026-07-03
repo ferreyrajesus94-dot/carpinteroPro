@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, RotateCcw } from "lucide-react";
+import { ArrowLeft, ExternalLink, RotateCcw } from "lucide-react";
 import { PageHeader } from "@/shared/ui/page-header";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
@@ -14,6 +14,10 @@ import {
 	formatSignedQuantity,
 	REASON_LABELS,
 } from "../lib/stockMovementLabels";
+import {
+	buildInventoryProductionOrderDeepLink,
+	shouldShowInventoryProductionOrderDeepLink,
+} from "../lib/productionOrderDeepLink";
 
 function getDetailText(movement: {
 	is_reversal: boolean;
@@ -184,6 +188,24 @@ export function StockMovementDetailPage() {
 							? " El lote ya fue revertido."
 							: " Revertí el lote completo para corregir."}
 					</p>
+					{shouldShowInventoryProductionOrderDeepLink({
+						reason: movement.reason,
+						productionDeductionId: movement.production_deduction_id,
+						productionOrderId: movement.production_order_id ?? null,
+					}) && movement.production_order_id ? (
+						<div className="mt-3">
+							<Button asChild variant="outline" size="sm">
+								<Link
+									to={buildInventoryProductionOrderDeepLink(
+										movement.production_order_id,
+									)}
+								>
+									<ExternalLink className="mr-2 h-4 w-4" />
+									Ver orden de producción
+								</Link>
+							</Button>
+						</div>
+					) : null}
 					{movement.production_deduction_status !== "reversed" &&
 						movement.can_reverse && (
 							<div className="mt-3 space-y-3">

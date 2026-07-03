@@ -40,7 +40,53 @@ Record every stock change (purchase, consumption, shrinkage, adjustment, quote d
 
 ### Requirement: Stock Movements Table
 
-The system MUST provide a `stock_movements` table with columns: `id uuid PK`, `workshop_id uuid NOT NULL`, `material_id uuid NOT NULL REFERENCES materials(id) ON DELETE CASCADE`, `delta NUMERIC(12,2) NOT NULL CHECK (delta <> 0)`, `reason stock_movement_reason NOT NULL`, `note text`, `quote_id uuid REFERENCES quotes(id) ON DELETE SET NULL`, `production_deduction_id uuid REFERENCES quote_production_stock_deductions(id) ON DELETE SET NULL`, `created_at timestamptz NOT NULL DEFAULT now()`, `created_by uuid`, and reversal audit columns `reversal_of_movement_id uuid`, `reversal_reason text`, `reversed_original_reason stock_movement_reason`, and `reversal_request_id uuid`. The `stock_movement_reason` enum MUST include `consumo_produccion` for production-start deductions and MUST retain `descuento_presupuesto` as a legacy value for historical rows. The table MUST have indexes on `(material_id, created_at DESC)`, `(workshop_id, created_at DESC)`, `(workshop_id, production_deduction_id)` where not null, and reversal lookup/idempotency indexes. RLS MUST be enabled with all four policies (S/I/U/D) scoped by `get_current_workshop_id()`.
+The system MUST provide a `stock_movements` table with columns: `id uuid PK`, `workshop_id uuid NOT NULL`, `material_id uuid NOT NULL REFERENCES materials(id) ON DELETE CASCADE`, `delta NUMERIC(12,2) NOT NULL CHECK (delta <> 0)`, `reason stock_movement_reason NOT NULL`, `note text`, `quote_id uuid REFERENCES quotes(id) ON DELETE SET NULL`, `production_deduction_id uuid REFERENCES quote_production_stock_deductions(id) ON DELETE SET NULL`, and reversal audit columns `reversal_of_movement_id uuid`, `reversal_reason text`, `reversed_original_reason stock_movement_reason`, `reversal_request_id uuid`, and the `created_at` / `created_by` audit columns. The `stock_movement_reason` enum MUST include `consumo_produccion` for production-start deductions and MUST retain `descuento_presupuesto` as a legacy value for historical rows. The table MUST have indexes on `(material_id, created_at DESC)`, `(workshop_id, created_at DESC)`, `(workshop_id, production_deduction_id)` where not null, and reversal lookup/idempotency indexes. RLS MUST be enabled with all four policies (S/I/U/D) scoped by `get_current_workshop_id()`.
+
+(Previously: production-origin movement linkage existed only via `production_deduction_id`; this change keeps that linkage and introduces an additional nullable production-order reference on the deduction batch — see Requirement: Production-Deduction Order Linkage. The new linkage is at the deduction-batch level, not the movement level, because the deduction is the right granularity for "which production order caused this set of movements".)
+
+#### Scenario: Movement carries production_deduction_id
+
+- GIVEN a production-start deduction creates movements
+- WHEN a movement row is inserted
+- THEN `production_deduction_id` references the producing
+  `quote_production_stock_deductions` row
+
+### Requirement: Production-Deduction Order Linkage
+
+The system MUST expose a nullable
+`quote_production_stock_deductions.production_order_id uuid NULL
+REFERENCES production_orders(id) ON DELETE SET NULL` column. The
+column MUST be nullable so a deduction created before its
+corresponding production order is linked (or before the production
+order concept existed) remains valid. A SQL trigger MUST enforce
+that when `production_order_id` is non-null, the referenced
+production order belongs to the same workshop as the deduction
+batch; a mismatch MUST raise 23514. The system MUST enforce an
+`ON DELETE SET NULL` semantic: deleting a `production_orders` row
+MUST NOT cascade-delete the deduction batch, only null the link.
+
+#### Scenario: Nullable link allows legacy deductions
+
+- GIVEN a `quote_production_stock_deductions` row created before
+  production orders existed
+- WHEN the new column is added
+- THEN existing rows keep `production_order_id = NULL` without
+  constraint violations
+
+#### Scenario: Same-workshop check rejects mismatch
+
+- GIVEN a deduction batch in workshop A
+- WHEN the system attempts to UPDATE
+  `production_order_id` to a `production_orders.id` belonging to
+  workshop B
+- THEN the trigger raises 23514 and the update is rejected
+
+#### Scenario: ON DELETE SET NULL preserves the batch
+
+- GIVEN a deduction batch with `production_order_id` set
+- WHEN the referenced production order is deleted
+- THEN the deduction batch remains and `production_order_id` becomes
+  NULL (no cascade delete)
 
 ### Requirement: Apply Stock Movement RPC
 

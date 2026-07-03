@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	waitFor,
+	within,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { StockMovementDetailPage } from "./StockMovementDetailPage";
 import type { StockMovementDetail } from "../api/stockMovements";
@@ -41,6 +47,8 @@ const DETAIL: StockMovementDetail = {
 	production_deduction_id: null,
 	is_production_deduction: false,
 	production_deduction_status: null,
+	// PR 7: production-order deep-link target (NULL for non-production movements).
+	production_order_id: null,
 	can_reverse: true,
 };
 
@@ -273,33 +281,121 @@ describe("StockMovementDetailPage", () => {
 			).not.toBeInTheDocument();
 		});
 
-		it("calls batch reversal on confirm with reason", async () => {
-			vi.mocked(useStockMovementDetail).mockReturnValue({
-				data: PRODUCTION_DETAIL,
-				isLoading: false,
-				error: null,
-			} as ReturnType<typeof useStockMovementDetail>);
-			const mutateAsync = vi.fn().mockResolvedValue({ id: "rev-batch" });
-			vi.mocked(useReverseProductionDeduction).mockReturnValue({
-				mutateAsync,
-				isPending: false,
-			} as unknown as ReturnType<typeof useReverseProductionDeduction>);
+	it("calls batch reversal on confirm with reason", async () => {
+		vi.mocked(useStockMovementDetail).mockReturnValue({
+			data: PRODUCTION_DETAIL,
+			isLoading: false,
+			error: null,
+		} as ReturnType<typeof useStockMovementDetail>);
+		const mutateAsync = vi.fn().mockResolvedValue({ id: "rev-batch" });
+		vi.mocked(useReverseProductionDeduction).mockReturnValue({
+			mutateAsync,
+			isPending: false,
+		} as unknown as ReturnType<typeof useReverseProductionDeduction>);
 
-			renderDetail();
+		renderDetail();
 
-			fireEvent.change(screen.getByLabelText("Motivo de reversión del lote"), {
-				target: { value: "Error en la producción" },
-			});
-			fireEvent.click(
-				screen.getByRole("button", { name: /revertir lote completo/i }),
-			);
+		fireEvent.change(screen.getByLabelText("Motivo de reversión del lote"), {
+			target: { value: "Error en la producción" },
+		});
+		fireEvent.click(
+			screen.getByRole("button", { name: /revertir lote completo/i }),
+		);
 
-			await waitFor(() => {
-				expect(mutateAsync).toHaveBeenCalledWith({
-					deductionId: "pd-1",
-					reversalReason: "Error en la producción",
-				});
+		await waitFor(() => {
+			expect(mutateAsync).toHaveBeenCalledWith({
+				deductionId: "pd-1",
+				reversalReason: "Error en la producción",
 			});
 		});
 	});
+});
+
+describe("StockMovementDetailPage — production-order deep link (PR 7)", () => {
+	const PRODUCTION_DETAIL_WITH_ORDER: StockMovementDetail = {
+		...DETAIL,
+		reason: "consumo_produccion",
+		note: "Inicio de producción",
+		quote_id: "q-3",
+		quote_number: "P-2026-003",
+		production_deduction_id: "pd-1",
+		is_production_deduction: true,
+		production_deduction_status: "completed",
+		production_order_id: "order-abc-123",
+	};
+
+	const PRODUCTION_DETAIL_WITHOUT_ORDER: StockMovementDetail = {
+		...PRODUCTION_DETAIL_WITH_ORDER,
+		production_order_id: null,
+	};
+
+	const NON_PRODUCTION_DETAIL: StockMovementDetail = {
+		...DETAIL,
+		reason: "compra",
+		production_order_id: null,
+	};
+
+	beforeEach(() => {
+		vi.mocked(useStockMovementDetail).mockReturnValue({
+			data: PRODUCTION_DETAIL_WITH_ORDER,
+			isLoading: false,
+			error: null,
+		} as ReturnType<typeof useStockMovementDetail>);
+	});
+
+	it("renders a 'Ver orden de producción' link when the movement is production-origin AND the deduction has a production_order_id", () => {
+		renderDetail();
+
+		const link = screen.getByRole("link", {
+			name: /ver orden de producci[oó]n/i,
+		});
+		expect(link).toBeInTheDocument();
+		expect(link).toHaveAttribute("href", "/production/order-abc-123");
+	});
+
+	it("hides the deep link when the movement is production-origin BUT the deduction has a null production_order_id (legacy batch)", () => {
+		vi.mocked(useStockMovementDetail).mockReturnValue({
+			data: PRODUCTION_DETAIL_WITHOUT_ORDER,
+			isLoading: false,
+			error: null,
+		} as ReturnType<typeof useStockMovementDetail>);
+
+		renderDetail();
+
+		expect(
+			screen.queryByRole("link", { name: /ver orden de producci[oó]n/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("hides the deep link for non-production movements (compra, reversion, ajuste)", () => {
+		vi.mocked(useStockMovementDetail).mockReturnValue({
+			data: NON_PRODUCTION_DETAIL,
+			isLoading: false,
+			error: null,
+		} as ReturnType<typeof useStockMovementDetail>);
+
+		renderDetail();
+
+		expect(
+			screen.queryByRole("link", { name: /ver orden de producci[oó]n/i }),
+		).not.toBeInTheDocument();
+	});
+
+	it("renders the link inside the production-batch context section so the user sees it together with the other production-deduction context", () => {
+		renderDetail();
+
+		// The production-batch context heading and the deep link are
+		// both rendered. Asserting the link text inside the production
+		// section ensures the link is not orphaned in a separate panel.
+		const batchSection = screen
+			.getByText("Descuento de producción")
+			.closest("section");
+		expect(batchSection).not.toBeNull();
+		expect(
+			within(batchSection as HTMLElement).getByRole("link", {
+				name: /ver orden de producci[oó]n/i,
+			}),
+		).toBeInTheDocument();
+	});
+});
 });

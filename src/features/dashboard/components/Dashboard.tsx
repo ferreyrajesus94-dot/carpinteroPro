@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import {
 	AlertTriangle,
@@ -44,9 +44,15 @@ export interface DashboardProps {
 	quotes: DashboardQuote[];
 	materials: DashboardMaterial[];
 	isLoading: boolean;
+	productionPipelineWidget: ReactNode;
 }
 
-export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
+export function Dashboard({
+	quotes,
+	materials,
+	isLoading,
+	productionPipelineWidget,
+}: DashboardProps) {
 	const navigate = useNavigate();
 	const [period, setPeriod] = useState<Period>("current_month");
 	const [staleQuotes, setStaleQuotes] = useState<typeof quotes>([]);
@@ -86,6 +92,7 @@ export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
 				{[...Array(4)].map((_, i) => (
 					<div key={i} className="h-20 animate-pulse rounded-xl bg-muted" />
 				))}
+				{productionPipelineWidget}
 			</div>
 		);
 	}
@@ -179,6 +186,8 @@ export function Dashboard({ quotes, materials, isLoading }: DashboardProps) {
 
 			{/* KPI grid 2×2 mobile / 4×1 desktop */}
 			<KPICards stats={stats} />
+
+			{productionPipelineWidget}
 
 			{/* Pipeline snapshot */}
 			{stats.byStatus.length > 0 && (

@@ -81,6 +81,13 @@ export const router = createBrowserRouter([
 							})),
 					},
 					{
+						path: "/production/*",
+						lazy: () =>
+							import("@/features/production/routes").then((m) => ({
+								Component: m.ProductionRoutes,
+							})),
+					},
+					{
 						path: "/recipes/*",
 						lazy: () =>
 							import("./pages/RecipesPage").then((m) => ({

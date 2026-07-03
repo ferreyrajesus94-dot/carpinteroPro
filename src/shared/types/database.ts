@@ -1136,6 +1136,13 @@ export type Database = {
 					reversed_at: string | null;
 					reversal_reason: string | null;
 					reversal_request_id: string | null;
+					// PR 4: nullable FK to production_orders.id. The new flow
+					// (start_production_order) writes a non-null value. Legacy
+					// batches (created via the legacy start_quote_production RPC)
+					// keep production_order_id = NULL per the spec "Legacy batch
+					// keeps null" scenario. ON DELETE SET NULL so deleting a
+					// production order does not cascade to legacy ledger rows.
+					production_order_id: string | null;
 				};
 				Insert: {
 					id?: string;
@@ -1153,6 +1160,7 @@ export type Database = {
 					reversed_at?: string | null;
 					reversal_reason?: string | null;
 					reversal_request_id?: string | null;
+					production_order_id?: string | null;
 				};
 				Update: {
 					id?: string;
@@ -1170,6 +1178,130 @@ export type Database = {
 					reversed_at?: string | null;
 					reversal_reason?: string | null;
 					reversal_request_id?: string | null;
+					production_order_id?: string | null;
+				};
+				Relationships: [];
+			};
+			// PR 1: first-class production orders. State machine is owned by
+			// SQL (start_production_order, transition_production_order_state
+			// RPCs land in PR 2). RLS exposes only a SELECT policy scoped by
+			// get_current_workshop_id(); no INSERT/UPDATE/DELETE policies exist
+			// for authenticated users. Defense-in-depth triggers reject
+			// authenticated mutations with SQLSTATE 42501 UNLESS the
+			// transaction-local guard `app.production_order_write_context
+			// = 'rpc'` is set by a PR-2 SECURITY DEFINER RPC after its own
+			// role and workshop checks.
+			production_orders: {
+				Row: {
+					id: string;
+					workshop_id: string;
+					quote_id: string;
+					production_number: string;
+					state: Database["public"]["Enums"]["production_order_state"];
+					planned_start_date: string | null;
+					planned_end_date: string | null;
+					actual_start_date: string | null;
+					actual_end_date: string | null;
+					assigned_to: string | null;
+					notes: string | null;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					workshop_id: string;
+					quote_id: string;
+					production_number: string;
+					state?: Database["public"]["Enums"]["production_order_state"];
+					planned_start_date?: string | null;
+					planned_end_date?: string | null;
+					actual_start_date?: string | null;
+					actual_end_date?: string | null;
+					assigned_to?: string | null;
+					notes?: string | null;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					workshop_id?: string;
+					quote_id?: string;
+					production_number?: string;
+					state?: Database["public"]["Enums"]["production_order_state"];
+					planned_start_date?: string | null;
+					planned_end_date?: string | null;
+					actual_start_date?: string | null;
+					actual_end_date?: string | null;
+					assigned_to?: string | null;
+					notes?: string | null;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Relationships: [];
+			};
+			// PR 1: append-only audit log of production_order state
+			// transitions. RLS exposes only a SELECT policy scoped by
+			// get_current_workshop_id(); no INSERT/UPDATE/DELETE policies
+			// exist for authenticated users. Defense-in-depth triggers
+			// reject authenticated mutations with SQLSTATE 42501 UNLESS
+			// the transaction-local guard `app.production_order_write_context
+			// = 'rpc'` is set by a PR-2 SECURITY DEFINER RPC. The PR-2
+			// transition_production_order_state RPC is the only sanctioned
+			// writer. from_state is NULL for the creation event and set for
+			// every subsequent transition.
+			production_order_events: {
+				Row: {
+					id: string;
+					workshop_id: string;
+					production_order_id: string;
+					// PR 7: the canonical UI label (one of created /
+					// transitioned / paused / resumed / cancelled /
+					// delivered). NOT NULL.
+					event_type: string;
+					from_state:
+						| Database["public"]["Enums"]["production_order_state"]
+						| null;
+					to_state: Database["public"]["Enums"]["production_order_state"];
+					// Legacy column: kept for back-compat.
+					reason: string | null;
+					// PR 7: human note attached to the event.
+					note: string | null;
+					actor_id: string | null;
+					metadata: Json | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					workshop_id: string;
+					production_order_id: string;
+					// PR 7: optional — auto-derived from (from_state,
+					// to_state) by the BEFORE INSERT trigger when the
+					// caller omits it. The write RPCs set it explicitly.
+					event_type?: string;
+					from_state?:
+						| Database["public"]["Enums"]["production_order_state"]
+						| null;
+					to_state: Database["public"]["Enums"]["production_order_state"];
+					reason?: string | null;
+					note?: string | null;
+					actor_id?: string | null;
+					metadata?: Json | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					workshop_id?: string;
+					production_order_id?: string;
+					event_type?: string;
+					from_state?:
+						| Database["public"]["Enums"]["production_order_state"]
+						| null;
+					to_state?: Database["public"]["Enums"]["production_order_state"];
+					reason?: string | null;
+					note?: string | null;
+					actor_id?: string | null;
+					metadata?: Json | null;
+					created_at?: string;
 				};
 				Relationships: [];
 			};
@@ -1263,6 +1395,11 @@ export type Database = {
 					production_deduction_id: string | null;
 					is_production_deduction: boolean;
 					production_deduction_status: string | null;
+					// PR 7: production-order deep-link target. NULL for
+					// non-production movements, for legacy deduction
+					// batches, and after a production order is deleted
+					// (ON DELETE SET NULL propagates).
+					production_order_id: string | null;
 				}[];
 			};
 			get_quote_production_deduction_preview: {
@@ -1306,6 +1443,204 @@ export type Database = {
 					p_reversal_request_id?: string | null;
 				};
 				Returns: string;
+			};
+			// PR 2: write RPC that creates a production_orders row in
+			// state='planned' and appends a creation event. SECURITY DEFINER,
+			// role-gated (admin/operational), and uses
+			// SET LOCAL app.production_order_write_context = 'rpc' to bridge
+			// the PR-1 defense-in-depth triggers. Idempotent on p_request_id.
+			//
+			// PR 4: the 8th argument p_create_deduction (boolean, default true)
+			// controls whether the RPC also creates a deduction batch with
+			// production_order_id = NEW.id. The new flow defaults to true
+			// (writes non-null FK); PR 2 isolation tests pass false.
+			//
+			// Returns a single production_orders row (typed below).
+			start_production_order: {
+				Args: {
+					p_quote_id: string;
+					p_production_number: string;
+					p_planned_start_date?: string | null;
+					p_planned_end_date?: string | null;
+					p_assigned_to?: string | null;
+					p_notes?: string | null;
+					p_request_id?: string | null;
+					p_create_deduction?: boolean;
+				};
+				Returns: Database["public"]["Tables"]["production_orders"]["Row"];
+			};
+			// PR 2: write RPC that transitions a production_orders state and
+			// appends an audit event. SECURITY DEFINER, role-gated
+			// (admin/operational), and uses
+			// SET LOCAL app.production_order_write_context = 'rpc' to bridge
+			// the PR-1 defense-in-depth triggers. Idempotent on p_request_id.
+			// Allowed transitions: planned->in_progress|cancelled,
+			// in_progress->paused|quality_check|cancelled,
+			// paused->in_progress|cancelled,
+			// quality_check->ready|in_progress, ready->delivered|cancelled;
+			// delivered and cancelled are terminal.
+			//
+			// Returns the updated production_orders row.
+			transition_production_order_state: {
+				Args: {
+					p_order_id: string;
+					p_to_state: Database["public"]["Enums"]["production_order_state"];
+					p_reason?: string | null;
+					p_request_id?: string | null;
+				};
+				Returns: Database["public"]["Tables"]["production_orders"]["Row"];
+			};
+			// PR 3: list production orders for the caller's workshop. Returns
+			// 16 columns (the 13 production_orders columns + quote_number,
+			// quote_furniture_name, assigned_to_name). SECURITY INVOKER: the
+			// caller's RLS context applies (workshop_id =
+			// get_current_workshop_id()). Filters by state array, assigned_to,
+			// quote_id, and ILIKE search on production_number + notes. Default
+			// ordering: planned_start_date ASC NULLS LAST, created_at DESC.
+			list_production_orders: {
+				Args: {
+					p_states?:
+						| Database["public"]["Enums"]["production_order_state"][]
+						| null;
+					p_assigned_to?: string | null;
+					p_quote_id?: string | null;
+					p_search?: string | null;
+					p_limit?: number | null;
+					p_offset?: number | null;
+				};
+				Returns: {
+					id: string;
+					workshop_id: string;
+					quote_id: string;
+					production_number: string;
+					state: Database["public"]["Enums"]["production_order_state"];
+					planned_start_date: string | null;
+					planned_end_date: string | null;
+					actual_start_date: string | null;
+					actual_end_date: string | null;
+					assigned_to: string | null;
+					notes: string | null;
+					created_at: string;
+					updated_at: string;
+					quote_number: string;
+					quote_furniture_name: string;
+					assigned_to_name: string;
+				}[];
+			};
+			// PR 3: fetch a single production order by id. Returns 19 columns
+			// (the 16 from list_production_orders + quote_status,
+			// quote_client_id, quote_client_name). SECURITY INVOKER: RLS
+			// scopes by workshop — cross-workshop ids return 0 rows, not an
+			// error.
+			get_production_order: {
+				Args: { p_order_id: string };
+				Returns: {
+					id: string;
+					workshop_id: string;
+					quote_id: string;
+					production_number: string;
+					state: Database["public"]["Enums"]["production_order_state"];
+					planned_start_date: string | null;
+					planned_end_date: string | null;
+					actual_start_date: string | null;
+					actual_end_date: string | null;
+					assigned_to: string | null;
+					notes: string | null;
+					created_at: string;
+					updated_at: string;
+					quote_number: string;
+					quote_furniture_name: string;
+					quote_status: Database["public"]["Enums"]["quote_status"];
+					quote_client_id: string | null;
+					quote_client_name: string;
+					assigned_to_name: string;
+				}[];
+			};
+			// PR 3: append-only audit timeline for a production order.
+			// PR 7.2 review-blocker fix: returns 12 columns (the 11
+			// production_order_events columns — id, workshop_id,
+			// production_order_id, event_type, from_state, to_state,
+			// reason, note, actor_id, metadata, created_at — plus
+			// actor_name). event_type and note were added in PR 7.
+			// PR 3 blocker-fix deterministic ordering: ordered by
+			// created_at ASC, id ASC (the id tie-breaker keeps the
+			// sequence stable when two events share a created_at,
+			// which happens in the same-transaction transition+event
+			// write). SECURITY INVOKER: cross-workshop ids return 0
+			// rows.
+			get_production_order_events: {
+				Args: { p_order_id: string };
+				Returns: {
+					id: string;
+					workshop_id: string;
+					production_order_id: string;
+					// PR 7: the canonical UI label, one of created /
+					// transitioned / paused / resumed / cancelled /
+					// delivered. Set by the write RPCs (or auto-derived
+					// from (from_state, to_state) by the BEFORE INSERT
+					// trigger). The EventTimeline UI uses this column
+					// as the primary source of the per-row label, with
+					// the (from_state, to_state) pair kept as a
+					// defense-in-depth fallback.
+					event_type: string;
+					from_state:
+						| Database["public"]["Enums"]["production_order_state"]
+						| null;
+					to_state: Database["public"]["Enums"]["production_order_state"];
+					// Legacy column: kept for back-compat. New code paths
+					// should read `note` (which carries the same value).
+					reason: string | null;
+					// PR 7: the human note attached to the event. The
+					// EventTimeline UI renders this verbatim below the
+					// transition line.
+					note: string | null;
+					actor_id: string | null;
+					metadata: Json | null;
+					created_at: string;
+					actor_name: string;
+				}[];
+			};
+			// PR 3: project the effective production status onto every quote
+			// in the caller's workshop. Returns 10 columns including
+			// production_status (the projected status), stored_status, and
+			// has_active_production. SECURITY INVOKER: RLS on both quotes and
+			// production_orders scopes by workshop. Projection rules: any
+			// active order -> en_produccion; all-delivered (and at least one
+			// order exists) -> entregado; otherwise stored_status.
+			get_quotes_with_production_status: {
+				Args: { p_limit?: number | null; p_offset?: number | null };
+				Returns: {
+					id: string;
+					workshop_id: string;
+					quote_number: string;
+					furniture_name: string;
+					client_id: string | null;
+					client_name: string;
+					stored_status: Database["public"]["Enums"]["quote_status"];
+					production_status: Database["public"]["Enums"]["quote_status"];
+					has_active_production: boolean;
+					last_event_at: string | null;
+				}[];
+			};
+			// PR 3 + PR 8 review-blocker fix #2: count of
+			// production_orders grouped by ACTIVE state for the
+			// caller's workshop. Returns exactly 5 rows (one per
+			// active state: planned, in_progress, paused,
+			// quality_check, ready) in workflow order, with zero
+			// counts included for active states with no orders.
+			// Terminal states (delivered, cancelled) are EXCLUDED
+			// from the pipeline per the production-orders spec
+			// "Production Pipeline Stats RPC" requirement. The
+			// result set is a 1:1 positional match for the
+			// PRODUCTION_ORDER_ACTIVE_STATES array exported from
+			// the production feature barrel. SECURITY INVOKER: RLS
+			// scopes by workshop.
+			get_production_pipeline_stats: {
+				Args: Record<PropertyKey, never>;
+				Returns: {
+					state: Database["public"]["Enums"]["production_order_state"];
+					count: number;
+				}[];
 			};
 		};
 		Enums: {
@@ -1352,6 +1687,22 @@ export type Database = {
 				| "descuento_presupuesto"
 				| "reversion"
 				| "consumo_produccion";
+			// PR 1: production_order_state enum. State machine transitions are
+			// validated at the SQL layer by transition_production_order_state.
+			// allowed: planned -> in_progress | cancelled;
+			//          in_progress -> paused | quality_check | cancelled;
+			//          paused -> in_progress | cancelled;
+			//          quality_check -> ready | in_progress;
+			//          ready -> delivered | cancelled;
+			//          delivered and cancelled are terminal.
+			production_order_state:
+				| "planned"
+				| "in_progress"
+				| "paused"
+				| "quality_check"
+				| "ready"
+				| "delivered"
+				| "cancelled";
 			workshop_user_role: "admin" | "operational" | "viewer";
 			task_priority: "alta" | "normal" | "baja";
 			task_status: "pendiente" | "hecha";

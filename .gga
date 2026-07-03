@@ -13,9 +13,9 @@
 #   PROVIDER="ollama:codellama"
 #   PROVIDER="lmstudio"
 #   PROVIDER="lmstudio:qwen2.5-coder-7b-instruct"
-#   PROVIDER="github:gpt-4o"
+#   PROVIDER="github:gpt-4.1"
 #   PROVIDER="github:deepseek-r1"
-PROVIDER="opencode"
+PROVIDER="github:gpt-4.1"
 
 # File patterns to include in review (comma-separated)
 # Default: * (all files)
@@ -30,7 +30,7 @@ FILE_PATTERNS="*.ts,*.tsx,*.js,*.jsx"
 # Examples:
 #   EXCLUDE_PATTERNS="*.test.ts,*.spec.ts"
 #   EXCLUDE_PATTERNS="*_test.go,*.mock.ts"
-EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts"
+EXCLUDE_PATTERNS="*.test.ts,*.spec.ts,*.test.tsx,*.spec.tsx,*.d.ts,src/shared/types/database.ts"
 
 # File containing code review rules
 # Default: AGENTS.md
@@ -42,8 +42,8 @@ STRICT_MODE="true"
 
 # Timeout in seconds for AI provider response
 # Default: 300 (5 minutes)
-# Increase for large changesets or slow connections
-TIMEOUT="300"
+# Keep local pre-commit feedback bounded; full reviews can run in PR/CI mode.
+TIMEOUT="90"
 
 # Base branch for --pr-mode (auto-detects main/master/develop if empty)
 # Default: auto-detect

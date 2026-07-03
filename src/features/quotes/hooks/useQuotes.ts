@@ -101,6 +101,14 @@ export function useUpdateQuote(workshopId: string) {
 			recipeSnapshots,
 			laborSnapshots,
 		}: UpdatePayload) => {
+			// Keep the edit flow from writing `en_produccion` directly.
+			// That state is entered only through the production start flow
+			// and is derived from the production-order state machine.
+			if (quote.status === "en_produccion") {
+				throw new Error(
+					`No se puede escribir "en_produccion" directamente desde el editor completo: ese estado lo deriva production a partir de la orden de producción. Usá useStartProductionOrder (módulo production) para iniciar producción.`,
+				);
+			}
 			await updateQuote(
 				id,
 				quote,
@@ -108,7 +116,7 @@ export function useUpdateQuote(workshopId: string) {
 				recipeSnapshots ?? [],
 				laborSnapshots ?? [],
 			);
-			// Capture approved BOM when quote transitions to aprobado
+			// Approved quotes capture a BOM snapshot when they transition.
 			if (quote.status === "aprobado") {
 				await captureApprovedBom(id);
 			}
@@ -127,10 +135,20 @@ interface StatusOnlyPayload {
 	status: QuoteStatus;
 }
 
+/**
+ * Keeps the status-only mutation aligned with the edit flow: users
+ * cannot write `en_produccion` directly because production derives
+ * that state from the order state machine.
+ */
 export function useUpdateQuoteStatus(workshopId: string) {
 	const queryClient = useQueryClient();
 	return useMutation({
 		mutationFn: async ({ id, status }: StatusOnlyPayload) => {
+			if (status === "en_produccion") {
+				throw new Error(
+					`No se puede escribir "en_produccion" directamente: ese estado lo deriva production a partir de la orden de producción. Usá useStartProductionOrder (módulo production) para iniciar producción.`,
+				);
+			}
 			await updateQuoteStatus(id, status);
 			// Capture approved BOM when quote transitions to aprobado
 			if (status === "aprobado") {

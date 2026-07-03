@@ -357,6 +357,130 @@ describe("useUpdateQuote", () => {
 		);
 		expect(approvedBomApi.captureApprovedBom).toHaveBeenCalledWith("q-1");
 	});
+
+	// PR 6 blocker-fix: the full-edit path (`useUpdateQuote` /
+	// `updateQuote` / `QuoteForm`) can submit a `QuoteUpdate` containing
+	// `status: "en_produccion"`. The status-only path was already guarded
+	// in PR 6 (see `useUpdateQuoteStatus` tests above), but the
+	// full-edit path bypasses that guard. This hook-level guard closes
+	// the leak at the application layer (the SQL defense-in-depth trigger
+	// is the second line of defense; see
+	// `prevent_direct_en_produccion_writes()` in
+	// `supabase/migrations/20260630000001_production_orders_rpc.sql`).
+	it('rejects full-edit updates with status "en_produccion" and does not call updateQuote', async () => {
+		vi.mocked(quotesApi.updateQuote).mockResolvedValue(undefined);
+
+		const { useUpdateQuote } = await import("./useQuotes");
+		const { result } = renderHook(() => useUpdateQuote(WORKSHOP_ID), {
+			wrapper: makeQueryWrapper(),
+		});
+
+		await act(async () => {
+			await expect(
+				result.current.mutateAsync({
+					id: "q-1",
+					quote: { status: "en_produccion" },
+					extras: [],
+				}),
+			).rejects.toThrow(/en_produccion/);
+		});
+
+		// The API was never touched.
+		expect(quotesApi.updateQuote).not.toHaveBeenCalled();
+		// BOM capture is irrelevant to a rejected call.
+		expect(approvedBomApi.captureApprovedBom).not.toHaveBeenCalled();
+	});
+
+	// TRIANGULATE: the rejection error message tells the caller where to
+	// go instead (the new `useStartProductionOrder` flow in the
+	// production feature).
+	it('rejection error for full-edit "en_produccion" mentions the start-production flow', async () => {
+		vi.mocked(quotesApi.updateQuote).mockResolvedValue(undefined);
+
+		const { useUpdateQuote } = await import("./useQuotes");
+		const { result } = renderHook(() => useUpdateQuote(WORKSHOP_ID), {
+			wrapper: makeQueryWrapper(),
+		});
+
+		await act(async () => {
+			await expect(
+				result.current.mutateAsync({
+					id: "q-1",
+					quote: {
+						status: "en_produccion",
+						margin_pct: 30,
+					},
+					extras: [],
+				}),
+			).rejects.toThrow(/start_production_order|producci[oó]n/i);
+		});
+	});
+
+	// SAFETY NET: every other status (including the production-derived
+	// `entregado` and `cancelado`) must still flow through the full-edit
+	// path unchanged. This guarantees the guard is targeted and does
+	// not over-block legitimate status transitions.
+	it.each([
+		"presupuesto",
+		"enviado",
+		"aprobado",
+		"entregado",
+		"cancelado",
+	] as const)(
+		"allows full-edit updates with status %s (no en_produccion regression)",
+		async (status) => {
+			vi.mocked(quotesApi.updateQuote).mockResolvedValue(undefined);
+
+			const { useUpdateQuote } = await import("./useQuotes");
+			const { result } = renderHook(() => useUpdateQuote(WORKSHOP_ID), {
+				wrapper: makeQueryWrapper(),
+			});
+
+			await act(() =>
+				result.current.mutateAsync({
+					id: "q-1",
+					quote: { status },
+					extras: [],
+				}),
+			);
+
+			expect(quotesApi.updateQuote).toHaveBeenCalledWith(
+				"q-1",
+				{ status },
+				[],
+				[],
+				[],
+			);
+		},
+	);
+
+	// SAFETY NET: full-edit with no status field at all must still work
+	// (the user is editing other fields like margin, furniture name, etc.,
+	// and the form does not always send status on a full edit).
+	it("allows full-edit updates that omit the status field", async () => {
+		vi.mocked(quotesApi.updateQuote).mockResolvedValue(undefined);
+
+		const { useUpdateQuote } = await import("./useQuotes");
+		const { result } = renderHook(() => useUpdateQuote(WORKSHOP_ID), {
+			wrapper: makeQueryWrapper(),
+		});
+
+		await act(() =>
+			result.current.mutateAsync({
+				id: "q-1",
+				quote: { margin_pct: 35 },
+				extras: [],
+			}),
+		);
+
+		expect(quotesApi.updateQuote).toHaveBeenCalledWith(
+			"q-1",
+			{ margin_pct: 35 },
+			[],
+			[],
+			[],
+		);
+	});
 });
 
 // ── useUpdateQuoteStatus — status-only changes ─────────────────────────
@@ -387,7 +511,13 @@ describe("useUpdateQuoteStatus", () => {
 		expect(quotesApi.updateQuote).not.toHaveBeenCalled();
 	});
 
-	it('can update a quote status to "en_produccion"', async () => {
+	// PR 6: direct writes of en_produccion are rejected. The status
+	// "en_produccion" is now derived at the read layer from the
+	// production_orders state machine (see get_quotes_with_production_status
+	// RPC). Setting it via updateQuoteStatus would bypass the start
+	// production order flow and the SQL defense-in-depth triggers. The
+	// hook therefore throws synchronously and never touches the API.
+	it('rejects "en_produccion" with a helpful error and does not call updateQuoteStatus', async () => {
 		vi.mocked(quotesApi.updateQuoteStatus).mockResolvedValue(undefined);
 
 		const { useUpdateQuoteStatus } = await import("./useQuotes");
@@ -395,17 +525,36 @@ describe("useUpdateQuoteStatus", () => {
 			wrapper: makeQueryWrapper(),
 		});
 
-		await act(() =>
-			result.current.mutateAsync({
-				id: "q-1",
-				status: "en_produccion",
-			}),
-		);
+		await act(async () => {
+			await expect(
+				result.current.mutateAsync({
+					id: "q-1",
+					status: "en_produccion",
+				}),
+			).rejects.toThrow(/en_produccion/);
+		});
 
-		expect(quotesApi.updateQuoteStatus).toHaveBeenCalledWith(
-			"q-1",
-			"en_produccion",
-		);
+		expect(quotesApi.updateQuoteStatus).not.toHaveBeenCalled();
+		expect(approvedBomApi.captureApprovedBom).not.toHaveBeenCalled();
+	});
+
+	// TRIANGULATE: the error message tells the user where to go instead.
+	it('rejection error for "en_produccion" mentions the start-production flow', async () => {
+		vi.mocked(quotesApi.updateQuoteStatus).mockResolvedValue(undefined);
+
+		const { useUpdateQuoteStatus } = await import("./useQuotes");
+		const { result } = renderHook(() => useUpdateQuoteStatus(WORKSHOP_ID), {
+			wrapper: makeQueryWrapper(),
+		});
+
+		await act(async () => {
+			await expect(
+				result.current.mutateAsync({
+					id: "q-2",
+					status: "en_produccion",
+				}),
+			).rejects.toThrow(/start_production_order|producci[oó]n/i);
+		});
 	});
 
 	it("sets isError when API fails", async () => {
@@ -446,7 +595,7 @@ describe("useUpdateQuoteStatus", () => {
 		expect(approvedBomApi.captureApprovedBom).toHaveBeenCalledWith("q-1");
 	});
 
-	it("preserves existing snapshots when updating status to non-approval status", async () => {
+	it("preserves existing snapshots when updating status to non-approval, non-production status", async () => {
 		vi.mocked(quotesApi.updateQuoteStatus).mockResolvedValue(undefined);
 
 		const { useUpdateQuoteStatus } = await import("./useQuotes");
@@ -457,14 +606,11 @@ describe("useUpdateQuoteStatus", () => {
 		await act(() =>
 			result.current.mutateAsync({
 				id: "q-2",
-				status: "en_produccion",
+				status: "cancelado",
 			}),
 		);
 
-		expect(quotesApi.updateQuoteStatus).toHaveBeenCalledWith(
-			"q-2",
-			"en_produccion",
-		);
+		expect(quotesApi.updateQuoteStatus).toHaveBeenCalledWith("q-2", "cancelado");
 		expect(quotesApi.updateQuote).not.toHaveBeenCalled();
 		// BOM capture NOT called for non-approval transition
 		expect(approvedBomApi.captureApprovedBom).not.toHaveBeenCalled();
