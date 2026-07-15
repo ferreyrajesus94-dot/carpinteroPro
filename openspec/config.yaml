@@ -32,12 +32,17 @@ testing:
   runner: vitest
   command: "npm test"
   watch_command: "npm run test:watch"
+  coverage_command: "npm run test:coverage"
+  e2e_runner: playwright
+  e2e_command: "npm run test:e2e"
   environment: jsdom
   setup_file: tests/setup.ts
   globals: true
-  coverage_tool: "@vitest/coverage-v8 (V8 provider) with global thresholds"
+  coverage_tool: "@vitest/coverage-v8 (V8 provider) with 50% global thresholds"
   existing_tests:
-    - "tests/features/quotes/ (partial coverage only)"
+    - "21 Vitest unit/integration/architecture test files under tests/"
+    - "17 Playwright E2E spec files under tests/e2e/"
+    - "Supabase SQL/RLS and Edge Function coverage alongside 73 migrations"
   strict_tdd: true
   guidance: |
     Every SDD package that changes behavior must include:
