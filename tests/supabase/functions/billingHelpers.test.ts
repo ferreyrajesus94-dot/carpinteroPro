@@ -28,8 +28,8 @@ describe("mapMercadoPagoStatusToAppStatus", () => {
 	it("maps cancelled → cancelled", () => {
 		expect(mapMercadoPagoStatusToAppStatus("cancelled")).toBe("cancelled");
 	});
-	it("maps unknown → past_due", () => {
-		expect(mapMercadoPagoStatusToAppStatus("unknown")).toBe("past_due");
+	it("returns null for an unknown status instead of regressing access", () => {
+		expect(mapMercadoPagoStatusToAppStatus("unknown")).toBeNull();
 	});
 });
 
@@ -169,8 +169,8 @@ describe("calculateNextPeriodDates", () => {
 });
 
 describe("mapMercadoPagoStatusToAppStatus triangulation", () => {
-	it("maps empty string → past_due (fail-safe)", () => {
-		expect(mapMercadoPagoStatusToAppStatus("")).toBe("past_due");
+	it("returns null for an empty status", () => {
+		expect(mapMercadoPagoStatusToAppStatus("")).toBeNull();
 	});
 	it("maps uppercase ACTIVE → active", () => {
 		expect(mapMercadoPagoStatusToAppStatus("ACTIVE")).toBe("active");

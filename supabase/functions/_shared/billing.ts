@@ -7,13 +7,13 @@ export type SubscriptionStatus =
 
 export function mapMercadoPagoStatusToAppStatus(
 	providerStatus: string,
-): SubscriptionStatus {
+): SubscriptionStatus | null {
 	const s = providerStatus.toLowerCase();
 	if (s === "authorized" || s === "active") return "active";
 	if (s === "pending" || s === "paused") return "past_due";
 	if (s === "rejected" || s === "failure") return "unpaid";
 	if (s === "cancelled") return "cancelled";
-	return "past_due";
+	return null;
 }
 
 export type MercadoPagoWebhookResourceType =

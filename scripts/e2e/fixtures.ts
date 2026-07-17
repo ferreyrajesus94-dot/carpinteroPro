@@ -83,11 +83,23 @@ export interface StockMovementOptions {
 	quoteId?: string | null;
 }
 
+export interface WebhookSimulationCommission {
+	providerPaymentId: string;
+	paymentAmount: number;
+	currency: string;
+	occurredAt: string;
+}
+
 export interface WebhookSimulationOptions {
 	providerEventId: string;
 	eventType: string;
 	providerResourceId: string;
-	providerStatus: SubscriptionStatus;
+	providerStatus: string;
+	resourceKind?: "preapproval" | "payment" | "authorized_payment";
+	providerPreapprovalId?: string;
+	providerSnapshotAt?: string | null;
+	providerFetchedAt?: string;
+	commission?: WebhookSimulationCommission;
 	payload?: Json;
 }
 
@@ -631,43 +643,47 @@ export async function simulateMercadoPagoWebhook(
 	options: WebhookSimulationOptions,
 ): Promise<WebhookEventRow> {
 	const client = adminClient();
-	const now = new Date().toISOString();
-	const { data: event, error: insertError } = await client
-		.from("billing_webhook_events")
-		.insert({
-			provider: "mercadopago",
-			provider_event_id: options.providerEventId,
-			event_type: options.eventType,
-			provider_resource_id: options.providerResourceId,
-			workshop_id: fixtureWorkshopId,
-			payload: options.payload ?? {
-				data: { id: options.providerResourceId },
-				type: options.eventType,
-			},
-			processed_at: now,
-			updated_at: now,
-		})
-		.select("*")
-		.single();
-	if (insertError) throw insertError;
-
-	const { error: updateError } = await client
+	const { data: subscription, error: subscriptionError } = await client
 		.from("subscriptions")
-		.update({
-			status: options.providerStatus,
-			provider_status: options.providerStatus,
-			current_period_starts_at:
-				options.providerStatus === "active" ? now : undefined,
-			current_period_ends_at:
-				options.providerStatus === "active"
-					? new Date(Date.now() + 30 * 86_400_000).toISOString()
-					: undefined,
-			updated_at: now,
-		})
-		.eq("workshop_id", fixtureWorkshopId);
-	if (updateError) throw updateError;
-
+		.select("provider_preapproval_id")
+		.eq("workshop_id", fixtureWorkshopId)
+		.single();
+	if (subscriptionError || !subscription?.provider_preapproval_id) {
+		throw subscriptionError ?? new Error("Fixture subscription has no provider preapproval");
+	}
+	const resourceKind = options.resourceKind ?? "preapproval";
+	const providerStatus = options.providerStatus === "active" ? "authorized" : options.providerStatus === "past_due" ? "pending" : options.providerStatus;
+	const rpcClient = client as unknown as {
+		rpc(name: string, input: Record<string, unknown>): Promise<{ data: { eventId?: string } | null; error: { message: string } | null }>;
+	};
+	const { data, error } = await rpcClient.rpc("process_mercadopago_billing_event_v2", {
+		contractVersion: 2,
+		provider: "mercadopago",
+		providerEventId: options.providerEventId,
+		eventType: options.eventType,
+		resourceKind,
+		providerResourceId: options.providerResourceId,
+		providerPreapprovalId: options.providerPreapprovalId ?? subscription.provider_preapproval_id,
+		providerStatus,
+		providerSnapshotAt: options.providerSnapshotAt ?? new Date().toISOString(),
+		providerFetchedAt: options.providerFetchedAt ?? new Date().toISOString(),
+		normalizedPayload: options.payload ?? { resourceKind },
+		...(options.commission ? { commission: options.commission } : {}),
+	});
+	if (error || !data?.eventId) throw error ?? new Error("Fixture RPC did not return an event");
+	const event = await fetchWebhookEventById(data.eventId);
+	if (!event) throw new Error("Fixture RPC event was not persisted");
 	return event;
+}
+
+async function fetchWebhookEventById(eventId: string): Promise<WebhookEventRow | null> {
+	const { data, error } = await adminClient()
+		.from("billing_webhook_events")
+		.select("*")
+		.eq("id", eventId)
+		.maybeSingle();
+	if (error) throw error;
+	return data;
 }
 
 export async function insertDuplicateWebhookEvent(
