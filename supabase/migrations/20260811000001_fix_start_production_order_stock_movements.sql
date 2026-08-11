@@ -56,7 +56,7 @@ BEGIN
     NEW.workshop_id,
     abl.material_id,
     -abl.deduction_quantity,
-    'consumo_produccion'::text,
+    'consumo_produccion'::public.stock_movement_reason,
     format('Inicio de producción presupuesto %s', v_quote_number),
     NEW.quote_id,
     NEW.id,
