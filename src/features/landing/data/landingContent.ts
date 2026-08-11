@@ -20,7 +20,6 @@ export type HeroCopy = {
 export const navItems: NavItem[] = [
 	{ label: "Funciones", href: "#features" },
 	{ label: "Cómo funciona", href: "#workflow" },
-	{ label: "Precios", href: "#pricing" },
 	{ label: "FAQ", href: "#faq" },
 ];
 
@@ -46,7 +45,7 @@ export const heroCopy: HeroCopy = {
 		"Controlá materiales, armá presupuestos en minutos y gestioná clientes — todo desde una sola app pensada para carpinteros.",
 	primaryCta: heroCta,
 	secondaryCta,
-	note: "14 días gratis · Sin tarjeta · Cancelá cuando quieras",
+	note: "Gratis para siempre · Sin tarjeta",
 };
 
 export type FeatureItem = {
@@ -147,18 +146,9 @@ export const faqs: FaqItem[] = [
 			"Las funciones básicas sí. Los datos se sincronizan automáticamente cuando vuelvas a tener conexión.",
 	},
 	{
-		question: "¿Puedo probar gratis?",
-		answer:
-			"Sí, tenés 14 días de prueba gratuita con todas las funciones. Sin tarjeta de crédito.",
-	},
-	{
 		question: "¿Mis datos están seguros?",
 		answer:
 			"Tus datos se gestionan con la infraestructura de Supabase y las políticas de privacidad publicadas. Podés revisar los detalles en nuestra página de privacidad.",
-	},
-	{
-		question: "¿Puedo cancelar cuando quiera?",
-		answer: "Sí, sin compromiso. Cancelás desde la app y no se te cobra más.",
 	},
 ];
 
@@ -167,7 +157,6 @@ export const footerColumns: FooterColumn[] = [
 		title: "Producto",
 		links: [
 			{ label: "Funciones", href: "#features" },
-			{ label: "Precios", href: "#pricing" },
 			{ label: "FAQ", href: "#faq" },
 		],
 	},

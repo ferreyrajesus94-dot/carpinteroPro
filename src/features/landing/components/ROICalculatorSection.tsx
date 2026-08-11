@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { BILLING_PRICE } from "@/shared/constants/billingPricing";
 
 const AVG_QUOTE_VALUE = 150_000;
 
@@ -27,10 +26,6 @@ export function ROICalculatorSection() {
 			monthlySaved: Math.round(monthlySaved),
 			lostQuotes,
 			totalBenefit: Math.round(totalBenefit),
-			returnRate: Math.max(
-				1,
-				Math.round(totalBenefit / BILLING_PRICE.amountARS),
-			),
 		};
 	}, [hourlyRate, hoursPerWeek, quotesPerMonth]);
 
@@ -141,10 +136,8 @@ export function ROICalculatorSection() {
 							<span>Beneficio total estimado/mes</span>
 							<strong>{formatCurrency(results.totalBenefit)}</strong>
 							<p>
-								Cálculo orientativo según tus datos vs.{" "}
-								{formatCurrency(BILLING_PRICE.amountARS)}
-								/mes de suscripción →{" "}
-								<b>retorno estimado {results.returnRate}x</b>
+								Cálculo orientativo según tus datos. CarpinteroPro es
+								gratuito, así que este beneficio es directo para tu taller.
 							</p>
 						</div>
 					</div>

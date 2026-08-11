@@ -21,7 +21,6 @@ import {
 	comparisonRows,
 	comparisonTools,
 } from "../data/landingContent";
-import { pricingPlan } from "../data/pricing";
 
 describe("LandingPage", () => {
 	function setup() {
@@ -106,25 +105,6 @@ describe("LandingPage", () => {
 			expect(screen.getByText(step.title)).toBeInTheDocument();
 			expect(screen.getByText(step.description)).toBeInTheDocument();
 		}
-	});
-
-	it("renders pricing section with fixed public price", () => {
-		setup();
-		expect(
-			screen.getByRole("heading", { name: "Una suscripción, todo incluido" }),
-		).toBeInTheDocument();
-		expect(screen.getByText(pricingPlan.name)).toBeInTheDocument();
-		expect(screen.getByText(pricingPlan.price)).toBeInTheDocument();
-		for (const feature of pricingPlan.features) {
-			expect(screen.getAllByText(feature).length).toBeGreaterThan(0);
-		}
-	});
-
-	it("pricing CTA links to /login", () => {
-		setup();
-		const ctas = screen.getAllByRole("link", { name: pricingPlan.ctaLabel });
-		expect(ctas.length).toBeGreaterThan(0);
-		expect(ctas[ctas.length - 1]).toHaveAttribute("href", "/login");
 	});
 
 	it("renders FAQ section with questions and answers", () => {
