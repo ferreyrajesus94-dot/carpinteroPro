@@ -468,7 +468,6 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
                   <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Precio/u</TableHead>
                   <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Stock</TableHead>
                   <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Unidad</TableHead>
-                  <TableHead className="w-[100px] text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Tendencia</TableHead>
                   <TableHead className="w-[160px] text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -503,9 +502,6 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
                         )}
                       </TableCell>
                       <TableCell className="text-ink2 text-sm">{material.unit}</TableCell>
-                      <TableCell>
-                        <PriceSparkline data={sparklineByMaterial.get(material.id) ?? []} />
-                      </TableCell>
                       <TableCell>{actions(material)}</TableCell>
                     </TableRow>
                   )
