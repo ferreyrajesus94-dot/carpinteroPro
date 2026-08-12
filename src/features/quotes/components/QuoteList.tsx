@@ -495,7 +495,7 @@ export function QuoteList() {
 											</TableCell>
 											<TableCell>
 												{q.client?.name ?? (
-													<span className="text-muted-foreground">—</span>
+													<span className="text-muted-foreground">Sin cliente</span>
 												)}
 											</TableCell>
 											<TableCell>{q.furniture_name}</TableCell>
