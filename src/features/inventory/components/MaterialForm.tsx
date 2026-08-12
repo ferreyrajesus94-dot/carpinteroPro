@@ -283,7 +283,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
           El stock se maneja siempre en unidades.
         </p>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <Label htmlFor="pack_size">Unidades por pack</Label>
             <Input
