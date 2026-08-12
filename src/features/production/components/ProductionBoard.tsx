@@ -47,7 +47,7 @@ function Column({ state, orders }: ColumnProps) {
 	return (
 		<section
 			aria-label={PRODUCTION_ORDER_STATE_LABELS[state]}
-			className="flex min-w-[260px] flex-1 flex-col gap-2 rounded-lg border border-line bg-cp-bg2 p-3"
+			className="flex w-[260px] shrink-0 flex-col gap-2 rounded-lg border border-line bg-cp-bg2 p-3"
 		>
 			<header className="flex items-center justify-between">
 				<h2 className="text-sm font-semibold text-ink">
@@ -164,7 +164,7 @@ export function ProductionBoard({ onStartProduction }: ProductionBoardProps) {
 	}
 
 	return (
-		<div className="space-y-4 p-4 md:p-6 pb-24 md:pb-6">
+		<div className="space-y-4 p-4 md:p-6 pb-24 md:pb-6 min-w-0">
 			<PageHeader
 				title="Producción"
 				subtitle="Tablero de órdenes de producción activas"
@@ -223,7 +223,10 @@ export function ProductionBoard({ onStartProduction }: ProductionBoardProps) {
 					description="Cuando inicies producción desde un presupuesto aprobado aparecerá acá."
 				/>
 			) : (
-				<div className="flex flex-row gap-3 overflow-x-auto pb-2">
+				<div
+					data-testid="production-board-kanban"
+					className="flex flex-row gap-3 overflow-x-auto pb-2 min-w-0"
+				>
 					{PRODUCTION_ORDER_ACTIVE_STATES.map((state) => (
 						<Column key={state} state={state} orders={grouped[state]} />
 					))}
