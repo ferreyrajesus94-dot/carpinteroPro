@@ -179,12 +179,14 @@ export const router = createBrowserRouter([
 								Component: m.SettingsPage,
 							})),
 					},
-			{
-				path: "/profile/*",
-				lazy: () =>
-					import("@/features/auth/routes").then((m) => ({
-						Component: m.ProfileRoutes,
-					})),
+					{
+						path: "/profile/*",
+						lazy: () =>
+							import("@/features/auth/routes").then((m) => ({
+								Component: m.ProfileRoutes,
+							})),
+					},
+				],
 			},
 		],
 	},
