@@ -36,3 +36,26 @@ describe("DialogContent", () => {
 		expect(content.className).toContain("sm:rounded-lg");
 	});
 });
+
+describe("DialogOverlay", () => {
+	it("stops intercepting pointer events while the close animation plays", () => {
+		const { baseElement } = render(
+			<Dialog open>
+				<DialogContent>
+					<div>body</div>
+				</DialogContent>
+			</Dialog>,
+		);
+		// Look for any node with data-state attribute (Radix adds it to
+		// both the overlay and the content). There should be at least 2 in
+		// an open dialog. The overlay is the one styled with bg-black/80.
+		const candidates = baseElement.querySelectorAll("[data-state]");
+		const overlay = Array.from(candidates).find((n) =>
+			n.className?.includes("bg-black/80"),
+		);
+		expect(overlay, "expected to find an overlay with bg-black/80").toBeDefined();
+		expect(overlay!.className).toContain(
+			"data-[state=closed]:pointer-events-none",
+		);
+	});
+});
