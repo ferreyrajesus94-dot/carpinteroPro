@@ -179,15 +179,23 @@ export const router = createBrowserRouter([
 								Component: m.SettingsPage,
 							})),
 					},
-					{
-						path: "/profile/*",
-						lazy: () =>
-							import("@/features/auth/routes").then((m) => ({
-								Component: m.ProfileRoutes,
-							})),
-					},
-				],
+			{
+				path: "/profile/*",
+				lazy: () =>
+					import("@/features/auth/routes").then((m) => ({
+						Component: m.ProfileRoutes,
+					})),
 			},
 		],
+	},
+	{
+		// Catch-all 404. Must be LAST in the route list so it only fires when
+		// no named route matches. Renders a branded Spanish 404 page; never
+		// the React Router dev error UI.
+		path: "*",
+		lazy: () =>
+			import("@/app/pages/NotFoundPage").then((m) => ({
+				Component: m.NotFoundPage,
+			})),
 	},
 ]);
