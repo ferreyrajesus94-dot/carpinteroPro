@@ -100,7 +100,7 @@ export function Dashboard({
 	const maxRev = Math.max(...stats.revenueByMonth.map((d) => d.total), 1);
 
 	return (
-		<div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6">
+		<div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6 min-w-0">
 			<PageHeader
 				title="Dashboard"
 				actions={
