@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import {
+	getSupportEmail,
+	getSupportMailtoHref,
+} from "@/shared/lib/supportContact";
 
 const LAST_UPDATED = "29 de abril de 2025";
 
 export function PrivacyPage() {
+	const supportEmail = getSupportEmail() ?? "soporte@example.com";
+	const supportHref = getSupportMailtoHref();
 	return (
 		<div className="min-h-screen bg-background">
 			<header className="border-b border-line bg-cp-surface px-6 py-4 flex items-center justify-between">
@@ -37,12 +43,16 @@ export function PrivacyPage() {
 				<Section title="1. Responsable del tratamiento">
 					<p>
 						CarpinteroPro, con contacto en{" "}
+						{supportHref ? (
 						<a
-							href="mailto:hola@carpinteropro.app"
+							href={supportHref}
 							className="underline hover:text-foreground"
 						>
-							hola@carpinteropro.app
+							{supportEmail}
 						</a>
+						) : (
+						<span>{supportEmail}</span>
+						)}
 						, es responsable del tratamiento de sus datos personales conforme a
 						la Ley 25.326 de Protección de Datos Personales de la República
 						Argentina y normativas complementarias.
@@ -160,12 +170,16 @@ export function PrivacyPage() {
 					</ul>
 					<p>
 						Para ejercer estos derechos, escriba a{" "}
-						<a
-							href="mailto:hola@carpinteropro.app"
-							className="underline hover:text-foreground"
-						>
-							hola@carpinteropro.app
-						</a>
+							{supportHref ? (
+							<a
+								href={supportHref}
+								className="underline hover:text-foreground"
+							>
+								{supportEmail}
+							</a>
+							) : (
+							<span>{supportEmail}</span>
+							)}
 						. Responderemos en un plazo máximo de 10 días hábiles. La Dirección
 						Nacional de Protección de Datos Personales actúa como autoridad de
 						control (
@@ -209,12 +223,16 @@ export function PrivacyPage() {
 
 				<p className="text-sm text-muted-foreground pt-4 border-t border-line">
 					Consultas de privacidad:{" "}
-					<a
-						href="mailto:hola@carpinteropro.app"
-						className="underline hover:text-foreground"
-					>
-						hola@carpinteropro.app
-					</a>
+					{supportHref ? (
+						<a
+							href={supportHref}
+							className="underline hover:text-foreground"
+						>
+							{supportEmail}
+						</a>
+					) : (
+						<span>{supportEmail}</span>
+					)}
 				</p>
 			</main>
 		</div>
