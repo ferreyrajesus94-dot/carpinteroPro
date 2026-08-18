@@ -21,7 +21,7 @@ Deno.serve(async (req: Request) => {
 
 	try {
 		const { workshopId, email } = await getAuthContext(req);
-		console.info("create-subscription request", { workshopId, email });
+		console.info("create-subscription request", { workshopId });
 		const supabase = serviceClient();
 		const { data: sub, error: selectError } = await supabase
 			.from("subscriptions")
