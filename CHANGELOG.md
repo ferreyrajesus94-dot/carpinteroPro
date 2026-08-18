@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0-beta.1] — 2026-08-18
+
+Pre-OSS hardening: AGPL-3.0 LICENSE added, demo credentials removed from
+the public surface, and six warning-level findings from a security audit
+addressed. The demo workshop account password (`CarpPro#2024`) that used
+to live in tracked files has been rotated in Supabase and the new
+password lives only in `.env` (gitignored). The hosted SaaS billing
+integration (`mercadopago-webhook`) is now `cancel_at_period_end` for
+the demo workshop — the project ships as free software.
+
+### Added
+
+- **AGPL-3.0 LICENSE** at the repository root (`LICENSE`,
+  `Copyright (C) 2026 Jesus Elias Ferreyra`). AGPL over MIT was chosen
+  to keep the hosted version of CarpinteroPro open-source: any modified
+  deployment served over the network must publish its source.
+
+### Changed
+
+- **README.md**: the Live demo section no longer hardcodes the demo
+  account credentials. Demo access is now requested by opening an issue
+  tagged `demo`.
+- **README.md**: new License section links to `LICENSE` with a
+  plain-language summary of the AGPL-3.0 SaaS-copyleft obligation.
+- **TermsPage and PrivacyPage** (`src/features/legal/pages/*.tsx`):
+  the hardcoded support email and `mailto:` anchors now use the
+  existing `getSupportEmail` / `getSupportMailtoHref` helpers from
+  `src/shared/lib/supportContact.ts`, reading `VITE_SUPPORT_EMAIL`.
+  Changing the support address no longer requires a code change.
+- **`.gitignore`**: covers `.env` and `.env.*` explicitly, with
+  `.env.example` retained as the tracked template. Previously only
+  `.env.local` was ignored (via the `*.local` rule), leaving
+  `.env`, `.env.production`, etc. at risk of accidental commit.
+
+### Security
+
+- **`tests/e2e/envCheck.ts`**: `getAdminEmail` and `getAdminPassword`
+  now throw when `E2E_ADMIN_EMAIL` / `E2E_ADMIN_PASSWORD` are unset
+  instead of silently falling back to the hardcoded demo values. Tests
+  fail loudly instead of running against unknown credentials.
+- **`supabase/functions/create-subscription/index.ts`**: the
+  `console.info("create-subscription request", …)` call no longer
+  logs the user `email` (PII). Only `workshopId` (internal UUID)
+  is retained.
+- **`.env.example`**: tracked lines for `E2E_ADMIN_EMAIL` /
+  `E2E_ADMIN_PASSWORD` use generic `<your-admin-email>` /
+  `<your-admin-password>` placeholders instead of the previously
+  hardcoded demo values.
+
 ## [0.1.0-beta.1] — 2026-08-12
 
 First public beta of CarpinteroPro. This release bundles the first batch

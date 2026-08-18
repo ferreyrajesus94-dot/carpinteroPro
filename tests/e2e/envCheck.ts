@@ -11,12 +11,16 @@ export function hasAdminCredentials(): boolean {
 	);
 }
 
-/** Returns the admin email or the hardcoded dev default */
+/** Returns the admin email or throws when E2E_ADMIN_EMAIL is unset */
 export function getAdminEmail(): string {
-	return process.env.E2E_ADMIN_EMAIL ?? "admin@carpinteropro.dev";
+	const email = process.env.E2E_ADMIN_EMAIL;
+	if (!email) throw new Error("E2E_ADMIN_EMAIL not set");
+	return email;
 }
 
-/** Returns the admin password or the hardcoded dev default */
+/** Returns the admin password or throws when E2E_ADMIN_PASSWORD is unset */
 export function getAdminPassword(): string {
-	return process.env.E2E_ADMIN_PASSWORD ?? "CarpPro#2024";
+	const password = process.env.E2E_ADMIN_PASSWORD;
+	if (!password) throw new Error("E2E_ADMIN_PASSWORD not set");
+	return password;
 }

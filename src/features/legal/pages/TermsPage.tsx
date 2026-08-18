@@ -1,9 +1,15 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import {
+	getSupportEmail,
+	getSupportMailtoHref,
+} from "@/shared/lib/supportContact";
 
 const LAST_UPDATED = "29 de abril de 2025";
 
 export function TermsPage() {
+	const supportEmail = getSupportEmail() ?? "soporte@example.com";
+	const supportHref = getSupportMailtoHref();
 	return (
 		<div className="min-h-screen bg-background">
 			<header className="border-b border-line bg-cp-surface px-6 py-4 flex items-center justify-between">
@@ -166,12 +172,16 @@ export function TermsPage() {
 
 				<p className="text-sm text-muted-foreground pt-4 border-t border-line">
 					Consultas:{" "}
-					<a
-						href="mailto:hola@carpinteropro.app"
-						className="underline hover:text-foreground"
-					>
-						hola@carpinteropro.app
-					</a>
+					{supportHref ? (
+						<a
+							href={supportHref}
+							className="underline hover:text-foreground"
+						>
+							{supportEmail}
+						</a>
+					) : (
+						<span>{supportEmail}</span>
+					)}
 				</p>
 			</main>
 		</div>
