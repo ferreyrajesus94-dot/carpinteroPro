@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 coverage
+
+# env files (template is tracked)
+.env
+.env.*
+!.env.example
+
 *.local
 
 # Playwright artifacts
