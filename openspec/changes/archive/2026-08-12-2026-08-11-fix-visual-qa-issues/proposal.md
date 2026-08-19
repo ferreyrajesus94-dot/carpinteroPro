@@ -2,7 +2,7 @@
 
 ## Intent
 
-A Playwright tour of `https://carpintero-pro.vercel.app` (14 pages + 404, `admin@carpinteropro.dev`) surfaced 8 user-visible defects: 4 critical (dev-leaking 404 page, submit button clipped below the material modal fold, two horizontal-overflow layouts clipping columns at 1440px) and 4 minor (truncated placeholder, empty "Tendencia" column, em-dash for missing client, modal overlay that persists after Escape). These break first-impression core flows (submit material, view production board, see quote status) without changing product behavior. Evidence: `/tmp/opencode/visual-tour/_report.json` + 15 PNGs.
+A Playwright tour of `https://carpintero-pro.vercel.app` (14 pages + 404, using the demo workshop admin account) surfaced 8 user-visible defects: 4 critical (dev-leaking 404 page, submit button clipped below the material modal fold, two horizontal-overflow layouts clipping columns at 1440px) and 4 minor (truncated placeholder, empty "Tendencia" column, em-dash for missing client, modal overlay that persists after Escape). These break first-impression core flows (submit material, view production board, see quote status) without changing product behavior. Evidence: `/tmp/opencode/visual-tour/_report.json` + 15 PNGs.
 
 ## Scope
 
