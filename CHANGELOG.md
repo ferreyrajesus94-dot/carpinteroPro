@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 Pre-OSS hardening: AGPL-3.0 LICENSE added, demo credentials removed from
 the public surface, and six warning-level findings from a security audit
-addressed. The demo workshop account password (`CarpPro#2024`) that used
-to live in tracked files has been rotated in Supabase and the new
-password lives only in `.env` (gitignored). The hosted SaaS billing
+addressed. The leaked demo workshop password that previously lived in
+tracked files has been rotated in Supabase; the new value lives only in
+`.env` (gitignored). The hosted SaaS billing
 integration (`mercadopago-webhook`) is now `cancel_at_period_end` for
 the demo workshop — the project ships as free software.
 

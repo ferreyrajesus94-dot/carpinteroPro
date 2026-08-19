@@ -8,7 +8,7 @@ import { AdminRoutes } from "./routes";
 
 const authMock = vi.hoisted(() => ({
 	state: {
-		session: { user: { id: "u1", email: "admin@carpinteropro.app" } } as {
+		session: { user: { id: "u1", email: "admin@example.com" } } as {
 			user: { id: string; email: string };
 		} | null,
 		loading: false,
@@ -87,7 +87,7 @@ describe("AdminRoutes", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		setAuthState({
-			session: { user: { id: "u1", email: "admin@carpinteropro.app" } },
+			session: { user: { id: "u1", email: "admin@example.com" } },
 			loading: false,
 			status: "ready",
 			profileIssue: null,
