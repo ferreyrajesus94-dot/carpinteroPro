@@ -4,6 +4,18 @@ vi.mock("sonner", () => ({
 	toast: { success: vi.fn(), error: vi.fn() },
 }));
 
+vi.mock("@tanstack/react-query", async () => {
+	const actual = await vi.importActual<typeof import("@tanstack/react-query")>(
+		"@tanstack/react-query",
+	);
+	return {
+		...actual,
+		useQueryClient: () => ({
+			invalidateQueries: vi.fn(),
+		}),
+	};
+});
+
 vi.mock("../hooks/useStockMovements", () => ({
 	useApplyStockMovement: vi.fn(),
 }));

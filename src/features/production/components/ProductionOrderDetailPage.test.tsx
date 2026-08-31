@@ -10,16 +10,21 @@ import type { ProductionOrderState } from "../api/types";
 vi.mock("../hooks/useProductionOrders", () => ({
 	useProductionOrder: vi.fn(),
 	useProductionOrderEvents: vi.fn(),
+	useTransitionProductionOrder: vi.fn(),
 }));
 
 import {
 	useProductionOrder,
 	useProductionOrderEvents,
+	useTransitionProductionOrder,
 } from "../hooks/useProductionOrders";
 import { ProductionOrderDetailPage } from "./ProductionOrderDetailPage";
 
 const mockUseProductionOrder = vi.mocked(useProductionOrder);
 const mockUseProductionOrderEvents = vi.mocked(useProductionOrderEvents);
+const mockUseTransitionProductionOrder = vi.mocked(
+	useTransitionProductionOrder,
+);
 
 const WORKSHOP_ID = "00000000-0000-0000-0000-000000000001";
 const ORDER_ID = "11111111-1111-4111-8111-111111111111";
@@ -85,6 +90,13 @@ function makeQueryWrapper() {
 
 beforeEach(() => {
 	vi.clearAllMocks();
+	mockUseTransitionProductionOrder.mockReturnValue({
+		mutate: vi.fn(),
+		isPending: false,
+		isError: false,
+		isSuccess: false,
+		reset: vi.fn(),
+	} as unknown as ReturnType<typeof useTransitionProductionOrder>);
 });
 
 describe("ProductionOrderDetailPage — loading and error states", () => {

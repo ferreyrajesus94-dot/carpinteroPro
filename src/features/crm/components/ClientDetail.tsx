@@ -9,6 +9,11 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { ClientForm } from "./ClientForm";
+import {
+	ClientProductionSection,
+	ClientProductionSectionLoading,
+	type ClientProductionOrderItem,
+} from "./ClientProductionSection";
 import type { Client } from "@/features/crm/types";
 import type { QuoteStatus } from "@/shared/types/quotes";
 
@@ -30,7 +35,7 @@ function formatDate(iso: string) {
 	});
 }
 
-type Tab = "info" | "presupuestos" | "notas";
+type Tab = "info" | "presupuestos" | "produccion" | "notas";
 
 export interface ClientDetailQuoteItem {
 	id: string;
@@ -50,6 +55,14 @@ interface ClientDetailProps {
 	isQuotesLoading: boolean;
 	/** Slot component for rendering a quote status badge */
 	QuoteStatusBadgeSlot: ComponentType<{ status: QuoteStatus }>;
+	/** Pre-filtered production orders for the current client, sorted
+	 *  by `updated_at` desc. The host page (CrmClientDetailPage) is
+	 *  responsible for the workshop-wide → client-wide filter and
+	 *  for pre-computing the human-readable state label so this
+	 *  component stays inside the CRM feature zone. */
+	clientProductionOrders: ClientProductionOrderItem[];
+	/** Whether the production orders query is still loading. */
+	isProductionLoading: boolean;
 }
 
 export function ClientDetail({
@@ -57,6 +70,8 @@ export function ClientDetail({
 	statsByClient,
 	isQuotesLoading,
 	QuoteStatusBadgeSlot,
+	clientProductionOrders,
+	isProductionLoading,
 }: ClientDetailProps) {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
@@ -268,24 +283,28 @@ export function ClientDetail({
 
 						{/* Mobile tabs */}
 						<div className="md:hidden flex rounded-lg border border-line bg-cp-bg2 p-1 gap-1">
-							{(["info", "presupuestos", "notas"] as Tab[]).map((t) => (
-								<button
-									key={t}
-									type="button"
-									onClick={() => setTab(t)}
-									className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
-										tab === t
-											? "bg-surface text-ink shadow-sm"
-											: "text-ink3 hover:text-ink"
-									}`}
-								>
-									{t === "info"
-										? "Info"
-										: t === "presupuestos"
-											? "Presupuestos"
-											: "Notas"}
-								</button>
-							))}
+							{(["info", "presupuestos", "produccion", "notas"] as Tab[]).map(
+								(t) => (
+									<button
+										key={t}
+										type="button"
+										onClick={() => setTab(t)}
+										className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium capitalize transition-colors ${
+											tab === t
+												? "bg-surface text-ink shadow-sm"
+												: "text-ink3 hover:text-ink"
+										}`}
+									>
+										{t === "info"
+											? "Info"
+											: t === "presupuestos"
+												? "Presupuestos"
+												: t === "produccion"
+													? "Producción"
+													: "Notas"}
+									</button>
+								),
+							)}
 						</div>
 
 						{/* Info */}
@@ -349,6 +368,19 @@ export function ClientDetail({
 									</div>
 								)}
 							</div>
+						</section>
+
+						{/* Producción */}
+						<section
+							className={`${tab !== "produccion" ? "hidden md:block" : ""}`}
+						>
+							{isProductionLoading ? (
+								<ClientProductionSectionLoading />
+							) : (
+								<ClientProductionSection
+									orders={clientProductionOrders}
+								/>
+							)}
 						</section>
 
 						{/* Notas */}
