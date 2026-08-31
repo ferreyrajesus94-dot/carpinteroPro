@@ -1,7 +1,6 @@
 import { ArrowRight, Check, Pause, Play, Plus, X } from "lucide-react";
 import type { ProductionOrderEvent } from "../api/productionOrders";
 import {
-	PRODUCTION_ORDER_STATE,
 	PRODUCTION_ORDER_STATE_LABELS,
 	type ProductionOrderState,
 } from "../api/types";

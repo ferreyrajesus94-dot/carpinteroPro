@@ -26,9 +26,6 @@ vi.mock("@/shared/hooks/useWorkshopId", () => ({
 	useWorkshopId: () => "test-workshop-id",
 }));
 
-vi.mock("@/features/production/hooks/useProductionOrders", () => ({
-	useProductionOrders: vi.fn().mockReturnValue({ data: [], isLoading: false }),
-}));
 
 vi.mock("@/features/crm/hooks/useClients", () => ({
 	useClients: () => ({
@@ -99,7 +96,7 @@ describe("ClientDetail with quotes and status badge props", () => {
 								QuoteStatusBadgeSlot={({ status }: { status: string }) => (
 									<span data-testid="status-badge">{status}</span>
 								)}
-								clientQuoteIds={[]}
+								clientProductionOrders={[]} isProductionLoading={false}
 							/>
 						}
 					/>
@@ -127,7 +124,7 @@ describe("ClientDetail with quotes and status badge props", () => {
 								QuoteStatusBadgeSlot={({ status }: { status: string }) => (
 									<span data-testid="status-badge">{status}</span>
 								)}
-								clientQuoteIds={[]}
+								clientProductionOrders={[]} isProductionLoading={false}
 							/>
 						}
 					/>
@@ -157,7 +154,7 @@ describe("ClientDetail with quotes and status badge props", () => {
 								QuoteStatusBadgeSlot={({ status }: { status: string }) => (
 									<span data-testid="status-badge">{status}</span>
 								)}
-								clientQuoteIds={[]}
+								clientProductionOrders={[]} isProductionLoading={false}
 							/>
 						}
 					/>

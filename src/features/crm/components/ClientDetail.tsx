@@ -9,7 +9,11 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { ClientForm } from "./ClientForm";
-import { ClientProductionSection } from "./ClientProductionSection";
+import {
+	ClientProductionSection,
+	ClientProductionSectionLoading,
+	type ClientProductionOrderItem,
+} from "./ClientProductionSection";
 import type { Client } from "@/features/crm/types";
 import type { QuoteStatus } from "@/shared/types/quotes";
 
@@ -51,10 +55,14 @@ interface ClientDetailProps {
 	isQuotesLoading: boolean;
 	/** Slot component for rendering a quote status badge */
 	QuoteStatusBadgeSlot: ComponentType<{ status: QuoteStatus }>;
-	/** Quote IDs for the current client — used to filter the
-	 *  workshop-wide production orders down to the ones that matter
-	 *  for this client's profile. */
-	clientQuoteIds: string[];
+	/** Pre-filtered production orders for the current client, sorted
+	 *  by `updated_at` desc. The host page (CrmClientDetailPage) is
+	 *  responsible for the workshop-wide → client-wide filter and
+	 *  for pre-computing the human-readable state label so this
+	 *  component stays inside the CRM feature zone. */
+	clientProductionOrders: ClientProductionOrderItem[];
+	/** Whether the production orders query is still loading. */
+	isProductionLoading: boolean;
 }
 
 export function ClientDetail({
@@ -62,7 +70,8 @@ export function ClientDetail({
 	statsByClient,
 	isQuotesLoading,
 	QuoteStatusBadgeSlot,
-	clientQuoteIds,
+	clientProductionOrders,
+	isProductionLoading,
 }: ClientDetailProps) {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
@@ -365,7 +374,13 @@ export function ClientDetail({
 						<section
 							className={`${tab !== "produccion" ? "hidden md:block" : ""}`}
 						>
-							<ClientProductionSection quoteIds={clientQuoteIds} />
+							{isProductionLoading ? (
+								<ClientProductionSectionLoading />
+							) : (
+								<ClientProductionSection
+									orders={clientProductionOrders}
+								/>
+							)}
 						</section>
 
 						{/* Notas */}

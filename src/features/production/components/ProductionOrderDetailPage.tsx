@@ -12,9 +12,7 @@ import {
 	useProductionOrderEvents,
 } from "../hooks/useProductionOrders";
 import {
-	PRODUCTION_ORDER_STATE,
 	PRODUCTION_ORDER_STATE_LABELS,
-	type ProductionOrderState,
 } from "../api/types";
 import type { ProductionOrderDetailRow } from "../api/productionOrders";
 import { EventTimeline } from "./EventTimeline";
