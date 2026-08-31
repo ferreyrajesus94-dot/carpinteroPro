@@ -53,3 +53,4 @@ research/
 
 # Engram local memory cache (per-machine memory archive)
 .engram/
+.env*

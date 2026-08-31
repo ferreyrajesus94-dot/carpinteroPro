@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
@@ -32,6 +33,7 @@ const REASONS_OUT: { value: StockMovementReason; label: string }[] = [
 
 export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjustDialogProps) {
   const mutation = useApplyStockMovement()
+  const queryClient = useQueryClient()
 
   const [direction, setDirection] = useState<Direction>('in')
   const [amount, setAmount] = useState('')
@@ -68,7 +70,13 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
         reason,
         note: note.trim() || null,
       },
-      { onSuccess: () => onSuccess() },
+      {
+        onSuccess: () => {
+          // Invalidate the materials list cache so MaterialList refreshes immediately after a stock change — without this, the table keeps showing the stale stock until the page is reloaded.
+          queryClient.invalidateQueries({ queryKey: ['materials'] })
+          onSuccess()
+        },
+      },
     )
   }
 

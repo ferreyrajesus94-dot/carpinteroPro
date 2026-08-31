@@ -143,10 +143,12 @@ export function WoodItemsSection({
                   <Label className="text-xs text-muted-foreground">
                     {usage ? labelFor(usage.mode, usage.inputUnitLabel) : 'Cantidad'}
                   </Label>
+                  {/* aria-label added so the visible "Cantidad" / "Merma %" labels are programmatically associated with the inputs (the surrounding <Label> uses className only, no htmlFor). */}
                   <Input
                     type="number"
                     min="0"
                     step="0.01"
+                    aria-label="Cantidad"
                     {...register(`wood_items.${index}.quantity`)}
                     placeholder="0"
                   />
@@ -165,6 +167,7 @@ export function WoodItemsSection({
                   min="0"
                   max="99"
                   step="1"
+                  aria-label="Merma %"
                   {...register(`wood_items.${index}.waste_pct`)}
                   placeholder="0"
                 />
