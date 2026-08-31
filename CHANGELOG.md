@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0-beta.1] — 2026-08-31
+
+Production state-machine UI + end-to-end browser coverage for the
+inventory → recipe → quote → production → delivery cycle.
+
+### Added
+
+- **Production order state-machine UI** in
+  `src/features/production/components/ProductionOrderActions.tsx`.
+  Surfaces the legal next-state buttons for the current order
+  state, wired to the existing `useTransitionProductionOrder` hook
+  and the `transition_production_order_state` RPC. The
+  `ProductionOrderDetailPage` was previously intentionally
+  read-only with a comment promising transition actions in a
+  future PR; this commit closes that gap. Cancellation, pausing,
+  and delivery prompt for confirmation because each is terminal
+  or otherwise hard to revert.
+
+- **Per-client production history** in
+  `src/features/crm/components/ClientProductionSection.tsx`. The
+  `CrmClientDetailPage` previously only listed the client's
+  quotes; the new section surfaces every production order whose
+  `quote_id` belongs to the client, with a link into the
+  production detail page and a per-state badge. Filtering is
+  client-side on the existing `list_production_orders` query
+  cache so no new server endpoint is required.
+
+- **`PRODUCTION_ORDER_STATE_LABELS`** is now exported from the
+  production `api/types` barrel so cross-feature consumers
+  (production board, order detail, event timeline, the new
+  ClientProductionSection) render the same Spanish labels
+  without duplicating the map locally.
+
+- **E2E browser tests** for the full operational cycle in
+  `tests/e2e/browser/`. Two new specs — `inventory-recipe-quote.spec.ts`
+  and `production-cycle.spec.ts` — exercise material creation,
+  stock adjustment, recipe build, quote creation, production
+  board drag, start-production dialog, and the new
+  ProductionOrderActions flow all the way to `delivered`. A shared
+  helper at `tests/e2e/browser/helpers/e2e-admin.ts` reuses the
+  long-lived `E2E_ADMIN_EMAIL` admin user so the suite no longer
+  needs the `E2E_SUPABASE_SERVICE_ROLE_KEY` secret. Both specs
+  run cleanly in 1m 36s each and pass three consecutive
+  invocations without flake.
+
+### Fixed
+
+- **`StockAdjustDialog`** invalidated the materials query cache
+  after a movement so the MaterialList refreshes immediately
+  instead of keeping the stale stock value until the page is
+  reloaded.
+
+- **`WoodItemsSection`** inputs were missing `aria-label`
+  attributes, which broke Playwright's `getByLabel` selector
+  for the quantity / waste % fields and also exposed an
+  accessibility issue (visible label and programmatic name
+  diverged whenever the `usage` mode was set).
+
+- **`production-cycle.spec.ts`** was setting the test quote to
+  `en_produccion` manually, but the production board picker
+  filters on `stored_status === "aprobado"`, so the picker
+  never showed the quote. The test now leaves the quote in
+  `aprobado` and lets the SQL-projected overlay do the work.
+
 ## [0.2.0-beta.1] — 2026-08-18
 
 Pre-OSS hardening: AGPL-3.0 LICENSE added, demo credentials removed from
