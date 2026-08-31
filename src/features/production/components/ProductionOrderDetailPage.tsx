@@ -13,10 +13,12 @@ import {
 } from "../hooks/useProductionOrders";
 import {
 	PRODUCTION_ORDER_STATE,
+	PRODUCTION_ORDER_STATE_LABELS,
 	type ProductionOrderState,
 } from "../api/types";
 import type { ProductionOrderDetailRow } from "../api/productionOrders";
 import { EventTimeline } from "./EventTimeline";
+import { ProductionOrderActions } from "./ProductionOrderActions";
 
 /**
  * Production order detail page — read-only view of a single
@@ -28,16 +30,6 @@ import { EventTimeline } from "./EventTimeline";
  * read-only. Transition actions live on the production board and
  * arrive in PR 8 alongside the dashboard integration.
  */
-
-const PRODUCTION_ORDER_STATE_LABELS: Record<ProductionOrderState, string> = {
-	[PRODUCTION_ORDER_STATE.PLANNED]: "Planificado",
-	[PRODUCTION_ORDER_STATE.IN_PROGRESS]: "En producción",
-	[PRODUCTION_ORDER_STATE.PAUSED]: "Pausado",
-	[PRODUCTION_ORDER_STATE.QUALITY_CHECK]: "Control de calidad",
-	[PRODUCTION_ORDER_STATE.READY]: "Listo",
-	[PRODUCTION_ORDER_STATE.DELIVERED]: "Entregado",
-	[PRODUCTION_ORDER_STATE.CANCELLED]: "Cancelado",
-};
 
 function formatDate(iso: string | null): string {
 	if (!iso) return "—";
@@ -240,6 +232,10 @@ export function ProductionOrderDetailPage() {
 		<div className="space-y-4 p-4 md:p-6 pb-24 md:pb-6">
 			<DetailHeader order={order} />
 			<DetailGrid order={order} />
+			<ProductionOrderActions
+				orderId={order.id}
+				currentState={order.state}
+			/>
 			<TimelineSection />
 		</div>
 	);

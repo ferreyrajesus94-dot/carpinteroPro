@@ -56,12 +56,15 @@ export function CrmClientDetailPage() {
 			};
 		});
 
+	const clientQuoteIds = quotesWithSalePrice.map((q) => q.id);
+
 	return (
 		<ClientDetail
 			quotesWithSalePrice={quotesWithSalePrice}
 			statsByClient={statsByClient}
 			isQuotesLoading={isQuotesLoading}
 			QuoteStatusBadgeSlot={QuoteStatusBadge}
+			clientQuoteIds={clientQuoteIds}
 		/>
 	);
 }

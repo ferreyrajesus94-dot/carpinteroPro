@@ -5,28 +5,13 @@ import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/feedback-state
 import { useProductionOrders, useQuotesWithProductionStatus } from "../hooks/useProductionOrders";
 import {
 	PRODUCTION_ORDER_ACTIVE_STATES,
+	PRODUCTION_ORDER_STATE_LABELS,
 	type ProductionOrderState,
 } from "../api/types";
 import type {
 	ProductionOrderListRow,
 	QuoteWithProductionStatus,
 } from "../api/productionOrders";
-
-/**
- * Spanish labels for the production-order state machine. Mirrors the
- * 5 active states the board renders; the 2 terminal states (delivered,
- * cancelled) are kept for completeness in the type system and for future
- * detail/history views, but they are NOT shown on the board.
- */
-const PRODUCTION_ORDER_STATE_LABELS: Record<ProductionOrderState, string> = {
-	planned: "Planificado",
-	in_progress: "En producción",
-	paused: "Pausado",
-	quality_check: "Control de calidad",
-	ready: "Listo",
-	delivered: "Entregado",
-	cancelled: "Cancelado",
-};
 
 export interface ProductionBoardProps {
 	/**

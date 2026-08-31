@@ -42,3 +42,18 @@ export const PRODUCTION_ORDER_TERMINAL_STATES: readonly ProductionOrderState[] =
 	PRODUCTION_ORDER_STATE.DELIVERED,
 	PRODUCTION_ORDER_STATE.CANCELLED,
 ] as const;
+
+/**
+ * Canonical Spanish label for every state, used by the production
+ * board columns, the detail page, the event timeline, and any
+ * cross-feature UI that needs to render a production state.
+ */
+export const PRODUCTION_ORDER_STATE_LABELS: Record<ProductionOrderState, string> = {
+	[PRODUCTION_ORDER_STATE.PLANNED]: "Planificado",
+	[PRODUCTION_ORDER_STATE.IN_PROGRESS]: "En producción",
+	[PRODUCTION_ORDER_STATE.PAUSED]: "Pausado",
+	[PRODUCTION_ORDER_STATE.QUALITY_CHECK]: "Control de calidad",
+	[PRODUCTION_ORDER_STATE.READY]: "Listo",
+	[PRODUCTION_ORDER_STATE.DELIVERED]: "Entregado",
+	[PRODUCTION_ORDER_STATE.CANCELLED]: "Cancelado",
+};

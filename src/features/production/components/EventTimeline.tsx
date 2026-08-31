@@ -2,6 +2,7 @@ import { ArrowRight, Check, Pause, Play, Plus, X } from "lucide-react";
 import type { ProductionOrderEvent } from "../api/productionOrders";
 import {
 	PRODUCTION_ORDER_STATE,
+	PRODUCTION_ORDER_STATE_LABELS,
 	type ProductionOrderState,
 } from "../api/types";
 import {
@@ -36,16 +37,6 @@ import {
  * detail page wires the `useProductionOrderEvents` hook and passes the
  * result here.
  */
-
-const PRODUCTION_ORDER_STATE_LABELS: Record<ProductionOrderState, string> = {
-	[PRODUCTION_ORDER_STATE.PLANNED]: "Planificado",
-	[PRODUCTION_ORDER_STATE.IN_PROGRESS]: "En producción",
-	[PRODUCTION_ORDER_STATE.PAUSED]: "Pausado",
-	[PRODUCTION_ORDER_STATE.QUALITY_CHECK]: "Control de calidad",
-	[PRODUCTION_ORDER_STATE.READY]: "Listo",
-	[PRODUCTION_ORDER_STATE.DELIVERED]: "Entregado",
-	[PRODUCTION_ORDER_STATE.CANCELLED]: "Cancelado",
-};
 
 const ICON_BY_NAME = {
 	Plus,
