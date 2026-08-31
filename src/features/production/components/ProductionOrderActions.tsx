@@ -201,6 +201,11 @@ export function ProductionOrderActions({
 				onOpenChange={(open) => {
 					if (!open) setPendingTarget(null);
 				}}
+				confirmLabel={
+					pendingTarget
+						? `Confirmar ${STATE_LABEL[pendingTarget].toLowerCase()}`
+						: "Confirmar"
+				}
 				title={
 					pendingTarget
 						? `Confirmar cambio a ${STATE_LABEL[pendingTarget]}`

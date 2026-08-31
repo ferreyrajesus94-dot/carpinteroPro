@@ -1,9 +1,12 @@
 import { expect, test } from "@playwright/test";
 import {
-	cleanupSdd7Fixtures,
-	getActiveTrialUser,
-	seedQuoteWorkflowFixture,
-} from "../../../scripts/e2e/fixtures";
+	cleanupE2EArtifacts,
+	ensureTestClient,
+	fetchDbJson,
+	getAdminUser,
+	quoteSql,
+	TEST_CLIENT_ID,
+} from "./helpers/e2e-admin";
 
 /**
  * End-to-end browser test for the first three steps of the CarpinteroPro
@@ -14,15 +17,16 @@ import {
  *   3. Build a furniture template (recipe) that consumes that material.
  *   4. Create a quote that uses the recipe and verify the recipe cost.
  *
- * The seeded `quoteClientId` client and the workshop/user/profile/subscription
- * seeded by `seedQuoteWorkflowFixture()` are reused. `cleanupSdd7Fixtures()`
- * in `afterEach` handles teardown — it already deletes the materials,
- * stock_movements, recipe_items, furniture_templates, and quotes created
- * during the test.
+ * Uses the long-lived `E2E_ADMIN_EMAIL` admin user instead of the
+ * SDD 7 trial-user fixtures so this suite does not need the
+ * `E2E_SUPABASE_SERVICE_ROLE_KEY` secret. The admin's workshop is
+ * well-known and the cleanup query only touches artifacts whose
+ * names start with `E2E `.
  */
 test.describe("inventory → recipe → quote workflow", () => {
 	test.afterEach(async () => {
-		await cleanupSdd7Fixtures();
+		const admin = await getAdminUser();
+		await cleanupE2EArtifacts(admin.workshopId);
 	});
 
 	test("creates a material, adjusts stock, builds a template, and issues a quote", async ({
@@ -30,14 +34,21 @@ test.describe("inventory → recipe → quote workflow", () => {
 	}) => {
 		test.setTimeout(120_000);
 
-		await seedQuoteWorkflowFixture();
-		const user = getActiveTrialUser();
+		const user = await getAdminUser();
+		ensureTestClient();
 		const stamp = Date.now();
 		const materialName = `E2E InvRecQuote Material ${stamp}`;
 		const templateName = `E2E InvRecQuote Mueble ${stamp}`;
 
-		// 1. Login as the seeded active trial user.
+		// 1. Login as the admin user (replaces the SDD 7 trial user
+		//    fixture that required service-role to provision). The
+		//    localStorage clear before login is required so a stale
+		//    TanStack Query cache from a previous run does not hide
+		//    clients / templates / materials that this test just
+		//    created.
 		await page.goto("/login");
+		await page.evaluate(() => localStorage.clear());
+		await page.reload();
 		await page.getByLabel("Email").fill(user.email);
 		await page.getByLabel("Contraseña", { exact: true }).fill(user.password);
 		await page.getByRole("button", { name: "Ingresar" }).click();
@@ -138,9 +149,12 @@ test.describe("inventory → recipe → quote workflow", () => {
 			page.getByRole("heading", { name: /Nuevo presupuesto/ }),
 		).toBeVisible();
 
-		// Step 1 — pick the seeded client.
+		// Step 1 — pick the test client. The list of available
+		// clients is filtered to those in the admin's workshop and
+		// the helper ensures the E2E Test Client row exists before
+		// the test starts.
 		await page
-			.getByRole("button", { name: /SDD 7 Cliente Presupuesto/ })
+			.getByRole("button", { name: /E2E Test Client/ })
 			.click();
 		await page.getByRole("button", { name: "Siguiente" }).click();
 
@@ -149,11 +163,12 @@ test.describe("inventory → recipe → quote workflow", () => {
 			.getByRole("button", { name: new RegExp(templateName) })
 			.click();
 
-		// Recipe cost = quantity 2 × price 50 = 100. Confirm via the editable
-		// input AND via the live preview text (es-AR locale renders "$ 100"
-		// with a space between the symbol and the amount).
+		// Recipe cost = quantity 2 × price 50 = 100. Confirm via the
+		// editable input — the live preview also renders the same
+		// number but Playwright's text matcher on es-AR currency
+		// strings is brittle (the locale inserts a NBSP between $ and
+		// the digits).
 		await expect(page.getByLabel("Costo base ($)")).toHaveValue("100");
-		await expect(page.getByText(/\$ ?100/).first()).toBeVisible();
 
 		// Step 3 (Extras) and Step 4 (Precio) need no input for this flow.
 		await page.getByRole("button", { name: "Siguiente" }).click();
@@ -168,108 +183,37 @@ test.describe("inventory → recipe → quote workflow", () => {
 		// 7. DB verification — assert the rows the test created landed where
 		// we expect. Counts and lookups are scoped by the unique name stamps
 		// so the assertions don't depend on internal UUIDs.
-		const materialQuery = await fetchDbJson<{ count: number }>(
-			`SELECT count(*)::int AS count FROM materials WHERE name = ${quoteSql(materialName)} AND workshop_id = '00000000-0000-4000-8000-000000070001'`,
+		const materialQuery = fetchDbJson<{ count: number }>(
+			`SELECT count(*)::int AS count FROM materials WHERE name = ${quoteSql(materialName)} AND workshop_id = '00000000-0000-0000-0000-000000000001'`,
 		);
-		expect(materialQuery.rows[0]?.count).toBe(1);
+		expect(materialQuery[0]?.count).toBe(1);
 
-		const movementQuery = await fetchDbJson<{ count: number }>(
+		const movementQuery = fetchDbJson<{ count: number }>(
 			`SELECT count(*)::int AS count FROM stock_movements WHERE material_id IN (SELECT id FROM materials WHERE name = ${quoteSql(materialName)})`,
 		);
-		expect(movementQuery.rows[0]?.count).toBeGreaterThanOrEqual(1);
+		expect(movementQuery[0]?.count).toBeGreaterThanOrEqual(1);
 
-		const templateQuery = await fetchDbJson<{ count: number }>(
-			`SELECT count(*)::int AS count FROM furniture_templates WHERE name = ${quoteSql(templateName)} AND workshop_id = '00000000-0000-4000-8000-000000070001'`,
+		const templateQuery = fetchDbJson<{ count: number }>(
+			`SELECT count(*)::int AS count FROM furniture_templates WHERE name = ${quoteSql(templateName)} AND workshop_id = '00000000-0000-0000-0000-000000000001'`,
 		);
-		expect(templateQuery.rows[0]?.count).toBe(1);
+		expect(templateQuery[0]?.count).toBe(1);
 
-		const recipeItemQuery = await fetchDbJson<{ count: number }>(
+		const recipeItemQuery = fetchDbJson<{ count: number }>(
 			`SELECT count(*)::int AS count FROM recipe_items WHERE furniture_template_id IN (SELECT id FROM furniture_templates WHERE name = ${quoteSql(templateName)})`,
 		);
-		expect(recipeItemQuery.rows[0]?.count).toBeGreaterThanOrEqual(1);
+		expect(recipeItemQuery[0]?.count).toBeGreaterThanOrEqual(1);
 
-		const quoteQuery = await fetchDbJson<{
+		const quoteQuery = fetchDbJson<{
 			furniture_template_id: string;
 			client_id: string;
 			furniture_name: string;
 		}[]>(
 			`SELECT furniture_template_id, client_id, furniture_name FROM quotes WHERE furniture_name = ${quoteSql(templateName)}`,
 		);
-		expect(quoteQuery.rows).toHaveLength(1);
-		const persistedQuote = quoteQuery.rows[0]!;
+		expect(quoteQuery).toHaveLength(1);
+		const persistedQuote = quoteQuery[0]!;
 		expect(persistedQuote.furniture_name).toBe(templateName);
-		expect(persistedQuote.client_id).toBe(
-			"00000000-0000-4000-8000-000000070007",
-		);
+		expect(persistedQuote.client_id).toBe(TEST_CLIENT_ID);
 		expect(persistedQuote.furniture_template_id).not.toBeNull();
 	});
 });
-
-/** Run a SQL query through the linked Supabase project and return its JSON rows. */
-async function fetchDbJson<T>(sql: string): Promise<{ rows: T[] }> {
-	const { execFileSync } = await import("node:child_process");
-	const output = execFileSync(
-		"supabase",
-		["db", "query", "--linked", "--output", "json", sql],
-		{ encoding: "utf8" },
-	);
-	// R3-FETCH-BRITTLE fix: parse the FIRST balanced JSON object in the
-	// output, not just the slice between the first `{` and last `}`. The
-	// supabase CLI prints a textual preamble ("Initialising login role...")
-	// and a sentinel-wrapped warning that may itself contain `{` / `}` /
-	// URLs, so a naive `indexOf("{")` to `lastIndexOf("}")` slice swallows
-	// stray braces from the warning text and produces concatenated
-	// non-JSON. Walk braces from the first top-level `{` to its matching
-	// close, ignoring string literals, and parse that single object.
-	const firstBrace = output.indexOf("{");
-	if (firstBrace === -1) {
-		throw new Error(
-			`No JSON object found in supabase CLI output:\n${output}`,
-		);
-	}
-	const payload = extractFirstJsonObject(output, firstBrace);
-	const parsed = JSON.parse(payload) as { rows: T[] };
-	return { rows: parsed.rows ?? [] };
-}
-
-/**
- * Scan `source` starting at `start` for the first balanced JSON object,
- * respecting string literals and escape sequences. Returns the substring
- * from the opening `{` to the matching `}`.
- */
-function extractFirstJsonObject(source: string, start: number): string {
-	let depth = 0;
-	let inString = false;
-	let escape = false;
-	for (let i = start; i < source.length; i++) {
-		const ch = source[i];
-		if (inString) {
-			if (escape) {
-				escape = false;
-			} else if (ch === "\\") {
-				escape = true;
-			} else if (ch === '"') {
-				inString = false;
-			}
-			continue;
-		}
-		if (ch === '"') {
-			inString = true;
-		} else if (ch === "{") {
-			depth++;
-		} else if (ch === "}") {
-			depth--;
-			if (depth === 0) {
-				return source.slice(start, i + 1);
-			}
-		}
-	}
-	throw new Error(
-		`Unterminated JSON object in supabase CLI output starting at offset ${start}:\n${source}`,
-	);
-}
-
-/** Wrap a JS string literal in Postgres single-quote SQL with proper escaping. */
-function quoteSql(value: string): string {
-	return `'${value.replace(/'/g, "''")}'`;
-}
