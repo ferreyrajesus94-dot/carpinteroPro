@@ -202,7 +202,13 @@ function AuthenticatedAppShell({
 		<div className="flex h-screen flex-col bg-background">
 			<OfflineBanner />
 			<MaintenanceBanner />
-			<main className="flex-1 overflow-y-auto">
+			<a
+				href="#main"
+				className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-cp-accent focus:px-4 focus:py-2 focus:text-[var(--cp-accent-ink)] focus:shadow-lg"
+			>
+				Saltar al contenido
+			</a>
+			<main id="main" className="flex-1 overflow-y-auto">
 				<Outlet />
 			</main>
 		</div>
@@ -409,7 +415,13 @@ function AuthenticatedAppShell({
 					</Link>
 				</header>
 
-				<main className="flex-1 overflow-y-auto p-4 pb-24 lg:pb-4">
+				<a
+					href="#main"
+					className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-cp-accent focus:px-4 focus:py-2 focus:text-[var(--cp-accent-ink)] focus:shadow-lg"
+				>
+					Saltar al contenido
+				</a>
+				<main id="main" className="flex-1 overflow-y-auto p-4 pb-24 lg:pb-4">
 					<Outlet />
 				</main>
 

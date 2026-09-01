@@ -16,8 +16,7 @@ import { useTasks } from '@/features/tasks/hooks/useTasks'
 import { Button } from '@/shared/ui/button'
 import { PageHeader } from '@/shared/ui/page-header'
 import { SectionHowto } from '@/shared/ui/section-howto'
-import { EmptyState } from '@/shared/ui/empty-state'
-import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
+import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/feedback-state'
 import {
   TASK_CATEGORY_LABELS,
   TASK_PRIORITY_RANK,
@@ -26,6 +25,7 @@ import {
 } from '@/features/tasks/types'
 import { TaskForm } from './TaskForm'
 import { TaskItem } from './TaskItem'
+import { RetryButton } from '@/shared/components/RetryButton'
 
 type TabKey = 'hoy' | 'semana' | 'todas' | 'sin_fecha'
 
@@ -139,15 +139,7 @@ export function TaskList() {
       <ErrorState
         title="Error al cargar las tareas"
         description="Revisá tu conexión e intentá de nuevo."
-        action={
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-          >
-            Reintentar
-          </button>
-        }
+        action={<RetryButton onRetry={() => refetch()} />}
       />
     )
   }
@@ -187,7 +179,7 @@ export function TaskList() {
             className={cn(
               'flex-1 whitespace-nowrap rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors',
               tab === key
-                ? 'bg-surface text-ink shadow-sm'
+                ? 'bg-cp-surface text-ink shadow-sm'
                 : 'text-ink3 hover:text-ink'
             )}
           >
@@ -211,7 +203,7 @@ export function TaskList() {
               'rounded-full border px-3 py-1 text-[12px] transition-colors',
               categoryFilter === cat
                 ? 'border-cp-accent bg-cp-accent-soft text-cp-accent'
-                : 'border-line bg-surface text-ink3 hover:border-line2'
+                : 'border-line bg-cp-surface text-ink3 hover:border-line2'
             )}
           >
             {CATEGORY_FILTER_LABELS[cat]}
@@ -222,6 +214,7 @@ export function TaskList() {
       {filtered.length === 0 ? (
         tasks.length === 0 ? (
           <EmptyState
+            variant="empty-feature"
             icon={CheckSquare}
             title="Sin tareas todavía"
             description="Creá tu primera tarea para empezar a organizar el taller."

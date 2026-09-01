@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { AlertTriangle, Inbox, SearchX, WifiOff } from "lucide-react";
+import { AlertTriangle, Inbox, SearchX, WifiOff, type LucideIcon } from "lucide-react";
 
 /* ─── Constants ─────────────────────────────────────────── */
 
@@ -34,6 +34,12 @@ interface FeedbackStateProps {
 
 interface EmptyStateProps extends FeedbackStateProps {
   variant: EmptyStateVariant;
+  /**
+   * Optional override for the variant icon. When provided, this icon is used
+   * instead of the variant's default. Preserves the older EmptyState API that
+   * required a single icon prop (e.g. for feature-specific empty states).
+   */
+  icon?: LucideIcon;
 }
 
 interface LoadingStateProps {
@@ -67,8 +73,9 @@ export function EmptyState({
   title,
   description,
   action,
+  icon,
 }: EmptyStateProps) {
-  const Icon = EMPTY_ICONS[variant];
+  const Icon = icon ?? EMPTY_ICONS[variant];
   const descriptionText = description ?? EMPTY_DEFAULT_DESCRIPTIONS[variant];
 
   return (

@@ -380,7 +380,7 @@ export function QuoteForm({
 			)}
 
 			{/* Header */}
-			<div className="flex items-center justify-between border-b border-line bg-surface px-4 py-3 sm:px-6 sm:py-4">
+			<div className="flex items-center justify-between border-b border-line bg-cp-surface px-4 py-3 sm:px-6 sm:py-4">
 				<div>
 					<h1 className="text-lg sm:text-2xl font-bold">
 						{isEditing
@@ -418,7 +418,7 @@ export function QuoteForm({
 							<div
 								className={`w-7 h-7 rounded-full grid place-items-center font-mono text-xs ${
 									step === s.n
-										? "bg-cp-accent text-white"
+										? "bg-cp-accent text-[var(--cp-accent-ink)]"
 										: s.n < step
 											? "bg-cp-accent/20 text-cp-accent"
 											: "bg-line text-ink2"
@@ -629,7 +629,7 @@ export function QuoteForm({
 			</div>
 
 			{/* Footer with navigation */}
-			<div className="border-t border-line bg-surface px-4 py-3 sm:px-6 flex flex-col-reverse sm:flex-row gap-2 sm:gap-4 sm:items-center sm:justify-between">
+			<div className="border-t border-line bg-cp-surface px-4 py-3 sm:px-6 flex flex-col-reverse sm:flex-row gap-2 sm:gap-4 sm:items-center sm:justify-between">
 			{/* Mobile price preview */}
 				<div className="lg:hidden text-center sm:text-left">
 					<p className="text-xs text-muted-foreground">Precio final</p>

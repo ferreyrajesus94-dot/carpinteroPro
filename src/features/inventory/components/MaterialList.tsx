@@ -6,8 +6,7 @@ import { Input } from '@/shared/ui/input'
 import { Switch } from '@/shared/ui/switch'
 import { Label } from '@/shared/ui/label'
 import { SectionHowto } from '@/shared/ui/section-howto'
-import { EmptyState } from '@/shared/ui/empty-state'
-import { ErrorState, LoadingState } from '@/shared/ui/feedback-state'
+import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/feedback-state'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/shared/ui/table'
@@ -18,6 +17,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/shared/ui/dialog'
 import { ConfirmDialog } from '@/shared/components/ConfirmDialog'
+import { RetryButton } from '@/shared/components/RetryButton'
 import { useMaterials, useDeleteMaterial } from '../hooks/useMaterials'
 import { useAllPriceHistory } from '../hooks/useAllPriceHistory'
 import { PriceSparkline } from './PriceSparkline'
@@ -158,15 +158,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
       <ErrorState
         title="Error al cargar los materiales"
         description="Revisá tu conexión e intentá de nuevo."
-        action={
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-          >
-            Reintentar
-          </button>
-        }
+        action={<RetryButton onRetry={() => refetch()} />}
       />
     )
   }
@@ -235,7 +227,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
 
       {/* Stat strip — clickeable para filtrar */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <div className="bg-surface border border-line rounded-xl p-3.5">
+        <div className="bg-cp-surface border border-line rounded-xl p-3.5">
           <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Materiales</div>
           <div className="mt-1.5 font-display text-[22px] leading-none font-semibold text-ink">{materials.length}</div>
         </div>
@@ -243,8 +235,8 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
           onClick={() => setLowStockOnly(v => !v)}
           className={`text-left rounded-xl p-3.5 border transition-all ${
             lowStockOnly
-              ? 'border-[var(--cp-warn)] ring-2 ring-[var(--cp-warn)]/20 bg-surface'
-              : 'border-line bg-surface hover:border-line2'
+              ? 'border-[var(--cp-warn)] ring-2 ring-[var(--cp-warn)]/20 bg-cp-surface'
+              : 'border-line bg-cp-surface hover:border-line2'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -254,11 +246,11 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
           <div className="mt-1.5 font-display text-[22px] leading-none font-semibold text-ink">{lowStockCount}</div>
           <div className="mt-1 text-[11px] text-ink3">{lowStockOnly ? '✓ Filtrando' : 'Tocá para filtrar'}</div>
         </button>
-        <div className="bg-surface border border-line rounded-xl p-3.5">
+        <div className="bg-cp-surface border border-line rounded-xl p-3.5">
           <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Sin stock</div>
           <div className={`mt-1.5 font-display text-[22px] leading-none font-semibold ${noStockCount > 0 ? 'text-[var(--cp-danger)]' : 'text-ink'}`}>{noStockCount}</div>
         </div>
-        <div className="bg-surface border border-line rounded-xl p-3.5">
+        <div className="bg-cp-surface border border-line rounded-xl p-3.5">
           <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Valor inventario</div>
           <div className="mt-1.5 font-display text-[18px] leading-none font-semibold text-ink truncate">{formatCurrency(totalValue)}</div>
         </div>
@@ -355,7 +347,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
             onClick={() => setCategoryFilter(chip.value as MaterialCategory | 'all')}
             className={`inline-flex items-center gap-1.5 shrink-0 rounded-full px-3 py-1 text-[12px] font-medium transition-colors ${
               categoryFilter === chip.value
-                ? 'bg-cp-accent text-white'
+                ? 'bg-cp-accent text-[var(--cp-accent-ink)]'
                 : 'bg-cp-bg2 text-ink2 hover:bg-cp-bg border border-line'
             }`}
           >
@@ -399,6 +391,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
 
       {visibleMaterials.length === 0 ? (
         <EmptyState
+          variant={materials.length === 0 ? 'empty-feature' : 'no-results'}
           icon={materials.length === 0 ? PackagePlus : Search}
           title={materials.length === 0 ? 'Sin materiales todavía' : 'Nada coincide'}
           description={
@@ -415,7 +408,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
               const isLow = material.stock <= material.min_stock
               const extra = formatExtraInfo(material)
               return (
-                <div key={material.id} className="bg-surface border border-line rounded-xl overflow-hidden hover:border-line2 transition-colors">
+                <div key={material.id} className="bg-cp-surface border border-line rounded-xl overflow-hidden hover:border-line2 transition-colors">
                   <div className="p-3.5">
                     <div className="flex items-start gap-3">
                       <div className="flex-1 min-w-0">

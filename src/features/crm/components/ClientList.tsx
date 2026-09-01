@@ -16,11 +16,11 @@ import { PAGE_SIZE } from "@/features/crm/api/clients";
 import { CLIENT_SOURCE_LABELS } from "@/features/crm/types";
 import { formatCurrency } from "@/shared/lib/formatters";
 import { Button } from "@/shared/ui/button";
+import { RetryButton } from "@/shared/components/RetryButton";
 import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
-import { ErrorState, LoadingState } from "@/shared/ui/feedback-state";
+import { ErrorState, LoadingState, EmptyState } from "@/shared/ui/feedback-state";
 import { SectionHowto } from "@/shared/ui/section-howto";
-import { EmptyState } from "@/shared/ui/empty-state";
 import { ClientForm } from "./ClientForm";
 import type { Client } from "@/features/crm/types";
 
@@ -89,15 +89,7 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 			<ErrorState
 				title="Error al cargar los clientes"
 				description="Revisá tu conexión e intentá de nuevo."
-				action={
-					<button
-						type="button"
-						onClick={() => refetch()}
-						className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-					>
-						Reintentar
-					</button>
-				}
+				action={<RetryButton onRetry={() => refetch()} />}
 			/>
 		);
 	}
@@ -147,6 +139,7 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 
 			{totalCount === 0 ? (
 				<EmptyState
+					variant="empty-feature"
 					icon={Users}
 					title="Sin clientes todavía"
 					description="Agregá tu primer cliente para empezar a armar presupuestos."
@@ -170,7 +163,7 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 									key={client.id}
 									type="button"
 									onClick={() => navigate(`/crm/clientes/${client.id}`)}
-									className="group rounded-xl border border-line bg-surface p-3 text-left transition-colors hover:border-line2 hover:bg-cp-bg2"
+									className="group rounded-xl border border-line bg-cp-surface p-3 text-left transition-colors hover:border-line2 hover:bg-cp-bg2"
 								>
 									<div className="flex items-center gap-3">
 										<div

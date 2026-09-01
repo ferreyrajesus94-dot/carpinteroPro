@@ -80,6 +80,12 @@ export function AdminLayout() {
 			</aside>
 
 			<div className="flex min-w-0 flex-1 flex-col">
+				<a
+					href="#main"
+					className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-cp-accent focus:px-4 focus:py-2 focus:text-[var(--cp-accent-ink)] focus:shadow-lg"
+				>
+					Saltar al contenido
+				</a>
 				<header className="flex items-center justify-between border-b border-line bg-cp-surface/90 px-4 py-3 backdrop-blur">
 					<div>
 						<h1 className="font-display text-base font-semibold text-ink">
@@ -152,7 +158,7 @@ export function AdminLayout() {
 					</div>
 				</header>
 
-				<main className="flex-1 overflow-y-auto p-4 lg:p-6">
+				<main id="main" className="flex-1 overflow-y-auto p-4 lg:p-6">
 					<Outlet />
 				</main>
 			</div>

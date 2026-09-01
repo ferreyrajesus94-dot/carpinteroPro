@@ -29,9 +29,9 @@ import {
 	SelectValue,
 } from "@/shared/ui/select";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
+import { RetryButton } from "@/shared/components/RetryButton";
 import { SectionHowto } from "@/shared/ui/section-howto";
-import { EmptyState } from "@/shared/ui/empty-state";
-import { ErrorState, LoadingState } from "@/shared/ui/feedback-state";
+import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/feedback-state";
 import {
 	Table,
 	TableBody,
@@ -108,7 +108,7 @@ function DraggableCard({
 	return (
 		<div
 			ref={setNodeRef}
-			className={`bg-surface border border-line rounded-md p-3 hover:border-cp-accent transition-colors ${isDragging ? "opacity-40" : ""}`}
+			className={`bg-cp-surface border border-line rounded-md p-3 hover:border-cp-accent transition-colors ${isDragging ? "opacity-40" : ""}`}
 		>
 			<div className="flex items-center justify-between mb-1">
 				<span className="font-mono text-xs text-ink2">
@@ -263,15 +263,7 @@ export function QuoteList() {
 			<ErrorState
 				title="Error al cargar los presupuestos"
 				description="Revisá tu conexión e intentá de nuevo."
-				action={
-					<button
-						type="button"
-						onClick={() => refetch()}
-						className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-					>
-						Reintentar
-					</button>
-				}
+				action={<RetryButton onRetry={() => refetch()} />}
 			/>
 		);
 	}
@@ -337,7 +329,7 @@ export function QuoteList() {
 						key={v}
 						onClick={() => setView(v)}
 						className={`h-8 px-3 rounded-md text-xs font-medium capitalize transition-colors flex items-center gap-2 ${
-							view === v ? "bg-surface text-ink shadow-sm" : "text-ink3"
+							view === v ? "bg-cp-surface text-ink shadow-sm" : "text-ink3"
 						}`}
 					>
 						{v === "lista" ? (
@@ -352,6 +344,7 @@ export function QuoteList() {
 
 			{allQuotes.length === 0 ? (
 				<EmptyState
+					variant="empty-feature"
 					icon={FileText}
 					title="Sin presupuestos todavía"
 					description="Armá el primer presupuesto desde una plantilla de mueble o a medida."
@@ -372,7 +365,7 @@ export function QuoteList() {
 								onClick={() => setStatusFilter(value)}
 								className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
 									statusFilter === value
-										? "bg-cp-accent text-white"
+										? "bg-cp-accent text-[var(--cp-accent-ink)]"
 										: "bg-cp-bg2 text-ink2 hover:bg-cp-accent/10"
 								}`}
 							>
@@ -403,7 +396,7 @@ export function QuoteList() {
 							return (
 								<div
 									key={q.id}
-									className="rounded-md border border-line bg-surface/50 p-3 space-y-2"
+									className="rounded-md border border-line bg-cp-surface/50 p-3 space-y-2"
 								>
 									<div className="flex items-center justify-between">
 										<span className="font-mono font-medium text-sm text-ink2">

@@ -45,7 +45,9 @@ const featureBoundaryZones = [
   // "Iniciar producción" flow.
 	featureZone("quotes", ["production"]),
 	featureZone("search"),
-	featureZone("recipes"),
+  // Recipes needs inventory (materials/price history) and settings
+  // (stock alert flag) for the template editor.
+	featureZone("recipes", ["inventory", "settings"]),
 	featureZone("settings"),
 	featureZone("tasks"),
 ];

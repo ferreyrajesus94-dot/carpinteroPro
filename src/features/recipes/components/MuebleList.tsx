@@ -21,8 +21,7 @@ import {
 } from "@/shared/ui/select";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { SectionHowto } from "@/shared/ui/section-howto";
-import { EmptyState } from "@/shared/ui/empty-state";
-import { LoadingState } from "@/shared/ui/feedback-state";
+import { EmptyState, LoadingState } from "@/shared/ui/feedback-state";
 import {
 	useFurnitureTemplates,
 	useDeleteFurnitureTemplate,
@@ -98,6 +97,7 @@ export function MuebleList({
 	if (templates.length === 0) {
 		return (
 			<EmptyState
+				variant="empty-feature"
 				icon={Package}
 				title="Sin muebles todavía"
 				description="Creá tu primer mueble para usarlo como plantilla en presupuestos."
@@ -183,7 +183,7 @@ export function MuebleList({
 					return (
 						<div
 							key={template.id}
-							className="rounded-lg border border-line bg-surface/50 hover:border-line-2 transition-colors overflow-hidden flex flex-col"
+							className="rounded-lg border border-line bg-cp-surface/50 hover:border-line-2 transition-colors overflow-hidden flex flex-col"
 						>
 							{/* Thumbnail */}
 							<div className="w-full aspect-square bg-cp-bg2 relative flex items-center justify-center border-b border-line overflow-hidden">
