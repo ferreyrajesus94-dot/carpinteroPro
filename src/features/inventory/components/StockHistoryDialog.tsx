@@ -49,8 +49,8 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 							<div
 								className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
 									isIn
-										? "bg-green-500/15 text-green-600"
-										: "bg-destructive/15 text-destructive"
+										? "bg-cp-success/15 text-cp-success"
+										: "bg-cp-danger/15 text-cp-danger"
 								}`}
 							>
 								{isIn ? (
@@ -63,7 +63,7 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 								<div className="flex items-baseline justify-between gap-2">
 									<span className="font-medium">{REASON_LABELS[m.reason]}</span>
 									<span
-										className={`font-mono font-semibold ${isIn ? "text-green-600" : "text-destructive"}`}
+										className={`font-mono font-semibold ${isIn ? "text-cp-success" : "text-cp-danger"}`}
 									>
 										{formatSignedQuantity(m.delta)}
 									</span>

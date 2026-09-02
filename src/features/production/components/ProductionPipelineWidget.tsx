@@ -27,11 +27,11 @@ const ACTIVE_STATE_LABELS: Record<ProductionOrderState, string> = {
 const ACTIVE_STATE_SWATCH_BG: Record<ProductionOrderState, string> = {
 	planned: "bg-cp-accent-soft",
 	in_progress: "bg-cp-accent",
-	paused: "bg-amber-400",
-	quality_check: "bg-violet-400",
-	ready: "bg-emerald-500",
-	delivered: "bg-emerald-700",
-	cancelled: "bg-rose-400",
+	paused: "bg-cp-warn",
+	quality_check: "bg-cp-info",
+	ready: "bg-cp-success",
+	delivered: "bg-cp-success/70",
+	cancelled: "bg-cp-danger",
 };
 
 function getCountForState(
@@ -91,13 +91,13 @@ export function ProductionPipelineWidget() {
 		return (
 			<div
 				data-testid="pipeline-widget-error"
-				className="rounded-xl border border-rose-300 bg-rose-50 p-4"
+				className="rounded-xl border border-cp-danger/40 bg-cp-danger/10 p-4"
 				role="alert"
 			>
-				<p className="text-[10.5px] uppercase tracking-[0.08em] text-rose-700 font-medium mb-1">
+				<p className="text-[10.5px] uppercase tracking-[0.08em] text-cp-danger font-medium mb-1">
 					Pipeline de producción
 				</p>
-				<p className="text-[12px] text-rose-800">
+				<p className="text-[12px] text-cp-danger">
 					No se pudo cargar el pipeline. Reintentá desde esta pantalla.
 				</p>
 			</div>

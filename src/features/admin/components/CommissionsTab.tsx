@@ -167,7 +167,7 @@ export function CommissionsTab() {
 				<div
 					role="alert"
 					aria-label={`${staleCount} comisiones vencidas`}
-					className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800"
+					className="flex items-center gap-2 rounded-lg border border-cp-danger/30 bg-cp-danger/10 px-3 py-2 text-sm text-cp-danger"
 				>
 					<i
 						className="fi fi-rr-exclamation-triangle text-sm leading-none"

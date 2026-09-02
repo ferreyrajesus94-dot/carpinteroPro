@@ -10,7 +10,7 @@ import type { Session } from "@supabase/supabase-js";
 import { cn } from "@/shared/lib/utils";
 import { OfflineBanner } from "@/shared/components/OfflineBanner";
 import { MaintenanceBanner } from "@/shared/components/MaintenanceBanner";
-import { useTheme } from "@/shared/hooks/useTheme";
+import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { useSubscription } from "@/features/billing/hooks/useSubscription";
@@ -158,7 +158,6 @@ function AuthenticatedAppShell({
 	workshopId,
 	isPlatformAdmin,
 }: AuthenticatedAppShellProps) {
-	const { theme, toggle } = useTheme();
 	const { data: subscription, isLoading: subscriptionLoading } =
 		useSubscription(workshopId, onboardedAt);
 	const createSubscription = useCreateSubscription();
@@ -328,18 +327,10 @@ function AuthenticatedAppShell({
 					</div>
 					<div className="flex-1" />
 					<GlobalSearch />
-					<button
-						type="button"
-						onClick={toggle}
-						aria-label={
-							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
-						}
-						className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer focus-ring"
-					>
-						<i
-							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
-						/>
-					</button>
+					<ThemeToggle
+						variant="icon"
+						className="h-9 w-9"
+					/>
 				</header>
 
 				{/* Header mobile */}
@@ -364,18 +355,10 @@ function AuthenticatedAppShell({
 					>
 						<i className="fi fi-rr-search text-base leading-none" />
 					</NavLink>
-					<button
-						type="button"
-						onClick={toggle}
-						aria-label={
-							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
-						}
-						className="grid h-11 w-11 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors cursor-pointer focus-ring"
-					>
-						<i
-							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
-						/>
-					</button>
+					<ThemeToggle
+						variant="icon"
+						className="h-11 w-11"
+					/>
 					{isPlatformAdmin && (
 						<NavLink
 							to="/admin"

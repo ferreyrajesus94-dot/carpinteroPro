@@ -151,7 +151,7 @@ export function ProductionStartReviewDialog({
 										: "Sin descuento automático de stock."}
 							</p>
 							{result.lines_skipped > 0 && (
-								<p className="text-xs text-amber-600 mt-1">
+								<p className="text-xs text-cp-warn mt-1">
 									{result.lines_skipped} línea(s) omitidas por datos
 									incompletos.
 								</p>
@@ -178,11 +178,11 @@ export function ProductionStartReviewDialog({
 					<>
 						{/* Warnings */}
 						{hasShortage && (
-							<div className="rounded-lg bg-red-50 border border-red-200 p-3">
-								<p className="text-sm font-semibold text-destructive">
+							<div className="rounded-lg bg-cp-danger/10 border border-cp-danger/30 p-3">
+								<p className="text-sm font-semibold text-cp-danger">
 									⚠ Stock insuficiente
 								</p>
-								<p className="text-xs text-destructive/80 mt-1">
+								<p className="text-xs text-cp-danger/80 mt-1">
 									{shortageCount} material(es) con stock insuficiente. Se
 									descontará igual si confirmás.
 								</p>
@@ -190,11 +190,11 @@ export function ProductionStartReviewDialog({
 						)}
 
 						{hasIncomplete && (
-							<div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-								<p className="text-sm font-semibold text-amber-700">
+							<div className="rounded-lg bg-cp-warn/10 border border-cp-warn/30 p-3">
+								<p className="text-sm font-semibold text-cp-warn">
 									⚠ Materiales incompletos
 								</p>
-								<p className="text-xs text-amber-600/80 mt-1">
+								<p className="text-xs text-cp-warn/80 mt-1">
 									{incompleteCount} línea(s) de la lista de materiales tienen
 									datos insuficientes y serán omitidas del descuento.
 								</p>
@@ -202,11 +202,11 @@ export function ProductionStartReviewDialog({
 						)}
 
 						{isExistingActive && (
-							<div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
-								<p className="text-sm font-semibold text-blue-700">
+							<div className="rounded-lg bg-cp-info/10 border border-cp-info/30 p-3">
+								<p className="text-sm font-semibold text-cp-info">
 									ℹ Producción ya fue iniciada
 								</p>
-								<p className="text-xs text-blue-600/80 mt-1">
+								<p className="text-xs text-cp-info/80 mt-1">
 									Este presupuesto ya tiene un descuento de stock activo. No se
 									crearán nuevos movimientos.
 								</p>
@@ -214,11 +214,11 @@ export function ProductionStartReviewDialog({
 						)}
 
 						{isExistingReversed && (
-							<div className="rounded-lg bg-violet-50 border border-violet-200 p-3">
-								<p className="text-sm font-semibold text-violet-700">
+							<div className="rounded-lg bg-cp-accent-soft border border-cp-accent/30 p-3">
+								<p className="text-sm font-semibold text-cp-accent">
 									ℹ Lote anterior revertido
 								</p>
-								<p className="text-xs text-violet-600/80 mt-1">
+								<p className="text-xs text-cp-accent/80 mt-1">
 									Este presupuesto tuvo un descuento de producción que fue
 									revertido. Podés iniciar producción nuevamente.
 								</p>
@@ -227,11 +227,11 @@ export function ProductionStartReviewDialog({
 
 						{/* BOM recapture recovery */}
 						{hasNoBom && !isRecapturing && (
-							<div className="rounded-lg bg-amber-50 border border-amber-200 p-3">
-								<p className="text-sm font-semibold text-amber-700">
+							<div className="rounded-lg bg-cp-warn/10 border border-cp-warn/30 p-3">
+								<p className="text-sm font-semibold text-cp-warn">
 									⚠ Sin lista de materiales aprobada
 								</p>
-								<p className="text-xs text-amber-600/80 mt-1">
+								<p className="text-xs text-cp-warn/80 mt-1">
 									No se encontró una lista de materiales aprobada. Intentá
 									capturarla nuevamente.
 								</p>
@@ -277,14 +277,14 @@ export function ProductionStartReviewDialog({
 												!row.is_complete
 													? "opacity-50"
 													: (row.shortage_amount ?? 0) > 0
-														? "bg-red-50/50"
+														? "bg-cp-danger/5"
 														: ""
 											}
 										>
 											<TableCell className="font-medium">
 												{row.material_name}
 												{!row.is_complete && (
-													<span className="ml-1 text-xs text-amber-600">
+													<span className="ml-1 text-xs text-cp-warn">
 														(incompleto)
 													</span>
 												)}
@@ -298,7 +298,7 @@ export function ProductionStartReviewDialog({
 											<TableCell
 												className={`text-right font-medium ${
 													(row.shortage_amount ?? 0) > 0
-														? "text-destructive"
+														? "text-cp-danger"
 														: ""
 												}`}
 											>

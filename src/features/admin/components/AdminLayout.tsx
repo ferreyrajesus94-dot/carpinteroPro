@@ -1,12 +1,11 @@
 import { NavLink, Outlet, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/shared/lib/utils";
-import { useTheme } from "@/shared/hooks/useTheme";
+import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 
 export function AdminLayout() {
-	const { theme, toggle } = useTheme();
 	const overview = useAdminOverview();
 	const queryClient = useQueryClient();
 	const webhookFailures = overview.data?.support?.recentWebhookFailures ?? 0;
@@ -62,20 +61,10 @@ export function AdminLayout() {
 						/>
 						Volver a la app
 					</Link>
-					<button
-						type="button"
-						onClick={toggle}
-						aria-label={
-							theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
-						}
-						className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-					>
-						<i
-							className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-sm leading-none`}
-							aria-hidden="true"
-						/>
-						{theme === "dark" ? "Modo claro" : "Modo oscuro"}
-					</button>
+					<ThemeToggle
+						variant="label"
+						className="h-9 w-full px-3 text-[13px] font-medium border-0"
+					/>
 				</div>
 			</aside>
 
@@ -142,19 +131,10 @@ export function AdminLayout() {
 								aria-hidden="true"
 							/>
 						</Link>
-						<button
-							type="button"
-							onClick={toggle}
-							aria-label={
-								theme === "dark" ? "Activar modo claro" : "Activar modo oscuro"
-							}
-							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-						>
-							<i
-								className={`fi ${theme === "dark" ? "fi-rr-sun" : "fi-rr-moon"} text-base leading-none`}
-								aria-hidden="true"
-							/>
-						</button>
+						<ThemeToggle
+							variant="icon"
+							className="h-9 w-9"
+						/>
 					</div>
 				</header>
 

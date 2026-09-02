@@ -49,7 +49,7 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 			className={cn(
 				"rounded-xl border p-5 shadow-sm",
 				variant === "warning"
-					? "border-amber-200 bg-amber-50"
+					? "border-cp-warn/40 bg-cp-warn/10"
 					: "border-line bg-cp-surface",
 			)}
 		>
@@ -61,7 +61,7 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 					<p
 						className={cn(
 							"mt-1 font-mono text-3xl font-bold tracking-tight",
-							variant === "warning" ? "text-amber-700" : "text-ink",
+							variant === "warning" ? "text-cp-warn" : "text-ink",
 						)}
 					>
 						{value}
@@ -69,7 +69,7 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 				</div>
 				<i
 					className={`fi ${icon} text-2xl leading-none ${
-						variant === "warning" ? "text-amber-600" : "text-cp-accent"
+						variant === "warning" ? "text-cp-warn" : "text-cp-accent"
 					}`}
 					aria-hidden="true"
 				/>
@@ -174,7 +174,7 @@ export function OverviewPage() {
 				<div
 					role="status"
 					aria-label="Alerta de webhook"
-					className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800"
+					className="rounded-xl border border-cp-warn/40 bg-cp-warn/10 p-4 text-sm text-cp-warn"
 				>
 					<i
 						className="fi fi-rr-bell-ring mr-2 align-middle"
@@ -208,17 +208,17 @@ export function OverviewPage() {
 										key={status}
 										className={cn(
 											"flex items-center justify-between rounded-lg border px-4 py-3",
-											isActive && "border-emerald-200 bg-emerald-50",
-											isWarning && "border-amber-200 bg-amber-50",
-											!isActive && !isWarning && "border-red-200 bg-red-50",
+											isActive && "border-cp-success/40 bg-cp-success/10",
+											isWarning && "border-cp-warn/40 bg-cp-warn/10",
+											!isActive && !isWarning && "border-cp-danger/40 bg-cp-danger/10",
 										)}
 									>
 										<span
 											className={cn(
 												"text-sm font-medium capitalize",
-												isActive && "text-emerald-800",
-												isWarning && "text-amber-800",
-												!isActive && !isWarning && "text-red-800",
+												isActive && "text-cp-success",
+												isWarning && "text-cp-warn",
+												!isActive && !isWarning && "text-cp-danger",
 											)}
 										>
 											{statusLabel(status)}
@@ -226,9 +226,9 @@ export function OverviewPage() {
 										<span
 											className={cn(
 												"font-mono text-lg font-bold",
-												isActive && "text-emerald-800",
-												isWarning && "text-amber-800",
-												!isActive && !isWarning && "text-red-800",
+												isActive && "text-cp-success",
+												isWarning && "text-cp-warn",
+												!isActive && !isWarning && "text-cp-danger",
 											)}
 										>
 											{count}
@@ -264,14 +264,14 @@ export function OverviewPage() {
 								message: maintMessage || undefined,
 							})
 						}
-						className="inline-flex h-9 items-center gap-1.5 rounded-md bg-amber-100 px-4 text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
+						className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cp-warn/15 px-4 text-xs font-medium text-cp-warn hover:bg-cp-warn/25 transition-colors"
 					>
 						Activar
 					</button>
 					<button
 						type="button"
 						onClick={() => maintenanceMutation.mutate({ enabled: false })}
-						className="inline-flex h-9 items-center gap-1.5 rounded-md bg-emerald-100 px-4 text-xs font-medium text-emerald-800 hover:bg-emerald-200 transition-colors"
+						className="inline-flex h-9 items-center gap-1.5 rounded-md bg-cp-success/15 px-4 text-xs font-medium text-cp-success hover:bg-cp-success/25 transition-colors"
 					>
 						Desactivar
 					</button>

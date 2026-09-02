@@ -10,7 +10,7 @@ export function MaintenanceBanner() {
 	if (isPlatformAdmin || !maintenance?.enabled || dismissed) return null;
 
 	return (
-		<div className="flex items-center justify-between gap-2 border-b border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+		<div className="flex items-center justify-between gap-2 border-b border-cp-warn/40 bg-cp-warn/10 px-4 py-2 text-sm text-cp-warn">
 			<span>
 				<i
 					className="fi fi-rr-triangle-warning mr-2 align-middle"
@@ -21,7 +21,7 @@ export function MaintenanceBanner() {
 			<button
 				type="button"
 				onClick={() => setDismissed(true)}
-				className="text-amber-600 hover:text-amber-800 text-lg leading-none"
+				className="text-cp-warn/80 hover:text-cp-warn text-lg leading-none"
 				aria-label="Cerrar aviso"
 			>
 				×

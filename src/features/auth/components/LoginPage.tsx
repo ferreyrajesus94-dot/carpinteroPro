@@ -3,11 +3,11 @@ import { useNavigate, Navigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
 import { checkGoogleEnabled, signInWithEmail, signUpWithEmail, signInWithGoogle } from '@/features/auth/api'
 import { buildSignupMetadata } from '@/features/auth/lib/referralMetadata'
-import { useTheme } from '@/shared/hooks/useTheme'
 import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
+import { ThemeToggle } from '@/shared/components/ThemeToggle'
 import { cn } from '@/shared/lib/utils'
 
 type Mode = 'login' | 'register'
@@ -73,15 +73,14 @@ const PASSWORD_RULES = [
 ]
 
 const STRENGTH_LABELS  = ['', 'Muy débil', 'Débil', 'Regular', 'Buena', 'Muy segura']
-const STRENGTH_COLORS  = ['', 'bg-destructive', 'bg-orange-500', 'bg-yellow-500', 'bg-blue-500', 'bg-green-500']
-const STRENGTH_TEXT    = ['', 'text-destructive', 'text-orange-500', 'text-yellow-500', 'text-blue-500', 'text-green-500']
+const STRENGTH_COLORS  = ['', 'bg-cp-danger', 'bg-cp-warn', 'bg-cp-warn/70', 'bg-cp-info', 'bg-cp-success']
+const STRENGTH_TEXT    = ['', 'text-cp-danger', 'text-cp-warn', 'text-cp-warn/70', 'text-cp-info', 'text-cp-success']
 
 export function LoginPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const refCode = searchParams.get('ref')
   const { session, loading } = useAuth()
-  const { theme, toggle } = useTheme()
   const [mode, setMode]               = useState<Mode>('login')
   const [showPassword, setShowPassword] = useState(false)
 
@@ -186,14 +185,12 @@ export function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-8">
       {/* Toggle modo oscuro */}
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label={theme === 'dark' ? 'Activar modo claro' : 'Activar modo oscuro'}
-        className="absolute top-4 right-4 flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-      >
-        <i className={`fi ${theme === 'dark' ? 'fi-rr-sun' : 'fi-rr-moon'} text-base leading-none`} />
-      </button>
+      <div className="absolute top-4 right-4">
+        <ThemeToggle
+          variant="label"
+          className="h-9 px-2 text-xs"
+        />
+      </div>
 
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
