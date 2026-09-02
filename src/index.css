@@ -211,6 +211,67 @@
   .bg-cp-info          { background: var(--cp-info); }
   .text-cp-info        { color: var(--cp-info); }
 
+  /* === cp-N/opacity utilities ===
+   * Tailwind JIT cannot derive opacity variants from raw @layer utilities declarations,
+   * so each cp-N/opacity combination used in the codebase gets an explicit utility.
+   * Run `grep -rohE "(bg|text|border|ring)-cp-[a-z0-9-]+/[0-9]+" src/ | sort -u` to see the inventory.
+   * When adding new cp-N/opacity usages, add the utility here too.
+   * Note: cp-bg2 references var(--bg-2) and cp-surface references var(--surface).
+   */
+
+  /* bg-cp-N/opacity utilities */
+  .bg-cp-accent\/5  { background: color-mix(in oklch, var(--cp-accent) 5%, transparent); }
+  .bg-cp-accent\/10 { background: color-mix(in oklch, var(--cp-accent) 10%, transparent); }
+  .bg-cp-accent\/15 { background: color-mix(in oklch, var(--cp-accent) 15%, transparent); }
+  .bg-cp-accent\/20 { background: color-mix(in oklch, var(--cp-accent) 20%, transparent); }
+  .bg-cp-accent\/40 { background: color-mix(in oklch, var(--cp-accent) 40%, transparent); }
+  .bg-cp-accent\/80 { background: color-mix(in oklch, var(--cp-accent) 80%, transparent); }
+  .bg-cp-accent\/90 { background: color-mix(in oklch, var(--cp-accent) 90%, transparent); }
+
+  .bg-cp-bg2\/30 { background: color-mix(in oklch, var(--bg-2) 30%, transparent); }
+  .bg-cp-bg2\/40 { background: color-mix(in oklch, var(--bg-2) 40%, transparent); }
+  .bg-cp-bg2\/50 { background: color-mix(in oklch, var(--bg-2) 50%, transparent); }
+  .bg-cp-bg2\/80 { background: color-mix(in oklch, var(--bg-2) 80%, transparent); }
+
+  .bg-cp-danger\/5  { background: color-mix(in oklch, var(--cp-danger) 5%, transparent); }
+  .bg-cp-danger\/15 { background: color-mix(in oklch, var(--cp-danger) 15%, transparent); }
+  .bg-cp-danger\/80 { background: color-mix(in oklch, var(--cp-danger) 80%, transparent); }
+  .bg-cp-danger\/90 { background: color-mix(in oklch, var(--cp-danger) 90%, transparent); }
+
+  .bg-cp-info\/10 { background: color-mix(in oklch, var(--cp-info) 10%, transparent); }
+
+  .bg-cp-success\/10 { background: color-mix(in oklch, var(--cp-success) 10%, transparent); }
+  .bg-cp-success\/15 { background: color-mix(in oklch, var(--cp-success) 15%, transparent); }
+  .bg-cp-success\/25 { background: color-mix(in oklch, var(--cp-success) 25%, transparent); }
+  .bg-cp-success\/70 { background: color-mix(in oklch, var(--cp-success) 70%, transparent); }
+
+  .bg-cp-surface\/50 { background: color-mix(in oklch, var(--surface) 50%, transparent); }
+  .bg-cp-surface\/85 { background: color-mix(in oklch, var(--surface) 85%, transparent); }
+  .bg-cp-surface\/90 { background: color-mix(in oklch, var(--surface) 90%, transparent); }
+  .bg-cp-surface\/95 { background: color-mix(in oklch, var(--surface) 95%, transparent); }
+
+  .bg-cp-warn\/10 { background: color-mix(in oklch, var(--cp-warn) 10%, transparent); }
+  .bg-cp-warn\/15 { background: color-mix(in oklch, var(--cp-warn) 15%, transparent); }
+  .bg-cp-warn\/25 { background: color-mix(in oklch, var(--cp-warn) 25%, transparent); }
+  .bg-cp-warn\/70 { background: color-mix(in oklch, var(--cp-warn) 70%, transparent); }
+
+  /* text-cp-N/opacity utilities */
+  .text-cp-accent\/80 { color: color-mix(in oklch, var(--cp-accent) 80%, transparent); }
+  .text-cp-danger\/80 { color: color-mix(in oklch, var(--cp-danger) 80%, transparent); }
+  .text-cp-info\/80   { color: color-mix(in oklch, var(--cp-info) 80%, transparent); }
+  .text-cp-warn\/70   { color: color-mix(in oklch, var(--cp-warn) 70%, transparent); }
+  .text-cp-warn\/80   { color: color-mix(in oklch, var(--cp-warn) 80%, transparent); }
+
+  /* border-cp-N/opacity utilities */
+  .border-cp-accent\/30  { border-color: color-mix(in oklch, var(--cp-accent) 30%, transparent); }
+  .border-cp-accent\/50  { border-color: color-mix(in oklch, var(--cp-accent) 50%, transparent); }
+  .border-cp-danger\/30  { border-color: color-mix(in oklch, var(--cp-danger) 30%, transparent); }
+  .border-cp-danger\/40  { border-color: color-mix(in oklch, var(--cp-danger) 40%, transparent); }
+  .border-cp-info\/30    { border-color: color-mix(in oklch, var(--cp-info) 30%, transparent); }
+  .border-cp-success\/40 { border-color: color-mix(in oklch, var(--cp-success) 40%, transparent); }
+  .border-cp-warn\/30    { border-color: color-mix(in oklch, var(--cp-warn) 30%, transparent); }
+  .border-cp-warn\/40    { border-color: color-mix(in oklch, var(--cp-warn) 40%, transparent); }
+
   /* Chart color tokens */
   .stroke-chart-up      { stroke: var(--chart-up); }
   .stroke-chart-down    { stroke: var(--chart-down); }
