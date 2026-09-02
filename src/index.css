@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* === DEPRECATED — shadcn legacy HSL tokens ===
+   * These tokens will be removed once all features migrate to the OKLCH redesign system.
+   * Use bg-cp-bg / text-ink / bg-cp-accent / border-line / etc. instead of
+   * bg-background / text-foreground / bg-primary / border-border / etc.
+   */
   :root {
     /* === Legacy shadcn HSL tokens (consumed by shared/ui/*) === */
     --background: 30 30% 98%;
@@ -193,6 +198,7 @@
   .text-cp-accent { color: var(--cp-accent); }
   .bg-cp-accent-soft { background: var(--cp-accent-soft); color: var(--cp-accent); }
   .ring-cp-accent { --tw-ring-color: var(--cp-accent); }
+  .ring-offset-cp-bg { --tw-ring-offset-color: var(--bg); }
 
   /* Status color utilities (palette-safe, used by feedback-state) */
   .bg-cp-danger        { background: var(--cp-danger); }
