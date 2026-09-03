@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/shared/lib/utils";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { Eyebrow } from "@/shared/ui/eyebrow";
+import { ChipToggle } from "@/shared/ui/chip-toggle";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 
@@ -88,20 +89,22 @@ export function AdminLayout() {
 									key={to}
 									to={to}
 									end={to === "/admin"}
-									className={({ isActive }) =>
-										cn(
-											"inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1.5 text-xs font-medium",
-											isActive
-												? "bg-cp-accent text-[var(--cp-accent-ink)]"
-												: "text-ink2",
-										)
-									}
+
 								>
-									{label}
-									{to === "/admin" && webhookFailures > 0 && (
-										<span className="rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 leading-none">
-											{webhookFailures}
-										</span>
+									{({ isActive }) => (
+										<ChipToggle
+											variant="nav-chip"
+											active={isActive}
+											onSelect={() => undefined}
+											label={label}
+											count={
+												to === "/admin" && webhookFailures > 0
+													? webhookFailures
+													: undefined
+											}
+											badgeTone="danger"
+											className="font-medium"
+										/>
 									)}
 								</NavLink>
 							))}

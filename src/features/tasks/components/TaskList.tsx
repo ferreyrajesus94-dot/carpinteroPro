@@ -8,13 +8,13 @@ import {
   startOfDay,
 } from 'date-fns'
 import { CheckSquare } from 'lucide-react'
-import { cn } from '@/shared/lib/utils'
 import { useFabAction } from '@/shared/lib/fab'
 import { useWorkshopId } from '@/shared/hooks/useWorkshopId'
 import { useOnlineStatus } from '@/shared/hooks/useOnlineStatus'
 import { useTasks } from '@/features/tasks/hooks/useTasks'
 import { Button } from '@/shared/ui/button'
 import { PageHeader } from '@/shared/ui/page-header'
+import { ChipToggle } from '@/shared/ui/chip-toggle'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/feedback-state'
 import {
@@ -172,42 +172,28 @@ export function TaskList() {
 
       <div className="flex gap-1 overflow-x-auto rounded-xl border border-line bg-cp-bg2 p-1">
         {TABS.map(({ key, label }) => (
-          <button
+          <ChipToggle
             key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={cn(
-              'flex-1 whitespace-nowrap rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors',
-              tab === key
-                ? 'bg-cp-surface text-ink shadow-sm'
-                : 'text-ink3 hover:text-ink'
-            )}
-          >
-            {label}
-            {key !== 'todas' && counts[key] > 0 && (
-              <span className="ml-1.5 rounded-full bg-cp-accent-soft px-1.5 py-0.5 text-[10px] text-cp-accent">
-                {counts[key]}
-              </span>
-            )}
-          </button>
+            variant="tab"
+            active={tab === key}
+            onSelect={() => setTab(key)}
+            label={label}
+            count={key !== 'todas' ? counts[key] : undefined}
+            badgeTone="accent"
+            className="font-medium"
+          />
         ))}
       </div>
 
       <div className="flex flex-wrap gap-1.5">
         {CATEGORIES.map((cat) => (
-          <button
+          <ChipToggle
             key={cat}
-            type="button"
-            onClick={() => setCategoryFilter(cat)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-[12px] transition-colors',
-              categoryFilter === cat
-                ? 'border-cp-accent bg-cp-accent-soft text-cp-accent'
-                : 'border-line bg-cp-surface text-ink3 hover:border-line2'
-            )}
-          >
-            {CATEGORY_FILTER_LABELS[cat]}
-          </button>
+            variant="category"
+            active={categoryFilter === cat}
+            onSelect={() => setCategoryFilter(cat)}
+            label={CATEGORY_FILTER_LABELS[cat]}
+          />
         ))}
       </div>
 

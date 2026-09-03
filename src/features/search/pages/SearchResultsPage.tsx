@@ -5,6 +5,7 @@ import { useAuth } from "@/shared/providers/AuthProvider";
 import { PageHeader } from "@/shared/ui/page-header";
 import { Eyebrow } from "@/shared/ui/eyebrow";
 import { Button } from "@/shared/ui/button";
+import { ChipToggle } from "@/shared/ui/chip-toggle";
 import {
 	ErrorState,
 	LoadingState,
@@ -232,25 +233,16 @@ export function SearchResultsPage() {
 								f.value === "all" ? results.total : results[f.value].length;
 							const isActive = filter === f.value;
 							return (
-								<button
+								<ChipToggle
 									key={f.value}
-									type="button"
-									onClick={() => handleFilterChange(f.value)}
-									aria-pressed={isActive}
-									className={cn(
-										"rounded-md px-3 py-1.5 text-[12.5px] font-medium transition-colors",
-										isActive
-											? "bg-cp-accent-soft text-cp-accent"
-											: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-									)}
-								>
-									{f.label}
-									{count > 0 ? (
-										<span className="ml-1.5 rounded-sm bg-cp-bg2 px-1.5 py-0.5 font-mono text-[10px] text-ink3">
-											{count}
-										</span>
-									) : null}
-								</button>
+									variant="filter"
+									active={isActive}
+									onSelect={() => handleFilterChange(f.value)}
+									label={f.label}
+									count={count}
+									badgeTone="neutral"
+									className="font-medium"
+								/>
 							);
 						})}
 					</div>
