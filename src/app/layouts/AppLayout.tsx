@@ -11,6 +11,7 @@ import { cn } from "@/shared/lib/utils";
 import { OfflineBanner } from "@/shared/components/OfflineBanner";
 import { MaintenanceBanner } from "@/shared/components/MaintenanceBanner";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
+import { Avatar } from "@/shared/ui/avatar";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { useSubscription } from "@/features/billing/hooks/useSubscription";
@@ -167,14 +168,6 @@ function AuthenticatedAppShell({
 	const userEmail = session?.user?.email ?? "";
 	const workshopName = session?.user?.user_metadata?.workshop_name ?? "";
 	const displayName = session?.user?.user_metadata?.full_name ?? "";
-	const initials = displayName
-		? displayName
-				.split(" ")
-				.map((w: string) => w[0])
-				.join("")
-				.toUpperCase()
-				.slice(0, 2)
-		: userEmail.slice(0, 2).toUpperCase();
 
 	const wizard = isWizardPath(location.pathname);
 	const current = activeNav(location.pathname);
@@ -280,9 +273,12 @@ function AuthenticatedAppShell({
 						to="/profile"
 						className="mt-1 flex items-center gap-2 rounded-md px-2 py-2 hover:bg-cp-bg2 transition-colors focus-ring"
 					>
-						<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cp-accent text-[var(--cp-accent-ink)] font-mono text-[11px] font-semibold">
-							{initials}
-						</div>
+						<Avatar
+							name={displayName}
+							email={userEmail}
+							size="sm"
+							tone="solid"
+						/>
 						<div className="min-w-0">
 							{workshopName && (
 								<p className="truncate text-[12.5px] font-semibold text-ink">
@@ -394,7 +390,12 @@ function AuthenticatedAppShell({
 						aria-label="Mi perfil"
 						className="grid h-11 w-11 place-items-center rounded-full bg-cp-accent text-[var(--cp-accent-ink)] font-mono text-[11px] font-semibold hover:opacity-90 transition-opacity focus-ring"
 					>
-						{initials}
+						<Avatar
+							name={displayName}
+							email={userEmail}
+							size="md"
+							tone="solid"
+						/>
 					</Link>
 				</header>
 

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
+import { Avatar } from "@/shared/ui/avatar";
 import {
 	Select,
 	SelectContent,
@@ -461,13 +462,11 @@ export function QuoteForm({
 											}`}
 										>
 											<div className="flex items-center gap-3">
-												<div className="w-8 h-8 rounded-full grid place-items-center bg-cp-accent/20 text-cp-accent font-mono text-xs font-semibold shrink-0">
-													{c.name
-														.split(" ")
-														.map((w) => w[0])
-														.slice(0, 2)
-														.join("")}
-												</div>
+												<Avatar
+													name={c.name}
+													size="sm"
+													tone="soft"
+												/>
 												<div className="flex-1 min-w-0">
 													<p className="font-medium text-sm">{c.name}</p>
 													<p className="text-xs text-muted-foreground">

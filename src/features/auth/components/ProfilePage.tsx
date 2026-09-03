@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
+import { Avatar } from '@/shared/ui/avatar'
 
 export function ProfilePage() {
   const { session, workshopId, signOut } = useAuth()
@@ -9,11 +10,6 @@ export function ProfilePage() {
   const email = user?.email ?? ''
   const workshopName = user?.user_metadata?.workshop_name ?? 'Mi Taller'
   const displayName = user?.user_metadata?.full_name ?? ''
-
-  // Iniciales para el avatar
-  const initials = displayName
-    ? displayName.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)
-    : email.slice(0, 2).toUpperCase()
 
   async function handleSignOut() {
     await signOut()
@@ -30,9 +26,12 @@ export function ProfilePage() {
       {/* Avatar + info */}
       <div className="rounded-lg border bg-card p-6 space-y-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xl font-bold">
-            {initials}
-          </div>
+          <Avatar
+            name={displayName}
+            email={email}
+            size="lg"
+            tone="solid"
+          />
           <div className="min-w-0">
             {displayName && (
               <p className="font-semibold text-foreground truncate">{displayName}</p>

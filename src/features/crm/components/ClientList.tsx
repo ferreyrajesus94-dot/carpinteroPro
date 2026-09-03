@@ -21,6 +21,7 @@ import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/page-header";
 import { ErrorState, LoadingState, EmptyState } from "@/shared/ui/feedback-state";
 import { SectionHowto } from "@/shared/ui/section-howto";
+import { Avatar } from "@/shared/ui/avatar";
 import { ClientForm } from "./ClientForm";
 import type { Client } from "@/features/crm/types";
 
@@ -33,15 +34,7 @@ function formatDate(iso: string) {
 	});
 }
 
-function initials(name: string) {
-	return name
-		.split(" ")
-		.map((w) => w[0])
-		.filter(Boolean)
-		.slice(0, 2)
-		.join("")
-		.toUpperCase();
-}
+
 
 interface ClientListProps {
 	/** Pre-computed per-client quote totals: {count, total, lastDate} */
@@ -166,15 +159,11 @@ export function ClientList({ statsByClient = {} }: ClientListProps) {
 									className="group rounded-xl border border-line bg-cp-surface p-3 text-left transition-colors hover:border-line2 hover:bg-cp-bg2"
 								>
 									<div className="flex items-center gap-3">
-										<div
-											className="grid h-11 w-11 shrink-0 place-items-center rounded-full font-mono text-[13px] font-semibold"
-											style={{
-												background: "var(--cp-accent-soft)",
-												color: "var(--cp-accent)",
-											}}
-										>
-											{initials(client.name)}
-										</div>
+										<Avatar
+											name={client.name}
+											size="md"
+											tone="soft"
+										/>
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center justify-between gap-2">
 												<div className="truncate font-medium text-[14.5px] text-ink">

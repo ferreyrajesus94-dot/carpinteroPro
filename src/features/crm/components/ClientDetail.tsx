@@ -7,6 +7,7 @@ import { formatCurrency } from "@/shared/lib/formatters";
 import { CLIENT_SOURCE_LABELS } from "@/features/crm/types";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Avatar } from "@/shared/ui/avatar";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { ClientForm } from "./ClientForm";
 import {
@@ -17,15 +18,7 @@ import {
 import type { Client } from "@/features/crm/types";
 import type { QuoteStatus } from "@/shared/types/quotes";
 
-function initials(name: string) {
-	return name
-		.split(" ")
-		.map((w) => w[0])
-		.filter(Boolean)
-		.slice(0, 2)
-		.join("")
-		.toUpperCase();
-}
+
 
 function formatDate(iso: string) {
 	return new Date(iso).toLocaleDateString("es-AR", {
@@ -164,15 +157,12 @@ export function ClientDetail({
 											active ? "bg-cp-accent-soft" : "hover:bg-cp-bg2"
 										}`}
 									>
-										<div
-											className="grid h-10 w-10 shrink-0 place-items-center rounded-full font-mono text-[12px] font-semibold"
-											style={{
-												background: "var(--cp-accent-soft)",
-												color: "var(--cp-accent)",
-											}}
-										>
-											{initials(c.name)}
-										</div>
+										<Avatar
+											name={c.name}
+											size="sm"
+											tone="soft"
+											className="h-10 w-10 text-[12px]"
+										/>
 										<div className="min-w-0 flex-1">
 											<div className="flex items-center justify-between gap-2">
 												<div className="truncate text-[13.5px] font-medium text-ink">
@@ -209,15 +199,12 @@ export function ClientDetail({
 
 						<div className="rounded-xl border border-line bg-surface p-4 md:p-6">
 							<div className="flex items-start gap-4">
-								<div
-									className="grid h-14 w-14 md:h-16 md:w-16 shrink-0 place-items-center rounded-full font-mono text-[16px] md:text-[18px] font-semibold"
-									style={{
-										background: "var(--cp-accent-soft)",
-										color: "var(--cp-accent)",
-									}}
-								>
-									{initials(client.name)}
-								</div>
+								<Avatar
+									name={client.name}
+									size="lg"
+									tone="soft"
+									className="md:h-16 md:w-16 md:text-[18px]"
+								/>
 								<div className="min-w-0 flex-1">
 									<h1 className="font-display text-xl md:text-[22px] font-semibold text-ink truncate">
 										{client.name}
