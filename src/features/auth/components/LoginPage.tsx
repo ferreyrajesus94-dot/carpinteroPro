@@ -8,6 +8,7 @@ import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
 import { ThemeToggle } from '@/shared/components/ThemeToggle'
+import { BrandMark } from '@/shared/ui/brand-mark'
 import { cn } from '@/shared/lib/utils'
 
 type Mode = 'login' | 'register'
@@ -195,9 +196,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-            <i className="fi fi-br-hammer text-lg text-primary-foreground" />
-          </div>
+          <BrandMark size="lg" shape="rounded" wordmark={false} />
           <h1 className="text-xl font-bold text-foreground tracking-tight">CarpinteroPro</h1>
         </div>
 

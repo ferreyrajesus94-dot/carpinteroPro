@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { BrandMark } from "@/shared/ui/brand-mark";
 import {
 	getSupportEmail,
 	getSupportMailtoHref,
@@ -21,12 +22,7 @@ export function PrivacyPage() {
 					Volver
 				</Link>
 				<div className="flex items-center gap-2">
-					<div className="flex h-7 w-7 items-center justify-center rounded-md bg-cp-accent">
-						<i className="fi fi-br-hammer text-sm text-[var(--cp-accent-ink)]" />
-					</div>
-					<span className="font-display font-semibold text-[15px] tracking-tight text-ink">
-						CarpinteroPro
-					</span>
+					<BrandMark size="sm" />
 				</div>
 			</header>
 

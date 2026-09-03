@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { FooterColumn } from "../data/landingContent";
 import { Eyebrow } from "@/shared/ui/eyebrow";
+import { BrandMark } from "@/shared/ui/brand-mark";
 
 interface LandingFooterProps {
 	columns: FooterColumn[];
@@ -12,14 +13,7 @@ export function LandingFooter({ columns }: LandingFooterProps) {
 			<div className="mx-auto max-w-6xl px-6 py-12 sm:px-8">
 				<div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr]">
 					<div className="space-y-3">
-						<div className="flex items-center gap-2">
-							<span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cp-accent text-[var(--cp-accent-ink)]">
-								<i className="fi fi-br-hammer text-base leading-none" aria-hidden="true" />
-							</span>
-							<span className="font-display text-lg font-semibold tracking-tight text-ink">
-								CarpinteroPro
-							</span>
-						</div>
+						<BrandMark size="md" shape="rounded" />
 						<p className="text-sm text-ink2">
 							La app de gestión para carpinteros profesionales.
 						</p>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import type { NavItem, LandingCta } from "../data/landingContent";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
+import { BrandMark } from "@/shared/ui/brand-mark";
 
 interface LandingHeaderProps {
 	navItems: NavItem[];
@@ -30,18 +31,12 @@ export function LandingHeader({
 			}`}
 		>
 			<div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4 sm:px-8">
-				<Link
-					to="/"
-					className="flex items-center gap-2"
+				<BrandMark
+					size="md"
+					shape="rounded"
 					aria-label="CarpinteroPro inicio"
-				>
-					<span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cp-accent text-[var(--cp-accent-ink)]">
-						<i className="fi fi-br-hammer text-base leading-none" aria-hidden="true" />
-					</span>
-					<span className="font-display text-lg font-semibold tracking-tight text-ink">
-						CarpinteroPro
-					</span>
-				</Link>
+					className="text-lg"
+				/>
 
 				{/* Desktop nav */}
 				<nav

@@ -13,6 +13,7 @@ import { MaintenanceBanner } from "@/shared/components/MaintenanceBanner";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { Avatar } from "@/shared/ui/avatar";
 import { Eyebrow } from "@/shared/ui/eyebrow";
+import { BrandMark } from "@/shared/ui/brand-mark";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { useSubscription } from "@/features/billing/hooks/useSubscription";
@@ -210,12 +211,7 @@ function AuthenticatedAppShell({
 			{/* === SIDEBAR DESKTOP ≥1024 === */}
 			<aside className="hidden lg:flex lg:w-60 lg:flex-col border-r border-line bg-cp-surface">
 				<div className="flex h-14 items-center gap-2 px-4 border-b border-line">
-					<div className="flex h-7 w-7 items-center justify-center rounded-md bg-cp-accent">
-						<i className="fi fi-br-hammer text-sm text-[var(--cp-accent-ink)]" />
-					</div>
-					<span className="font-display font-semibold text-[15px] tracking-tight text-ink">
-						CarpinteroPro
-					</span>
+					<BrandMark size="sm" />
 				</div>
 				<nav
 					aria-label="Navegación principal lateral"
@@ -332,12 +328,7 @@ function AuthenticatedAppShell({
 
 				{/* Header mobile */}
 				<header className="flex h-12 items-center gap-2 px-4 border-b border-line bg-cp-surface/85 backdrop-blur lg:hidden sticky top-0 z-10">
-					<div className="flex h-6 w-6 items-center justify-center rounded-md bg-cp-accent shrink-0">
-						<i className="fi fi-br-hammer text-[11px] text-[var(--cp-accent-ink)]" />
-					</div>
-					<span className="font-display font-semibold text-[14px] tracking-tight text-ink truncate flex-1">
-						{sectionTitle}
-					</span>
+					<BrandMark size="xs" label={sectionTitle} className="truncate flex-1 text-[14px]" />
 					<NavLink
 						to="/buscar"
 						aria-label="Buscar"

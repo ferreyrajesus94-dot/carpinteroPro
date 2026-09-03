@@ -8,6 +8,7 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { Label } from '@/shared/ui/label'
 import { Textarea } from '@/shared/ui/textarea'
+import { BrandMark } from '@/shared/ui/brand-mark'
 import { useAuth } from '@/shared/providers/AuthProvider'
 import { SEED_MATERIALS } from '../data/seedMaterials'
 import { useMarkOnboarded } from '../hooks/useOnboarding'
@@ -116,12 +117,7 @@ export function OnboardingWizard({
       {/* Header */}
       <header className="border-b border-line bg-cp-surface px-4 py-4 sm:px-8">
         <div className="mx-auto flex max-w-3xl items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-cp-accent">
-            <i className="fi fi-br-hammer text-sm text-[var(--cp-accent-ink)]" />
-          </div>
-          <span className="font-display text-[15px] font-semibold tracking-tight text-ink">
-            CarpinteroPro
-          </span>
+          <BrandMark size="sm" />
           <span className="ml-2 text-xs text-ink3">— Configurá tu taller en 1 minuto</span>
         </div>
       </header>
