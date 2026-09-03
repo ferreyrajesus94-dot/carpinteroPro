@@ -14,7 +14,7 @@ export function StockAlertBanner({ check, showOk = false }: Props) {
   if (!check.hasShortage) {
     if (!showOk) return null
     return (
-      <div className="flex items-start gap-2 rounded-md border border-green-500/30 bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">
+      <div className="flex items-start gap-2 rounded-md border border-cp-success/30 bg-cp-success/10 p-3 text-sm text-cp-success">
         <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
         <span>Stock suficiente para fabricar este mueble.</span>
       </div>

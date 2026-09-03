@@ -6,8 +6,6 @@ import { ThemeToggle } from "@/shared/components/ThemeToggle";
 interface LandingHeaderProps {
 	navItems: NavItem[];
 	primaryCta: LandingCta;
-	theme: "light" | "dark";
-	toggle: () => void;
 }
 
 export function LandingHeader({

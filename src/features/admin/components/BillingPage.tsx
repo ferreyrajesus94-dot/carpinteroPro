@@ -9,6 +9,7 @@ import {
 import { useSort } from "../lib/useSort";
 import { downloadCsv } from "../lib/downloadCsv";
 import { cn } from "@/shared/lib/utils";
+import { RetryButton } from "@/shared/components/RetryButton";
 import {
 	Table,
 	TableBody,
@@ -109,13 +110,7 @@ export function BillingPage() {
 							: "Error desconocido"
 					}
 					action={
-						<button
-							type="button"
-							onClick={() => subscriptions.refetch()}
-							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-						>
-							Reintentar
-						</button>
+						<RetryButton onRetry={() => subscriptions.refetch()} />
 					}
 				/>
 			</section>

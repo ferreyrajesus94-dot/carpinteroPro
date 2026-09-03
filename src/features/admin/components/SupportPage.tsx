@@ -5,6 +5,7 @@ import { useAdminSupportDiagnostics } from "../hooks/useAdminSupportDiagnostics"
 import { useAdminWorkshops } from "../hooks/useAdminWorkshops";
 import { useRetryWebhook } from "../hooks/useAdminActions";
 import { useSort } from "../lib/useSort";
+import { RetryButton } from "@/shared/components/RetryButton";
 import {
 	Table,
 	TableBody,
@@ -84,13 +85,7 @@ export function SupportPage() {
 							: "Error desconocido"
 					}
 					action={
-						<button
-							type="button"
-							onClick={() => diagnostics.refetch()}
-							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
-						>
-							Reintentar
-						</button>
+						<RetryButton onRetry={() => diagnostics.refetch()} />
 					}
 				/>
 			</section>
@@ -198,13 +193,10 @@ export function SupportPage() {
 												Taller
 											</Link>
 											{evt.eventType.toLowerCase().includes("fail") && (
-												<button
-													type="button"
-													onClick={() => retryMutation.mutate(evt.id)}
-													className="text-[11px] text-amber-600 hover:underline"
-												>
-													Reintentar
-												</button>
+												<RetryButton
+													onRetry={() => retryMutation.mutate(evt.id)}
+													className="text-[11px] border-none bg-transparent text-amber-600 hover:bg-transparent hover:underline px-0"
+												/>
 											)}
 										</div>
 									</TableCell>
