@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { PageHeader } from "@/shared/ui/page-header";
 import { Button } from "@/shared/ui/button";
 import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/feedback-state";
@@ -28,7 +28,7 @@ interface ColumnProps {
 	orders: ProductionOrderListRow[];
 }
 
-function Column({ state, orders }: ColumnProps) {
+const Column = memo(function Column({ state, orders }: ColumnProps) {
 	return (
 		<section
 			aria-label={PRODUCTION_ORDER_STATE_LABELS[state]}
@@ -51,9 +51,9 @@ function Column({ state, orders }: ColumnProps) {
 			</div>
 		</section>
 	);
-}
+});
 
-function OrderCard({ order }: { order: ProductionOrderListRow }) {
+const OrderCard = memo(function OrderCard({ order }: { order: ProductionOrderListRow }) {
 	return (
 		<article
 			data-testid="production-order-card"
@@ -71,7 +71,7 @@ function OrderCard({ order }: { order: ProductionOrderListRow }) {
 			)}
 		</article>
 	);
-}
+});
 
 /**
  * Production board — Kanban-style overview of every active production
@@ -107,17 +107,30 @@ export function ProductionBoard({ onStartProduction }: ProductionBoardProps) {
 		(q) => q.stored_status === "aprobado" && q.has_active_production === false,
 	);
 
-	const grouped: Record<ProductionOrderState, ProductionOrderListRow[]> = {
-		planned: [],
-		in_progress: [],
-		paused: [],
-		quality_check: [],
-		ready: [],
-		delivered: [],
-		cancelled: [],
-	};
-	for (const o of orders ?? []) {
-		grouped[o.state].push(o);
+	const grouped: Record<ProductionOrderState, ProductionOrderListRow[]> = useMemo(
+		() => {
+			const acc: Record<ProductionOrderState, ProductionOrderListRow[]> = {
+				planned: [],
+				in_progress: [],
+				paused: [],
+				quality_check: [],
+				ready: [],
+				delivered: [],
+				cancelled: [],
+			};
+			for (const o of orders ?? []) {
+				acc[o.state].push(o);
+			}
+			return acc;
+		},
+		[orders],
+	);
+
+	const hasNoOrders = (orders ?? []).length === 0;
+	const selectedQuote = startableQuotes.find((q) => q.id === selectedQuoteId) ?? null;
+
+	function handleStart() {
+		if (selectedQuote) onStartProduction(selectedQuote);
 	}
 
 	if (isLoading) {
@@ -139,13 +152,6 @@ export function ProductionBoard({ onStartProduction }: ProductionBoardProps) {
 				/>
 			</div>
 		);
-	}
-
-	const hasNoOrders = (orders ?? []).length === 0;
-	const selectedQuote = startableQuotes.find((q) => q.id === selectedQuoteId) ?? null;
-
-	function handleStart() {
-		if (selectedQuote) onStartProduction(selectedQuote);
 	}
 
 	return (

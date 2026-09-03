@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { startTransition, useMemo, useState } from 'react'
 import { Pencil, Trash2, TrendingUp, AlertTriangle, Search, PackagePlus, History, Download, SlidersHorizontal } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
 import { Badge } from '@/shared/ui/badge'
@@ -159,7 +159,15 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
       <ErrorState
         title="Error al cargar los materiales"
         description="Revisá tu conexión e intentá de nuevo."
-        action={<RetryButton onRetry={() => refetch()} />}
+        action={
+          <RetryButton
+            onRetry={() => {
+              startTransition(() => {
+                refetch();
+              });
+            }}
+          />
+        }
       />
     )
   }

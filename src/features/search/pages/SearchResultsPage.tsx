@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Loader2, Search, SearchX, X } from "lucide-react";
 import { useAuth } from "@/shared/providers/AuthProvider";
@@ -68,6 +68,11 @@ export function SearchResultsPage() {
 	// address bar in sync without triggering a query refetch on every keystroke.
 	const [draftQuery, setDraftQuery] = useState(urlQuery);
 	const debouncedDraft = useDebouncedValue(draftQuery, 250);
+	// Defer the actual search query so typing stays responsive even when
+	// results render is heavy. React 19 prioritises the controlled input
+	// (high priority) and lets the deferred value lag behind during typing.
+	const trimmedDraft = draftQuery.trim();
+	const deferredQuery = useDeferredValue(trimmedDraft);
 
 	// Bidirectional sync between local input state and the URL ?q= param,
 	// coordinated by the existing values rather than a shared "last synced"
@@ -119,7 +124,6 @@ export function SearchResultsPage() {
 		);
 	}, [debouncedDraft, draftQuery, urlQuery, setParams]);
 
-	const trimmedDraft = draftQuery.trim();
 	const hasQuery = trimmedDraft.length >= 2;
 	const debouncedHasQuery = debouncedDraft.trim().length >= 2;
 
@@ -128,7 +132,7 @@ export function SearchResultsPage() {
 
 	const { data, isLoading, isError, isFetching, refetch } = useGlobalSearch(
 		workshopId,
-		debouncedDraft.trim(),
+		deferredQuery,
 		"page",
 	);
 	const results = useMemo(

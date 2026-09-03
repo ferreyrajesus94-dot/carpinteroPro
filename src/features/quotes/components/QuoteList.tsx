@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { startTransition, useCallback, useMemo, useState, memo } from "react";
 import { Link } from "react-router-dom";
 import {
 	Plus,
@@ -70,7 +70,7 @@ const STATUS_ORDER: QuoteStatus[] = [
 	"cancelado",
 ];
 
-function DroppableColumn({
+const DroppableColumn = memo(function DroppableColumn({
 	status,
 	children,
 }: {
@@ -86,21 +86,23 @@ function DroppableColumn({
 			{children}
 		</div>
 	);
-}
+});
 
-function DraggableCard({
-	quote,
-	status,
-	salePrice,
-	isOnline,
-	onChangeStatus,
-}: {
+interface DraggableCardProps {
 	quote: QuoteWithExtras;
 	status: QuoteStatus;
 	salePrice: number;
 	isOnline: boolean;
 	onChangeStatus: (id: string, next: QuoteStatus) => void;
-}) {
+}
+
+const DraggableCard = memo(function DraggableCard({
+	quote,
+	status,
+	salePrice,
+	isOnline,
+	onChangeStatus,
+}: DraggableCardProps) {
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
 		id: quote.id,
 		data: { status },
@@ -170,7 +172,7 @@ function DraggableCard({
 			</div>
 		</div>
 	);
-}
+});
 
 export function QuoteList() {
 	const workshopId = useWorkshopId();
@@ -200,27 +202,33 @@ export function QuoteList() {
 		useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
 	);
 
-	function moveQuoteToStatus(id: string, next: QuoteStatus) {
-		const quote = allQuotes.find((q) => q.id === id);
-		if (!quote || quote.status === next) return;
-		if (quote.status === "aprobado" && next === "en_produccion") {
-			setProductionStartTarget({
-				id: quote.id,
-				quoteNumber: quote.quote_number,
-			});
-			return;
-		}
-		// Use status-only path that preserves snapshots/extras
-		updateStatusMutation.mutate({ id: quote.id, status: next });
-	}
+	const moveQuoteToStatus = useCallback(
+		(id: string, next: QuoteStatus) => {
+			const quote = allQuotes.find((q) => q.id === id);
+			if (!quote || quote.status === next) return;
+			if (quote.status === "aprobado" && next === "en_produccion") {
+				setProductionStartTarget({
+					id: quote.id,
+					quoteNumber: quote.quote_number,
+				});
+				return;
+			}
+			// Use status-only path that preserves snapshots/extras
+			updateStatusMutation.mutate({ id: quote.id, status: next });
+		},
+		[allQuotes, updateStatusMutation],
+	);
 
-	function handleDragEnd(event: DragEndEvent) {
-		const { active, over } = event;
-		if (!over) return;
-		const next = over.id as QuoteStatus;
-		const prev = active.data.current?.status as QuoteStatus | undefined;
-		if (prev && prev !== next) moveQuoteToStatus(active.id as string, next);
-	}
+	const handleDragEnd = useCallback(
+		(event: DragEndEvent) => {
+			const { active, over } = event;
+			if (!over) return;
+			const next = over.id as QuoteStatus;
+			const prev = active.data.current?.status as QuoteStatus | undefined;
+			if (prev && prev !== next) moveQuoteToStatus(active.id as string, next);
+		},
+		[moveQuoteToStatus],
+	);
 
 	const quotes = result?.data ?? [];
 	const totalCount = result?.count ?? 0;
@@ -263,7 +271,15 @@ export function QuoteList() {
 			<ErrorState
 				title="Error al cargar los presupuestos"
 				description="Revisá tu conexión e intentá de nuevo."
-				action={<RetryButton onRetry={() => refetch()} />}
+				action={
+					<RetryButton
+						onRetry={() => {
+							startTransition(() => {
+								refetch();
+							});
+						}}
+					/>
+				}
 			/>
 		);
 	}
