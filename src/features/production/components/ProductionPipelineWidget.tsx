@@ -2,6 +2,7 @@ import { useProductionPipelineStats } from "../hooks/useProductionOrders";
 import { PRODUCTION_ORDER_ACTIVE_STATES } from "../api/types";
 import type { ProductionOrderState } from "../api/types";
 import type { ProductionPipelineStat } from "../api/productionOrders";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 /**
  * Pipeline-state label map for the dashboard widget. Mirrors the active
@@ -79,9 +80,9 @@ export function ProductionPipelineWidget() {
 				role="status"
 				aria-label="Cargando pipeline de producción"
 			>
-				<p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-3">
+				<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-3">
 					Pipeline de producción
-				</p>
+				</Eyebrow>
 				<div className="h-3 w-32 animate-pulse rounded bg-cp-bg2" />
 			</div>
 		);
@@ -94,9 +95,9 @@ export function ProductionPipelineWidget() {
 				className="rounded-xl border border-cp-danger/40 bg-cp-danger/10 p-4"
 				role="alert"
 			>
-				<p className="text-[10.5px] uppercase tracking-[0.08em] text-cp-danger font-medium mb-1">
+				<Eyebrow as="p" variant="mono" tone="danger" className="text-[10.5px] mb-1">
 					Pipeline de producción
-				</p>
+				</Eyebrow>
 				<p className="text-[12px] text-cp-danger">
 					No se pudo cargar el pipeline. Reintentá desde esta pantalla.
 				</p>
@@ -110,9 +111,9 @@ export function ProductionPipelineWidget() {
 			className="rounded-xl border border-line bg-surface p-4"
 		>
 			<header className="mb-3 flex items-baseline justify-between">
-				<h2 className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">
+				<Eyebrow as="h2" variant="mono" className="text-[10.5px]">
 					Pipeline de producción
-				</h2>
+				</Eyebrow>
 				<p className="font-mono text-[12px] text-ink2">
 					<span data-testid="pipeline-total">{total}</span>{" "}
 					<span className="text-ink3">activas</span>

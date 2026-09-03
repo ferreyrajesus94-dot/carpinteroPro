@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { useReferralCodes, useCreateReferralCode, useDeactivateReferralCode } from "../hooks/useReferrals";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { EmptyState, ErrorState } from "@/shared/ui/feedback-state";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { cn } from "@/shared/lib/utils";
 
 interface CodesPanelProps {
@@ -61,9 +62,9 @@ export function CodesPanel({ youtuberId, youtuberName }: CodesPanelProps) {
 	return (
 		<div className="mt-3 space-y-3">
 			<div className="flex items-center justify-between">
-				<h4 className="text-xs font-semibold uppercase tracking-wider text-ink3">
+				<Eyebrow as="h4" className="font-semibold">
 					Códigos de {youtuberName}
-				</h4>
+				</Eyebrow>
 				{!showCreate && (
 					<button
 						type="button"

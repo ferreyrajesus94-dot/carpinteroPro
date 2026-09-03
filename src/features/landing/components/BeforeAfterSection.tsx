@@ -1,5 +1,6 @@
 import { X, Check } from "lucide-react";
 import type { BeforeAfterItem } from "../data/landingContent";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 interface BeforeAfterSectionProps {
 	beforeItems: BeforeAfterItem[];
@@ -14,9 +15,7 @@ export function BeforeAfterSection({
 		<section className="scroll-mt-20 border-y border-line bg-cp-bg2 py-16 sm:py-20">
 			<div className="mx-auto max-w-6xl px-6 sm:px-8">
 				<div className="mb-10 text-center">
-					<p className="mb-2 text-xs font-medium uppercase tracking-wider text-ink3">
-						El cambio
-					</p>
+					<Eyebrow as="p" className="mb-2">El cambio</Eyebrow>
 					<h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
 						Antes vs. Después de CarpinteroPro
 					</h2>

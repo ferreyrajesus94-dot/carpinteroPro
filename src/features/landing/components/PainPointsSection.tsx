@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Zap } from "lucide-react";
 import type { PainPoint } from "../data/landingContent";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 interface PainPointsSectionProps {
 	pains: PainPoint[];
@@ -34,9 +35,7 @@ export function PainPointsSection({ pains }: PainPointsSectionProps) {
 		<section className="scroll-mt-20 py-16 sm:py-20">
 			<div className="mx-auto max-w-6xl px-6 sm:px-8">
 				<div className="mb-10 text-center">
-					<p className="mb-2 text-xs font-medium uppercase tracking-wider text-ink3">
-						¿Te suena familiar?
-					</p>
+					<Eyebrow as="p" className="mb-2">¿Te suena familiar?</Eyebrow>
 					<h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
 						Los problemas que todo carpintero conoce
 					</h2>

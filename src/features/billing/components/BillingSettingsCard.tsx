@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import {
 	useCancelSubscription,
 	useCreateSubscription,
@@ -183,9 +184,9 @@ export function BillingSettingsCard({
 	return (
 		<Card>
 			<CardHeader>
-				<div className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink3">
+				<Eyebrow as="div" variant="mono" className="tracking-[0.1em]">
 					Facturación
-				</div>
+				</Eyebrow>
 				<CardTitle className="text-base font-display">
 					{content.title}
 				</CardTitle>

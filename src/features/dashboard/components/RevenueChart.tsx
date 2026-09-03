@@ -1,5 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import type { DashboardStats } from '../hooks/useDashboardStats'
+import { Eyebrow } from '@/shared/ui/eyebrow'
 
 interface Props {
   data: DashboardStats['revenueByMonth']
@@ -36,9 +37,9 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 export function RevenueChart({ data }: Props) {
   return (
     <div className="rounded-xl border border-line bg-surface p-5">
-      <h3 className="mb-4 text-[11px] uppercase tracking-[0.08em] font-medium text-ink3">
+      <Eyebrow as="h3" variant="mono" className="mb-4">
         Ingresos por mes (últimos 12 meses)
-      </h3>
+      </Eyebrow>
       <ResponsiveContainer width="100%" height={200}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--line)" />

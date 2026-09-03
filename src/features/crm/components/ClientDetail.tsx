@@ -8,6 +8,7 @@ import { CLIENT_SOURCE_LABELS } from "@/features/crm/types";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Avatar } from "@/shared/ui/avatar";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog";
 import { ClientForm } from "./ClientForm";
 import {
@@ -242,25 +243,25 @@ export function ClientDetail({
 
 							<div className="mt-5 grid grid-cols-3 gap-3">
 								<div className="rounded-lg border border-line p-3">
-									<div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">
+									<Eyebrow as="div" variant="mono" className="text-[10.5px]">
 										Trabajos
-									</div>
+									</Eyebrow>
 									<div className="font-display text-xl md:text-[22px] font-semibold mt-1 text-ink">
 										{stats.count}
 									</div>
 								</div>
 								<div className="rounded-lg border border-line p-3">
-									<div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">
+									<Eyebrow as="div" variant="mono" className="text-[10.5px]">
 										Facturado
-									</div>
+									</Eyebrow>
 									<div className="font-mono text-base md:text-[18px] font-semibold mt-1 text-ink">
 										{formatCurrency(stats.total)}
 									</div>
 								</div>
 								<div className="rounded-lg border border-line p-3">
-									<div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">
+									<Eyebrow as="div" variant="mono" className="text-[10.5px]">
 										Ticket prom.
-									</div>
+									</Eyebrow>
 									<div className="font-mono text-base md:text-[18px] font-semibold mt-1 text-ink">
 										{formatCurrency(averageTicket)}
 									</div>

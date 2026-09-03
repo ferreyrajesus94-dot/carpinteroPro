@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { createElement } from "react";
+import { Eyebrow } from "./eyebrow";
 
 export type PageHeaderLevel = "h1" | "h2" | "h3";
 
@@ -20,11 +21,7 @@ export function PageHeader({
 }: PageHeaderProps) {
 	return (
 		<div className="flex min-w-0 flex-col gap-1 pb-4">
-			{eyebrow && (
-				<span className="text-xs font-medium uppercase tracking-wider text-ink3">
-					{eyebrow}
-				</span>
-			)}
+			{eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
 			<div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
 				<div className="flex min-w-0 flex-col">
 					{createElement(

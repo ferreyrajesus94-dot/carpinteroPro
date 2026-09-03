@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 import { useToggleMaintenance } from "../hooks/useAdminActions";
 import { cn } from "@/shared/lib/utils";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 const STATUS_LABELS: Record<string, string> = {
 	active: "activas",
@@ -55,9 +56,7 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 		>
 			<div className="flex items-start justify-between">
 				<div>
-					<p className="text-xs font-medium uppercase tracking-wider text-ink3">
-						{label}
-					</p>
+					<Eyebrow as="p">{label}</Eyebrow>
 					<p
 						className={cn(
 							"mt-1 font-mono text-3xl font-bold tracking-tight",

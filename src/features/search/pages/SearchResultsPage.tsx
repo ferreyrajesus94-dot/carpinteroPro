@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Loader2, Search, SearchX, X } from "lucide-react";
 import { useAuth } from "@/shared/providers/AuthProvider";
 import { PageHeader } from "@/shared/ui/page-header";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { Button } from "@/shared/ui/button";
 import {
 	ErrorState,
@@ -283,12 +284,12 @@ export function SearchResultsPage() {
 								className="rounded-xl border border-line bg-surface"
 							>
 								<div className="border-b border-line px-5 py-3">
-									<h2 className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink3">
+									<Eyebrow as="h2" variant="mono">
 										{sectionOf(key)}
 										<span className="ml-1.5 text-ink3/70">
 											· {items.length}
 										</span>
-									</h2>
+									</Eyebrow>
 								</div>
 								<div className="p-1.5">
 									{items.map((hit) => (

@@ -12,6 +12,7 @@ import { formatCurrency } from "@/shared/lib/formatters";
 import { QUOTE_STATUS_LABELS } from "@/shared/types/quotes";
 import { PageHeader } from "@/shared/ui/page-header";
 import { SectionHowto } from "@/shared/ui/section-howto";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { KPICards } from "./KPICards";
 import { RevenueChart } from "./RevenueChart";
 import { ActiveQuotesPanel } from "./ActiveQuotesPanel";
@@ -136,10 +137,10 @@ export function Dashboard({
 			<div className="rounded-xl border border-line bg-surface overflow-hidden">
 				<div className="p-4 pb-3">
 					<div className="flex items-center justify-between">
-						<div className="text-[10.5px] uppercase tracking-[0.1em] text-ink3 font-medium">
+						<Eyebrow as="div" variant="mono" className="text-[10.5px] tracking-[0.1em]">
 							Facturado —{" "}
 							{PERIOD_OPTIONS.find((o) => o.value === period)?.label}
-						</div>
+						</Eyebrow>
 					</div>
 					<div className="mt-2 font-display font-semibold text-[40px] leading-none text-ink">
 						{formatCurrency(stats.totalRevenue)}
@@ -192,9 +193,9 @@ export function Dashboard({
 			{/* Pipeline snapshot */}
 			{stats.byStatus.length > 0 && (
 				<div className="rounded-xl border border-line bg-surface p-4">
-					<p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-3">
+					<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-3">
 						Pipeline · presupuestos activos
-					</p>
+					</Eyebrow>
 					<div className="space-y-2">
 						{ALL_STATUSES.map((status) => {
 							const entry = stats.byStatus.find((s) => s.status === status);
@@ -229,9 +230,9 @@ export function Dashboard({
 
 			{/* Shortcuts */}
 			<div>
-				<p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-2">
+				<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-2">
 					Accesos rápidos
-				</p>
+				</Eyebrow>
 				<div className="grid grid-cols-2 gap-2">
 					{[
 						{
@@ -281,9 +282,9 @@ export function Dashboard({
 			{/* Needs attention */}
 			{(lowStockMaterials.length > 0 || staleQuotes.length > 0) && (
 				<div>
-					<p className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium mb-2">
+					<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-2">
 						Requiere atención
-					</p>
+					</Eyebrow>
 					<div className="space-y-2">
 						{lowStockMaterials.length > 0 && (
 							<div

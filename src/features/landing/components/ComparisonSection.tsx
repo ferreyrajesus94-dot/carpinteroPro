@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react";
 import type { ComparisonRow } from "../data/landingContent";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 interface ComparisonSectionProps {
 	tools: string[];
@@ -11,9 +12,7 @@ export function ComparisonSection({ tools, rows }: ComparisonSectionProps) {
 		<section className="scroll-mt-20 py-16 sm:py-20">
 			<div className="mx-auto max-w-6xl px-6 sm:px-8">
 				<div className="mb-10 text-center">
-					<p className="mb-2 text-xs font-medium uppercase tracking-wider text-ink3">
-						Comparativa
-					</p>
+					<Eyebrow as="p" className="mb-2">Comparativa</Eyebrow>
 					<h2 className="font-display text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
 						¿Por qué no seguir con lo que ya tengo?
 					</h2>

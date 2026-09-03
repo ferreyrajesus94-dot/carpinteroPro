@@ -7,6 +7,7 @@ import { Switch } from '@/shared/ui/switch'
 import { Label } from '@/shared/ui/label'
 import { SectionHowto } from '@/shared/ui/section-howto'
 import { EmptyState, ErrorState, LoadingState } from '@/shared/ui/feedback-state'
+import { Eyebrow } from '@/shared/ui/eyebrow'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/shared/ui/table'
@@ -228,7 +229,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
       {/* Stat strip — clickeable para filtrar */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="bg-cp-surface border border-line rounded-xl p-3.5">
-          <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Materiales</div>
+          <Eyebrow as="div" variant="mono" className="text-[10.5px]">Materiales</Eyebrow>
           <div className="mt-1.5 font-display text-[22px] leading-none font-semibold text-ink">{materials.length}</div>
         </div>
         <button
@@ -240,18 +241,18 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
           }`}
         >
           <div className="flex items-center justify-between">
-            <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Stock bajo</div>
+            <Eyebrow as="div" variant="mono" className="text-[10.5px]">Stock bajo</Eyebrow>
             {lowStockCount > 0 && <AlertTriangle size={13} style={{ color: 'var(--cp-warn)' }} />}
           </div>
           <div className="mt-1.5 font-display text-[22px] leading-none font-semibold text-ink">{lowStockCount}</div>
           <div className="mt-1 text-[11px] text-ink3">{lowStockOnly ? '✓ Filtrando' : 'Tocá para filtrar'}</div>
         </button>
         <div className="bg-cp-surface border border-line rounded-xl p-3.5">
-          <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Sin stock</div>
+          <Eyebrow as="div" variant="mono" className="text-[10.5px]">Sin stock</Eyebrow>
           <div className={`mt-1.5 font-display text-[22px] leading-none font-semibold ${noStockCount > 0 ? 'text-[var(--cp-danger)]' : 'text-ink'}`}>{noStockCount}</div>
         </div>
         <div className="bg-cp-surface border border-line rounded-xl p-3.5">
-          <div className="text-[10.5px] uppercase tracking-[0.08em] text-ink3 font-medium">Valor inventario</div>
+          <Eyebrow as="div" variant="mono" className="text-[10.5px]">Valor inventario</Eyebrow>
           <div className="mt-1.5 font-display text-[18px] leading-none font-semibold text-ink truncate">{formatCurrency(totalValue)}</div>
         </div>
       </div>
@@ -456,12 +457,12 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
             <Table>
               <TableHeader>
                 <TableRow className="bg-cp-bg2 hover:bg-cp-bg2">
-                  <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Nombre</TableHead>
-                  <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Categoría</TableHead>
-                  <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Precio/u</TableHead>
-                  <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Stock</TableHead>
-                  <TableHead className="text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Unidad</TableHead>
-                  <TableHead className="w-[160px] text-ink3 font-medium text-[11px] uppercase tracking-[0.06em]">Acciones</TableHead>
+                  <Eyebrow as={TableHead} variant="mono">Nombre</Eyebrow>
+                  <Eyebrow as={TableHead} variant="mono">Categoría</Eyebrow>
+                  <Eyebrow as={TableHead} variant="mono">Precio/u</Eyebrow>
+                  <Eyebrow as={TableHead} variant="mono">Stock</Eyebrow>
+                  <Eyebrow as={TableHead} variant="mono">Unidad</Eyebrow>
+                  <Eyebrow as={TableHead} variant="mono" className="w-[160px]">Acciones</Eyebrow>
                 </TableRow>
               </TableHeader>
               <TableBody>

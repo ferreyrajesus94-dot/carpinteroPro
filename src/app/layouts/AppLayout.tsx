@@ -12,6 +12,7 @@ import { OfflineBanner } from "@/shared/components/OfflineBanner";
 import { MaintenanceBanner } from "@/shared/components/MaintenanceBanner";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { Avatar } from "@/shared/ui/avatar";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { useSubscription } from "@/features/billing/hooks/useSubscription";
@@ -316,11 +317,11 @@ function AuthenticatedAppShell({
 
 				{/* Topbar desktop */}
 				<header className="hidden lg:flex h-14 items-center gap-3 px-6 border-b border-line bg-cp-surface/85 backdrop-blur sticky top-0 z-10">
-					<div className="flex items-center gap-1.5 text-[11px] text-ink3 font-mono uppercase tracking-wider">
+					<Eyebrow variant="mono" className="flex items-center gap-1.5 text-[11px]">
 						<span>CarpinteroPro</span>
 						<i className="fi fi-rr-angle-small-right text-[10px]" />
 						<span className="text-ink2">{sectionTitle}</span>
-					</div>
+					</Eyebrow>
 					<div className="flex-1" />
 					<GlobalSearch />
 					<ThemeToggle

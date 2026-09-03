@@ -2,6 +2,7 @@ import { NavLink, Outlet, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/shared/lib/utils";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 
@@ -14,9 +15,7 @@ export function AdminLayout() {
 		<div className="flex min-h-screen bg-background">
 			<aside className="hidden w-64 flex-col border-r border-line bg-cp-surface lg:flex">
 				<div className="border-b border-line px-4 py-4">
-					<p className="font-mono text-[11px] uppercase tracking-wider text-ink3">
-						Plataforma
-					</p>
+					<Eyebrow as="p" variant="mono">Plataforma</Eyebrow>
 					<h1 className="mt-1 font-display text-lg font-semibold tracking-tight text-ink">
 						Admin CarpinteroPro
 					</h1>

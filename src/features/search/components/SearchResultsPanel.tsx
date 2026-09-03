@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { ChevronRight, Loader2, SearchX } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { SearchResultItem } from "./SearchResultItem";
 import type { SearchHit, SearchResults } from "../types";
 
@@ -134,10 +135,10 @@ export function SearchResultsPanel({
 					const sectionStart = sectionOffsets[section.key] ?? 0;
 					return (
 						<div key={section.key} className="mb-1.5 last:mb-0">
-							<div className="px-3 pb-1 pt-1.5 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink3">
+							<Eyebrow as="div" variant="mono" className="px-3 pb-1 pt-1.5 text-[10.5px]">
 								{section.label}
 								<span className="ml-1.5 text-ink3/70">· {items.length}</span>
-							</div>
+							</Eyebrow>
 							<div className="space-y-0.5">
 								{items.map((hit, idx) => {
 									const globalIndex = sectionStart + idx;

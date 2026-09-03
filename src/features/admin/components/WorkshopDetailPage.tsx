@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAdminWorkshopDetail } from "../hooks/useAdminWorkshops";
 import { useToggleWorkshop, useForceOnboarding } from "../hooks/useAdminActions";
 import { cn } from "@/shared/lib/utils";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 const STATUS_LABELS: Record<string, string> = {
 	active: "activa",
@@ -110,9 +111,7 @@ export function WorkshopDetailPage() {
 				<header className="rounded-xl border border-line bg-cp-surface p-6 shadow-sm">
 					<div className="flex flex-wrap items-start justify-between gap-4">
 						<div>
-							<p className="font-mono text-[11px] uppercase tracking-wider text-ink3">
-								Taller
-							</p>
+							<Eyebrow as="p" variant="mono">Taller</Eyebrow>
 							<h1 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">
 								{workshop.name}
 							</h1>
@@ -181,17 +180,13 @@ export function WorkshopDetailPage() {
 				</h2>
 				<div className="mt-4 grid gap-4 sm:grid-cols-2">
 					<article className="rounded-lg border border-line bg-cp-bg2 p-4">
-						<p className="text-xs font-medium uppercase tracking-wider text-ink3">
-							Perfiles totales
-						</p>
+						<Eyebrow as="p">Perfiles totales</Eyebrow>
 						<p className="mt-1 font-mono text-2xl font-bold text-ink">
 							{workshop.profileCount}
 						</p>
 					</article>
 					<article className="rounded-lg border border-line bg-cp-bg2 p-4">
-						<p className="text-xs font-medium uppercase tracking-wider text-ink3">
-							Perfiles onboardeados
-						</p>
+						<Eyebrow as="p">Perfiles onboardeados</Eyebrow>
 						<p className="mt-1 font-mono text-2xl font-bold text-ink">
 							{workshop.onboardedProfileCount}
 						</p>

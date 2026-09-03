@@ -7,6 +7,7 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Switch } from "@/shared/ui/switch";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 import { useWorkshopId } from "@/shared/hooks/useWorkshopId";
 import { useTheme, type Palette } from "@/shared/hooks/useTheme";
 import {
@@ -206,9 +207,9 @@ export function WorkshopSettings({
 	return (
 		<div className="max-w-lg mx-auto p-4 md:p-6 space-y-6 pb-24 md:pb-6">
 			<div>
-				<div className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink3">
+				<Eyebrow as="div" variant="mono" className="tracking-[0.1em]">
 					Configuración
-				</div>
+				</Eyebrow>
 				<h1 className="font-display text-2xl md:text-[32px] font-semibold tracking-tight text-ink mt-1">
 					Ajustes
 				</h1>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { FooterColumn } from "../data/landingContent";
+import { Eyebrow } from "@/shared/ui/eyebrow";
 
 interface LandingFooterProps {
 	columns: FooterColumn[];
@@ -26,9 +27,12 @@ export function LandingFooter({ columns }: LandingFooterProps) {
 
 					{columns.map((col) => (
 						<div key={col.title}>
-							<h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-ink">
+							<Eyebrow
+								as="h3"
+								className="mb-3 text-sm font-semibold text-ink"
+							>
 								{col.title}
-							</h3>
+							</Eyebrow>
 							<ul className="space-y-2">
 								{col.links.map((link) => {
 									const isInternal = link.href.startsWith("/");
