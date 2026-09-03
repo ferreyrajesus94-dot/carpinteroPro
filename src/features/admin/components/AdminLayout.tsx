@@ -1,9 +1,8 @@
-import { NavLink, Outlet, Link } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { cn } from "@/shared/lib/utils";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { Eyebrow } from "@/shared/ui/eyebrow";
-import { ChipToggle } from "@/shared/ui/chip-toggle";
+import { SidebarNavLink } from "@/shared/ui/sidebar-nav-link";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 import { ADMIN_NAV_ITEMS } from "../lib/adminNavigation";
 
@@ -23,30 +22,19 @@ export function AdminLayout() {
 				</div>
 				<nav aria-label="Navegación de administración" className="flex-1 p-2">
 					{ADMIN_NAV_ITEMS.map(({ to, label, icon }) => (
-						<NavLink
+						<SidebarNavLink
 							key={to}
 							to={to}
 							end={to === "/admin"}
-							className={({ isActive }) =>
-								cn(
-									"flex h-10 items-center gap-3 rounded-md px-3 text-[13.5px] font-medium transition-colors",
-									isActive
-										? "bg-cp-accent-soft text-cp-accent"
-										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-								)
+							label={label}
+							icon={icon}
+							variant="row-icon"
+							badge={
+								to === "/admin" && webhookFailures > 0
+									? { count: webhookFailures, tone: "danger" }
+									: undefined
 							}
-						>
-							<i
-								className={`fi ${icon} text-base leading-none`}
-								aria-hidden="true"
-							/>
-							{label}
-							{to === "/admin" && webhookFailures > 0 && (
-								<span className="ml-auto rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-700 leading-none">
-									{webhookFailures}
-								</span>
-							)}
-						</NavLink>
+						/>
 					))}
 				</nav>
 
@@ -85,28 +73,19 @@ export function AdminLayout() {
 							className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden"
 						>
 							{ADMIN_NAV_ITEMS.map(({ to, label }) => (
-								<NavLink
+								<SidebarNavLink
 									key={to}
 									to={to}
 									end={to === "/admin"}
-
-								>
-									{({ isActive }) => (
-										<ChipToggle
-											variant="nav-chip"
-											active={isActive}
-											onSelect={() => undefined}
-											label={label}
-											count={
-												to === "/admin" && webhookFailures > 0
-													? webhookFailures
-													: undefined
-											}
-											badgeTone="danger"
-											className="font-medium"
-										/>
-									)}
-								</NavLink>
+									label={label}
+									variant="chip"
+									className="font-medium"
+									badge={
+										to === "/admin" && webhookFailures > 0
+											? { count: webhookFailures, tone: "danger" }
+											: undefined
+									}
+								/>
 							))}
 						</nav>
 					</div>

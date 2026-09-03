@@ -1,19 +1,18 @@
 import {
 	Outlet,
-	NavLink,
 	Navigate,
 	Link,
 	useLocation,
 	useNavigate,
 } from "react-router-dom";
 import type { Session } from "@supabase/supabase-js";
-import { cn } from "@/shared/lib/utils";
 import { OfflineBanner } from "@/shared/components/OfflineBanner";
 import { MaintenanceBanner } from "@/shared/components/MaintenanceBanner";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
 import { Avatar } from "@/shared/ui/avatar";
 import { Eyebrow } from "@/shared/ui/eyebrow";
 import { BrandMark } from "@/shared/ui/brand-mark";
+import { SidebarNavLink } from "@/shared/ui/sidebar-nav-link";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
 import { useSubscription } from "@/features/billing/hooks/useSubscription";
@@ -218,54 +217,30 @@ function AuthenticatedAppShell({
 					className="flex-1 overflow-y-auto p-2 space-y-0.5"
 				>
 					{NAV_ITEMS.map(({ to, label, icon }) => (
-						<NavLink
+						<SidebarNavLink
 							key={to}
 							to={to}
-							className={({ isActive }) =>
-								cn(
-									"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors focus-ring",
-									isActive
-										? "bg-cp-accent-soft text-cp-accent"
-										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-								)
-							}
-						>
-							<i className={`fi ${icon} text-base leading-none shrink-0`} />
-							{label}
-						</NavLink>
+							label={label}
+							icon={icon}
+							variant="row-icon"
+						/>
 					))}
 				</nav>
 				<div className="border-t border-line p-2 space-y-0.5">
 					{isPlatformAdmin && (
-						<NavLink
+						<SidebarNavLink
 							to="/admin"
-							className={({ isActive }) =>
-								cn(
-									"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors focus-ring",
-									isActive
-										? "bg-cp-accent-soft text-cp-accent"
-										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-								)
-							}
-						>
-							<i className="fi fi-rr-shield-check text-base leading-none shrink-0" />
-							Admin
-						</NavLink>
+							label="Admin"
+							icon="fi-rr-shield-check"
+							variant="row-icon"
+						/>
 					)}
-					<NavLink
+					<SidebarNavLink
 						to="/settings"
-						className={({ isActive }) =>
-							cn(
-								"flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium transition-colors focus-ring",
-								isActive
-									? "bg-cp-accent-soft text-cp-accent"
-									: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-							)
-						}
-					>
-						<i className="fi fi-rr-settings text-base leading-none shrink-0" />
-						Ajustes
-					</NavLink>
+						label="Ajustes"
+						icon="fi-rr-settings"
+						variant="row-icon"
+					/>
 					<Link
 						to="/profile"
 						className="mt-1 flex items-center gap-2 rounded-md px-2 py-2 hover:bg-cp-bg2 transition-colors focus-ring"
@@ -329,54 +304,30 @@ function AuthenticatedAppShell({
 				{/* Header mobile */}
 				<header className="flex h-12 items-center gap-2 px-4 border-b border-line bg-cp-surface/85 backdrop-blur lg:hidden sticky top-0 z-10">
 					<BrandMark size="xs" label={sectionTitle} className="truncate flex-1 text-[14px]" />
-					<NavLink
+					<SidebarNavLink
 						to="/buscar"
 						aria-label="Buscar"
-						className={({ isActive }) =>
-							cn(
-								"grid h-11 w-11 place-items-center rounded-md transition-colors focus-ring",
-								isActive
-									? "bg-cp-accent-soft text-cp-accent"
-									: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-							)
-						}
-					>
-						<i className="fi fi-rr-search text-base leading-none" />
-					</NavLink>
+						icon="fi-rr-search"
+						variant="icon-square"
+					/>
 					<ThemeToggle
 						variant="icon"
 						className="h-11 w-11"
 					/>
 					{isPlatformAdmin && (
-						<NavLink
+						<SidebarNavLink
 							to="/admin"
 							aria-label="Admin"
-							className={({ isActive }) =>
-								cn(
-									"grid h-11 w-11 place-items-center rounded-md transition-colors focus-ring",
-									isActive
-										? "bg-cp-accent-soft text-cp-accent"
-										: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-								)
-							}
-						>
-							<i className="fi fi-rr-shield-check text-base leading-none" />
-						</NavLink>
+							icon="fi-rr-shield-check"
+							variant="icon-square"
+						/>
 					)}
-					<NavLink
+					<SidebarNavLink
 						to="/settings"
 						aria-label="Ajustes"
-						className={({ isActive }) =>
-							cn(
-								"grid h-11 w-11 place-items-center rounded-md transition-colors focus-ring",
-								isActive
-									? "bg-cp-accent-soft text-cp-accent"
-									: "text-ink2 hover:bg-cp-bg2 hover:text-ink",
-							)
-						}
-					>
-						<i className="fi fi-rr-settings text-base leading-none" />
-					</NavLink>
+						icon="fi-rr-settings"
+						variant="icon-square"
+					/>
 					<Link
 						to="/profile"
 						aria-label="Mi perfil"
@@ -423,30 +374,13 @@ function AuthenticatedAppShell({
 					style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
 				>
 					{NAV_ITEMS.map(({ to, label, icon }) => (
-						<NavLink
+						<SidebarNavLink
 							key={to}
 							to={to}
-							className={({ isActive }) =>
-								cn(
-									"flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors focus-ring",
-									isActive ? "text-ink" : "text-ink3 hover:text-ink2",
-								)
-							}
-						>
-							{({ isActive }) => (
-								<>
-									<i
-										className={cn(
-											`fi ${icon} text-lg leading-none`,
-											isActive && "text-cp-accent",
-										)}
-									/>
-									<span className={isActive ? "font-semibold" : "font-medium"}>
-										{label}
-									</span>
-								</>
-							)}
-						</NavLink>
+							label={label}
+							icon={icon}
+							variant="bottom-tab"
+						/>
 					))}
 				</nav>
 			</div>
