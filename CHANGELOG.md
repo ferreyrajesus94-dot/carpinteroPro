@@ -5,7 +5,137 @@ All notable changes to CarpinteroPro are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.1-beta.2] — 2026-09-05
+
+UI audit: refactored to a single OKLCH redesign system, extracted
+five shared components, added performance optimizations and 58 smoke
+tests for design-system primitives. Also includes a Vite 8.0.16
+compatibility fix that was blocking login.
+
+### Changed
+
+- **Design tokens unified on OKLCH**: the redesign system introduced in
+  `src/index.css` (3 themes `sawdust` / `workshop` / `graphite` + dark
+  mode, `--cp-accent` / `--ink` / `--bg` etc.) is now the canonical
+  surface across `src/shared/ui/*`. Legacy shadcn HSL tokens kept as
+  `@deprecated` in `src/index.css` for migration tracking only.
+
+- **`src/shared/ui/*`**: 12 components (Button, Card, Badge, Input,
+  Select, Switch, Dialog, Table, Textarea, Tooltip, RadioGroup,
+  Separator) now use the OKLCH tokens. Variants are first-class
+  (e.g. `<Button variant="outline">`, not `isOutline`).
+
+- **`React.forwardRef` removed** from all 12 shadcn-style components
+  (React 19 has native ref-as-prop). `<ThemeToggle>` extracted to
+  `src/shared/components/ThemeToggle.tsx` with `variant="icon" | "label"`.
+
+- **Color tokens**: hardcoded Tailwind palette (`bg-yellow-500`,
+  `text-green-700`, `border-destructive/40`, etc.) replaced with
+  OKLCH tokens (`bg-cp-warn`, `text-cp-success`, `border-cp-danger/40`)
+  in 10+ files including `LoginPage`, `OfflineBanner`,
+  `MaintenanceBanner`, `OverviewPage`, `ProductionPipelineWidget`,
+  `InventoryStats`, `ProductionStartReviewDialog`,
+  `WorkshopDetailPage`, `CommissionsTab`, `StockHistoryDialog`,
+  `StockAlertBanner`, `StockAlertBanner`.
+
+- **Lint cleanup**: dead `theme="light"|"dark"` and `toggle: () => void`
+  props removed from `LandingHeader` interface (useTheme already
+  wired internally). `<EmptyState>` consolidated into
+  `feedback-state.tsx` with optional `icon?: LucideIcon`. Two versions
+  (with and without icon) detected in the codebase; only one now.
+
+- **LandingHeader** (public landing page) is now the header for
+  authenticated users too — both use `<BrandMark>` with the same
+  defaults, removing the legacy compat shim that previously accepted
+  `theme`/`toggle` props.
+
+### Added
+
+- **Five shared components** in `src/shared/ui/`:
+  - `<Avatar>` with `getInitials(name, email)` helper,
+    `size="xs|sm|md|lg"` and `tone="solid|soft"` variants. Migrates
+    5 call sites (AppLayout sidebar + mobile header, ProfilePage,
+    ClientList, ClientDetail, QuoteForm).
+  - `<Eyebrow>` with `variant="sans|mono"`, `tone="muted|danger|warn"`,
+    and `as="span|p|div|h2|h3|h4"` polymorphic root. Migrates
+    20+ section labels across landing, dashboard, inventory,
+    production, search, settings, billing, admin, crm, recipes.
+  - `<BrandMark>` with `size="xs|sm|md|lg"`, `shape="square|rounded"`,
+    optional `wordmark` and `label` override, optional `href` for
+    `<Link>` wrapping. Migrates 8 call sites including the public
+    landing header + footer and the authenticated `AppLayout` desktop
+    sidebar + mobile section badge.
+  - `<ChipToggle>` with `variant="filter|tab|category|nav-chip"`,
+    optional `count` badge with `badgeTone="neutral|accent|danger"`.
+    Migrates 4 call sites (SearchResults filter chips, TaskList tabs +
+    category chips, AdminLayout mobile chip nav).
+  - `<SidebarNavLink>` (companion: `<SidebarNavLink>` is the export)
+    with `variant="row-icon|icon-square|bottom-tab|chip"`, optional
+    `badge={{count, tone}}`. Migrates 10 call sites across
+    `AppLayout` (sidebar list + admin/settings links + mobile icon
+    buttons + bottom tabs) and `AdminLayout` (sidebar + mobile chip
+    nav). Centralizes the active-state styling that was duplicated
+    verbatim across both layouts.
+
+- **`<RetryButton>`** in `src/shared/components/RetryButton.tsx` —
+  small shared button replacing the inline `<button>` that was
+  duplicated in 8 places across inventory, quotes, crm, tasks, and
+  admin feature components.
+
+- **Performance optimizations** on drag-heavy components:
+  `<Column>` and `<OrderCard>` in `ProductionBoard` and
+  `<DroppableColumn>` and `<DraggableCard>` in `<QuoteList>` wrapped
+  with `React.memo` to avoid re-rendering every card on each
+  drag-over. Callbacks (`moveQuoteToStatus`, `handleDragEnd`,
+  `handleStart`) wrapped with `useCallback`. Stable `key` props on
+  draggable lists (`order.id`, not array index).
+
+- **`useDeferredValue`** in `SearchResultsPage` — the input now drives
+  the data hook through `useDeferredValue(trimmedDraft)`, keeping
+  keystroke latency independent of the result-render cost. URL
+  address-bar sync keeps the original `useDebouncedValue` 250ms
+  timing (the contract for the address-bar mirror is different
+  from the input responsiveness contract).
+
+- **`startTransition` on retry**: error-state retry buttons in
+  `MaterialList` and `QuoteList` wrap the refetch in
+  `startTransition(() => refetch())` so the button stays responsive
+  while the query is in flight.
+
+- **58 smoke tests** in `src/shared/ui/*.test.tsx` for components
+  that had no coverage: Button, Card, Input, Select, Switch,
+  Tooltip, Badge, Separator, Textarea, RadioGroup, Skeleton, plus
+  `EmptyState` (now exported from `feedback-state.tsx`). Each test
+  asserts render, variants, `className` forwarding, a11y role/aria,
+  and one user interaction where applicable.
+  Total tests passing: **967** (was 909 baseline).
+
+- **Explicit OKLCH opacity utilities** in `src/index.css` for the
+  41 `cp-*/N` combinations actually used in the codebase (e.g.
+  `.bg-cp-warn\/10`, `.border-cp-danger\/40`, `.text-cp-success`).
+  Rendered via `color-mix(in oklch, var(--cp-X) N%, transparent)`
+  for OKLCH fidelity. Tailwind JIT cannot derive opacity variants
+  from raw `@layer utilities` definitions, so each combination
+  needs an explicit utility.
+
+### Fixed
+
+- **Vite 8.0.16 silently substitutes the literal `[SENSITIVE]` for
+  any `import.meta.env.VITE_SUPABASE_*`** at bundle time, breaking
+  `createClient(supabaseUrl, supabaseAnonKey)` with "Invalid
+  supabaseUrl" inside `@supabase/supabase-js`. The throw was caught
+  by `App.tsx`'s `<ErrorBoundary name="app-root">` and rendered an
+  empty fallback with no `console.error`, so the failure mode was
+  invisible during Playwright smoke tests. Renamed to `VITE_DB_URL`
+  and `VITE_DB_ANON_KEY` to escape the redaction. No `.env.local`
+  changes were committed (environment files are git-ignored);
+  only `.env.example` and `src/shared/lib/supabase.ts` were
+  updated.
+
+- `bg-cp-accent text-white` in MaterialList, QuoteList, QuoteForm
+  replaced with `text-[var(--cp-accent-ink)]` to honor the per-theme
+  ink color in dark mode and the workshop/sawdust graphite variants
+  where `--cp-accent-ink` is not white.
 
 ## [0.3.0-beta.1] — 2026-08-31
 
