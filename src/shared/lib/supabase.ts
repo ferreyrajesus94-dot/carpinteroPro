@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/shared/types/database";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_DB_URL;
+const supabaseAnonKey = import.meta.env.VITE_DB_ANON_KEY;
 const useMocks =
 	import.meta.env.DEV && import.meta.env.VITE_USE_LOCAL_MOCKS === "true";
 
