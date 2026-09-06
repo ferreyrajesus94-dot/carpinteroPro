@@ -108,8 +108,8 @@ describe("AppLayout billing integration", () => {
 		// resolve against the in-memory mock data instead of trying to hit a
 		// real Supabase instance from jsdom.
 		vi.stubEnv("VITE_USE_LOCAL_MOCKS", "true");
-		vi.stubEnv("VITE_SUPABASE_URL", "http://stub.local");
-		vi.stubEnv("VITE_SUPABASE_ANON_KEY", "stub-anon-key");
+		vi.stubEnv("VITE_DB_URL", "http://stub.local");
+		vi.stubEnv("VITE_DB_ANON_KEY", "stub-anon-key");
 		setAuthState({
 			session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } },
 			loading: false,

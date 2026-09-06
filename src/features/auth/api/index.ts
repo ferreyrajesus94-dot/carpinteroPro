@@ -3,8 +3,8 @@ import { supabase } from '@/shared/lib/supabase'
 // /auth/v1/settings is not exposed by supabase-js — raw fetch is the only option here.
 export async function checkGoogleEnabled(): Promise<boolean> {
   try {
-    const url = import.meta.env.VITE_SUPABASE_URL as string
-    const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+    const url = import.meta.env.VITE_DB_URL as string
+    const key = import.meta.env.VITE_DB_ANON_KEY as string
     const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } })
     const settings = (await res.json()) as { external?: { google?: boolean } }
     return Boolean(settings?.external?.google)

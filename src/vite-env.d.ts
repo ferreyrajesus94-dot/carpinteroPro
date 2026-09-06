@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-	readonly VITE_SUPABASE_URL: string;
-	readonly VITE_SUPABASE_ANON_KEY: string;
+	readonly VITE_DB_URL: string;
+	readonly VITE_DB_ANON_KEY: string;
 	readonly VITE_USE_LOCAL_MOCKS?: string;
 	readonly VITE_SENTRY_DSN?: string;
 	readonly VITE_SUPPORT_EMAIL?: string;
