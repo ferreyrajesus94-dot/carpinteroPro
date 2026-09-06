@@ -121,6 +121,13 @@ export function LoginPage() {
     setAcceptedTerms(false)
   }
 
+  // Feature flag para ocultar el botón de Google (ej: en previews de Vercel
+  // donde los JavaScript origins no pueden cubrir todos los URLs únicos).
+  // Default: visible (cuando la variable no está definida o vale cualquier
+  // cosa distinta de 'false').
+  const googleLoginEnabled =
+    import.meta.env.VITE_ENABLE_GOOGLE_LOGIN !== 'false'
+
   async function handleGoogleAuth() {
     setError(null)
     const googleEnabled = await checkGoogleEnabled()
@@ -270,16 +277,20 @@ export function LoginPage() {
                     {submitting ? 'Ingresando...' : 'Ingresar'}
                   </Button>
 
-                  <div className="relative flex items-center gap-3">
-                    <div className="flex-1 border-t" />
-                    <span className="text-xs text-muted-foreground">o continuá con</span>
-                    <div className="flex-1 border-t" />
-                  </div>
+                  {googleLoginEnabled && (
+                    <>
+                      <div className="relative flex items-center gap-3">
+                        <div className="flex-1 border-t" />
+                        <span className="text-xs text-muted-foreground">o continuá con</span>
+                        <div className="flex-1 border-t" />
+                      </div>
 
-                  <Button type="button" variant="outline" className="w-full gap-2" onClick={handleGoogleAuth}>
-                    <GoogleIcon />
-                    Google
-                  </Button>
+                      <Button type="button" variant="outline" className="w-full gap-2" onClick={handleGoogleAuth}>
+                        <GoogleIcon />
+                        Google
+                      </Button>
+                    </>
+                  )}
                 </form>
               </CardContent>
             </>
@@ -415,16 +426,20 @@ export function LoginPage() {
                       {submitting ? 'Creando cuenta...' : 'Crear cuenta'}
                     </Button>
 
-                    <div className="relative flex items-center gap-3">
-                      <div className="flex-1 border-t" />
-                      <span className="text-xs text-muted-foreground">o registrate con</span>
-                      <div className="flex-1 border-t" />
-                    </div>
+                    {googleLoginEnabled && (
+                      <>
+                        <div className="relative flex items-center gap-3">
+                          <div className="flex-1 border-t" />
+                          <span className="text-xs text-muted-foreground">o registrate con</span>
+                          <div className="flex-1 border-t" />
+                        </div>
 
-                    <Button type="button" variant="outline" className="w-full gap-2" onClick={handleGoogleAuth}>
-                      <GoogleIcon />
-                      Google
-                    </Button>
+                        <Button type="button" variant="outline" className="w-full gap-2" onClick={handleGoogleAuth}>
+                          <GoogleIcon />
+                          Google
+                        </Button>
+                      </>
+                    )}
                   </form>
                 )}
               </CardContent>
