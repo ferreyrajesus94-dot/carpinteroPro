@@ -1,5 +1,5 @@
 import { FileText, MessageCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 const walkthroughSteps = [
 	"Elegí el mueble",
@@ -77,9 +77,11 @@ export function WalkthroughDemoSection() {
 					</div>
 					<div className="landing-walkthrough-progress" aria-hidden="true">
 						<div
-							style={{
-								width: `${((step + 1) / walkthroughSteps.length) * 100}%`,
-							}}
+							style={
+								{
+									"--progress": `${((step + 1) / walkthroughSteps.length) * 100}%`,
+								} as CSSProperties
+							}
 						/>
 					</div>
 					<div

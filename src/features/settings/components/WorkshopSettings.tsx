@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm, useWatch, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/shared/ui/button";
@@ -147,7 +147,7 @@ export function WorkshopSettings({
 		handleSubmit,
 		reset,
 		setValue,
-		watch,
+		control,
 		formState: { errors, isSubmitting },
 	} = useForm<FormValues>({
 		resolver: zodResolver(schema) as Resolver<FormValues>,
@@ -163,8 +163,8 @@ export function WorkshopSettings({
 		},
 	});
 
-	const autoStockDiscount = watch("auto_stock_discount");
-	const stockAlertEnabled = watch("stock_alert_enabled");
+	const autoStockDiscount = useWatch({ control, name: "auto_stock_discount" });
+	const stockAlertEnabled = useWatch({ control, name: "stock_alert_enabled" });
 
 	useEffect(() => {
 		if (settings) {

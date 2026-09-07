@@ -11,7 +11,7 @@ interface CardConfig {
   icon: string
   iconBg: string
   iconColor: string
-  accentColor: string
+  accentBg: string
 }
 
 export function InventoryStats() {
@@ -37,7 +37,7 @@ export function InventoryStats() {
       icon: 'fi-rr-box',
       iconBg: 'bg-cp-success/10',
       iconColor: 'text-cp-success',
-      accentColor: 'border-t-cp-success',
+      accentBg: 'bg-cp-success',
     },
     {
       label: 'Items con stock bajo',
@@ -45,7 +45,7 @@ export function InventoryStats() {
       icon: 'fi-rr-triangle-warning',
       iconBg: 'bg-cp-danger/10',
       iconColor: 'text-cp-danger',
-      accentColor: 'border-t-cp-danger',
+      accentBg: 'bg-cp-danger',
     },
     {
       label: 'Total de materiales',
@@ -53,7 +53,7 @@ export function InventoryStats() {
       icon: 'fi-rr-layers',
       iconBg: 'bg-cp-info/10',
       iconColor: 'text-cp-info',
-      accentColor: 'border-t-cp-info',
+      accentBg: 'bg-cp-info',
     },
     {
       label: 'Categoría con más valor',
@@ -61,24 +61,28 @@ export function InventoryStats() {
       icon: 'fi-rr-star',
       iconBg: 'bg-cp-accent-soft',
       iconColor: 'text-cp-accent',
-      accentColor: 'border-t-cp-accent',
+      accentBg: 'bg-cp-accent',
     },
   ]
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {cards.map(({ label, value, icon, iconBg, iconColor, accentColor }) => (
+      {cards.map(({ label, value, icon, iconBg, iconColor, accentBg }) => (
         <div
           key={label}
-          className={`rounded-lg border border-t-2 ${accentColor} bg-cp-surface p-5 shadow-sm`}
+          className="relative overflow-hidden rounded-lg border border-line bg-cp-surface p-5 shadow-sm"
         >
-          <div className="flex items-start justify-between">
+          <span
+            aria-hidden="true"
+            className={`absolute inset-y-3 left-0 w-1 rounded-r-full ${accentBg}`}
+          />
+          <div className="flex items-start justify-between pl-2">
             <p className="text-sm font-medium text-ink3 leading-snug">{label}</p>
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${iconBg}`}>
               <i className={`fi ${icon} text-base leading-none ${iconColor}`} />
             </div>
           </div>
-          <p className="mt-3 text-2xl font-bold tracking-tight">{value}</p>
+          <p className="mt-3 text-2xl font-bold tracking-tight pl-2">{value}</p>
         </div>
       ))}
     </div>

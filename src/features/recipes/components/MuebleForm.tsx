@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, useFieldArray, type Resolver } from 'react-hook-form'
+import { useForm, useFieldArray, useWatch, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/shared/ui/button'
@@ -85,7 +85,6 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
     register,
     handleSubmit,
     control,
-    watch,
     reset,
     setValue,
     formState: { errors, isSubmitting },
@@ -173,12 +172,12 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
     }
   }, [template, reset])
 
-  const woodItemsWatch = watch('wood_items')
-  const extraItemsWatch = watch('extra_items')
-  const laborItemsWatch = watch('labor_items')
-  const photoUrlWatch = watch('photo_url')
-  const suggestedMarginWatch = watch('suggested_margin_pct')
-  const paramsWatch = watch('params')
+  const woodItemsWatch = useWatch({ control, name: 'wood_items' })
+  const extraItemsWatch = useWatch({ control, name: 'extra_items' })
+  const laborItemsWatch = useWatch({ control, name: 'labor_items' })
+  const photoUrlWatch = useWatch({ control, name: 'photo_url' })
+  const suggestedMarginWatch = useWatch({ control, name: 'suggested_margin_pct' })
+  const paramsWatch = useWatch({ control, name: 'params' })
 
   const paramValues: Record<string, number> = {}
   for (const p of paramsWatch ?? []) {

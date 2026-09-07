@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -54,7 +54,7 @@ export function ClientForm({ open, onOpenChange, client, onCreated, onUpdated }:
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema) as Resolver<FormValues>,
@@ -75,7 +75,7 @@ export function ClientForm({ open, onOpenChange, client, onCreated, onUpdated }:
     }
   }, [client, reset, open])
 
-  const sourceValue = watch('source')
+  const sourceValue = useWatch({ control, name: 'source' })
 
   async function onSubmit(values: FormValues) {
     const payload = {

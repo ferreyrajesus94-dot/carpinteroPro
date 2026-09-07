@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useForm, type Resolver } from 'react-hook-form'
+import { useForm, useWatch, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -57,7 +57,7 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema) as Resolver<FormValues>,
@@ -90,8 +90,8 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
     }
   }, [task, reset, open])
 
-  const priority = watch('priority')
-  const category = watch('category')
+  const priority = useWatch({ control, name: 'priority' })
+  const category = useWatch({ control, name: 'category' })
 
   async function onSubmit(values: FormValues) {
     const payload = {

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { useForm, Controller, type Resolver } from 'react-hook-form'
+import { useEffect, useMemo, useState } from 'react'
+import { useForm, useWatch, Controller, type Resolver } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/shared/ui/button'
@@ -72,7 +72,6 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
     register,
     handleSubmit,
     control,
-    watch,
     reset,
     setValue,
     formState: { errors, isSubmitting },
@@ -137,38 +136,56 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
     onSuccess()
   }
 
-  const category = watch('category')
+  const category = useWatch({ control, name: 'category' })
   const isWood = category === 'madera'
   const isLiquid = category === 'pintura' || category === 'adhesivo'
 
   // Pack price sincronizado con price_per_unit × pack_size
-  const priceUnit = watch('price_per_unit')
-  const packSize = watch('pack_size')
-  const [packPriceStr, setPackPriceStr] = useState('')
-  const lastEdit = useRef<'unit' | 'pack' | null>(null)
+  const priceUnit = useWatch({ control, name: 'price_per_unit' })
+  const packSize = useWatch({ control, name: 'pack_size' })
+  const [packPriceOverride, setPackPriceOverride] = useState('')
+  // Marca qué campo editó el usuario por última vez; controla si el memo devuelve el
+  // typed value del pack_price o la derivación de unit × size. Vive en state para que
+  // el useMemo pueda leerla durante el render (los refs no se pueden leer en render).
+  const [lastEdit, setLastEdit] = useState<'unit' | 'pack' | null>(null)
+  const packSizeReg = register('pack_size')
+  const priceUnitReg = register('price_per_unit')
 
-  useEffect(() => {
-    if (lastEdit.current === 'pack') {
-      lastEdit.current = null
-      return
+  // Deriva packPriceStr durante el render (sin useEffect). El valor tipeado por el
+  // usuario toma precedence mientras `lastEdit === 'pack'`; cuando el usuario toca
+  // pack_size o price_per_unit, sus handlers limpian el state y la derivación vuelve.
+  const packPriceStr = useMemo(() => {
+    if (lastEdit === 'pack' && packPriceOverride !== '') {
+      return packPriceOverride
     }
     const size = typeof packSize === 'number' ? packSize : Number(packSize)
     const unit = typeof priceUnit === 'number' ? priceUnit : Number(priceUnit)
     if (size && size >= 2 && Number.isFinite(unit)) {
       const derived = Math.round(unit * size * 100) / 100
-      setPackPriceStr(derived ? String(derived) : '')
-    } else {
-      setPackPriceStr('')
+      return derived ? String(derived) : ''
     }
-  }, [priceUnit, packSize])
+    return ''
+  }, [packSize, priceUnit, packPriceOverride, lastEdit])
+
+  const handlePackSizeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLastEdit(null)
+    packSizeReg.onChange(e)
+  }
+
+  const handlePriceUnitInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLastEdit(null)
+    priceUnitReg.onChange(e)
+  }
 
   const onPackPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const str = e.target.value
-    setPackPriceStr(str)
+    setPackPriceOverride(str)
+    // Marcamos 'pack' siempre que el usuario toca el campo, incluso si pack_size es
+    // inválido, para que el typed value no sea pisado por una derivación durante este render.
+    setLastEdit('pack')
     const num = Number(str)
     const size = typeof packSize === 'number' ? packSize : Number(packSize)
     if (size && size >= 2 && Number.isFinite(num)) {
-      lastEdit.current = 'pack'
       // 4 decimales de precisión interna para evitar drift al redondear
       const newUnit = Math.round((num / size) * 10000) / 10000
       setValue('price_per_unit', newUnit, { shouldValidate: false, shouldDirty: true })
@@ -243,7 +260,8 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
             type="number"
             min="0"
             step="0.01"
-            {...register('price_per_unit')}
+            {...priceUnitReg}
+            onChange={handlePriceUnitInput}
           />
           {errors.price_per_unit && (
             <p className="text-cp-danger text-xs">{errors.price_per_unit.message}</p>
@@ -292,7 +310,8 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
               min="2"
               step="1"
               placeholder="Ej: 10"
-              {...register('pack_size')}
+              {...packSizeReg}
+              onChange={handlePackSizeInput}
             />
             {errors.pack_size && (
               <p className="text-cp-danger text-xs">{errors.pack_size.message}</p>

@@ -184,8 +184,7 @@
     @apply border-line;
   }
   body {
-    @apply bg-cp-bg text-ink;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-cp-bg text-ink font-sans;
     -webkit-font-smoothing: antialiased;
   }
 }
@@ -199,7 +198,11 @@
   /* Display voice: Fraunces (lifted editorial serif italic).
    * Fallback chain: Newsreader → Crimson Text → Georgia → serif.
    * Tailwind's `font-display` class is also bound to this stack via tailwind.config.ts. */
-  .font-display { font-family: 'Fraunces', 'Newsreader', 'Crimson Text', Georgia, serif; letter-spacing: -0.01em; }
+  /* .font-display: keeps the editorial letter-spacing override on top of
+   * Tailwind's `font-display` (Fraunces stack). Inter and Fraunces are the
+   * documented design-system voices in DESIGN.md; the overused-font detector
+   * warning is accepted as a residual for these two voices. */
+  .font-display { @apply font-display; letter-spacing: -0.01em; }
   .font-mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum"; }
 
   /* Redesign surface/text/border tokens */
@@ -332,7 +335,6 @@
 /* Reduced-motion guard: suppress decorative animations */
 @media (prefers-reduced-motion: reduce) {
   .animate-pulse,
-  .animate-bounce,
   .animate-spin {
     animation: none !important;
   }

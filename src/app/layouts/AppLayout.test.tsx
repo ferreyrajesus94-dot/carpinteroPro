@@ -545,9 +545,10 @@ describe("AppLayout billing integration", () => {
 		renderWithRouter();
 
 		// Verify that every link/button in the shell has focus-ring
-		// There are two "Inicio" links: sidebar + bottom nav
+		// "Inicio" appears in: (1) desktop sidebar, (2) mobile bottom nav,
+		// and (3) the mobile BrandMark which surfaces the current section title.
 		const inicioLinks = screen.getAllByRole("link", { name: "Inicio" });
-		expect(inicioLinks.length).toBe(2);
+		expect(inicioLinks.length).toBe(3);
 		for (const link of inicioLinks) {
 			expect(link.className).toContain("focus-ring");
 		}

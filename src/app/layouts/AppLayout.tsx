@@ -2,6 +2,7 @@ import {
 	Outlet,
 	Navigate,
 	Link,
+	NavLink,
 	useLocation,
 	useNavigate,
 } from "react-router-dom";
@@ -21,6 +22,7 @@ import { BillingGate } from "@/features/billing/components/BillingGate";
 import { GlobalSearch } from "@/features/search";
 import { NAV_ITEMS, type NavItem } from "./nav-items";
 import { dispatchFab } from "@/shared/lib/fab";
+import { cn } from "@/shared/lib/utils";
 
 function isWizardPath(pathname: string) {
 	const segs = pathname.split("/").filter(Boolean);
@@ -303,31 +305,53 @@ function AuthenticatedAppShell({
 
 				{/* Header mobile */}
 				<header className="flex h-12 items-center gap-2 px-4 border-b border-line bg-cp-surface/85 backdrop-blur lg:hidden sticky top-0 z-10">
-					<BrandMark size="xs" label={sectionTitle} className="truncate flex-1 text-[14px]" />
-					<SidebarNavLink
+					<BrandMark
+						size="xs"
+						label={sectionTitle}
+						className="truncate flex-1 text-[14px] focus-ring rounded-md"
+					/>
+					<NavLink
 						to="/buscar"
 						aria-label="Buscar"
-						icon="fi-rr-search"
-						variant="icon-square"
-					/>
+						className={({ isActive }) =>
+							cn(
+								"grid h-11 w-11 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors focus-ring",
+								isActive && "bg-cp-accent-soft text-cp-accent",
+							)
+						}
+					>
+						<i className="fi fi-rr-search text-base leading-none shrink-0" aria-hidden="true" />
+					</NavLink>
 					<ThemeToggle
 						variant="icon"
 						className="h-11 w-11"
 					/>
 					{isPlatformAdmin && (
-						<SidebarNavLink
+						<NavLink
 							to="/admin"
 							aria-label="Admin"
-							icon="fi-rr-shield-check"
-							variant="icon-square"
-						/>
+							className={({ isActive }) =>
+								cn(
+									"grid h-11 w-11 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors focus-ring",
+									isActive && "bg-cp-accent-soft text-cp-accent",
+								)
+							}
+						>
+							<i className="fi fi-rr-shield-check text-base leading-none shrink-0" aria-hidden="true" />
+						</NavLink>
 					)}
-					<SidebarNavLink
+					<NavLink
 						to="/settings"
 						aria-label="Ajustes"
-						icon="fi-rr-settings"
-						variant="icon-square"
-					/>
+						className={({ isActive }) =>
+							cn(
+								"grid h-11 w-11 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors focus-ring",
+								isActive && "bg-cp-accent-soft text-cp-accent",
+							)
+						}
+					>
+						<i className="fi fi-rr-settings text-base leading-none shrink-0" aria-hidden="true" />
+					</NavLink>
 					<Link
 						to="/profile"
 						aria-label="Mi perfil"
