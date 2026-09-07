@@ -11,6 +11,13 @@ export function SectionHowto({ storageKey, steps }: Props) {
     try { return localStorage.getItem(`cp.howto.${storageKey}`) === 'open' } catch { return false }
   })
 
+  // Stable ID for the collapsible panel so assistive tech can pair the toggle
+  // (via aria-controls) with the region it expands. storageKey is already
+  // unique per-section by convention (e.g. "dashboard", "inventory"), so
+  // deriving the ID from it avoids needing useId() and keeps the wiring
+  // deterministic across SSR/CSR.
+  const panelId = `howto-${storageKey}`
+
   function toggle() {
     const next = !open
     setOpen(next)
@@ -20,8 +27,11 @@ export function SectionHowto({ storageKey, steps }: Props) {
   return (
     <div className="mb-3">
       <button
+        type="button"
         onClick={toggle}
-        className="w-full flex items-center gap-2 text-left text-[12px] text-ink2 bg-cp-bg2 border border-line rounded-lg px-3 py-2 hover:border-line2 transition-colors"
+        aria-expanded={open}
+        aria-controls={panelId}
+        className="w-full flex items-center gap-2 text-left text-[12px] text-ink2 bg-cp-bg2 border border-line rounded-lg px-3 py-2 hover:border-line2 transition-colors focus-ring"
       >
         <Info size={14} className="text-cp-accent shrink-0" />
         <span className="flex-1 truncate">
@@ -31,7 +41,10 @@ export function SectionHowto({ storageKey, steps }: Props) {
       </button>
 
       {open && (
-        <div className="mt-1.5 rounded-lg border border-line bg-cp-bg2 p-3">
+        <div
+          id={panelId}
+          className="mt-1.5 rounded-lg border border-line bg-cp-bg2 p-3"
+        >
           <p className="text-[11px] uppercase tracking-widest text-ink3 font-medium mb-2">Cómo funciona</p>
           <ul className="space-y-1.5 text-[13px] text-ink2">
             {steps.map((step, i) => (

@@ -3,6 +3,14 @@ import { cn } from "@/shared/lib/utils";
 
 export type ChipToggleVariant = "filter" | "tab" | "category" | "nav-chip";
 export type ChipToggleBadgeTone = "neutral" | "accent" | "danger";
+/**
+ * `button` (default) renders an `aria-pressed` toggle, the right fit for
+ * independent filter / category chips that can each be flipped on or off.
+ * `radio` renders an `aria-checked` element for use inside a `role="radiogroup"`
+ * parent (e.g. the dashboard period selector) — the parent controls
+ * single-selection semantics and keyboard arrow navigation.
+ */
+export type ChipToggleRole = "button" | "radio";
 
 interface ChipToggleProps {
 	variant: ChipToggleVariant;
@@ -14,6 +22,12 @@ interface ChipToggleProps {
 	badgeTone?: ChipToggleBadgeTone;
 	ariaLabel?: string;
 	className?: string;
+	/**
+	 * ARIA role for the underlying button. When set to `"radio"`, the element
+	 * renders with `role="radio"` + `aria-checked` instead of `aria-pressed`,
+	 * which is what a parent `role="radiogroup"` expects.
+	 */
+	role?: ChipToggleRole;
 }
 
 const containerStyles: Record<ChipToggleVariant, { base: string; active: string }> = {
@@ -51,14 +65,18 @@ export function ChipToggle({
 	badgeTone = "neutral",
 	ariaLabel,
 	className,
+	role: ariaRole = "button",
 }: ChipToggleProps) {
 	const styles = containerStyles[variant];
+	const isRadio = ariaRole === "radio";
 
 	return (
 		<button
 			type="button"
 			onClick={onSelect}
-			aria-pressed={active}
+			role={isRadio ? "radio" : undefined}
+			aria-pressed={isRadio ? undefined : active}
+			aria-checked={isRadio ? active : undefined}
 			aria-label={ariaLabel}
 			className={cn(
 				"inline-flex items-center gap-1.5 focus-ring transition-colors",

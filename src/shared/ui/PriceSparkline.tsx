@@ -24,7 +24,7 @@ export function PriceSparkline({ data, width = 80, height = 24 }: Props) {
   if (data.length < 2) {
     return (
       <span
-        className="text-muted-foreground inline-block text-center text-xs"
+        className="text-ink3 inline-block text-center text-xs"
         style={{ width, height, lineHeight: `${height}px` }}
       >
         —

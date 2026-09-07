@@ -101,4 +101,39 @@ export default defineConfig([
 			"react-refresh/only-export-components": "off",
 		},
 	},
+	{
+		// Guardrail: prevent legacy shadcn HSL tokens from creeping back into the
+		// dashboard surface or the shared primitives after the colorize migration.
+		// OKLCH (`bg-cp-*`, `text-ink*`, `border-line`, `ring-cp-accent`,
+		// `ring-offset-cp-bg`) is the single source of truth per DESIGN.md
+		// "The Single Source Rule". Bare `bg-muted` is the only allowed HSL
+		// survivor and lives in `Skeleton` per the prior pass; the rule bans every
+		// opacity variant of it but never the bare class.
+		// Scope kept explicit so other surfaces (inventory, recipes, …) are not
+		// swept until their own slices migrate; expand the file list when the
+		// next surface comes up for colorize.
+		files: [
+			"src/features/dashboard/components/Dashboard.tsx",
+			"src/features/dashboard/components/KPICards.tsx",
+			"src/features/dashboard/components/ActiveQuotesPanel.tsx",
+			"src/features/dashboard/components/StatusPieChart.tsx",
+			"src/shared/ui/**/*.{ts,tsx}",
+		],
+		rules: {
+			"no-restricted-syntax": [
+				"error",
+				{
+					selector:
+						"Literal[value=/\\b(bg-surface|bg-card|bg-background|bg-popover|text-popover-foreground|border-input|text-card-foreground|bg-accent|text-accent-foreground|bg-secondary|text-secondary-foreground|bg-primary|text-primary-foreground|bg-destructive|text-destructive-foreground|bg-ring|ring-offset-background|text-muted-foreground)\\b/]",
+					message:
+						'Legacy shadcn HSL token (DEPRECATED, see DESIGN.md "The Single Source Rule"). Use OKLCH tokens: bg-cp-surface / bg-cp-bg2 / text-ink / text-ink2 / text-ink3 / border-line / bg-cp-accent / text-cp-accent / ring-cp-accent / ring-offset-cp-bg.',
+				},
+				{
+					selector: "Literal[value=/\\bbg-muted\\/\\d+\\b/]",
+					message:
+						'Legacy shadcn HSL token with opacity modifier (DEPRECATED, see DESIGN.md "The Single Source Rule"). Use OKLCH token: bg-cp-bg2/N. Bare bg-muted is allowed only in Skeleton.',
+				},
+			],
+		},
+	},
 ]);
