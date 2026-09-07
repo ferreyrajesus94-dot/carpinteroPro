@@ -19,10 +19,10 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   const entry = payload[0].payload
   return (
-    <div className="rounded-md border bg-background px-3 py-2 shadow-md text-sm">
+    <div className="rounded-md border bg-cp-bg2 px-3 py-2 shadow-md text-sm">
       <p className="font-medium">{QUOTE_STATUS_LABELS[entry.status]}</p>
       <p>{entry.count} {entry.count === 1 ? 'presupuesto' : 'presupuestos'}</p>
-      <p className="text-muted-foreground">{formatCurrency(entry.total)}</p>
+      <p className="text-ink2">{formatCurrency(entry.total)}</p>
     </div>
   )
 }
@@ -50,15 +50,15 @@ function CustomLegend({ payload }: { payload?: { value: string }[] }) {
 export function StatusPieChart({ data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="flex min-h-[220px] items-center justify-center rounded-lg border bg-card p-5 shadow-sm">
-        <p className="text-sm text-muted-foreground">Sin datos en el período</p>
+      <div className="flex min-h-[220px] items-center justify-center rounded-lg border bg-cp-surface p-5 shadow-sm">
+        <p className="text-sm text-ink2">Sin datos en el período</p>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg border bg-card p-5 shadow-sm">
-      <h3 className="mb-4 text-sm font-semibold text-muted-foreground">Distribución por estado</h3>
+    <div className="rounded-lg border bg-cp-surface p-5 shadow-sm">
+      <h3 className="mb-4 text-sm font-semibold text-ink2">Distribución por estado</h3>
       <ResponsiveContainer width="100%" height={220}>
         <PieChart>
           <Pie

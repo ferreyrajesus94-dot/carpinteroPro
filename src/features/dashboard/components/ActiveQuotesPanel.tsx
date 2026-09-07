@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatCurrency } from "@/shared/lib/formatters";
@@ -35,18 +35,16 @@ function DashboardQuoteStatusBadge({
 }
 
 export function ActiveQuotesPanel({ quotes }: Props) {
-	const navigate = useNavigate();
-
 	return (
-		<div className="rounded-lg border bg-card shadow-sm">
+		<div className="rounded-lg border bg-cp-surface shadow-sm">
 			<div className="border-b px-5 py-4">
-				<h3 className="text-sm font-semibold text-muted-foreground">
+				<h3 className="text-sm font-semibold text-ink2">
 					Presupuestos activos
 				</h3>
 			</div>
 
 			{quotes.length === 0 ? (
-				<div className="px-5 py-10 text-center text-sm text-muted-foreground">
+				<div className="px-5 py-10 text-center text-sm text-ink2">
 					No hay presupuestos activos
 				</div>
 			) : (
@@ -57,7 +55,7 @@ export function ActiveQuotesPanel({ quotes }: Props) {
 							<Link
 								key={q.id}
 								to={`/quotes/${q.id}`}
-								className="block rounded-md border p-3 space-y-1 hover:bg-muted/30"
+								className="block rounded-md border p-3 space-y-1 hover:bg-cp-bg2/40"
 							>
 								<div className="flex items-center justify-between">
 									<span className="font-mono text-sm font-medium">
@@ -66,7 +64,7 @@ export function ActiveQuotesPanel({ quotes }: Props) {
 									<DashboardQuoteStatusBadge status={q.status} />
 								</div>
 								<p className="text-sm font-medium">{q.furniture_name}</p>
-								<div className="flex items-center justify-between text-xs text-muted-foreground">
+								<div className="flex items-center justify-between text-xs text-ink2">
 									<span>{q.client?.name ?? "—"}</span>
 									<span>{formatCurrency(getSalePrice(q))}</span>
 								</div>
@@ -89,28 +87,33 @@ export function ActiveQuotesPanel({ quotes }: Props) {
 							</TableHeader>
 							<TableBody>
 								{quotes.map((quote) => (
-									<TableRow
-										key={quote.id}
-										className="cursor-pointer"
-										onClick={() => navigate(`/quotes/${quote.id}`)}
-									>
-										<TableCell className="font-mono text-xs">
-											{quote.quote_number}
-										</TableCell>
-										<TableCell>{quote.furniture_name}</TableCell>
-										<TableCell className="text-muted-foreground">
-											{quote.client?.name ?? "—"}
-										</TableCell>
-										<TableCell className="text-right font-medium">
-											{formatCurrency(getSalePrice(quote))}
-										</TableCell>
-										<TableCell>
-											<DashboardQuoteStatusBadge status={quote.status} />
-										</TableCell>
-										<TableCell className="text-muted-foreground">
-											{format(new Date(quote.created_at), "d MMM yyyy", {
-												locale: es,
-											})}
+									<TableRow key={quote.id} className="hover:bg-cp-bg2/40">
+										<TableCell colSpan={6} className="p-0">
+											<Link
+												to={`/quotes/${quote.id}`}
+												className="flex items-center gap-3 px-4 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cp-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cp-bg"
+											>
+												<span className="font-mono text-xs w-16 shrink-0">
+													{quote.quote_number}
+												</span>
+												<span className="flex-1 min-w-0 truncate">
+													{quote.furniture_name}
+												</span>
+												<span className="hidden md:inline text-ink2 text-sm w-32 truncate">
+													{quote.client?.name ?? "—"}
+												</span>
+												<span className="ml-auto text-right font-medium tabular-nums w-20">
+													{formatCurrency(getSalePrice(quote))}
+												</span>
+												<span className="w-28 shrink-0 flex justify-start">
+													<DashboardQuoteStatusBadge status={quote.status} />
+												</span>
+												<span className="hidden md:inline text-ink2 text-sm w-24 text-right">
+													{format(new Date(quote.created_at), "d MMM yyyy", {
+														locale: es,
+													})}
+												</span>
+											</Link>
 										</TableCell>
 									</TableRow>
 								))}

@@ -6,14 +6,27 @@ import { useWorkshopId } from "@/shared/hooks/useWorkshopId";
 
 export function DashboardPage() {
 	const workshopId = useWorkshopId();
-	const { data: quotes = [], isLoading } = useQuotes(workshopId);
-	const { data: materials = [] } = useMaterials(workshopId);
+	const {
+		data: quotes = [],
+		isLoading,
+		isError: quotesError,
+		refetch: quotesRefetch,
+	} = useQuotes(workshopId);
+	const {
+		data: materials = [],
+		isError: materialsError,
+		refetch: materialsRefetch,
+	} = useMaterials(workshopId);
 
 	return (
 		<Dashboard
 			quotes={quotes}
 			materials={materials}
 			isLoading={isLoading}
+			quotesError={quotesError}
+			materialsError={materialsError}
+			quotesRefetch={quotesRefetch}
+			materialsRefetch={materialsRefetch}
 			productionPipelineWidget={<ProductionPipelineWidget />}
 		/>
 	);
