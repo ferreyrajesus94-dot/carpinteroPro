@@ -184,7 +184,7 @@
     @apply border-line;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-cp-bg text-ink;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }

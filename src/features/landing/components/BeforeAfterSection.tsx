@@ -22,7 +22,7 @@ export function BeforeAfterSection({
 				</div>
 				<div className="landing-before-after-grid">
 					<div className="landing-before-after-card landing-before-card">
-						<div className="mb-4 inline-block rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">
+						<div className="mb-4 inline-block rounded-full bg-cp-danger/10 px-3 py-1 text-xs font-semibold text-cp-danger">
 							Antes
 						</div>
 						<div className="landing-chaos-visual" aria-hidden="true">
@@ -42,7 +42,7 @@ export function BeforeAfterSection({
 									className="flex items-start gap-3 text-sm text-ink2"
 								>
 									<X
-										className="mt-0.5 h-4 w-4 shrink-0 text-destructive"
+										className="mt-0.5 h-4 w-4 shrink-0 text-cp-danger"
 										aria-hidden="true"
 									/>
 									{item.text}

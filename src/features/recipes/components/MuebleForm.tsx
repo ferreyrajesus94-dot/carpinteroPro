@@ -271,7 +271,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
       <div className="space-y-1">
         <Label htmlFor="name">Nombre del mueble</Label>
         <Input id="name" {...register('name')} placeholder="Ej: Ropero 2 puertas" />
-        {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
+        {errors.name && <p className="text-cp-danger text-xs">{errors.name.message}</p>}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -322,7 +322,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
           placeholder="Ej: 40"
         />
         {errors.suggested_margin_pct && (
-          <p className="text-destructive text-xs">{errors.suggested_margin_pct.message}</p>
+          <p className="text-cp-danger text-xs">{errors.suggested_margin_pct.message}</p>
         )}
       </div>
 
@@ -335,7 +335,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-semibold">Parámetros (opcional)</h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink3">
               Variables para fórmulas. Ej: <code>largo_cm</code> = 120. Usalas como cantidad en items: <code>largo_cm / 100</code>.
             </p>
           </div>
@@ -356,7 +356,7 @@ export function MuebleForm({ template, onSuccess, onCancel }: MuebleFormProps) {
                 {...register(`params.${idx}.name` as const)}
               />
               {errors.params?.[idx]?.name && (
-                <p className="text-destructive text-xs">{errors.params[idx]?.name?.message}</p>
+                <p className="text-cp-danger text-xs">{errors.params[idx]?.name?.message}</p>
               )}
             </div>
             <Input

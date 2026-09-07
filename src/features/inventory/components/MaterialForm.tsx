@@ -182,7 +182,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
         <Label htmlFor="name">Nombre del material</Label>
         <Input id="name" {...register('name')} placeholder="Ej: Madera MDF 18mm" />
         {errors.name && (
-          <p className="text-destructive text-xs">{errors.name.message}</p>
+          <p className="text-cp-danger text-xs">{errors.name.message}</p>
         )}
       </div>
 
@@ -246,7 +246,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
             {...register('price_per_unit')}
           />
           {errors.price_per_unit && (
-            <p className="text-destructive text-xs">{errors.price_per_unit.message}</p>
+            <p className="text-cp-danger text-xs">{errors.price_per_unit.message}</p>
           )}
         </div>
 
@@ -255,7 +255,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
           <Label htmlFor="stock">Stock actual</Label>
           <Input id="stock" type="number" min="0" step="0.01" {...register('stock')} />
           {errors.stock && (
-            <p className="text-destructive text-xs">{errors.stock.message}</p>
+            <p className="text-cp-danger text-xs">{errors.stock.message}</p>
           )}
         </div>
 
@@ -270,15 +270,15 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
             {...register('min_stock')}
           />
           {errors.min_stock && (
-            <p className="text-destructive text-xs">{errors.min_stock.message}</p>
+            <p className="text-cp-danger text-xs">{errors.min_stock.message}</p>
           )}
         </div>
       </div>
 
       {/* Sección presentación: pack opcional */}
-      <div className="space-y-3 rounded-md border border-border/60 p-3">
+      <div className="space-y-3 rounded-md border border-line/60 p-3">
         <p className="text-sm font-medium">Presentación (opcional)</p>
-        <p className="text-xs text-muted-foreground -mt-2">
+        <p className="text-xs text-ink3 -mt-2">
           Si el material se compra en pack (ej: listones de a 10), indicá cuántas unidades trae.
           El stock se maneja siempre en unidades.
         </p>
@@ -295,7 +295,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
               {...register('pack_size')}
             />
             {errors.pack_size && (
-              <p className="text-destructive text-xs">{errors.pack_size.message}</p>
+              <p className="text-cp-danger text-xs">{errors.pack_size.message}</p>
             )}
           </div>
           <div className="space-y-1">
@@ -310,7 +310,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
               onChange={onPackPriceChange}
               disabled={!packSize || (typeof packSize === 'number' && packSize < 2)}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-ink3">
               Editar este campo recalcula el precio unitario automáticamente.
             </p>
           </div>
@@ -319,7 +319,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
 
       {/* Sección madera: subtipo + medidas */}
       {isWood && (
-        <div className="space-y-3 rounded-md border border-border/60 p-3">
+        <div className="space-y-3 rounded-md border border-line/60 p-3">
           <p className="text-sm font-medium">Medidas de la pieza de stock</p>
 
           <div className="space-y-1">
@@ -359,7 +359,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
                 {...register('length_cm')}
               />
               {errors.length_cm && (
-                <p className="text-destructive text-xs">{errors.length_cm.message}</p>
+                <p className="text-cp-danger text-xs">{errors.length_cm.message}</p>
               )}
             </div>
             <div className="space-y-1">
@@ -373,7 +373,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
                 {...register('width_cm')}
               />
               {errors.width_cm && (
-                <p className="text-destructive text-xs">{errors.width_cm.message}</p>
+                <p className="text-cp-danger text-xs">{errors.width_cm.message}</p>
               )}
             </div>
             <div className="space-y-1">
@@ -387,7 +387,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
                 {...register('thickness_cm')}
               />
               {errors.thickness_cm && (
-                <p className="text-destructive text-xs">{errors.thickness_cm.message}</p>
+                <p className="text-cp-danger text-xs">{errors.thickness_cm.message}</p>
               )}
             </div>
           </div>
@@ -396,7 +396,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
 
       {/* Sección líquidos: volumen por envase */}
       {isLiquid && (
-        <div className="space-y-3 rounded-md border border-border/60 p-3">
+        <div className="space-y-3 rounded-md border border-line/60 p-3">
           <p className="text-sm font-medium">Volumen por envase</p>
           <div className="space-y-1">
             <Label htmlFor="volume_ml">Volumen (ml)</Label>
@@ -409,7 +409,7 @@ export function MaterialForm({ material, onSuccess, onCancel }: MaterialFormProp
               {...register('volume_ml')}
             />
             {errors.volume_ml && (
-              <p className="text-destructive text-xs">{errors.volume_ml.message}</p>
+              <p className="text-cp-danger text-xs">{errors.volume_ml.message}</p>
             )}
           </div>
         </div>

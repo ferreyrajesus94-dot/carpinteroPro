@@ -102,13 +102,13 @@ export function TemplateEditor() {
           {templates.map((t) => (
             <div
               key={t.id}
-              className={`flex items-center justify-between rounded-md border px-3 py-2 cursor-pointer text-sm ${selected?.id === t.id ? 'border-primary bg-accent' : 'hover:bg-muted'}`}
+              className={`flex items-center justify-between rounded-md border px-3 py-2 cursor-pointer text-sm ${selected?.id === t.id ? 'border-cp-accent bg-cp-accent-soft' : 'hover:bg-cp-bg2'}`}
               onClick={() => handleSelect(t)}
             >
               <span className="truncate">{t.name}{t.is_default ? ' ★' : ''}</span>
               <button
                 onClick={(e) => { e.stopPropagation(); setDeleteTargetId(t.id) }}
-                className="text-destructive text-xs ml-2 opacity-60 hover:opacity-100"
+                className="text-cp-danger text-xs ml-2 opacity-60 hover:opacity-100"
               >
                 ✕
               </button>
@@ -140,13 +140,13 @@ export function TemplateEditor() {
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Variables disponibles (click para insertar)</Label>
+              <Label className="text-xs text-ink3">Variables disponibles (click para insertar)</Label>
               <div className="flex flex-wrap gap-1">
                 {AVAILABLE_VARS.map((v) => (
                   <button
                     key={v}
                     onClick={() => insertVar(v)}
-                    className="rounded-full border px-2 py-0.5 text-xs font-mono hover:bg-accent"
+                    className="rounded-full border px-2 py-0.5 text-xs font-mono hover:bg-cp-accent-soft"
                   >
                     {v}
                   </button>
@@ -161,7 +161,7 @@ export function TemplateEditor() {
                   value={editBody}
                   onChange={(e) => setEditBody(e.target.value)}
                   rows={12}
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full rounded-md border bg-cp-bg2 px-3 py-2 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-cp-accent"
                 />
               </div>
               <div className="flex-1 space-y-1">
@@ -185,7 +185,7 @@ export function TemplateEditor() {
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+          <div className="flex-1 flex items-center justify-center text-ink3 text-sm">
             Seleccioná una plantilla para editarla.
           </div>
         )}

@@ -106,7 +106,7 @@ export function ClientForm({ open, onOpenChange, client, onCreated, onUpdated }:
           <div className="space-y-1">
             <Label htmlFor="client-name">Nombre *</Label>
             <Input id="client-name" {...register('name')} placeholder="Nombre completo" />
-            {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
+            {errors.name && <p className="text-cp-danger text-xs">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-1">
@@ -117,7 +117,7 @@ export function ClientForm({ open, onOpenChange, client, onCreated, onUpdated }:
           <div className="space-y-1">
             <Label htmlFor="client-email">Email</Label>
             <Input id="client-email" type="email" {...register('email')} placeholder="cliente@ejemplo.com" />
-            {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
+            {errors.email && <p className="text-cp-danger text-xs">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-1">

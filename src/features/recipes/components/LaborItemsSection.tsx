@@ -69,19 +69,19 @@ export function LaborItemsSection({
           <div key={field.id} className="space-y-1">
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
-                <Label className="text-xs text-muted-foreground">Descripción</Label>
+                <Label className="text-xs text-ink3">Descripción</Label>
                 <Input
                   {...register(`labor_items.${index}.description`)}
                   placeholder="Ej: Armado y lustrado"
                 />
                 {errors.labor_items?.[index]?.description && (
-                  <p className="text-destructive text-xs">
+                  <p className="text-cp-danger text-xs">
                     {errors.labor_items[index]?.description?.message}
                   </p>
                 )}
               </div>
               <div className="w-20 space-y-1">
-                <Label className="text-xs text-muted-foreground">Horas</Label>
+                <Label className="text-xs text-ink3">Horas</Label>
                 <Input
                   type="number"
                   min="0"
@@ -91,7 +91,7 @@ export function LaborItemsSection({
                 />
               </div>
               <div className="w-28 space-y-1">
-                <Label className="text-xs text-muted-foreground">Tarifa/h</Label>
+                <Label className="text-xs text-ink3">Tarifa/h</Label>
                 <Input
                   type="number"
                   min="0"
@@ -101,11 +101,11 @@ export function LaborItemsSection({
                 />
               </div>
               <Button type="button" variant="ghost" size="icon" onClick={() => onRemove(index)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="h-4 w-4 text-cp-danger" />
               </Button>
             </div>
             {subtotal > 0 && (
-              <p className="text-xs text-muted-foreground pl-1">{formatARS(subtotal)}</p>
+              <p className="text-xs text-ink3 pl-1">{formatARS(subtotal)}</p>
             )}
           </div>
         )

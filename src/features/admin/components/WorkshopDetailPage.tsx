@@ -56,7 +56,7 @@ export function WorkshopDetailPage() {
 				className="rounded-xl border border-line bg-cp-surface p-8 text-center"
 			>
 				<i
-					className={`fi ${isNotFound ? "fi-rr-search-alt" : "fi-rr-exclamation-circle"} mb-3 block text-3xl ${isNotFound ? "text-ink3" : "text-destructive"}`}
+					className={`fi ${isNotFound ? "fi-rr-search-alt" : "fi-rr-exclamation-circle"} mb-3 block text-3xl ${isNotFound ? "text-ink3" : "text-cp-danger"}`}
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">

@@ -12,7 +12,7 @@ export function AdminLayout() {
 	const webhookFailures = overview.data?.support?.recentWebhookFailures ?? 0;
 
 	return (
-		<div className="flex min-h-screen bg-background">
+		<div className="flex min-h-screen bg-cp-bg">
 			<aside className="hidden w-64 flex-col border-r border-line bg-cp-surface lg:flex">
 				<div className="border-b border-line px-4 py-4">
 					<Eyebrow as="p" variant="mono">Plataforma</Eyebrow>

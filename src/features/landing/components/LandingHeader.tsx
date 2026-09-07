@@ -26,7 +26,7 @@ export function LandingHeader({
 		<header
 			className={`fixed top-0 left-0 right-0 z-50 transition-colors ${
 				scrolled
-					? "bg-background/90 backdrop-blur shadow-sm border-b border-line"
+					? "bg-cp-surface/90 backdrop-blur shadow-sm border-b border-line"
 					: "bg-transparent"
 			}`}
 		>
@@ -100,7 +100,7 @@ export function LandingHeader({
 
 			{/* Mobile menu */}
 			{mobileMenuOpen && (
-				<div className="border-t border-line bg-background px-6 py-4 md:hidden">
+				<div className="border-t border-line bg-cp-bg px-6 py-4 md:hidden">
 					{navItems.map((item) => (
 						<a
 							key={item.href}

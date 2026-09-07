@@ -40,7 +40,7 @@ export function KanbanCard({
 				transform: CSS.Translate.toString(transform),
 				opacity: isDragging ? 0.4 : 1,
 			}}
-			className={`bg-card text-card-foreground rounded-lg border border-border p-3 shadow-sm hover:shadow-md transition-shadow space-y-2 ${draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+			className={`bg-cp-surface text-ink rounded-lg border border-line p-3 shadow-sm hover:shadow-md transition-shadow space-y-2 ${draggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
 			onClick={() => {
 				if (!isDragging) navigate(`/quotes/${quote.id}`);
 			}}
@@ -48,7 +48,7 @@ export function KanbanCard({
 			{...listeners}
 		>
 			<div className="flex items-center justify-between">
-				<span className="text-xs font-mono text-muted-foreground">
+				<span className="text-xs font-mono text-ink3">
 					{quote.quote_number}
 				</span>
 				<span
@@ -60,7 +60,7 @@ export function KanbanCard({
 			<p className="text-sm font-medium leading-tight">
 				{quote.furniture_name}
 			</p>
-			<p className="text-xs text-muted-foreground">{clientName}</p>
+			<p className="text-xs text-ink3">{clientName}</p>
 			<p className="text-sm font-semibold text-right">
 				{formatCurrency(salePrice)}
 			</p>

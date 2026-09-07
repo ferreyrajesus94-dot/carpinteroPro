@@ -21,7 +21,7 @@ export function PriceHistoryChart({ material }: PriceHistoryChartProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+      <div className="flex items-center justify-center h-40 text-ink3 text-sm">
         Cargando historial...
       </div>
     )
@@ -29,7 +29,7 @@ export function PriceHistoryChart({ material }: PriceHistoryChartProps) {
 
   if (history.length === 0) {
     return (
-      <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
+      <div className="flex items-center justify-center h-40 text-ink3 text-sm">
         Sin cambios de precio registrados aún.
       </div>
     )
@@ -52,7 +52,7 @@ export function PriceHistoryChart({ material }: PriceHistoryChartProps) {
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">
+      <p className="text-xs text-ink3">
         Precio actual: <strong>{formatCurrency(material.price_per_unit)}</strong>
         {history.length > 0 && (
           <>
@@ -85,7 +85,7 @@ export function PriceHistoryChart({ material }: PriceHistoryChartProps) {
             strokeWidth={2}
             dot={{ r: 3 }}
             activeDot={{ r: 5 }}
-            className="stroke-primary"
+            className="stroke-cp-accent"
           />
         </LineChart>
       </ResponsiveContainer>

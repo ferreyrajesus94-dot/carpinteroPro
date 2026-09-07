@@ -27,7 +27,7 @@ export function ClientSection({
 }: ClientSectionProps) {
 	return (
 		<section className="space-y-3">
-			<h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+			<h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">
 				Cliente
 			</h2>
 			<div className="flex gap-2">

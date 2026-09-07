@@ -131,7 +131,7 @@ export function StockMovementLedgerTable({
 							<TableCell>
 								<span
 									className={`font-mono font-semibold ${
-										row.delta > 0 ? "text-green-600" : "text-destructive"
+										row.delta > 0 ? "text-green-600" : "text-cp-danger"
 									}`}
 								>
 									{formatSignedQuantity(row.delta)}

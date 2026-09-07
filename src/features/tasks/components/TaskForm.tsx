@@ -132,7 +132,7 @@ export function TaskForm({ open, onOpenChange, task }: TaskFormProps) {
               placeholder="Comprar tornillos 3x30, llamar a Juan…"
               autoFocus
             />
-            {errors.title && <p className="text-destructive text-xs">{errors.title.message}</p>}
+            {errors.title && <p className="text-cp-danger text-xs">{errors.title.message}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">

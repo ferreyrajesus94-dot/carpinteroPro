@@ -95,7 +95,7 @@ function AuthProfileRecoveryScreen({
 	});
 
 	return (
-		<main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+		<main className="flex min-h-screen items-center justify-center bg-cp-bg px-4 py-8">
 			<section className="w-full max-w-md rounded-xl border border-line bg-cp-surface p-6 text-center shadow-sm">
 				<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cp-accent-soft text-cp-accent">
 					<i
@@ -192,7 +192,7 @@ function AuthenticatedAppShell({
 	}
 
 	const shell = wizard ? (
-		<div className="flex h-screen flex-col bg-background">
+		<div className="flex h-screen flex-col bg-cp-bg">
 			<OfflineBanner />
 			<MaintenanceBanner />
 			<a
@@ -206,7 +206,7 @@ function AuthenticatedAppShell({
 			</main>
 		</div>
 	) : (
-		<div className="flex h-screen bg-background">
+		<div className="flex h-screen bg-cp-bg">
 			{/* === SIDEBAR DESKTOP ≥1024 === */}
 			<aside className="hidden lg:flex lg:w-60 lg:flex-col border-r border-line bg-cp-surface">
 				<div className="flex h-14 items-center gap-2 px-4 border-b border-line">

@@ -84,7 +84,7 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="rounded-md border p-3 text-sm">
         <p className="font-medium">{material.name}</p>
-        <p className="text-muted-foreground">
+        <p className="text-ink3">
           Stock actual: <strong>{material.stock}</strong> {material.unit}
         </p>
       </div>
@@ -135,7 +135,7 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
           required
         />
         {packModeActive && isValid && (
-          <p className="text-muted-foreground text-xs">
+          <p className="text-ink3 text-xs">
             ≈ {effectiveAmount} {material.unit}
           </p>
         )}
@@ -165,7 +165,7 @@ export function StockAdjustDialog({ material, onSuccess, onCancel }: StockAdjust
       </div>
 
       {resultingStock !== null && (
-        <p className={`text-sm ${wouldGoNegative ? 'text-destructive' : 'text-muted-foreground'}`}>
+        <p className={`text-sm ${wouldGoNegative ? 'text-cp-danger' : 'text-ink3'}`}>
           Stock resultante: <strong>{resultingStock}</strong> {material.unit}
           {wouldGoNegative && ' — no puede quedar negativo'}
         </p>

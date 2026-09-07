@@ -264,10 +264,10 @@ export function PayoutsTab() {
 			<section
 				role="alert"
 				aria-label="Error al cargar pagos"
-				className="rounded-xl border border-destructive/20 bg-destructive/5 p-6 text-center"
+				className="rounded-xl border border-cp-danger/20 bg-cp-danger/5 p-6 text-center"
 			>
 				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-destructive"
+					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-cp-danger"
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">

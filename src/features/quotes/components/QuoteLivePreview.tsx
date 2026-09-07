@@ -33,13 +33,13 @@ export function QuoteLivePreview({ recipeCost, extras, marginMode, marginPct }: 
       </CardHeader>
       <CardContent className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Costo del mueble</span>
+          <span className="text-ink3">Costo del mueble</span>
           <span>{formatCurrency(recipeCost)}</span>
         </div>
 
         {visibleExtras.map((e, i) => (
           <div key={i} className="flex justify-between">
-            <span className="text-muted-foreground truncate max-w-[60%]">{e.description || 'Extra'}</span>
+            <span className="text-ink3 truncate max-w-[60%]">{e.description || 'Extra'}</span>
             <span>{formatCurrency(e.amount)}</span>
           </div>
         ))}
@@ -47,12 +47,12 @@ export function QuoteLivePreview({ recipeCost, extras, marginMode, marginPct }: 
         <Separator />
 
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Subtotal</span>
+          <span className="text-ink3">Subtotal</span>
           <span>{formatCurrency(result.costBase)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-muted-foreground">
+          <span className="text-ink3">
             Margen ({marginPct}%{marginMode === 'on_price' ? ' sobre precio' : ''})
           </span>
           <span>{formatCurrency(result.marginAmount)}</span>
@@ -62,7 +62,7 @@ export function QuoteLivePreview({ recipeCost, extras, marginMode, marginPct }: 
 
         <div className="flex justify-between font-bold text-lg">
           <span>Total</span>
-          <span className="text-primary">{formatCurrency(result.salePrice)}</span>
+          <span className="text-cp-accent">{formatCurrency(result.salePrice)}</span>
         </div>
       </CardContent>
     </Card>

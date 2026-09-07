@@ -44,15 +44,15 @@ export function CutPiecesSection({ pieces, boardLength, boardWidth, onChange }: 
   const areaM2 = totalPieceAreaM2(validPieces)
 
   return (
-    <div className="mt-2 rounded-md border border-dashed bg-muted/30 p-3 space-y-2">
-      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+    <div className="mt-2 rounded-md border border-dashed bg-cp-bg2/30 p-3 space-y-2">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-ink3">
         <Scissors className="h-3.5 w-3.5" />
         Piezas a cortar
       </div>
 
       {pieces.length > 0 && (
         <div className="space-y-1.5">
-          <div className="grid grid-cols-[1fr_60px_60px_50px_32px] gap-1 text-xs text-muted-foreground px-0.5">
+          <div className="grid grid-cols-[1fr_60px_60px_50px_32px] gap-1 text-xs text-ink3 px-0.5">
             <span>Nombre</span>
             <span>Largo</span>
             <span>Ancho</span>
@@ -101,7 +101,7 @@ export function CutPiecesSection({ pieces, boardLength, boardWidth, onChange }: 
                 className="h-7 w-7"
                 onClick={() => removePiece(i)}
               >
-                <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                <Trash2 className="h-3.5 w-3.5 text-cp-danger" />
               </Button>
             </div>
           ))}
@@ -114,14 +114,14 @@ export function CutPiecesSection({ pieces, boardLength, boardWidth, onChange }: 
       </Button>
 
       {validPieces.length > 0 && (
-        <div className="text-xs text-muted-foreground border-t pt-2 space-y-0.5">
+        <div className="text-xs text-ink3 border-t pt-2 space-y-0.5">
           <span>
             {validPieces.reduce((s, p) => s + p.quantity, 0)} pieza
             {validPieces.reduce((s, p) => s + p.quantity, 0) !== 1 ? 's' : ''} ·{' '}
             {areaM2.toFixed(3)} m²
           </span>
           {nesting && (
-            <span className="block font-medium text-foreground">
+            <span className="block font-medium text-ink">
               → {nesting.boardsNeeded} placa{nesting.boardsNeeded !== 1 ? 's' : ''} necesaria
               {nesting.boardsNeeded !== 1 ? 's' : ''} ·{' '}
               {(nesting.efficiency * 100).toFixed(0)}% aprovechamiento

@@ -141,7 +141,7 @@ export function EventTimeline({ events }: EventTimelineProps) {
 					<li
 						key={event.id}
 						data-testid="event-timeline-item"
-						className="flex items-start gap-3 rounded-md border border-line bg-background p-3"
+						className="flex items-start gap-3 rounded-md border border-line bg-cp-bg2 p-3"
 					>
 						<span
 							aria-hidden="true"

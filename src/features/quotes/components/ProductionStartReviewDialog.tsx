@@ -143,7 +143,7 @@ export function ProductionStartReviewDialog({
 									? "Producción ya iniciada"
 									: "Producción iniciada"}
 							</p>
-							<p className="text-xs text-muted-foreground mt-1">
+							<p className="text-xs text-ink3 mt-1">
 								{result.note && result.note.includes("batch already exists")
 									? "Ya existe un lote de descuento activo para este presupuesto. No se crearon nuevos movimientos."
 									: result.movements_created > 0
@@ -159,7 +159,7 @@ export function ProductionStartReviewDialog({
 						</div>
 
 						{result.shortage_detected && (
-							<p className="text-xs text-destructive font-medium">
+							<p className="text-xs text-cp-danger font-medium">
 								Hay materiales con stock insuficiente. Revisá el movimiento de
 								stock para más detalles.
 							</p>
@@ -252,7 +252,7 @@ export function ProductionStartReviewDialog({
 						)}
 
 						{/* Setting info */}
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-ink3">
 							{autoStockDiscount
 								? "Modo automático: se descontará stock al iniciar producción."
 								: "Modo manual: se iniciará producción sin descontar stock."}

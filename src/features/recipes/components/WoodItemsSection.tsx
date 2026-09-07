@@ -116,7 +116,7 @@ export function WoodItemsSection({
           <div key={field.id} className="space-y-1">
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
-                <Label className="text-xs text-muted-foreground">Material</Label>
+                <Label className="text-xs text-ink3">Material</Label>
                 <Select
                   value={woodItemsWatch[index]?.material_id ?? ''}
                   onValueChange={(v) => setValue(`wood_items.${index}.material_id`, v)}
@@ -131,7 +131,7 @@ export function WoodItemsSection({
                   </SelectContent>
                 </Select>
                 {errors.wood_items?.[index]?.material_id && (
-                  <p className="text-destructive text-xs">
+                  <p className="text-cp-danger text-xs">
                     {errors.wood_items[index]?.material_id?.message}
                   </p>
                 )}
@@ -140,7 +140,7 @@ export function WoodItemsSection({
               {/* Campo de cantidad: visible solo si NO hay piezas definidas */}
               {!hasCutPieces && (
                 <div className="w-24 space-y-1">
-                  <Label className="text-xs text-muted-foreground">
+                  <Label className="text-xs text-ink3">
                     {usage ? labelFor(usage.mode, usage.inputUnitLabel) : 'Cantidad'}
                   </Label>
                   {/* aria-label added so the visible "Cantidad" / "Merma %" labels are programmatically associated with the inputs (the surrounding <Label> uses className only, no htmlFor). */}
@@ -153,7 +153,7 @@ export function WoodItemsSection({
                     placeholder="0"
                   />
                   {errors.wood_items?.[index]?.quantity && (
-                    <p className="text-destructive text-xs">
+                    <p className="text-cp-danger text-xs">
                       {errors.wood_items[index]?.quantity?.message}
                     </p>
                   )}
@@ -161,7 +161,7 @@ export function WoodItemsSection({
               )}
 
               <div className="w-20 space-y-1">
-                <Label className="text-xs text-muted-foreground">Merma %</Label>
+                <Label className="text-xs text-ink3">Merma %</Label>
                 <Input
                   type="number"
                   min="0"
@@ -173,12 +173,12 @@ export function WoodItemsSection({
                 />
               </div>
               <Button type="button" variant="ghost" size="icon" onClick={() => onRemove(index)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
+                <Trash2 className="h-4 w-4 text-cp-danger" />
               </Button>
             </div>
 
             {usage && qty > 0 && usage.mode !== 'flat' && (
-              <p className="text-xs text-muted-foreground pl-1">
+              <p className="text-xs text-ink3 pl-1">
                 {hasCutPieces
                   ? `${qty.toFixed(3)} m² calculado desde piezas`
                   : hintFor(usage)}{' '}
@@ -222,7 +222,7 @@ export function WoodItemsSection({
         Agregar madera
       </Button>
       {woodMaterials.length === 0 && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-ink3">
           No hay maderas en el inventario. Agregá materiales de categoría "Madera" primero.
         </p>
       )}

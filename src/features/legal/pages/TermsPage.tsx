@@ -12,11 +12,11 @@ export function TermsPage() {
 	const supportEmail = getSupportEmail() ?? "soporte@example.com";
 	const supportHref = getSupportMailtoHref();
 	return (
-		<div className="min-h-screen bg-background">
+		<div className="min-h-screen bg-cp-bg">
 			<header className="border-b border-line bg-cp-surface px-6 py-4 flex items-center justify-between">
 				<Link
 					to="/login"
-					className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+					className="flex items-center gap-2 text-sm text-ink3 hover:text-ink transition-colors"
 				>
 					<i className="fi fi-rr-arrow-left text-sm leading-none" />
 					Volver
@@ -31,7 +31,7 @@ export function TermsPage() {
 					<h1 className="text-2xl font-bold text-ink">
 						Términos y Condiciones
 					</h1>
-					<p className="text-sm text-muted-foreground">
+					<p className="text-sm text-ink2">
 						Última actualización: {LAST_UPDATED}
 					</p>
 				</div>
@@ -166,12 +166,12 @@ export function TermsPage() {
 					</p>
 				</Section>
 
-				<p className="text-sm text-muted-foreground pt-4 border-t border-line">
+				<p className="text-sm text-ink3 pt-4 border-t border-line">
 					Consultas:{" "}
 					{supportHref ? (
 						<a
 							href={supportHref}
-							className="underline hover:text-foreground"
+							className="underline hover:text-ink"
 						>
 							{supportEmail}
 						</a>
@@ -188,7 +188,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
 		<section className="space-y-3">
 			<h2 className="text-base font-semibold text-ink">{title}</h2>
-			<div className="text-sm text-muted-foreground leading-relaxed space-y-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
+			<div className="text-sm text-ink2 leading-relaxed space-y-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
 				{children}
 			</div>
 		</section>

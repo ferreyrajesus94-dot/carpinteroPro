@@ -21,17 +21,17 @@ export function QuoteExtrasFieldArray({ control, register, errors }: QuoteExtras
       {fields.map((field, index) => (
         <div key={field.id} className="flex items-end gap-2">
           <div className="flex-1 space-y-1">
-            <Label className="text-xs text-muted-foreground">Descripción</Label>
+            <Label className="text-xs text-ink3">Descripción</Label>
             <Input
               {...register(`extras.${index}.description`)}
               placeholder="Ej: Mano de obra, traslado..."
             />
             {errors.extras?.[index]?.description && (
-              <p className="text-destructive text-xs">{errors.extras[index]?.description?.message}</p>
+              <p className="text-cp-danger text-xs">{errors.extras[index]?.description?.message}</p>
             )}
           </div>
           <div className="w-28 space-y-1">
-            <Label className="text-xs text-muted-foreground">Monto</Label>
+            <Label className="text-xs text-ink3">Monto</Label>
             <Input
               type="number"
               min="0"
@@ -41,7 +41,7 @@ export function QuoteExtrasFieldArray({ control, register, errors }: QuoteExtras
             />
           </div>
           <div className="flex flex-col items-center gap-1 pb-1">
-            <Label className="text-xs text-muted-foreground">Visible</Label>
+            <Label className="text-xs text-ink3">Visible</Label>
             <Controller
               control={control}
               name={`extras.${index}.show_in_quote`}
@@ -51,7 +51,7 @@ export function QuoteExtrasFieldArray({ control, register, errors }: QuoteExtras
             />
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
-            <Trash2 className="h-4 w-4 text-destructive" />
+            <Trash2 className="h-4 w-4 text-cp-danger" />
           </Button>
         </div>
       ))}

@@ -76,7 +76,7 @@ export function ProductionPipelineWidget() {
 		return (
 			<div
 				data-testid="pipeline-widget-loading"
-				className="rounded-xl border border-line bg-surface p-4"
+				className="rounded-xl border border-line bg-cp-surface p-4"
 				role="status"
 				aria-label="Cargando pipeline de producción"
 			>
@@ -108,42 +108,56 @@ export function ProductionPipelineWidget() {
 	return (
 		<div
 			data-testid="pipeline-widget"
-			className="rounded-xl border border-line bg-surface p-4"
+			className="rounded-xl border border-line bg-cp-surface p-4"
 		>
 			<header className="mb-3 flex items-baseline justify-between">
 				<Eyebrow as="h2" variant="mono" className="text-[10.5px]">
 					Pipeline de producción
 				</Eyebrow>
 				<p className="font-mono text-[12px] text-ink2">
-					<span data-testid="pipeline-total">{total}</span>{" "}
+					<span
+						data-testid="pipeline-total"
+						className="text-cp-accent font-bold tabular-nums"
+					>
+						{total}
+					</span>{" "}
 					<span className="text-ink3">activas</span>
 				</p>
 			</header>
 
 			<ul
 				data-testid="pipeline-swatches"
-				className="flex items-center gap-1.5"
+				className="grid grid-cols-5 gap-2"
 				aria-label="Órdenes activas por estado"
 			>
 				{PRODUCTION_ORDER_ACTIVE_STATES.map((state) => {
 					const count = getCountForState(data, state);
+					const label = ACTIVE_STATE_LABELS[state];
+					const isActive = state === "in_progress";
 					return (
 						<li
 							key={state}
 							data-testid="pipeline-swatch"
 							data-state={state}
-							className="flex min-w-0 flex-1 flex-col items-center gap-1"
+							aria-label={`${label}: ${count}`}
+							className={`rounded-md border p-2 flex flex-col items-center gap-1 ${
+								isActive
+									? "border-cp-accent bg-cp-accent-soft"
+									: "border-line bg-cp-surface"
+							}`}
 						>
 							<span
 								aria-hidden="true"
-								className={`block h-2 w-full rounded-full ${ACTIVE_STATE_SWATCH_BG[state]}`}
+								className={`block h-1.5 w-full rounded-full ${ACTIVE_STATE_SWATCH_BG[state]}`}
 							/>
-							<span className="text-[9.5px] uppercase tracking-wide text-ink3 truncate w-full text-center">
-								{ACTIVE_STATE_LABELS[state]}
+							<span className="text-[10px] uppercase tracking-wide text-ink3 truncate w-full text-center">
+								{label}
 							</span>
 							<span
 								data-testid={`pipeline-swatch-count-${state}`}
-								className="font-mono text-[12px] font-semibold text-ink"
+								className={`font-mono text-[14px] font-bold tabular-nums ${
+									isActive ? "text-cp-accent" : "text-ink"
+								}`}
 							>
 								{count}
 							</span>

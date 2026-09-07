@@ -78,7 +78,7 @@ export function ExtraItemsSection({
         return (
           <div key={field.id} className="flex items-end gap-2">
             <div className="flex-1 space-y-1">
-              <Label className="text-xs text-muted-foreground">Material</Label>
+              <Label className="text-xs text-ink3">Material</Label>
               <Select
                 value={extraItemsWatch[index]?.material_id ?? ''}
                 onValueChange={(v) => setValue(`extra_items.${index}.material_id`, v)}
@@ -93,13 +93,13 @@ export function ExtraItemsSection({
                 </SelectContent>
               </Select>
               {errors.extra_items?.[index]?.material_id && (
-                <p className="text-destructive text-xs">
+                <p className="text-cp-danger text-xs">
                   {errors.extra_items[index]?.material_id?.message}
                 </p>
               )}
             </div>
             <div className="w-24 space-y-1">
-              <Label className="text-xs text-muted-foreground">
+              <Label className="text-xs text-ink3">
                 Cantidad {mat ? `(${mat.unit})` : ''}
               </Label>
               <Input
@@ -110,13 +110,13 @@ export function ExtraItemsSection({
                 placeholder="0"
               />
               {errors.extra_items?.[index]?.quantity && (
-                <p className="text-destructive text-xs">
+                <p className="text-cp-danger text-xs">
                   {errors.extra_items[index]?.quantity?.message}
                 </p>
               )}
             </div>
             <div className="w-20 space-y-1">
-              <Label className="text-xs text-muted-foreground">Merma %</Label>
+              <Label className="text-xs text-ink3">Merma %</Label>
               <Input
                 type="number"
                 min="0"
@@ -127,7 +127,7 @@ export function ExtraItemsSection({
               />
             </div>
             <Button type="button" variant="ghost" size="icon" onClick={() => onRemove(index)}>
-              <Trash2 className="h-4 w-4 text-destructive" />
+              <Trash2 className="h-4 w-4 text-cp-danger" />
             </Button>
             <Input
               className="col-span-full text-xs"
@@ -148,7 +148,7 @@ export function ExtraItemsSection({
         Agregar gasto extra
       </Button>
       {extraMaterials.length === 0 && (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-ink3">
           No hay extras en el inventario. Agregá materiales de otra categoría primero.
         </p>
       )}

@@ -15,7 +15,7 @@ export function LandingSection({
 		<section
 			id={id}
 			aria-label={ariaLabel}
-			className={`py-16 md:py-24 ${variant === "alt" ? "bg-cp-bg2" : "bg-background"}`}
+			className={`py-16 md:py-24 ${variant === "alt" ? "bg-cp-bg2" : "bg-cp-bg"}`}
 		>
 			<div className="mx-auto max-w-6xl px-6 sm:px-8">{children}</div>
 		</section>

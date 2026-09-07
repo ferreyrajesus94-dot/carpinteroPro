@@ -30,13 +30,13 @@ export function BillingBlockedScreen({
 		: "Acceso suspendido";
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-background p-4">
+		<div className="flex min-h-screen items-center justify-center bg-cp-bg p-4">
 			<Card className="w-full max-w-md">
 				<CardHeader>
 					<CardTitle className="text-xl">CarpinteroPro</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<p className="text-sm text-muted-foreground">{statusText}</p>
+					<p className="text-sm text-ink2">{statusText}</p>
 					<p className="text-sm">
 						Tu acceso a la app está suspendido. Para seguir usando
 						CarpinteroPro, necesitás una suscripción activa o completar el pago
@@ -56,14 +56,14 @@ export function BillingBlockedScreen({
 							Cerrar sesión
 						</Button>
 					</div>
-					<div className="text-center text-xs text-muted-foreground">
+					<div className="text-center text-xs text-ink3">
 						<span>¿Necesitás ayuda? </span>
 						<a
 							data-testid="billing-whatsapp-link"
 							href={whatsappHref}
 							target="_blank"
 							rel="noreferrer"
-							className="underline hover:text-foreground"
+							className="underline hover:text-ink"
 						>
 							WhatsApp
 						</a>
@@ -73,7 +73,7 @@ export function BillingBlockedScreen({
 								<a
 									data-testid="billing-support-link"
 									href={supportHref}
-									className="underline hover:text-foreground"
+									className="underline hover:text-ink"
 								>
 									email
 								</a>

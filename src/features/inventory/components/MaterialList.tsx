@@ -199,7 +199,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
           onClick={() => setDeleteTarget(material)}
           title="Eliminar"
         >
-          <Trash2 className="h-4 w-4 text-destructive" />
+          <Trash2 className="h-4 w-4 text-cp-danger" />
         </Button>
         {isLowStock && (
           <Badge variant="destructive" className="gap-1 text-xs">
@@ -268,7 +268,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
       {/* Search + filtros */}
       <div className="flex gap-2 sm:hidden">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink3" />
           <Input
             type="search"
             placeholder="Buscar..."
@@ -308,7 +308,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
 
       <div className="hidden sm:flex sm:items-center sm:flex-wrap sm:gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink3" />
           <Input
             type="search"
             placeholder="Buscar por nombre..."
@@ -318,7 +318,7 @@ export function MaterialList({ onEdit, onViewHistory, onAdjustStock, onViewStock
           />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground shrink-0">Orden:</span>
+          <span className="text-sm text-ink3 shrink-0">Orden:</span>
           <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
             <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
             <SelectContent>

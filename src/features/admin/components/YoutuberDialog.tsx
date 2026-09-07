@@ -226,7 +226,7 @@ export function YoutuberDialog({
 								{bankErrors.payoutCbu && (
 									<p
 										id="yt-payout-cbu-error"
-										className="mt-1 text-xs text-destructive"
+										className="mt-1 text-xs text-cp-danger"
 									>
 										{bankErrors.payoutCbu}
 									</p>
@@ -256,7 +256,7 @@ export function YoutuberDialog({
 								{bankErrors.payoutCvu && (
 									<p
 										id="yt-payout-cvu-error"
-										className="mt-1 text-xs text-destructive"
+										className="mt-1 text-xs text-cp-danger"
 									>
 										{bankErrors.payoutCvu}
 									</p>
@@ -339,7 +339,7 @@ export function YoutuberDialog({
 								{bankErrors.payoutHolderCuit && (
 									<p
 										id="yt-payout-holder-cuit-error"
-										className="mt-1 text-xs text-destructive"
+										className="mt-1 text-xs text-cp-danger"
 									>
 										{bankErrors.payoutHolderCuit}
 									</p>

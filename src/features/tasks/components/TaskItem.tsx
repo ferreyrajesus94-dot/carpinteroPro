@@ -17,7 +17,7 @@ interface TaskItemProps {
 }
 
 const PRIORITY_CLASSES: Record<Task['priority'], string> = {
-  alta: 'border-destructive/40 bg-destructive/10 text-destructive',
+  alta: 'border-cp-danger/40 bg-cp-danger/10 text-cp-danger',
   normal: 'border-line bg-cp-bg2 text-ink2',
   baja: 'border-sky-400/30 bg-sky-400/10 text-sky-700 dark:text-sky-300',
 }
@@ -47,7 +47,7 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
       className={cn(
         'group flex items-start gap-3 rounded-xl border p-3 transition-colors',
         isOverdue
-          ? 'border-destructive/40 bg-destructive/5'
+          ? 'border-cp-danger/40 bg-cp-danger/5'
           : 'border-line bg-surface hover:border-line2 hover:bg-cp-bg2',
         isDone && 'opacity-60'
       )}
@@ -79,7 +79,7 @@ export function TaskItem({ task, onEdit }: TaskItemProps) {
               className={cn(
                 'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px]',
                 isOverdue
-                  ? 'border-destructive/40 bg-destructive/10 text-destructive'
+                  ? 'border-cp-danger/40 bg-cp-danger/10 text-cp-danger'
                   : 'border-line bg-cp-bg2 text-ink2'
               )}
             >

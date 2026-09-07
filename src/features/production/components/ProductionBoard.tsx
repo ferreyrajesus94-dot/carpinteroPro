@@ -57,7 +57,7 @@ const OrderCard = memo(function OrderCard({ order }: { order: ProductionOrderLis
 	return (
 		<article
 			data-testid="production-order-card"
-			className="rounded-md border border-line bg-background p-3 shadow-sm"
+			className="rounded-md border border-line bg-cp-bg2 p-3 shadow-sm"
 		>
 			<p className="font-mono text-xs text-ink3">{order.production_number}</p>
 			<p className="mt-1 text-sm font-medium text-ink">{order.quote_furniture_name}</p>
@@ -168,7 +168,7 @@ export function ProductionBoard({ onStartProduction }: ProductionBoardProps) {
 							id="production-start-quote"
 							value={selectedQuoteId}
 							onChange={(e) => setSelectedQuoteId(e.target.value)}
-							className="h-10 min-w-[220px] flex-1 rounded-md border border-input bg-background px-3 text-sm"
+							className="h-10 min-w-[220px] flex-1 rounded-md border border-line bg-cp-bg2 px-3 text-sm"
 							disabled={isQuotesLoading || isQuotesError || startableQuotes.length === 0}
 						>
 							<option value="">

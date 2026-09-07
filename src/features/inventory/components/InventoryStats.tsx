@@ -70,10 +70,10 @@ export function InventoryStats() {
       {cards.map(({ label, value, icon, iconBg, iconColor, accentColor }) => (
         <div
           key={label}
-          className={`rounded-lg border border-t-2 ${accentColor} bg-card p-5 shadow-sm`}
+          className={`rounded-lg border border-t-2 ${accentColor} bg-cp-surface p-5 shadow-sm`}
         >
           <div className="flex items-start justify-between">
-            <p className="text-sm font-medium text-muted-foreground leading-snug">{label}</p>
+            <p className="text-sm font-medium text-ink3 leading-snug">{label}</p>
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${iconBg}`}>
               <i className={`fi ${icon} text-base leading-none ${iconColor}`} />
             </div>

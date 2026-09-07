@@ -67,7 +67,7 @@ export function OnboardingWizard({
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cp-accent border-t-transparent" />
       </div>
     )
   }
@@ -113,7 +113,7 @@ export function OnboardingWizard({
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div className="flex h-screen flex-col bg-cp-bg">
       {/* Header */}
       <header className="border-b border-line bg-cp-surface px-4 py-4 sm:px-8">
         <div className="mx-auto flex max-w-3xl items-center gap-2">
@@ -179,7 +179,7 @@ export function OnboardingWizard({
                     {...register('name')}
                   />
                   {errors.name && (
-                    <p className="text-xs text-destructive">{errors.name.message}</p>
+                    <p className="text-xs text-cp-danger">{errors.name.message}</p>
                   )}
                 </div>
 

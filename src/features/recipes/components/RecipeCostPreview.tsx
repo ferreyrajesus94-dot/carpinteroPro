@@ -100,13 +100,13 @@ export function RecipeCostPreview({ woodItems, extraItems, laborItems = [], mate
   const total = woodsTotal + extrasTotal + laborTotal
 
   return (
-    <div className="rounded-lg border bg-muted/40 p-4 space-y-2">
-      <h3 className="text-sm font-semibold text-muted-foreground">Costo estimado</h3>
+    <div className="rounded-lg border bg-cp-bg2/40 p-4 space-y-2">
+      <h3 className="text-sm font-semibold text-ink3">Costo estimado</h3>
 
       {woodLines.length > 0 && (
         <div className="space-y-1.5 border-b pb-2">
           {woodLines.map(({ mat, qty, waste, usage, nesting, hasCutPieces, validPieces }) => (
-            <div key={mat.id} className="text-xs text-muted-foreground space-y-0.5">
+            <div key={mat.id} className="text-xs text-ink3 space-y-0.5">
               <div className="flex justify-between gap-2">
                 <span className="truncate">
                   {mat.name}: {formatNum(qty)} {usage.inputUnitLabel}
@@ -118,10 +118,10 @@ export function RecipeCostPreview({ woodItems, extraItems, laborItems = [], mate
                 <span className="shrink-0">{formatARS(usage.subtotal)}</span>
               </div>
               {hasCutPieces && nesting && (
-                <p className="pl-2 text-foreground/70">
+                <p className="pl-2 text-ink2">
                   {validPieces.reduce((s, p) => s + p.quantity, 0)} piezas cortadas
                   {' → '}
-                  <span className="font-medium text-foreground">
+                  <span className="font-medium text-ink">
                     {nesting.boardsNeeded} placa{nesting.boardsNeeded !== 1 ? 's' : ''}
                   </span>
                   {' · '}{(nesting.efficiency * 100).toFixed(0)}% aprovechamiento
@@ -154,7 +154,7 @@ export function RecipeCostPreview({ woodItems, extraItems, laborItems = [], mate
         <span>{formatARS(total)}</span>
       </div>
       {suggestedMarginPct != null && suggestedMarginPct > 0 && total > 0 && (
-        <div className="flex justify-between text-sm text-primary">
+        <div className="flex justify-between text-sm text-cp-accent">
           <span>Precio sugerido ({suggestedMarginPct}% sobre costo)</span>
           <span className="font-semibold">{formatARS(total * (1 + suggestedMarginPct / 100))}</span>
         </div>

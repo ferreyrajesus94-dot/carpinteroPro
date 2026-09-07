@@ -14,7 +14,7 @@ interface MarginSectionProps {
 export function MarginSection({ marginModeWatch, register, errors, setValue }: MarginSectionProps) {
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Margen</h2>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">Margen</h2>
       <RadioGroup
         value={marginModeWatch}
         onValueChange={(v: string) => setValue('margin_mode', v as MarginMode)}
@@ -40,7 +40,7 @@ export function MarginSection({ marginModeWatch, register, errors, setValue }: M
           {...register('margin_pct')}
         />
         {errors.margin_pct && (
-          <p className="text-destructive text-xs">{errors.margin_pct.message}</p>
+          <p className="text-cp-danger text-xs">{errors.margin_pct.message}</p>
         )}
       </div>
     </section>

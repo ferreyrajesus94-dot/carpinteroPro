@@ -368,7 +368,7 @@ export function QuoteForm({
 	const quoteNumber = isEditing ? existingQuote?.quote_number : nextNumber;
 
 	return (
-		<div className="fixed inset-0 bg-background flex flex-col overflow-hidden z-50">
+		<div className="fixed inset-0 bg-cp-bg flex flex-col overflow-hidden z-50">
 			{isEditing && id && quoteNumber && (
 				<ProductionStartReviewDialog
 					key={id}
@@ -443,10 +443,10 @@ export function QuoteForm({
 						{/* Step 1: Cliente */}
 						{step === 1 && (
 							<div className="space-y-4">
-								<h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+								<h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">
 									¿Para quién es?
 								</h2>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-sm text-ink3">
 									Elegí un cliente existente o creá uno nuevo al vuelo.
 								</p>
 								<div className="space-y-2 max-h-96 overflow-y-auto">
@@ -469,7 +469,7 @@ export function QuoteForm({
 												/>
 												<div className="flex-1 min-w-0">
 													<p className="font-medium text-sm">{c.name}</p>
-													<p className="text-xs text-muted-foreground">
+													<p className="text-xs text-ink3">
 														{c.email || c.phone}
 													</p>
 												</div>
@@ -491,16 +491,16 @@ export function QuoteForm({
 						{/* Step 2: Mueble */}
 						{step === 2 && (
 							<div className="space-y-4">
-								<h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+								<h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">
 									¿Qué vas a hacer?
 								</h2>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-sm text-ink3">
 									Elegí una plantilla o creá uno desde cero.
 								</p>
 
 								{templates.length > 0 && (
 									<div>
-										<label className="block text-xs font-medium text-muted-foreground mb-2">
+										<label className="block text-xs font-medium text-ink3 mb-2">
 											Plantillas
 										</label>
 										<div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -523,7 +523,7 @@ export function QuoteForm({
 															: "border-line hover:border-cp-accent/50"
 													}`}
 												>
-													<div className="w-full aspect-square bg-cp-bg2 rounded mb-1 flex items-center justify-center text-xs text-muted-foreground" />
+													<div className="w-full aspect-square bg-cp-bg2 rounded mb-1 flex items-center justify-center text-xs text-ink3" />
 													<p className="font-medium text-xs line-clamp-2">
 														{t.name}
 													</p>
@@ -546,10 +546,10 @@ export function QuoteForm({
 						{/* Step 3: Extras */}
 						{step === 3 && (
 							<div className="space-y-4">
-								<h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+								<h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">
 									Costos extra
 								</h2>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-sm text-ink3">
 									Flete, instalación, herrajes, lo que se te cobra aparte.
 								</p>
 								<QuoteExtrasFieldArray
@@ -563,7 +563,7 @@ export function QuoteForm({
 						{/* Step 4: Precio */}
 						{step === 4 && (
 							<div className="space-y-6">
-								<h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+								<h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">
 									Margen y precio final
 								</h2>
 
@@ -631,7 +631,7 @@ export function QuoteForm({
 			<div className="border-t border-line bg-cp-surface px-4 py-3 sm:px-6 flex flex-col-reverse sm:flex-row gap-2 sm:gap-4 sm:items-center sm:justify-between">
 			{/* Mobile price preview */}
 				<div className="lg:hidden text-center sm:text-left">
-					<p className="text-xs text-muted-foreground">Precio final</p>
+					<p className="text-xs text-ink3">Precio final</p>
 					<p className="font-display text-xl font-semibold">
 						${(salePrice || 0).toLocaleString("es-AR")}
 					</p>

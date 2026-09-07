@@ -32,7 +32,7 @@ export function FurnitureSection({
 }: FurnitureSectionProps) {
 	return (
 		<section className="space-y-3">
-			<h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+			<h2 className="text-sm font-semibold uppercase tracking-wide text-ink3">
 				Mueble
 			</h2>
 			<div className="space-y-1">
@@ -64,7 +64,7 @@ export function FurnitureSection({
 					placeholder="Ej: Ropero 2 puertas"
 				/>
 				{errors.furniture_name && (
-					<p className="text-destructive text-xs">
+					<p className="text-cp-danger text-xs">
 						{errors.furniture_name.message}
 					</p>
 				)}

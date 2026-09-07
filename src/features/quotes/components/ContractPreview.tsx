@@ -51,7 +51,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 		editState.templateId === activeTemplateId ? editState.isEditing : false;
 
 	if (!quote)
-		return <div className="p-4 text-muted-foreground">Cargando...</div>;
+		return <div className="p-4 text-ink3">Cargando...</div>;
 
 	const calcResult = calculateQuote({
 		recipeCost: quote.recipe_cost,
@@ -139,7 +139,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 			</div>
 
 			<div className="flex items-center gap-3">
-				<span className="text-sm text-muted-foreground">Plantilla:</span>
+				<span className="text-sm text-ink3">Plantilla:</span>
 				<Select
 					value={activeTemplateId || "__none__"}
 					onValueChange={(v) =>
@@ -227,7 +227,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 							className="font-mono text-sm"
 						/>
 					) : (
-						<div className="rounded-lg border p-6 bg-card text-card-foreground text-sm leading-relaxed">
+						<div className="rounded-lg border p-6 bg-cp-surface text-ink text-sm leading-relaxed">
 							<div
 								dangerouslySetInnerHTML={{
 									__html: markdownToHtml(renderedContract),
@@ -237,7 +237,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 					)}
 				</div>
 			) : (
-				<p className="text-muted-foreground text-sm">
+				<p className="text-ink3 text-sm">
 					Seleccioná una plantilla para ver el contrato.
 				</p>
 			)}

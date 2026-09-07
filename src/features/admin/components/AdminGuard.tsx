@@ -16,7 +16,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
 	) {
 		return (
 			<div
-				className="flex min-h-screen items-center justify-center bg-background"
+				className="flex min-h-screen items-center justify-center bg-cp-bg2"
 				role="status"
 				aria-label="Cargando acceso de administrador"
 			>
@@ -31,9 +31,9 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
 	if (!auth.isPlatformAdmin) {
 		return (
-			<main className="flex min-h-screen items-center justify-center bg-background px-4 py-8">
+			<main className="flex min-h-screen items-center justify-center bg-cp-bg2 px-4 py-8">
 				<section className="w-full max-w-md rounded-xl border border-line bg-cp-surface p-6 text-center shadow-sm">
-					<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+					<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cp-danger/10 text-cp-danger">
 						<i
 							className="fi fi-rr-lock text-xl leading-none"
 							aria-hidden="true"

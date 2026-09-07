@@ -56,7 +56,7 @@ function PasswordInput({
         type="button"
         onClick={onToggleShow}
         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink3 hover:text-ink transition-colors"
       >
         <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
       </button>
@@ -106,7 +106,7 @@ export function LoginPage() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-cp-accent border-t-transparent" />
       </div>
     )
   }
@@ -191,7 +191,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-8">
+    <div className="relative flex min-h-screen items-center justify-center bg-cp-bg px-4 py-8">
       {/* Toggle modo oscuro */}
       <div className="absolute top-4 right-4">
         <ThemeToggle
@@ -204,7 +204,7 @@ export function LoginPage() {
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
           <BrandMark size="lg" shape="rounded" wordmark={false} />
-          <h1 className="text-xl font-bold text-foreground tracking-tight">CarpinteroPro</h1>
+          <h1 className="text-xl font-bold text-ink tracking-tight">CarpinteroPro</h1>
         </div>
 
         <Card>
@@ -218,8 +218,8 @@ export function LoginPage() {
                 className={cn(
                   'flex-1 py-3 text-sm font-medium transition-colors',
                   mode === m
-                    ? 'border-b-2 border-primary text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'border-b-2 border-cp-accent text-cp-accent'
+                    : 'text-ink3 hover:text-ink'
                 )}
               >
                 {m === 'login' ? 'Iniciar sesión' : 'Registrarse'}
@@ -261,17 +261,17 @@ export function LoginPage() {
                     />
                   </div>
 
-                  <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                  <label className="flex items-center gap-2 text-sm text-ink3 cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={rememberMe}
                       onChange={e => setRememberMe(e.target.checked)}
-                      className="h-4 w-4 rounded border-input accent-primary cursor-pointer"
+                      className="h-4 w-4 rounded border-line accent-cp-accent cursor-pointer"
                     />
                     Recordarme en este equipo
                   </label>
 
-                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  {error && <p className="text-sm text-cp-danger">{error}</p>}
 
                   <Button type="submit" className="w-full" disabled={submitting}>
                     {submitting ? 'Ingresando...' : 'Ingresar'}
@@ -281,7 +281,7 @@ export function LoginPage() {
                     <>
                       <div className="relative flex items-center gap-3">
                         <div className="flex-1 border-t" />
-                        <span className="text-xs text-muted-foreground">o continuá con</span>
+                        <span className="text-xs text-ink3">o continuá con</span>
                         <div className="flex-1 border-t" />
                       </div>
 
@@ -306,13 +306,13 @@ export function LoginPage() {
                 {success ? (
                   <div className="space-y-4 text-center">
                     <div className="flex justify-center">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        <i className="fi fi-rr-envelope text-2xl text-primary leading-none" />
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cp-accent/10">
+                        <i className="fi fi-rr-envelope text-2xl text-cp-accent leading-none" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <p className="font-medium text-foreground">¡Revisá tu email!</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-ink">¡Revisá tu email!</p>
+                      <p className="text-sm text-ink3">
                         Te enviamos un link de confirmación a <strong>{email}</strong>.
                         Confirmá tu cuenta para poder ingresar.
                       </p>
@@ -367,7 +367,7 @@ export function LoginPage() {
                                 key={i}
                                 className={cn(
                                   'h-1 flex-1 rounded-full transition-all duration-300',
-                                  i < strength ? STRENGTH_COLORS[strength] : 'bg-muted'
+                                  i < strength ? STRENGTH_COLORS[strength] : 'bg-cp-bg2'
                                 )}
                               />
                             ))}
@@ -384,9 +384,9 @@ export function LoginPage() {
                                   'fi leading-none shrink-0',
                                   c.passed
                                     ? 'fi-rr-check text-green-500'
-                                    : 'fi-rr-cross text-muted-foreground'
+                                    : 'fi-rr-cross text-ink3'
                                 )} />
-                                <span className={c.passed ? 'text-foreground' : 'text-muted-foreground'}>
+                                <span className={c.passed ? 'text-ink' : 'text-ink3'}>
                                   {c.label}
                                 </span>
                               </li>
@@ -396,27 +396,27 @@ export function LoginPage() {
                       )}
                     </div>
 
-                    <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                    <label className="flex items-start gap-2 text-sm text-ink3 cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={acceptedTerms}
                         onChange={e => setAcceptedTerms(e.target.checked)}
                         required
-                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary cursor-pointer"
+                        className="mt-0.5 h-4 w-4 shrink-0 rounded border-line accent-cp-accent cursor-pointer"
                       />
                       <span>
                         Acepto los{' '}
-                        <Link to="/terms" target="_blank" className="underline text-foreground hover:text-primary">
+                        <Link to="/terms" target="_blank" className="underline text-ink hover:text-cp-accent">
                           Términos y Condiciones
                         </Link>{' '}
                         y la{' '}
-                        <Link to="/privacy" target="_blank" className="underline text-foreground hover:text-primary">
+                        <Link to="/privacy" target="_blank" className="underline text-ink hover:text-cp-accent">
                           Política de Privacidad
                         </Link>
                       </span>
                     </label>
 
-                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    {error && <p className="text-sm text-cp-danger">{error}</p>}
 
                     <Button
                       type="submit"
@@ -430,7 +430,7 @@ export function LoginPage() {
                       <>
                         <div className="relative flex items-center gap-3">
                           <div className="flex-1 border-t" />
-                          <span className="text-xs text-muted-foreground">o registrate con</span>
+                          <span className="text-xs text-ink3">o registrate con</span>
                           <div className="flex-1 border-t" />
                         </div>
 
@@ -446,10 +446,10 @@ export function LoginPage() {
             </>
           )}
         </Card>
-        <p className="text-center text-xs text-muted-foreground">
-          <Link to="/terms" target="_blank" className="hover:text-foreground transition-colors">Términos</Link>
+        <p className="text-center text-xs text-ink3">
+          <Link to="/terms" target="_blank" className="hover:text-ink transition-colors">Términos</Link>
           {' · '}
-          <Link to="/privacy" target="_blank" className="hover:text-foreground transition-colors">Privacidad</Link>
+          <Link to="/privacy" target="_blank" className="hover:text-ink transition-colors">Privacidad</Link>
         </p>
       </div>
     </div>

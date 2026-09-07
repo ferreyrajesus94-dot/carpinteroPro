@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { RouteErrorFallback } from "@/shared/components/RouteErrorFallback";
 
-const hydrateFallbackElement = <div className="min-h-screen bg-background" />;
+const hydrateFallbackElement = <div className="min-h-screen bg-cp-bg" />;
 
 const errorElement = <RouteErrorFallback />;
 

@@ -192,7 +192,7 @@ export function BillingSettingsCard({
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
-				<p className="text-sm text-muted-foreground">{content.description}</p>
+				<p className="text-sm text-ink2">{content.description}</p>
 				{content.details.length > 0 && (
 					<ul className="space-y-1 text-sm text-ink">
 						{content.details.map((detail) => (
@@ -201,7 +201,7 @@ export function BillingSettingsCard({
 					</ul>
 				)}
 				{visibleError && (
-					<p role="alert" className="text-sm text-destructive">
+					<p role="alert" className="text-sm text-cp-danger">
 						{visibleError}
 					</p>
 				)}

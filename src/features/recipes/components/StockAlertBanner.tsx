@@ -22,12 +22,12 @@ export function StockAlertBanner({ check, showOk = false }: Props) {
   }
 
   return (
-    <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
-      <div className="flex items-start gap-2 text-destructive">
+    <div className="rounded-md border border-cp-danger/40 bg-cp-danger/10 p-3 text-sm">
+      <div className="flex items-start gap-2 text-cp-danger">
         <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
         <span className="font-medium">Stock insuficiente para fabricar este mueble</span>
       </div>
-      <ul className="mt-2 space-y-1 text-xs text-foreground/80">
+      <ul className="mt-2 space-y-1 text-xs text-ink2">
         {check.shortages.map((s) => (
           <li key={s.materialId} className="flex items-baseline justify-between gap-2">
             <span className="truncate">

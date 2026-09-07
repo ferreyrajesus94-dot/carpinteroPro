@@ -132,7 +132,7 @@ export function MuebleList({
 
 			<div className="flex flex-col sm:flex-row gap-2">
 				<div className="relative flex-1">
-					<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-ink3" />
 					<Input
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
@@ -158,7 +158,7 @@ export function MuebleList({
 			</div>
 
 			{filteredTemplates.length === 0 && (
-				<p className="py-6 text-center text-sm text-muted-foreground">
+				<p className="py-6 text-center text-sm text-ink3">
 					Sin resultados.
 				</p>
 			)}
@@ -194,12 +194,12 @@ export function MuebleList({
 										className="w-full h-full object-cover"
 									/>
 								) : (
-									<div className="absolute inset-0 flex items-center justify-center text-muted-foreground/50">
+									<div className="absolute inset-0 flex items-center justify-center text-ink3/50">
 										<Package className="h-10 w-10" />
 									</div>
 								)}
 								{shortages.length > 0 && (
-									<div className="absolute top-2 right-2 bg-destructive text-white rounded-full p-1">
+									<div className="absolute top-2 right-2 bg-cp-danger text-cp-accent-ink rounded-full p-1">
 										<AlertTriangle className="h-4 w-4" />
 									</div>
 								)}
@@ -222,7 +222,7 @@ export function MuebleList({
 									)}
 
 									{/* Description */}
-									<div className="space-y-1 mb-3 text-xs text-muted-foreground">
+									<div className="space-y-1 mb-3 text-xs text-ink3">
 										<p>
 											{template.recipe_items.length} material
 											{template.recipe_items.length !== 1 ? "es" : ""}
@@ -238,7 +238,7 @@ export function MuebleList({
 
 								{/* Cost in font-display */}
 								<div className="mb-4 pt-3 border-t border-line">
-									<p className="text-xs uppercase tracking-widest text-muted-foreground font-medium mb-1">
+									<p className="text-xs uppercase tracking-widest text-ink3 font-medium mb-1">
 										Costo estimado
 									</p>
 									<div className="flex items-baseline justify-between">
@@ -310,16 +310,16 @@ export function MuebleList({
 										title="Eliminar"
 										className="h-8"
 									>
-										<Trash2 className="h-4 w-4 text-destructive" />
+										<Trash2 className="h-4 w-4 text-cp-danger" />
 									</Button>
 								</div>
 
 								{/* Usage info */}
 								{usedIn > 0 && (
-									<p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-line">
+									<p className="text-xs text-ink3 mt-3 pt-3 border-t border-line">
 										<Link
 											to={`/quotes?template=${template.id}`}
-											className="underline hover:text-foreground"
+											className="underline hover:text-ink"
 										>
 											Usado en {usedIn} presupuesto{usedIn !== 1 ? "s" : ""}
 										</Link>

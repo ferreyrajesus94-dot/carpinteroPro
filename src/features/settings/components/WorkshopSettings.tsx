@@ -83,7 +83,7 @@ function AppearanceCard() {
 						<Label htmlFor="density-switch" className="cursor-pointer">
 							Densidad compacta
 						</Label>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-ink3">
 							Reduce el padding de listas y cards para ver más en pantalla.
 						</p>
 					</div>
@@ -99,7 +99,7 @@ function AppearanceCard() {
 						<Label htmlFor="dark-switch" className="cursor-pointer">
 							Modo oscuro
 						</Label>
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs text-ink3">
 							Fondo oscuro para trabajar de noche o con poca luz.
 						</p>
 					</div>
@@ -263,7 +263,7 @@ export function WorkshopSettings({
 								placeholder="Ej: Carpintería San Martín"
 							/>
 							{errors.name && (
-								<p className="text-destructive text-xs">
+								<p className="text-cp-danger text-xs">
 									{errors.name.message}
 								</p>
 							)}
@@ -287,7 +287,7 @@ export function WorkshopSettings({
 								placeholder="taller@ejemplo.com"
 							/>
 							{errors.email && (
-								<p className="text-destructive text-xs">
+								<p className="text-cp-danger text-xs">
 									{errors.email.message}
 								</p>
 							)}
@@ -311,7 +311,7 @@ export function WorkshopSettings({
 								onChange={handleLogoChange}
 								className="cursor-pointer"
 							/>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-xs text-ink3">
 								La imagen se guarda en el dispositivo y aparece en el PDF.
 							</p>
 						</div>
@@ -328,7 +328,7 @@ export function WorkshopSettings({
 								{...register("default_labor_rate")}
 								placeholder="Ej: 3500"
 							/>
-							<p className="text-xs text-muted-foreground">
+							<p className="text-xs text-ink3">
 								Se usa como valor inicial al agregar ítems de mano de obra a un
 								mueble.
 							</p>
@@ -343,7 +343,7 @@ export function WorkshopSettings({
 									>
 										Descontar stock automáticamente al iniciar producción
 									</Label>
-									<p className="text-xs text-muted-foreground">
+									<p className="text-xs text-ink3">
 										Cuando un presupuesto aprobado pase a En producción, los materiales
 										que componen el mueble se restarán del stock
 										automáticamente. Podés revertir el movimiento manualmente
@@ -369,7 +369,7 @@ export function WorkshopSettings({
 									>
 										Alertar stock insuficiente al abrir un mueble
 									</Label>
-									<p className="text-xs text-muted-foreground">
+									<p className="text-xs text-ink3">
 										Cruza la lista de materiales del mueble contra el stock del
 										inventario y muestra un aviso si falta algo. Desactivalo si
 										trabajás bajo demanda.

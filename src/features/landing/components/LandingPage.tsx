@@ -32,7 +32,7 @@ import {
 
 export function LandingPage() {
 	return (
-		<div className="landing-page min-h-screen bg-background text-foreground">
+		<div className="landing-page min-h-screen bg-cp-bg text-ink">
 			<LandingHeader
 				navItems={navItems}
 				primaryCta={loginCta}

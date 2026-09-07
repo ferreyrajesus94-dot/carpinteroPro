@@ -101,7 +101,7 @@ export function QuoteActions({
 				<p
 					role="alert"
 					data-testid="quote-actions-error"
-					className="text-xs text-destructive sm:basis-full"
+					className="text-xs text-cp-danger sm:basis-full"
 				>
 					{submitError}
 				</p>

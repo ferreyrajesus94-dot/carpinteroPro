@@ -118,7 +118,7 @@ const DraggableCard = memo(function DraggableCard({
 				</span>
 				<Link
 					to={`/quotes/${quote.id}`}
-					className="text-muted-foreground hover:text-foreground text-xs"
+					className="text-ink3 hover:text-ink text-xs"
 					title="Editar"
 				>
 					↗
@@ -133,7 +133,7 @@ const DraggableCard = memo(function DraggableCard({
 				<p className="text-sm font-medium line-clamp-2 mb-1">
 					{quote.furniture_name}
 				</p>
-				<p className="text-xs text-muted-foreground truncate mb-2">
+				<p className="text-xs text-ink3 truncate mb-2">
 					{quote.client?.name ?? "Sin cliente"}
 				</p>
 				<p className="font-display font-semibold text-base">
@@ -145,7 +145,7 @@ const DraggableCard = memo(function DraggableCard({
 				<p className="text-sm font-medium line-clamp-2 mb-1">
 					{quote.furniture_name}
 				</p>
-				<p className="text-xs text-muted-foreground truncate mb-2">
+				<p className="text-xs text-ink3 truncate mb-2">
 					{quote.client?.name ?? "Sin cliente"}
 				</p>
 				<div className="flex items-center justify-between gap-2">
@@ -392,7 +392,7 @@ export function QuoteList() {
 					</div>
 
 					{listaQuotes.length === 0 && (
-						<p className="py-6 text-center text-sm text-muted-foreground">
+						<p className="py-6 text-center text-sm text-ink3">
 							Sin resultados en este estado.
 						</p>
 					)}
@@ -423,7 +423,7 @@ export function QuoteList() {
 									<p className="text-sm font-medium line-clamp-2">
 										{q.furniture_name}
 									</p>
-									<p className="text-xs text-muted-foreground">
+									<p className="text-xs text-ink3">
 										{q.client?.name ?? "Sin cliente"}
 									</p>
 									<div className="flex items-center justify-between">
@@ -464,7 +464,7 @@ export function QuoteList() {
 												}
 												className="h-8 w-8"
 											>
-												<Trash2 className="h-4 w-4 text-destructive" />
+												<Trash2 className="h-4 w-4 text-cp-danger" />
 											</Button>
 										</div>
 									</div>
@@ -504,7 +504,7 @@ export function QuoteList() {
 											</TableCell>
 											<TableCell>
 												{q.client?.name ?? (
-													<span className="text-muted-foreground">Sin cliente</span>
+													<span className="text-ink3">Sin cliente</span>
 												)}
 											</TableCell>
 											<TableCell>{q.furniture_name}</TableCell>
@@ -549,7 +549,7 @@ export function QuoteList() {
 														}
 														className="h-8 w-8"
 													>
-														<Trash2 className="h-4 w-4 text-destructive" />
+														<Trash2 className="h-4 w-4 text-cp-danger" />
 													</Button>
 												</div>
 											</TableCell>
@@ -561,7 +561,7 @@ export function QuoteList() {
 					</div>
 
 					{totalPages > 1 && (
-						<div className="flex items-center justify-between text-sm text-muted-foreground pt-1">
+						<div className="flex items-center justify-between text-sm text-ink3 pt-1">
 							<span>
 								{totalCount} presupuestos — página {page + 1} de {totalPages}
 							</span>
@@ -612,7 +612,7 @@ export function QuoteList() {
 
 										<DroppableColumn status={status}>
 											{cards.length === 0 ? (
-												<div className="text-center py-6 text-xs text-muted-foreground">
+												<div className="text-center py-6 text-xs text-ink3">
 													Vacío
 												</div>
 											) : (

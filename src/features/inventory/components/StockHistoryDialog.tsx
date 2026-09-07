@@ -28,7 +28,7 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 
 	if (movements.length === 0) {
 		return (
-			<p className="text-center text-sm text-muted-foreground py-8">
+			<p className="text-center text-sm text-ink3 py-8">
 				Todavía no hay movimientos para este material.
 			</p>
 		);
@@ -36,7 +36,7 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 
 	return (
 		<div className="space-y-2">
-			<p className="text-xs text-muted-foreground">
+			<p className="text-xs text-ink3">
 				Stock actual: <strong>{formatStock(material.stock)}</strong>{" "}
 				{material.unit} · {movements.length} movimiento
 				{movements.length > 1 ? "s" : ""}
@@ -68,7 +68,7 @@ export function StockHistoryDialog({ material }: StockHistoryDialogProps) {
 										{formatSignedQuantity(m.delta)}
 									</span>
 								</div>
-								<p className="text-xs text-muted-foreground">
+								<p className="text-xs text-ink3">
 									{format(parseISO(m.created_at), "d MMM yyyy, HH:mm", {
 										locale: es,
 									})}

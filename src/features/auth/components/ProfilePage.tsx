@@ -19,12 +19,12 @@ export function ProfilePage() {
   return (
     <div className="mx-auto max-w-md space-y-6 py-4">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Mi perfil</h1>
-        <p className="text-sm text-muted-foreground mt-1">Información de tu cuenta</p>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">Mi perfil</h1>
+        <p className="text-sm text-ink3 mt-1">Información de tu cuenta</p>
       </div>
 
       {/* Avatar + info */}
-      <div className="rounded-lg border bg-card p-6 space-y-4">
+      <div className="rounded-lg border bg-cp-surface p-6 space-y-4">
         <div className="flex items-center gap-4">
           <Avatar
             name={displayName}
@@ -34,27 +34,27 @@ export function ProfilePage() {
           />
           <div className="min-w-0">
             {displayName && (
-              <p className="font-semibold text-foreground truncate">{displayName}</p>
+              <p className="font-semibold text-ink truncate">{displayName}</p>
             )}
-            <p className="text-sm text-muted-foreground truncate">{email}</p>
+            <p className="text-sm text-ink3 truncate">{email}</p>
           </div>
         </div>
       </div>
 
       {/* Datos del taller */}
-      <div className="rounded-lg border bg-card divide-y">
+      <div className="rounded-lg border bg-cp-surface divide-y">
         <div className="px-4 py-3 flex items-center justify-between gap-4">
-          <span className="text-sm text-muted-foreground shrink-0">Taller</span>
-          <span className="text-sm font-medium text-foreground text-right truncate">{workshopName}</span>
+          <span className="text-sm text-ink3 shrink-0">Taller</span>
+          <span className="text-sm font-medium text-ink text-right truncate">{workshopName}</span>
         </div>
         <div className="px-4 py-3 flex items-center justify-between gap-4">
-          <span className="text-sm text-muted-foreground shrink-0">Email</span>
-          <span className="text-sm font-medium text-foreground text-right truncate">{email}</span>
+          <span className="text-sm text-ink3 shrink-0">Email</span>
+          <span className="text-sm font-medium text-ink text-right truncate">{email}</span>
         </div>
         {workshopId && (
           <div className="px-4 py-3 flex items-center justify-between gap-4">
-            <span className="text-sm text-muted-foreground shrink-0">ID de taller</span>
-            <span className="text-xs font-mono text-muted-foreground text-right truncate">{workshopId}</span>
+            <span className="text-sm text-ink3 shrink-0">ID de taller</span>
+            <span className="text-xs font-mono text-ink3 text-right truncate">{workshopId}</span>
           </div>
         )}
       </div>
@@ -63,7 +63,7 @@ export function ProfilePage() {
       <button
         type="button"
         onClick={handleSignOut}
-        className="flex w-full items-center justify-center gap-2 rounded-md border border-destructive/40 px-4 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 cursor-pointer"
+        className="flex w-full items-center justify-center gap-2 rounded-md border border-cp-danger/40 px-4 py-2.5 text-sm font-medium text-cp-danger transition-colors hover:bg-cp-danger/10 cursor-pointer"
       >
         <i className="fi fi-rr-sign-out text-base leading-none" />
         Cerrar sesión

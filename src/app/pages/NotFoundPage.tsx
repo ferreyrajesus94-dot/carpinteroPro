@@ -22,7 +22,7 @@ export function NotFoundPage() {
 		<div className="flex min-h-screen items-center justify-center bg-cp-bg2 p-4">
 		<Card className="max-w-md w-full">
 			<CardHeader>
-				<p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+				<p className="text-sm font-medium uppercase tracking-wide text-ink3">
 					Error 404
 				</p>
 				<h1 className="mt-2 text-2xl font-semibold leading-none tracking-tight">
@@ -30,7 +30,7 @@ export function NotFoundPage() {
 				</h1>
 			</CardHeader>
 				<CardContent className="space-y-4">
-					<p className="text-sm text-muted-foreground">
+					<p className="text-sm text-ink2">
 						La ruta que buscás no existe o fue movida. Si llegaste acá
 						desde un enlace, avisanos y lo revisamos.
 					</p>
