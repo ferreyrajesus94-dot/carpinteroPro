@@ -1,172 +1,172 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-06T13:00:00Z",
+  "generatedAt": "2026-09-07T10:55:00Z",
   "title": "Design System: CarpinteroPro",
   "extensions": {
     "colorMeta": {
       "primary": {
         "role": "primary",
-        "displayName": "Cobrizo cálido",
-        "canonical": "oklch(62% 0.18 48)",
+        "displayName": "Nogal oscuro",
+        "canonical": "oklch(35% 0.04 50)",
         "tonalRamp": [
-          "oklch(15% 0.05 48)",
-          "oklch(25% 0.10 48)",
-          "oklch(40% 0.15 48)",
-          "oklch(55% 0.18 48)",
-          "oklch(70% 0.16 48)",
-          "oklch(82% 0.10 48)",
-          "oklch(92% 0.05 48)",
-          "oklch(97% 0.02 48)"
+          "oklch(15% 0.02 50)",
+          "oklch(22% 0.03 50)",
+          "oklch(28% 0.04 50)",
+          "oklch(35% 0.04 50)",
+          "oklch(45% 0.05 50)",
+          "oklch(58% 0.05 50)",
+          "oklch(72% 0.05 50)",
+          "oklch(88% 0.04 50)"
         ]
       },
       "primary-ink": {
         "role": "primary-ink",
         "displayName": "Tinta sobre acento",
-        "canonical": "oklch(99% 0 0)",
+        "canonical": "oklch(98% 0.006 80)",
         "tonalRamp": [
-          "oklch(15% 0 0)",
-          "oklch(30% 0 0)",
-          "oklch(50% 0 0)",
-          "oklch(70% 0 0)",
-          "oklch(85% 0 0)",
-          "oklch(93% 0 0)",
-          "oklch(97% 0 0)",
-          "oklch(99% 0 0)"
+          "oklch(15% 0.005 80)",
+          "oklch(30% 0.005 80)",
+          "oklch(50% 0.005 80)",
+          "oklch(70% 0.005 80)",
+          "oklch(85% 0.005 80)",
+          "oklch(93% 0.006 80)",
+          "oklch(97% 0.006 80)",
+          "oklch(98% 0.006 80)"
         ]
       },
       "primary-soft": {
         "role": "primary-soft",
-        "displayName": "Acento suave",
-        "canonical": "oklch(94% 0.04 55)",
+        "displayName": "Nogal suave",
+        "canonical": "oklch(88% 0.04 50)",
         "tonalRamp": [
-          "oklch(15% 0.02 55)",
-          "oklch(30% 0.03 55)",
-          "oklch(50% 0.04 55)",
-          "oklch(70% 0.04 55)",
-          "oklch(82% 0.04 55)",
-          "oklch(90% 0.04 55)",
-          "oklch(94% 0.04 55)",
-          "oklch(97% 0.03 55)"
+          "oklch(35% 0.04 50)",
+          "oklch(50% 0.04 50)",
+          "oklch(65% 0.04 50)",
+          "oklch(75% 0.04 50)",
+          "oklch(82% 0.04 50)",
+          "oklch(86% 0.04 50)",
+          "oklch(88% 0.04 50)",
+          "oklch(92% 0.04 50)"
         ]
       },
       "neutral-bg": {
         "role": "neutral",
-        "displayName": "Papel cálido",
-        "canonical": "oklch(97.5% 0.008 70)",
+        "displayName": "Lino crudo",
+        "canonical": "oklch(95% 0.012 80)",
         "tonalRamp": [
-          "oklch(15% 0.005 70)",
-          "oklch(25% 0.006 70)",
-          "oklch(40% 0.007 70)",
-          "oklch(55% 0.008 70)",
-          "oklch(70% 0.008 70)",
-          "oklch(82% 0.008 70)",
-          "oklch(92% 0.008 70)",
-          "oklch(97.5% 0.008 70)"
+          "oklch(15% 0.008 80)",
+          "oklch(25% 0.009 80)",
+          "oklch(40% 0.010 80)",
+          "oklch(55% 0.011 80)",
+          "oklch(70% 0.012 80)",
+          "oklch(82% 0.012 80)",
+          "oklch(92% 0.012 80)",
+          "oklch(95% 0.012 80)"
         ]
       },
       "neutral-bg-2": {
         "role": "neutral",
         "displayName": "Arena",
-        "canonical": "oklch(94.8% 0.012 70)",
+        "canonical": "oklch(90% 0.014 75)",
         "tonalRamp": [
-          "oklch(15% 0.008 70)",
-          "oklch(25% 0.010 70)",
-          "oklch(40% 0.012 70)",
-          "oklch(55% 0.012 70)",
-          "oklch(70% 0.012 70)",
-          "oklch(82% 0.012 70)",
-          "oklch(92% 0.012 70)",
-          "oklch(95% 0.012 70)"
+          "oklch(15% 0.010 75)",
+          "oklch(25% 0.011 75)",
+          "oklch(40% 0.012 75)",
+          "oklch(55% 0.013 75)",
+          "oklch(70% 0.014 75)",
+          "oklch(80% 0.014 75)",
+          "oklch(90% 0.014 75)",
+          "oklch(93% 0.014 75)"
         ]
       },
       "neutral-surface": {
         "role": "neutral",
-        "displayName": "Superficie",
-        "canonical": "oklch(99% 0.004 70)",
+        "displayName": "Superficie (carta)",
+        "canonical": "oklch(98% 0.006 80)",
         "tonalRamp": [
-          "oklch(15% 0.003 70)",
-          "oklch(30% 0.003 70)",
-          "oklch(50% 0.004 70)",
-          "oklch(70% 0.004 70)",
-          "oklch(85% 0.004 70)",
-          "oklch(93% 0.004 70)",
-          "oklch(97% 0.004 70)",
-          "oklch(99% 0.004 70)"
+          "oklch(15% 0.004 80)",
+          "oklch(30% 0.005 80)",
+          "oklch(50% 0.005 80)",
+          "oklch(70% 0.005 80)",
+          "oklch(85% 0.005 80)",
+          "oklch(93% 0.006 80)",
+          "oklch(97% 0.006 80)",
+          "oklch(98% 0.006 80)"
         ]
       },
       "text-primary": {
         "role": "text",
-        "displayName": "Tinta primaria",
-        "canonical": "oklch(22% 0.018 50)",
+        "displayName": "Tinta nogal (primaria)",
+        "canonical": "oklch(22% 0.020 50)",
         "tonalRamp": [
           "oklch(15% 0.018 50)",
-          "oklch(22% 0.018 50)",
-          "oklch(35% 0.014 55)",
-          "oklch(50% 0.012 58)",
-          "oklch(65% 0.010 60)",
-          "oklch(80% 0.008 60)",
-          "oklch(92% 0.005 60)",
-          "oklch(97% 0.004 60)"
+          "oklch(22% 0.020 50)",
+          "oklch(35% 0.018 55)",
+          "oklch(50% 0.016 58)",
+          "oklch(65% 0.014 60)",
+          "oklch(80% 0.012 60)",
+          "oklch(92% 0.008 60)",
+          "oklch(97% 0.006 60)"
         ]
       },
       "text-secondary": {
         "role": "text",
         "displayName": "Tinta secundaria",
-        "canonical": "oklch(38% 0.014 55)",
+        "canonical": "oklch(38% 0.016 55)",
         "tonalRamp": [
           "oklch(15% 0.014 55)",
-          "oklch(25% 0.014 55)",
-          "oklch(38% 0.014 55)",
-          "oklch(55% 0.012 58)",
-          "oklch(70% 0.010 60)",
-          "oklch(85% 0.008 60)",
-          "oklch(93% 0.005 60)",
-          "oklch(97% 0.004 60)"
+          "oklch(25% 0.015 55)",
+          "oklch(38% 0.016 55)",
+          "oklch(55% 0.014 58)",
+          "oklch(70% 0.012 60)",
+          "oklch(85% 0.010 60)",
+          "oklch(93% 0.008 60)",
+          "oklch(97% 0.006 60)"
         ]
       },
       "text-tertiary": {
         "role": "text",
         "displayName": "Tinta terciaria",
-        "canonical": "oklch(55% 0.010 60)",
+        "canonical": "oklch(55% 0.012 60)",
         "tonalRamp": [
           "oklch(15% 0.010 60)",
           "oklch(30% 0.010 60)",
           "oklch(45% 0.010 60)",
-          "oklch(55% 0.010 60)",
-          "oklch(70% 0.008 60)",
-          "oklch(85% 0.006 60)",
-          "oklch(93% 0.004 60)",
-          "oklch(97% 0.003 60)"
+          "oklch(55% 0.012 60)",
+          "oklch(70% 0.010 60)",
+          "oklch(85% 0.008 60)",
+          "oklch(93% 0.006 60)",
+          "oklch(97% 0.005 60)"
         ]
       },
       "divider": {
         "role": "divider",
-        "displayName": "Línea",
-        "canonical": "oklch(89% 0.010 60)",
+        "displayName": "Hairline sepia",
+        "canonical": "oklch(86% 0.018 60)",
         "tonalRamp": [
           "oklch(15% 0.005 60)",
           "oklch(30% 0.008 60)",
           "oklch(50% 0.010 60)",
-          "oklch(70% 0.010 60)",
-          "oklch(82% 0.010 60)",
-          "oklch(89% 0.010 60)",
-          "oklch(94% 0.008 60)",
-          "oklch(97% 0.005 60)"
+          "oklch(70% 0.012 60)",
+          "oklch(82% 0.014 60)",
+          "oklch(86% 0.018 60)",
+          "oklch(92% 0.012 60)",
+          "oklch(96% 0.008 60)"
         ]
       },
       "divider-strong": {
         "role": "divider",
-        "displayName": "Línea fuerte",
-        "canonical": "oklch(82% 0.012 60)",
+        "displayName": "Hairline sepia fuerte",
+        "canonical": "oklch(78% 0.020 60)",
         "tonalRamp": [
           "oklch(15% 0.006 60)",
           "oklch(30% 0.010 60)",
           "oklch(50% 0.012 60)",
-          "oklch(70% 0.012 60)",
-          "oklch(82% 0.012 60)",
-          "oklch(90% 0.010 60)",
-          "oklch(95% 0.008 60)",
-          "oklch(98% 0.005 60)"
+          "oklch(68% 0.016 60)",
+          "oklch(78% 0.020 60)",
+          "oklch(86% 0.018 60)",
+          "oklch(93% 0.012 60)",
+          "oklch(96% 0.008 60)"
         ]
       },
       "success": {
@@ -201,16 +201,16 @@
       },
       "danger": {
         "role": "status",
-        "displayName": "Peligro",
-        "canonical": "oklch(58% 0.19 25)",
+        "displayName": "Peligro (escarlata)",
+        "canonical": "oklch(45% 0.20 25)",
         "tonalRamp": [
           "oklch(15% 0.06 25)",
           "oklch(25% 0.12 25)",
           "oklch(40% 0.17 25)",
-          "oklch(55% 0.19 25)",
-          "oklch(70% 0.16 25)",
-          "oklch(82% 0.10 25)",
-          "oklch(92% 0.06 25)",
+          "oklch(55% 0.20 25)",
+          "oklch(70% 0.18 25)",
+          "oklch(82% 0.12 25)",
+          "oklch(92% 0.07 25)",
           "oklch(96% 0.03 25)"
         ]
       },
@@ -246,16 +246,16 @@
       },
       "chart-down": {
         "role": "chart",
-        "displayName": "Bajó",
-        "canonical": "oklch(52% 0.20 25)",
+        "displayName": "Bajó (escarlata)",
+        "canonical": "oklch(45% 0.22 25)",
         "tonalRamp": [
           "oklch(15% 0.06 25)",
           "oklch(25% 0.13 25)",
           "oklch(40% 0.18 25)",
-          "oklch(55% 0.20 25)",
-          "oklch(70% 0.16 25)",
-          "oklch(82% 0.10 25)",
-          "oklch(92% 0.06 25)",
+          "oklch(55% 0.22 25)",
+          "oklch(70% 0.18 25)",
+          "oklch(82% 0.12 25)",
+          "oklch(92% 0.07 25)",
           "oklch(96% 0.03 25)"
         ]
       },
@@ -277,28 +277,28 @@
     },
     "typographyMeta": {
       "display": {
-        "displayName": "Display",
-        "purpose": "Hero del landing y títulos de sección de marketing. Solo donde el contenido es narrativa, no operación."
+        "displayName": "Display (Fraunces)",
+        "purpose": "Hero del landing y títulos de marketing. Solo donde el contenido es narrativa, no operación. La voz con carácter."
       },
       "headline": {
-        "displayName": "Headline",
-        "purpose": "PageHeader y KPI destacados en panel. Texto 2xl con Space Grotesk semibold."
+        "displayName": "Headline (Fraunces)",
+        "purpose": "PageHeader y KPI destacados en panel. Tracking ajustado a -0.02em para balance óptico de Fraunces."
       },
       "title": {
-        "displayName": "Title",
-        "purpose": "Títulos de Card, headings de detalle (settings), subtítulos cuando se quiere cuerpo y no display."
+        "displayName": "Title (Inter)",
+        "purpose": "Títulos de Card, headings de detalle (settings), subtítulos de sección cuando se quiere cuerpo y no display."
       },
       "body": {
-        "displayName": "Body",
+        "displayName": "Body (Inter)",
         "purpose": "Párrafos, descripciones de card, texto principal de celdas. Tamaño dominante del sistema (text-sm)."
       },
       "label": {
-        "displayName": "Caption / Label",
+        "displayName": "Caption / Label (Inter)",
         "purpose": "Eyebrow, helper text, table heads, error inline. Texto xs uppercase con tracking."
       },
       "mono": {
-        "displayName": "Mono / Tabular",
-        "purpose": "Todo lo que sea dinero, ID, kbd shortcut, paso de wizard, número tabular. JetBrains Mono con tnum."
+        "displayName": "Mono / Tabular (JetBrains Mono)",
+        "purpose": "Todo lo que sea dinero, ID, kbd shortcut, paso de wizard, número tabular. Con tnum activado. Excepción documentada: el hero KPI del dashboard usa Fraunces italic."
       }
     },
     "shadows": [
@@ -315,12 +315,12 @@
       {
         "name": "ambient-high",
         "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
-        "purpose": "Diálogo, search dropdown, switch thumb. Cosas que tienen que elevarse sobre la página."
+        "purpose": "Diálogo, search dropdown, switch thumb."
       },
       {
         "name": "ambient-peak",
         "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-        "purpose": "Solo FAB móvil. El único elemento en el sistema con esta elevación."
+        "purpose": "Solo FAB móvil."
       }
     ],
     "motion": [
@@ -335,19 +335,9 @@
         "purpose": "Apertura y cierre del Radix Dialog (data-state animation)."
       },
       {
-        "name": "transition-faq-chevron",
-        "value": "300ms",
-        "purpose": "Rotación del chevron en la sección FAQ del landing."
-      },
-      {
-        "name": "transition-walkthrough-progress",
-        "value": "450ms ease",
-        "purpose": "Barra de progreso del walkthrough en landing-visual-demos.css."
-      },
-      {
-        "name": "landing-grow",
-        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "Easing custom para keyframes de landing (landing-grow, landing-float)."
+        "name": "scale-fab",
+        "value": "transform scale(1.02) on hover, scale(0.95) on active",
+        "purpose": "Hover/active del FAB móvil. Único componente con scale-transform."
       }
     ],
     "breakpoints": [
@@ -363,17 +353,17 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Acción primaria. Cobrizo cálido sobre blanco. Única voz de acento del sistema.",
+      "description": "Acción primaria. Nogal oscuro sobre lino. Única voz de acento del sistema.",
       "html": "<button class=\"ds-btn-primary\">Guardar presupuesto</button>",
-      "css": ".ds-btn-primary {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  white-space: nowrap;\n  height: 40px;\n  padding: 0 16px;\n  border-radius: 8px;\n  background: var(--cp-accent);\n  color: var(--cp-accent-ink);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  border: none;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-btn-primary:hover {\n  background: oklch(58% 0.18 48 / 0.9);\n}\n.ds-btn-primary:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}\n.ds-btn-primary:disabled {\n  opacity: 0.5;\n  pointer-events: none;\n}\n.ds-btn-primary svg {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
+      "css": ".ds-btn-primary {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  white-space: nowrap;\n  height: 40px;\n  padding: 0 16px;\n  border-radius: 8px;\n  background: var(--cp-accent);\n  color: var(--cp-accent-ink);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  border: none;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-btn-primary:hover {\n  background: oklch(35% 0.04 50 / 0.9);\n}\n.ds-btn-primary:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}\n.ds-btn-primary:disabled {\n  opacity: 0.5;\n  pointer-events: none;\n}\n.ds-btn-primary svg {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
     },
     {
       "name": "Outline Button",
       "kind": "button",
       "refersTo": "button-outline",
-      "description": "Acción secundaria sobre fondo. Hover tinta el componente con acento suave.",
+      "description": "Acción secundaria sobre lino. Hover tinta el componente con acento suave.",
       "html": "<button class=\"ds-btn-outline\">Cancelar</button>",
-      "css": ".ds-btn-outline {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  height: 40px;\n  padding: 0 16px;\n  border-radius: 8px;\n  background: var(--cp-bg);\n  color: var(--ink);\n  border: 1px solid var(--line);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-btn-outline:hover {\n  background: var(--cp-accent-soft);\n  color: var(--cp-accent);\n}\n.ds-btn-outline:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}\n.ds-btn-outline:disabled {\n  opacity: 0.5;\n  pointer-events: none;\n}\n.ds-btn-outline svg {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
+      "css": ".ds-btn-outline {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  height: 40px;\n  padding: 0 16px;\n  border-radius: 8px;\n  background: var(--cp-bg);\n  color: var(--ink);\n  border: 1px solid var(--line);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-btn-outline:hover {\n  background: var(--cp-accent-soft);\n  color: var(--cp-accent);\n}\n.ds-btn-outline:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}"
     },
     {
       "name": "Input",
@@ -387,23 +377,15 @@
       "name": "Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "Contenedor principal. Borde 1px, superficie elevada 1px sobre el papel, sombra-sm.",
+      "description": "Contenedor principal. Borde hairline sepia, superficie elevada 1px sobre el lino, sombra-sm.",
       "html": "<div class=\"ds-card\">\n  <div class=\"ds-card-header\">\n    <h3 class=\"ds-card-title\">Stock disponible</h3>\n    <p class=\"ds-card-description\">Vista de los materiales con existencias.</p>\n  </div>\n  <div class=\"ds-card-content\">\n    <p>12 materiales en stock.</p>\n  </div>\n</div>",
       "css": ".ds-card {\n  border-radius: 10px;\n  border: 1px solid var(--line);\n  background: var(--cp-surface);\n  color: var(--ink);\n  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n  font-family: 'Inter', system-ui, sans-serif;\n}\n.ds-card-header {\n  display: flex;\n  flex-direction: column;\n  padding: 24px;\n  gap: 6px;\n}\n.ds-card-title {\n  font-size: 1.5rem;\n  font-weight: 600;\n  line-height: 1;\n  letter-spacing: -0.025em;\n  margin: 0;\n  color: var(--ink);\n}\n.ds-card-description {\n  font-size: 14px;\n  color: var(--ink-3);\n  margin: 0;\n}\n.ds-card-content {\n  padding: 0 24px 24px;\n  color: var(--ink-2);\n}"
-    },
-    {
-      "name": "Sidebar Nav Link (active)",
-      "kind": "nav",
-      "refersTo": "sidebar-nav-active",
-      "description": "Item de navegación lateral con estado activo. Acento suave + texto cobre; inactivo tinta-2 sobre papel.",
-      "html": "<a href=\"/dashboard\" class=\"ds-nav-row\" aria-current=\"page\">\n  <svg class=\"ds-nav-row-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">\n    <path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/>\n    <polyline points=\"9 22 9 12 15 12 15 22\"/>\n  </svg>\n  <span>Inicio</span>\n</a>",
-      "css": ".ds-nav-row {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  height: 36px;\n  padding: 0 12px;\n  border-radius: 8px;\n  font-size: 13.5px;\n  font-weight: 500;\n  color: var(--ink-2);\n  text-decoration: none;\n  font-family: 'Inter', system-ui, sans-serif;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-nav-row:hover {\n  background: var(--cp-bg-2);\n  color: var(--ink);\n}\n.ds-nav-row[aria-current=\"page\"] {\n  background: var(--cp-accent-soft);\n  color: var(--cp-accent);\n}\n.ds-nav-row:focus-visible {\n  outline: 2px solid var(--cp-accent);\n  outline-offset: 2px;\n  border-radius: 6px;\n}\n.ds-nav-row-icon {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
     },
     {
       "name": "Chip Toggle (tab, active)",
       "kind": "chip",
       "refersTo": "chip-toggle-tab-active",
-      "description": "Chip toggleable estilo tab. Estado activo se separa del fondo bg-2 con superficie y shadow-sm.",
+      "description": "Chip toggleable estilo tab. Estado activo se separa del fondo bg-2 con superficie y shadow-sm. Soporta role='radio' para radiogroups.",
       "html": "<button class=\"ds-chip-tab\" aria-pressed=\"true\" type=\"button\">Cotizaciones</button>",
       "css": ".ds-chip-tab {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  flex: 1;\n  padding: 6px 12px;\n  border-radius: 10px;\n  font-size: 13px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  background: var(--cp-bg-2);\n  color: var(--ink-2);\n  border: none;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-chip-tab[aria-pressed=\"true\"] {\n  background: var(--cp-surface);\n  color: var(--ink);\n  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n}\n.ds-chip-tab:focus-visible {\n  outline: 2px solid var(--cp-accent);\n  outline-offset: 2px;\n}"
     },
@@ -411,7 +393,7 @@
       "name": "Mobile FAB",
       "kind": "custom",
       "refersTo": "mobile-fab",
-      "description": "Botón flotante contextual sobre bottom-tabs. Píldora cobriza con shadow-xl; único elemento con scale-transform.",
+      "description": "Botón flotante contextual sobre bottom-tabs. Píldora nogal con shadow-xl; único elemento con scale-transform.",
       "html": "<button class=\"ds-mobile-fab\" type=\"button\">\n  <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">\n    <line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/>\n    <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/>\n  </svg>\n  <span>Nuevo presupuesto</span>\n</button>",
       "css": ".ds-mobile-fab {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  height: 48px;\n  padding: 0 20px;\n  border-radius: 9999px;\n  background: var(--cp-accent);\n  color: var(--cp-accent-ink);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  border: none;\n  cursor: pointer;\n  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);\n  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-mobile-fab:hover {\n  transform: scale(1.02);\n}\n.ds-mobile-fab:active {\n  transform: scale(0.95);\n}\n.ds-mobile-fab:focus-visible {\n  outline: 2px solid var(--cp-accent);\n  outline-offset: 2px;\n}\n.ds-mobile-fab svg {\n  width: 16px;\n  height: 16px;\n}"
     },
@@ -425,74 +407,85 @@
     }
   ],
   "narrative": {
-    "northStar": "El Cuaderno del Taller",
-    "overview": "Utilitario, cálido, de taller. La herramienta desaparece detrás del trabajo: no decora, no vende, no entretiene. La calidez viene del papel (paleta cálida sobre oklch(97.5% 0.008 70)) y del acento cobre, no de los bordes redondeados ni de las gradientes. La densidad viene del ritmo 8/12 y del toggle cómodo/denso, no del tamaño de letra. Solo se eleva lo que necesita elevarse: diálogos, popovers, el FAB móvil. El resto se queda plano sobre la mesa, marcado por bordes de 1px en --line. La numeración monetaria es siempre monospace.",
+    "northStar": "El Banco del Carpintero",
+    "overview": "Utilitario, cálido, de oficio. La herramienta desaparece detrás del trabajo: no decora, no vende, no entretiene. La calidez viene de la materialidad — lino crudo bajo los dedos, nogal oscuro en el detalle preciso, escarlata en la advertencia — no de los gradientes ni de los brillos. La densidad viene del ritmo 8/12 y del toggle cómodo/denso, no del tamaño de letra. Solo se eleva lo que necesita elevarse: diálogos, popovers, el FAB móvil. El resto se queda plano sobre el banco, marcado por hairlines sepia y la sombra mínima que indica profundidad. La numeración monetaria es siempre monospace, tabular, alineada.",
     "keyCharacteristics": [
-      "Plano en reposo; las sombras aparecen solo como respuesta al estado (hover, overlay, FAB).",
-      "Acento cobre único sobre papel cálido; sin tonos competidos ni colores secundarios.",
+      "Plano en reposo; las sombras aparecen solo como respuesta al estado (overlay, FAB, focus ring).",
+      "Acento nogal oscuro único sobre lino crudo; sin tonos competidos ni colores secundarios.",
       "Densidad de taller: paneles p-5/p-6, campos h-10, gaps 8/12px, sin respiración de más.",
-      "Tipografía de dos voces (Inter cuerpo + Space Grotesk títulos + JetBrains Mono dinero).",
-      "WCAG 2.1 AA no es opcional: contraste, teclado y tamaño de objetivo vienen del brief del piso del taller."
+      "Tipografía de tres voces: Fraunces (display con carácter, itálica para hero), Inter (cuerpo y UI), JetBrains Mono (numerales tabulares).",
+      "WCAG 2.1 AA no es opcional: contraste, teclado, tamaño de objetivo, ARIA bindings en cada surface."
     ],
     "rules": [
       {
         "name": "The One Voice Rule",
-        "body": "El cobrizo cálido se usa en ≤10% del lienzo en cualquier pantalla dada. Su rareza es el punto. Si un componente necesita jerarquía visual sin acción, usa text-secondary, bg-2 o border-line, no el acento.",
+        "body": "El nogal oscuro se usa en ≤10% del lienzo en cualquier pantalla dada. Su rareza es el punto. Si un componente necesita jerarquía visual sin acción, usa text-secondary, bg-2 o border-line, no el acento.",
         "section": "colors"
       },
       {
         "name": "The Single Source Rule",
-        "body": "Los tokens OKLCH son la única fuente de verdad. Los HSL legacy están DEPRECATED.",
+        "body": "Los tokens OKLCH (src/index.css:36-53) son la única fuente de verdad. Los tokens HSL legacy (src/index.css:14-34) están marcados DEPRECATED y solo se usan en Skeleton (bg-muted). Toda paleta nueva entra por OKLCH; no se agregan valores HSL.",
         "section": "colors"
       },
       {
         "name": "The No Color-Only State Rule",
-        "body": "Ningún estado (aprobación, stock bajo, sin stock, mantenimiento) se señaliza solo por color. Cada uno viene con icono, etiqueta o posición.",
+        "body": "Ningún estado (aprobación, stock bajo, sin stock, mantenimiento, error) se señaliza solo por color. Cada uno viene con un icono (AlertTriangle, CheckCircle2, etc.), una etiqueta visible, o una posición espacial. WCAG 2.1 AA, pero también sentido común en un taller polvoriento donde el sol cambia el color percibido.",
         "section": "colors"
       },
       {
         "name": "The Money Is Mono Rule",
-        "body": "Todo número monetario se renderiza en JetBrains Mono con tnum activado. Celdas de precio en listas, totales en cards, gráficos de precio histórico.",
+        "body": "Todo número monetario se renderiza en JetBrains Mono con tnum activado — celdas de precio en listas, totales en cards, gráficos de precio histórico, cualquier valor numérico que represente plata. Excepción documentada: el hero KPI del dashboard usa font-display italic (Fraunces) en vez de mono, porque es la cifra del día y carga con el peso de un título, no de una entrada de ledger. Esa excepción es específica del hero KPI; cualquier otro valor monetario, incluyendo los KPI tiles del grid, sigue siendo mono.",
         "section": "typography"
       },
       {
         "name": "The Two-Voice Rule",
-        "body": "Solo dos voces para texto corrido: Inter (cuerpo) y Space Grotesk (display/headline). Una tercera fuente se reemplaza por peso y tamaño.",
+        "body": "Solo dos voces para texto corrido: Fraunces (display/headline) y Inter (cuerpo/UI/label). La tercera voz (JetBrains Mono) está reservada para numerales tabulares. Cualquier intento de meter una cuarta fuente para 'jerarquía' se reemplaza por peso y tamaño dentro de las dos voces existentes.",
+        "section": "typography"
+      },
+      {
+        "name": "The Fraunces Character Rule",
+        "body": "La voz display tiene punto de vista. Cuando se usa en headers, headlines, o hero, debe ser por su carácter (itálica, opsz grandes, peso semibold/bold), no como reemplazo de Inter. La Fraunces 'default' (recta, regular, sin itálica) compite visualmente con Inter y se descarta. Si ves Fraunces en cuerpo, algo se rompió.",
         "section": "typography"
       },
       {
         "name": "The Flat-By-Default Rule",
-        "body": "Las superficies son planas en reposo. Las sombras aparecen solo como respuesta al estado. Si un componente necesita elevación en reposo, primero probá con border-line y bg-cp-surface.",
+        "body": "Las superficies son planas en reposo. Las sombras aparecen solo como respuesta al estado (hover, elevación, focus, overlay). Si un componente necesita 'elevación' en reposo, primero probá con border-line y bg-cp-surface; solo agregá shadow-sm si la jerarquía visual no se lee.",
         "section": "elevation"
       },
       {
         "name": "The Backdrop-Blur Surface Rule",
-        "body": "El topbar desktop, el header mobile y los bottom-tabs usan bg-cp-surface/85 o /95 + backdrop-blur. Translúcidos para no romper el flujo visual, no translúcidos para lujo.",
+        "body": "El topbar desktop, el header mobile y los bottom-tabs usan bg-cp-surface/85 o /95 + backdrop-blur. Translúcidos para no romper el flujo visual, no translúcidos para 'lujo'.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Usá bg-cp-accent para acciones primarias; el resto es bg-cp-bg2, bg-cp-surface o borde.",
-      "Mantené h-10 (40px) como altura mínima de cualquier control tappable.",
-      "Renderizá todo número monetario en JetBrains Mono con tnum.",
+      "Usá bg-cp-accent para acciones primarias; el resto es bg-cp-bg2, bg-cp-surface o borde. La voz del acento es única.",
+      "Mantené h-10 (40px) como altura mínima de cualquier control tappable. WCAG 2.1 AA + taller polvoriento.",
+      "Renderizá todo número monetario en JetBrains Mono con tnum — el hero KPI del dashboard es la única excepción documentada.",
       "Usá border-line para separar superficies; las sombras son para overlays.",
-      "Usá font-display (Space Grotesk) para PageHeader y KPI destacados.",
-      "Usá bg-cp-accent-soft para hover/activo de nav y chips en contexto plano.",
-      "Usá focus-visible:ring-2 focus-visible:ring-cp-accent focus-visible:ring-offset-2 en todo focusable.",
-      "Respetá prefers-reduced-motion: reduce.",
-      "Proveé skip-to-content anchors en cualquier layout con navegación lateral."
+      "Usá font-display (Fraunces) para PageHeader y el hero KPI; Inter para todo lo demás; JetBrains Mono para números.",
+      "Usá bg-cp-accent-soft para hover/activo de nav y chips cuando el contexto es plano.",
+      "Usá focus-visible:ring-2 focus-visible:ring-cp-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cp-bg en todo focusable. Sin outline nativo.",
+      "Respetá prefers-reduced-motion: reduce (src/index.css:316-330). Cero animaciones para ese usuario.",
+      "Proveé skip-to-content anchors (#main) en cualquier layout con navegación lateral.",
+      "Usá role='radio' en ChipToggle cuando el contenedor padre es un role='radiogroup'. El primitive soporta ambos roles.",
+      "Proveé aria-expanded + aria-controls en toggles colapsables (SectionHowto). El panel emparejado debe tener el id correspondiente.",
+      "Rendereá un error card con role='alert' + botón 'Reintentar' cuando las queries fallen. El carpintero no debe actuar sobre phantom data.",
+      "Rendereá alternativas accesibles (sr-only <table>) para chartas visuales. Screen readers leen los datos tabulares."
     ],
     "donts": [
-      "No agregues un color secundario de acento.",
-      "No uses shadow-sm fuera de cards, panels y pills de landing.",
-      "No uses gradientes.",
-      "No uses transition-all.",
-      "No uses rounded-full por estilo en componentes estructurales.",
-      "No uses los tokens HSL legacy.",
-      "No uses text-black o text-white literales.",
-      "No uses animaciones de tailwindcss-animate que no sean fade-* o zoom-*.",
-      "No uses dark mode como default.",
-      "No señalices estado solo con color."
+      "No agregues un color secundario de acento. La paleta tiene uno. Sumar un segundo es romper la One Voice Rule.",
+      "No uses shadow-sm fuera de cards, panels y pills de landing. La sombra es señal de elevación, no decoración.",
+      "No uses gradientes. Ni en hero, ni en card, ni en botón. La paleta es plana y el nogal es plano.",
+      "No uses transition-all. Solo transition-colors, transition-transform (FAB y Switch thumb), transition-opacity (dialog close).",
+      "No uses rounded-full por estilo en componentes estructurales. Solo en badges, avatars, pills de status y el FAB.",
+      "No uses los tokens HSL legacy (hsl(var(--primary)) etc.). OKLCH es la fuente de verdad.",
+      "No uses text-black o text-white literales. Usá text-ink y text-cp-accent-ink; el sistema nunca es blanco puro ni negro puro.",
+      "No uses animaciones de tailwindcss-animate que no sean fade-* o zoom-*. accordion-down/up está sin usar por diseño.",
+      "No uses dark mode como default. El sistema arranca en .theme-sawdust (lino crudo). Dark es opt-in por usuario vía useTheme().",
+      "No señalices estado solo con color. Cada estado lleva icono, etiqueta o posición adicional.",
+      "No uses Fraunces regular weight como cuerpo. Fraunces es display/headline con carácter; Inter es el cuerpo. Mezclar diluye ambas.",
+      "No uses el hero KPI como pretexto para relajar la Money Is Mono Rule en otros lugares. La excepción es específicamente la cifra del día, no un permiso general."
     ]
   }
 }
