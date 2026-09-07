@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/shared/lib/formatters";
 import { QUOTE_STATUS_LABELS } from "@/shared/types/quotes";
+import { Button } from "@/shared/ui/button";
+import { ChipToggle } from "@/shared/ui/chip-toggle";
 import { PageHeader } from "@/shared/ui/page-header";
 import { SectionHowto } from "@/shared/ui/section-howto";
 import { Eyebrow } from "@/shared/ui/eyebrow";
@@ -45,6 +47,10 @@ export interface DashboardProps {
 	quotes: DashboardQuote[];
 	materials: DashboardMaterial[];
 	isLoading: boolean;
+	quotesError: boolean;
+	materialsError: boolean;
+	quotesRefetch: () => void;
+	materialsRefetch: () => void;
 	productionPipelineWidget: ReactNode;
 }
 
@@ -52,6 +58,10 @@ export function Dashboard({
 	quotes,
 	materials,
 	isLoading,
+	quotesError,
+	materialsError,
+	quotesRefetch,
+	materialsRefetch,
 	productionPipelineWidget,
 }: DashboardProps) {
 	const navigate = useNavigate();
@@ -98,28 +108,62 @@ export function Dashboard({
 		);
 	}
 
+	if (quotesError || materialsError) {
+		const both = quotesError && materialsError;
+		return (
+			<div className="pb-24 md:pb-6 space-y-3 p-4 md:p-6 min-w-0">
+				<div
+					role="alert"
+					className="rounded-md border border-cp-danger/30 bg-cp-danger/10 p-3 flex items-center justify-between gap-3"
+				>
+					<p className="text-sm text-cp-danger">
+						{both
+							? "No se pudieron cargar los presupuestos ni el inventario. Reintentá."
+							: quotesError
+								? "No se pudieron cargar los presupuestos. Reintentá."
+								: "No se pudo cargar el inventario. Reintentá."}
+					</p>
+					<Button
+						size="sm"
+						variant="outline"
+						onClick={() => {
+							if (quotesError) quotesRefetch();
+							if (materialsError) materialsRefetch();
+						}}
+					>
+						Reintentar
+					</Button>
+				</div>
+				{productionPipelineWidget}
+			</div>
+		);
+	}
+
 	const maxRev = Math.max(...stats.revenueByMonth.map((d) => d.total), 1);
 
 	return (
 		<div className="pb-24 md:pb-6 space-y-5 p-4 md:p-6 min-w-0">
 			<PageHeader
-				title="Dashboard"
+				title="Inicio"
 				actions={
-					<div className="flex rounded-lg border border-line bg-cp-bg2 p-1 gap-1">
-						{PERIOD_OPTIONS.map((opt) => (
-							<button
-								key={opt.value}
-								type="button"
-								onClick={() => setPeriod(opt.value)}
-								className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-									period === opt.value
-										? "bg-surface text-ink shadow-sm"
-										: "text-ink3 hover:text-ink"
-								}`}
-							>
-								{opt.label}
-							</button>
-						))}
+					<div role="radiogroup" aria-label="Período de facturación">
+						<div className="flex rounded-lg border border-line bg-cp-bg2 p-1 gap-1">
+							{PERIOD_OPTIONS.map((opt) => (
+								<span
+									key={opt.value}
+									role="radio"
+									aria-checked={period === opt.value}
+								>
+									<ChipToggle
+										variant="tab"
+										active={period === opt.value}
+										onSelect={() => setPeriod(opt.value)}
+										label={opt.label}
+										ariaLabel={opt.label}
+									/>
+								</span>
+							))}
+						</div>
 					</div>
 				}
 			/>
@@ -134,7 +178,7 @@ export function Dashboard({
 			/>
 
 			{/* Hero KPI — facturación del período */}
-			<div className="rounded-xl border border-line bg-surface overflow-hidden">
+			<div className="rounded-xl border border-line bg-cp-surface overflow-hidden">
 				<div className="p-4 pb-3">
 					<div className="flex items-center justify-between">
 						<Eyebrow as="div" variant="mono" className="text-[10.5px] tracking-[0.1em]">
@@ -142,7 +186,12 @@ export function Dashboard({
 							{PERIOD_OPTIONS.find((o) => o.value === period)?.label}
 						</Eyebrow>
 					</div>
-					<div className="mt-2 font-display font-semibold text-[40px] leading-none text-ink">
+					{/* Hero KPI — display voice exception.
+					    Money Is Mono Rule still binds: tables, lists, and the
+					    "ticket promedio" sub-label below stay in JetBrains Mono.
+					    The 40px hero carries the day's headline, not a ledger
+					    entry, so it lifts to Fraunces italic per the brand brief. */}
+					<div className="mt-2 font-display italic font-semibold text-[40px] leading-none text-ink">
 						{formatCurrency(stats.totalRevenue)}
 					</div>
 					<div className="mt-1 text-[12px] text-ink3">
@@ -192,7 +241,7 @@ export function Dashboard({
 
 			{/* Pipeline snapshot */}
 			{stats.byStatus.length > 0 && (
-				<div className="rounded-xl border border-line bg-surface p-4">
+				<div className="rounded-xl border border-line bg-cp-surface p-4">
 					<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-3">
 						Pipeline · presupuestos activos
 					</Eyebrow>
@@ -233,7 +282,7 @@ export function Dashboard({
 				<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-2">
 					Accesos rápidos
 				</Eyebrow>
-				<div className="grid grid-cols-2 gap-2">
+				<div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
 					{[
 						{
 							icon: FileText,
@@ -263,7 +312,7 @@ export function Dashboard({
 						<button
 							key={s.path}
 							onClick={() => navigate(s.path)}
-							className="text-left bg-surface border border-line rounded-xl p-3 hover:border-line2 transition-colors"
+							className="text-left bg-cp-surface border border-line rounded-xl p-3 hover:border-line2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cp-accent focus-visible:ring-offset-2 focus-visible:ring-offset-cp-bg"
 						>
 							<div className="flex items-center justify-between">
 								<div className="w-8 h-8 rounded-md bg-cp-accent-soft text-cp-accent grid place-items-center">
@@ -288,7 +337,7 @@ export function Dashboard({
 					<div className="space-y-2">
 						{lowStockMaterials.length > 0 && (
 							<div
-								className="bg-surface border border-line rounded-xl p-3 flex items-start gap-3"
+								className="bg-cp-surface border border-line rounded-xl p-3 flex items-start gap-3"
 								style={{
 									borderLeftWidth: 4,
 									borderLeftColor: "var(--cp-warn)",
@@ -311,16 +360,18 @@ export function Dashboard({
 											.join(" · ")}
 									</div>
 								</div>
-								<button
+								<Button
+									variant="ghost"
+									size="default"
 									onClick={() => navigate("/inventory")}
-									className="text-xs text-ink2 hover:text-ink px-2 py-1 rounded-md hover:bg-cp-bg2 transition-colors shrink-0"
+									className="shrink-0"
 								>
 									Ver
-								</button>
+								</Button>
 							</div>
 						)}
 						{staleQuotes.length > 0 && (
-							<div className="bg-surface border border-line rounded-xl p-3 flex items-start gap-3">
+							<div className="bg-cp-surface border border-line rounded-xl p-3 flex items-start gap-3">
 								<Clock size={16} className="mt-0.5 text-ink2 shrink-0" />
 								<div className="flex-1 min-w-0">
 									<div className="font-medium text-[13.5px] text-ink">
@@ -332,12 +383,14 @@ export function Dashboard({
 										Enviá un recordatorio por WhatsApp
 									</div>
 								</div>
-								<button
+								<Button
+									variant="ghost"
+									size="default"
 									onClick={() => navigate("/quotes")}
-									className="text-xs text-ink2 hover:text-ink px-2 py-1 rounded-md hover:bg-cp-bg2 transition-colors shrink-0"
+									className="shrink-0"
 								>
 									Ver
-								</button>
+								</Button>
 							</div>
 						)}
 					</div>

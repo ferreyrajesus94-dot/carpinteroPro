@@ -27,8 +27,12 @@ export function PageHeader({
 					{createElement(
 						level,
 						{
+							// tracking-[-0.02em] replaces Tailwind's tracking-tight (-0.025em).
+							// Fraunces carries more visual weight at large sizes than the
+							// previous Space Grotesk, so a touch less tightening keeps
+							// the optical balance without crowding the letterforms.
 							className:
-								"font-display text-2xl font-semibold tracking-tight text-ink",
+								"font-display text-2xl font-semibold tracking-[-0.02em] text-ink",
 						},
 						title,
 					)}
