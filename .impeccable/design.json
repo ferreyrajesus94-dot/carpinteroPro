@@ -1,0 +1,498 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-06T13:00:00Z",
+  "title": "Design System: CarpinteroPro",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Cobrizo cálido",
+        "canonical": "oklch(62% 0.18 48)",
+        "tonalRamp": [
+          "oklch(15% 0.05 48)",
+          "oklch(25% 0.10 48)",
+          "oklch(40% 0.15 48)",
+          "oklch(55% 0.18 48)",
+          "oklch(70% 0.16 48)",
+          "oklch(82% 0.10 48)",
+          "oklch(92% 0.05 48)",
+          "oklch(97% 0.02 48)"
+        ]
+      },
+      "primary-ink": {
+        "role": "primary-ink",
+        "displayName": "Tinta sobre acento",
+        "canonical": "oklch(99% 0 0)",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(30% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(70% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(93% 0 0)",
+          "oklch(97% 0 0)",
+          "oklch(99% 0 0)"
+        ]
+      },
+      "primary-soft": {
+        "role": "primary-soft",
+        "displayName": "Acento suave",
+        "canonical": "oklch(94% 0.04 55)",
+        "tonalRamp": [
+          "oklch(15% 0.02 55)",
+          "oklch(30% 0.03 55)",
+          "oklch(50% 0.04 55)",
+          "oklch(70% 0.04 55)",
+          "oklch(82% 0.04 55)",
+          "oklch(90% 0.04 55)",
+          "oklch(94% 0.04 55)",
+          "oklch(97% 0.03 55)"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Papel cálido",
+        "canonical": "oklch(97.5% 0.008 70)",
+        "tonalRamp": [
+          "oklch(15% 0.005 70)",
+          "oklch(25% 0.006 70)",
+          "oklch(40% 0.007 70)",
+          "oklch(55% 0.008 70)",
+          "oklch(70% 0.008 70)",
+          "oklch(82% 0.008 70)",
+          "oklch(92% 0.008 70)",
+          "oklch(97.5% 0.008 70)"
+        ]
+      },
+      "neutral-bg-2": {
+        "role": "neutral",
+        "displayName": "Arena",
+        "canonical": "oklch(94.8% 0.012 70)",
+        "tonalRamp": [
+          "oklch(15% 0.008 70)",
+          "oklch(25% 0.010 70)",
+          "oklch(40% 0.012 70)",
+          "oklch(55% 0.012 70)",
+          "oklch(70% 0.012 70)",
+          "oklch(82% 0.012 70)",
+          "oklch(92% 0.012 70)",
+          "oklch(95% 0.012 70)"
+        ]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Superficie",
+        "canonical": "oklch(99% 0.004 70)",
+        "tonalRamp": [
+          "oklch(15% 0.003 70)",
+          "oklch(30% 0.003 70)",
+          "oklch(50% 0.004 70)",
+          "oklch(70% 0.004 70)",
+          "oklch(85% 0.004 70)",
+          "oklch(93% 0.004 70)",
+          "oklch(97% 0.004 70)",
+          "oklch(99% 0.004 70)"
+        ]
+      },
+      "text-primary": {
+        "role": "text",
+        "displayName": "Tinta primaria",
+        "canonical": "oklch(22% 0.018 50)",
+        "tonalRamp": [
+          "oklch(15% 0.018 50)",
+          "oklch(22% 0.018 50)",
+          "oklch(35% 0.014 55)",
+          "oklch(50% 0.012 58)",
+          "oklch(65% 0.010 60)",
+          "oklch(80% 0.008 60)",
+          "oklch(92% 0.005 60)",
+          "oklch(97% 0.004 60)"
+        ]
+      },
+      "text-secondary": {
+        "role": "text",
+        "displayName": "Tinta secundaria",
+        "canonical": "oklch(38% 0.014 55)",
+        "tonalRamp": [
+          "oklch(15% 0.014 55)",
+          "oklch(25% 0.014 55)",
+          "oklch(38% 0.014 55)",
+          "oklch(55% 0.012 58)",
+          "oklch(70% 0.010 60)",
+          "oklch(85% 0.008 60)",
+          "oklch(93% 0.005 60)",
+          "oklch(97% 0.004 60)"
+        ]
+      },
+      "text-tertiary": {
+        "role": "text",
+        "displayName": "Tinta terciaria",
+        "canonical": "oklch(55% 0.010 60)",
+        "tonalRamp": [
+          "oklch(15% 0.010 60)",
+          "oklch(30% 0.010 60)",
+          "oklch(45% 0.010 60)",
+          "oklch(55% 0.010 60)",
+          "oklch(70% 0.008 60)",
+          "oklch(85% 0.006 60)",
+          "oklch(93% 0.004 60)",
+          "oklch(97% 0.003 60)"
+        ]
+      },
+      "divider": {
+        "role": "divider",
+        "displayName": "Línea",
+        "canonical": "oklch(89% 0.010 60)",
+        "tonalRamp": [
+          "oklch(15% 0.005 60)",
+          "oklch(30% 0.008 60)",
+          "oklch(50% 0.010 60)",
+          "oklch(70% 0.010 60)",
+          "oklch(82% 0.010 60)",
+          "oklch(89% 0.010 60)",
+          "oklch(94% 0.008 60)",
+          "oklch(97% 0.005 60)"
+        ]
+      },
+      "divider-strong": {
+        "role": "divider",
+        "displayName": "Línea fuerte",
+        "canonical": "oklch(82% 0.012 60)",
+        "tonalRamp": [
+          "oklch(15% 0.006 60)",
+          "oklch(30% 0.010 60)",
+          "oklch(50% 0.012 60)",
+          "oklch(70% 0.012 60)",
+          "oklch(82% 0.012 60)",
+          "oklch(90% 0.010 60)",
+          "oklch(95% 0.008 60)",
+          "oklch(98% 0.005 60)"
+        ]
+      },
+      "success": {
+        "role": "status",
+        "displayName": "Éxito",
+        "canonical": "oklch(58% 0.14 155)",
+        "tonalRamp": [
+          "oklch(15% 0.05 155)",
+          "oklch(25% 0.08 155)",
+          "oklch(40% 0.12 155)",
+          "oklch(55% 0.14 155)",
+          "oklch(70% 0.12 155)",
+          "oklch(82% 0.08 155)",
+          "oklch(92% 0.05 155)",
+          "oklch(96% 0.03 155)"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Atención",
+        "canonical": "oklch(72% 0.16 75)",
+        "tonalRamp": [
+          "oklch(15% 0.05 75)",
+          "oklch(25% 0.10 75)",
+          "oklch(40% 0.14 75)",
+          "oklch(55% 0.16 75)",
+          "oklch(70% 0.16 75)",
+          "oklch(82% 0.12 75)",
+          "oklch(92% 0.08 75)",
+          "oklch(96% 0.04 75)"
+        ]
+      },
+      "danger": {
+        "role": "status",
+        "displayName": "Peligro",
+        "canonical": "oklch(58% 0.19 25)",
+        "tonalRamp": [
+          "oklch(15% 0.06 25)",
+          "oklch(25% 0.12 25)",
+          "oklch(40% 0.17 25)",
+          "oklch(55% 0.19 25)",
+          "oklch(70% 0.16 25)",
+          "oklch(82% 0.10 25)",
+          "oklch(92% 0.06 25)",
+          "oklch(96% 0.03 25)"
+        ]
+      },
+      "info": {
+        "role": "status",
+        "displayName": "Info",
+        "canonical": "oklch(60% 0.12 230)",
+        "tonalRamp": [
+          "oklch(15% 0.04 230)",
+          "oklch(25% 0.08 230)",
+          "oklch(40% 0.11 230)",
+          "oklch(55% 0.12 230)",
+          "oklch(70% 0.10 230)",
+          "oklch(82% 0.07 230)",
+          "oklch(92% 0.04 230)",
+          "oklch(96% 0.02 230)"
+        ]
+      },
+      "chart-up": {
+        "role": "chart",
+        "displayName": "Subió",
+        "canonical": "oklch(52% 0.16 145)",
+        "tonalRamp": [
+          "oklch(15% 0.05 145)",
+          "oklch(25% 0.10 145)",
+          "oklch(40% 0.14 145)",
+          "oklch(55% 0.16 145)",
+          "oklch(70% 0.13 145)",
+          "oklch(82% 0.08 145)",
+          "oklch(92% 0.05 145)",
+          "oklch(96% 0.03 145)"
+        ]
+      },
+      "chart-down": {
+        "role": "chart",
+        "displayName": "Bajó",
+        "canonical": "oklch(52% 0.20 25)",
+        "tonalRamp": [
+          "oklch(15% 0.06 25)",
+          "oklch(25% 0.13 25)",
+          "oklch(40% 0.18 25)",
+          "oklch(55% 0.20 25)",
+          "oklch(70% 0.16 25)",
+          "oklch(82% 0.10 25)",
+          "oklch(92% 0.06 25)",
+          "oklch(96% 0.03 25)"
+        ]
+      },
+      "chart-neutral": {
+        "role": "chart",
+        "displayName": "Neutro (chart)",
+        "canonical": "oklch(55% 0.01 0)",
+        "tonalRamp": [
+          "oklch(15% 0.01 0)",
+          "oklch(25% 0.01 0)",
+          "oklch(40% 0.01 0)",
+          "oklch(55% 0.01 0)",
+          "oklch(70% 0.01 0)",
+          "oklch(82% 0.01 0)",
+          "oklch(92% 0.005 0)",
+          "oklch(96% 0.003 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero del landing y títulos de sección de marketing. Solo donde el contenido es narrativa, no operación."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "PageHeader y KPI destacados en panel. Texto 2xl con Space Grotesk semibold."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Títulos de Card, headings de detalle (settings), subtítulos cuando se quiere cuerpo y no display."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Párrafos, descripciones de card, texto principal de celdas. Tamaño dominante del sistema (text-sm)."
+      },
+      "label": {
+        "displayName": "Caption / Label",
+        "purpose": "Eyebrow, helper text, table heads, error inline. Texto xs uppercase con tracking."
+      },
+      "mono": {
+        "displayName": "Mono / Tabular",
+        "purpose": "Todo lo que sea dinero, ID, kbd shortcut, paso de wizard, número tabular. JetBrains Mono con tnum."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-low",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Card default, pill de landing, panel admin. Elevación natural de una tarjeta sobre la mesa."
+      },
+      {
+        "name": "ambient-mid",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "Tooltip, contenido de select, tooltips de dashboard."
+      },
+      {
+        "name": "ambient-high",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Diálogo, search dropdown, switch thumb. Cosas que tienen que elevarse sobre la página."
+      },
+      {
+        "name": "ambient-peak",
+        "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+        "purpose": "Solo FAB móvil. El único elemento en el sistema con esta elevación."
+      }
+    ],
+    "motion": [
+      {
+        "name": "transition-default",
+        "value": "150ms cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "Default easing para transition-colors (la dominante del sistema)."
+      },
+      {
+        "name": "transition-dialog",
+        "value": "200ms",
+        "purpose": "Apertura y cierre del Radix Dialog (data-state animation)."
+      },
+      {
+        "name": "transition-faq-chevron",
+        "value": "300ms",
+        "purpose": "Rotación del chevron en la sección FAQ del landing."
+      },
+      {
+        "name": "transition-walkthrough-progress",
+        "value": "450ms ease",
+        "purpose": "Barra de progreso del walkthrough en landing-visual-demos.css."
+      },
+      {
+        "name": "landing-grow",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Easing custom para keyframes de landing (landing-grow, landing-float)."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px", "purpose": "Breakpoint del shell desktop: sidebar visible, bottom-tabs ocultos." },
+      { "name": "xl", "value": "1280px" },
+      { "name": "2xl", "value": "1536px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción primaria. Cobrizo cálido sobre blanco. Única voz de acento del sistema.",
+      "html": "<button class=\"ds-btn-primary\">Guardar presupuesto</button>",
+      "css": ".ds-btn-primary {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  white-space: nowrap;\n  height: 40px;\n  padding: 0 16px;\n  border-radius: 8px;\n  background: var(--cp-accent);\n  color: var(--cp-accent-ink);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  border: none;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-btn-primary:hover {\n  background: oklch(58% 0.18 48 / 0.9);\n}\n.ds-btn-primary:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}\n.ds-btn-primary:disabled {\n  opacity: 0.5;\n  pointer-events: none;\n}\n.ds-btn-primary svg {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Acción secundaria sobre fondo. Hover tinta el componente con acento suave.",
+      "html": "<button class=\"ds-btn-outline\">Cancelar</button>",
+      "css": ".ds-btn-outline {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 8px;\n  height: 40px;\n  padding: 0 16px;\n  border-radius: 8px;\n  background: var(--cp-bg);\n  color: var(--ink);\n  border: 1px solid var(--line);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-btn-outline:hover {\n  background: var(--cp-accent-soft);\n  color: var(--cp-accent);\n}\n.ds-btn-outline:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}\n.ds-btn-outline:disabled {\n  opacity: 0.5;\n  pointer-events: none;\n}\n.ds-btn-outline svg {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Campo de texto operativo. Sin cambio de borde en focus; el ring hace todo el trabajo.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"Nombre del material\" />",
+      "css": ".ds-input {\n  display: flex;\n  width: 100%;\n  height: 40px;\n  padding: 8px 12px;\n  border-radius: 8px;\n  background: var(--cp-bg);\n  color: var(--ink);\n  border: 1px solid var(--line);\n  font-size: 14px;\n  font-family: 'Inter', system-ui, sans-serif;\n  box-sizing: border-box;\n  transition: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-input::placeholder {\n  color: var(--ink-3);\n}\n.ds-input:focus-visible {\n  outline: none;\n  box-shadow: 0 0 0 2px var(--cp-bg), 0 0 0 4px var(--cp-accent);\n}\n.ds-input:disabled {\n  opacity: 0.5;\n  cursor: not-allowed;\n}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Contenedor principal. Borde 1px, superficie elevada 1px sobre el papel, sombra-sm.",
+      "html": "<div class=\"ds-card\">\n  <div class=\"ds-card-header\">\n    <h3 class=\"ds-card-title\">Stock disponible</h3>\n    <p class=\"ds-card-description\">Vista de los materiales con existencias.</p>\n  </div>\n  <div class=\"ds-card-content\">\n    <p>12 materiales en stock.</p>\n  </div>\n</div>",
+      "css": ".ds-card {\n  border-radius: 10px;\n  border: 1px solid var(--line);\n  background: var(--cp-surface);\n  color: var(--ink);\n  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n  font-family: 'Inter', system-ui, sans-serif;\n}\n.ds-card-header {\n  display: flex;\n  flex-direction: column;\n  padding: 24px;\n  gap: 6px;\n}\n.ds-card-title {\n  font-size: 1.5rem;\n  font-weight: 600;\n  line-height: 1;\n  letter-spacing: -0.025em;\n  margin: 0;\n  color: var(--ink);\n}\n.ds-card-description {\n  font-size: 14px;\n  color: var(--ink-3);\n  margin: 0;\n}\n.ds-card-content {\n  padding: 0 24px 24px;\n  color: var(--ink-2);\n}"
+    },
+    {
+      "name": "Sidebar Nav Link (active)",
+      "kind": "nav",
+      "refersTo": "sidebar-nav-active",
+      "description": "Item de navegación lateral con estado activo. Acento suave + texto cobre; inactivo tinta-2 sobre papel.",
+      "html": "<a href=\"/dashboard\" class=\"ds-nav-row\" aria-current=\"page\">\n  <svg class=\"ds-nav-row-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">\n    <path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/>\n    <polyline points=\"9 22 9 12 15 12 15 22\"/>\n  </svg>\n  <span>Inicio</span>\n</a>",
+      "css": ".ds-nav-row {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  height: 36px;\n  padding: 0 12px;\n  border-radius: 8px;\n  font-size: 13.5px;\n  font-weight: 500;\n  color: var(--ink-2);\n  text-decoration: none;\n  font-family: 'Inter', system-ui, sans-serif;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-nav-row:hover {\n  background: var(--cp-bg-2);\n  color: var(--ink);\n}\n.ds-nav-row[aria-current=\"page\"] {\n  background: var(--cp-accent-soft);\n  color: var(--cp-accent);\n}\n.ds-nav-row:focus-visible {\n  outline: 2px solid var(--cp-accent);\n  outline-offset: 2px;\n  border-radius: 6px;\n}\n.ds-nav-row-icon {\n  width: 16px;\n  height: 16px;\n  flex-shrink: 0;\n}"
+    },
+    {
+      "name": "Chip Toggle (tab, active)",
+      "kind": "chip",
+      "refersTo": "chip-toggle-tab-active",
+      "description": "Chip toggleable estilo tab. Estado activo se separa del fondo bg-2 con superficie y shadow-sm.",
+      "html": "<button class=\"ds-chip-tab\" aria-pressed=\"true\" type=\"button\">Cotizaciones</button>",
+      "css": ".ds-chip-tab {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  gap: 6px;\n  flex: 1;\n  padding: 6px 12px;\n  border-radius: 10px;\n  font-size: 13px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  background: var(--cp-bg-2);\n  color: var(--ink-2);\n  border: none;\n  cursor: pointer;\n  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), color 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-chip-tab[aria-pressed=\"true\"] {\n  background: var(--cp-surface);\n  color: var(--ink);\n  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);\n}\n.ds-chip-tab:focus-visible {\n  outline: 2px solid var(--cp-accent);\n  outline-offset: 2px;\n}"
+    },
+    {
+      "name": "Mobile FAB",
+      "kind": "custom",
+      "refersTo": "mobile-fab",
+      "description": "Botón flotante contextual sobre bottom-tabs. Píldora cobriza con shadow-xl; único elemento con scale-transform.",
+      "html": "<button class=\"ds-mobile-fab\" type=\"button\">\n  <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\">\n    <line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/>\n    <line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/>\n  </svg>\n  <span>Nuevo presupuesto</span>\n</button>",
+      "css": ".ds-mobile-fab {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  height: 48px;\n  padding: 0 20px;\n  border-radius: 9999px;\n  background: var(--cp-accent);\n  color: var(--cp-accent-ink);\n  font-size: 14px;\n  font-weight: 500;\n  font-family: 'Inter', system-ui, sans-serif;\n  border: none;\n  cursor: pointer;\n  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);\n  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);\n}\n.ds-mobile-fab:hover {\n  transform: scale(1.02);\n}\n.ds-mobile-fab:active {\n  transform: scale(0.95);\n}\n.ds-mobile-fab:focus-visible {\n  outline: 2px solid var(--cp-accent);\n  outline-offset: 2px;\n}\n.ds-mobile-fab svg {\n  width: 16px;\n  height: 16px;\n}"
+    },
+    {
+      "name": "Dialog Content",
+      "kind": "custom",
+      "refersTo": "dialog-content",
+      "description": "Contenedor modal centrado. Shadow-lg, fade+zoom Radix animation 200ms.",
+      "html": "<div class=\"ds-dialog-overlay\"></div>\n<div class=\"ds-dialog-content\" role=\"dialog\" aria-labelledby=\"ds-dialog-title\">\n  <h2 class=\"ds-dialog-title\" id=\"ds-dialog-title\">Confirmar presupuesto</h2>\n  <p class=\"ds-dialog-description\">Una vez aprobado, se descontará el material del stock.</p>\n  <div class=\"ds-dialog-footer\">\n    <button class=\"ds-btn-outline\" type=\"button\">Cancelar</button>\n    <button class=\"ds-btn-primary\" type=\"button\">Aprobar</button>\n  </div>\n</div>",
+      "css": ".ds-dialog-overlay {\n  position: fixed;\n  inset: 0;\n  z-index: 50;\n  background: rgb(0 0 0 / 0.8);\n}\n.ds-dialog-content {\n  position: fixed;\n  left: 50%;\n  top: 50%;\n  z-index: 50;\n  display: grid;\n  width: calc(100% - 32px);\n  max-width: 32rem;\n  max-height: 90vh;\n  transform: translate(-50%, -50%);\n  gap: 16px;\n  overflow-y: auto;\n  border-radius: 10px;\n  border: 1px solid var(--line);\n  background: var(--cp-bg);\n  padding: 24px;\n  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);\n  font-family: 'Inter', system-ui, sans-serif;\n  box-sizing: border-box;\n  animation: ds-dialog-in 200ms ease;\n}\n@keyframes ds-dialog-in {\n  from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); }\n  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }\n}\n.ds-dialog-title {\n  font-size: 18px;\n  font-weight: 600;\n  line-height: 1.2;\n  letter-spacing: -0.01em;\n  margin: 0;\n  color: var(--ink);\n}\n.ds-dialog-description {\n  font-size: 14px;\n  color: var(--ink-3);\n  margin: 0;\n}\n.ds-dialog-footer {\n  display: flex;\n  flex-direction: column-reverse;\n  gap: 8px;\n}\n@media (min-width: 640px) {\n  .ds-dialog-footer {\n    flex-direction: row;\n    justify-content: flex-end;\n  }\n}"
+    }
+  ],
+  "narrative": {
+    "northStar": "El Cuaderno del Taller",
+    "overview": "Utilitario, cálido, de taller. La herramienta desaparece detrás del trabajo: no decora, no vende, no entretiene. La calidez viene del papel (paleta cálida sobre oklch(97.5% 0.008 70)) y del acento cobre, no de los bordes redondeados ni de las gradientes. La densidad viene del ritmo 8/12 y del toggle cómodo/denso, no del tamaño de letra. Solo se eleva lo que necesita elevarse: diálogos, popovers, el FAB móvil. El resto se queda plano sobre la mesa, marcado por bordes de 1px en --line. La numeración monetaria es siempre monospace.",
+    "keyCharacteristics": [
+      "Plano en reposo; las sombras aparecen solo como respuesta al estado (hover, overlay, FAB).",
+      "Acento cobre único sobre papel cálido; sin tonos competidos ni colores secundarios.",
+      "Densidad de taller: paneles p-5/p-6, campos h-10, gaps 8/12px, sin respiración de más.",
+      "Tipografía de dos voces (Inter cuerpo + Space Grotesk títulos + JetBrains Mono dinero).",
+      "WCAG 2.1 AA no es opcional: contraste, teclado y tamaño de objetivo vienen del brief del piso del taller."
+    ],
+    "rules": [
+      {
+        "name": "The One Voice Rule",
+        "body": "El cobrizo cálido se usa en ≤10% del lienzo en cualquier pantalla dada. Su rareza es el punto. Si un componente necesita jerarquía visual sin acción, usa text-secondary, bg-2 o border-line, no el acento.",
+        "section": "colors"
+      },
+      {
+        "name": "The Single Source Rule",
+        "body": "Los tokens OKLCH son la única fuente de verdad. Los HSL legacy están DEPRECATED.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Color-Only State Rule",
+        "body": "Ningún estado (aprobación, stock bajo, sin stock, mantenimiento) se señaliza solo por color. Cada uno viene con icono, etiqueta o posición.",
+        "section": "colors"
+      },
+      {
+        "name": "The Money Is Mono Rule",
+        "body": "Todo número monetario se renderiza en JetBrains Mono con tnum activado. Celdas de precio en listas, totales en cards, gráficos de precio histórico.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two-Voice Rule",
+        "body": "Solo dos voces para texto corrido: Inter (cuerpo) y Space Grotesk (display/headline). Una tercera fuente se reemplaza por peso y tamaño.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Las superficies son planas en reposo. Las sombras aparecen solo como respuesta al estado. Si un componente necesita elevación en reposo, primero probá con border-line y bg-cp-surface.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Backdrop-Blur Surface Rule",
+        "body": "El topbar desktop, el header mobile y los bottom-tabs usan bg-cp-surface/85 o /95 + backdrop-blur. Translúcidos para no romper el flujo visual, no translúcidos para lujo.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Usá bg-cp-accent para acciones primarias; el resto es bg-cp-bg2, bg-cp-surface o borde.",
+      "Mantené h-10 (40px) como altura mínima de cualquier control tappable.",
+      "Renderizá todo número monetario en JetBrains Mono con tnum.",
+      "Usá border-line para separar superficies; las sombras son para overlays.",
+      "Usá font-display (Space Grotesk) para PageHeader y KPI destacados.",
+      "Usá bg-cp-accent-soft para hover/activo de nav y chips en contexto plano.",
+      "Usá focus-visible:ring-2 focus-visible:ring-cp-accent focus-visible:ring-offset-2 en todo focusable.",
+      "Respetá prefers-reduced-motion: reduce.",
+      "Proveé skip-to-content anchors en cualquier layout con navegación lateral."
+    ],
+    "donts": [
+      "No agregues un color secundario de acento.",
+      "No uses shadow-sm fuera de cards, panels y pills de landing.",
+      "No uses gradientes.",
+      "No uses transition-all.",
+      "No uses rounded-full por estilo en componentes estructurales.",
+      "No uses los tokens HSL legacy.",
+      "No uses text-black o text-white literales.",
+      "No uses animaciones de tailwindcss-animate que no sean fade-* o zoom-*.",
+      "No uses dark mode como default.",
+      "No señalices estado solo con color."
+    ]
+  }
+}
