@@ -15,6 +15,14 @@ export const router = createBrowserRouter([
 			})),
 	},
 	{
+		path: "/v3",
+		hydrateFallbackElement,
+		lazy: () =>
+			import("@/features/landing-v3").then((m) => ({
+				Component: m.LandingV3Routes,
+			})),
+	},
+	{
 		path: "/terms",
 		hydrateFallbackElement,
 		lazy: () =>
