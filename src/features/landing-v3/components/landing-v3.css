@@ -1,0 +1,771 @@
+.landing-v3 {
+	--v3-void: #15100d;
+	--v3-ivory: #f7f2e7;
+	--v3-red: #c94b32;
+	--v3-ochre: #d7a85b;
+	--v3-ink: #201811;
+	background: var(--v3-void);
+	color: var(--v3-ivory);
+	font-family: "Inter", system-ui, sans-serif;
+	scroll-behavior: smooth;
+}
+
+.landing-v3 ::selection {
+	background: var(--v3-red);
+	color: var(--v3-ivory);
+}
+
+.landing-v3 :focus-visible {
+	outline: 3px solid var(--v3-ochre);
+	outline-offset: 4px;
+}
+
+.landing-v3__hero,
+.landing-v3__scene {
+	position: relative;
+	min-height: 100svh;
+	overflow: hidden;
+	background: var(--v3-void);
+	scroll-margin-top: 0;
+	isolation: isolate;
+}
+
+.landing-v3__hero-photo,
+.landing-v3__scene-photo {
+	position: absolute;
+	display: block;
+	object-fit: cover;
+}
+
+.landing-v3__hero-photo {
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	background-image: url("/assets/plates/hero-workshop-photo.png");
+	background-position: center;
+	background-size: cover;
+	object-position: center;
+}
+
+.landing-v3__hero::after {
+	position: absolute;
+	inset: 0;
+	content: "";
+	pointer-events: none;
+	background: rgb(15 10 7 / 0.4);
+	clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%);
+}
+
+.landing-v3__brand {
+	position: absolute;
+	z-index: 4;
+	top: 5.5%;
+	left: 3.23%;
+	display: flex;
+	align-items: center;
+	height: auto;
+	color: var(--v3-ivory);
+	font-size: clamp(2rem, 3.05vw, 3.2rem);
+	font-weight: 700;
+	letter-spacing: -0.035em;
+	text-decoration: none;
+}
+
+.landing-v3__brand strong {
+	color: var(--v3-red);
+}
+
+.landing-v3__progress {
+	position: absolute;
+	z-index: 4;
+	top: 0;
+	left: 30%;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	width: 40%;
+	height: 16%;
+}
+
+.landing-v3__progress-rule {
+	position: absolute;
+	top: 4.6rem;
+	left: 10%;
+	width: 80%;
+	height: 1px;
+	background: rgb(247 242 231 / 0.72);
+}
+
+.landing-v3__stage {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	min-width: 7rem;
+	align-items: center;
+	align-self: start;
+	justify-self: center;
+	flex-direction: column;
+	gap: 0.3rem;
+	padding-top: 2.8rem;
+	color: var(--v3-ivory);
+	font-size: clamp(0.72rem, 0.95vw, 1rem);
+	text-decoration: none;
+}
+
+.landing-v3__stage span {
+	display: grid;
+	width: clamp(2.4rem, 2.7vw, 2.85rem);
+	aspect-ratio: 1;
+	place-items: center;
+	border: 1px solid rgb(247 242 231 / 0.84);
+	border-radius: 50%;
+	background: rgb(21 16 13 / 0.78);
+	font-weight: 700;
+	transition: background-color 180ms ease-out, border-color 180ms ease-out;
+}
+
+.landing-v3__stage:hover span,
+.landing-v3__stage[data-active] span {
+	border-color: var(--v3-red);
+	background: var(--v3-red);
+}
+
+.landing-v3__stage strong {
+	font-weight: 600;
+}
+
+.landing-v3__hero-copy {
+	position: absolute;
+	z-index: 3;
+	top: 20%;
+	left: 4.25%;
+	width: min(42rem, 43%);
+}
+
+.landing-v3__headline,
+.landing-v3__scene-copy h2,
+.landing-v3__closing h2 {
+	margin: 0;
+	font-family: "Mukta Malar", "Inter", sans-serif;
+	font-weight: 700;
+	letter-spacing: -0.03em;
+	line-height: 0.92;
+	text-wrap: balance;
+}
+
+.landing-v3__headline {
+	font-size: clamp(4rem, 4.8vw, 5rem);
+}
+
+.landing-v3__primary-action {
+	display: inline-flex;
+	min-width: 19rem;
+	height: 4.75rem;
+	align-items: center;
+	justify-content: space-between;
+	gap: 2rem;
+	margin-top: 1.75rem;
+	padding: 0 1.8rem;
+	background: var(--v3-red);
+	color: var(--v3-ivory);
+	font-size: clamp(1rem, 1.3vw, 1.35rem);
+	font-weight: 700;
+	text-decoration: none;
+	transition: background-color 180ms ease-out, color 180ms ease-out;
+}
+
+.landing-v3__primary-action:hover {
+	background: var(--v3-ivory);
+	color: var(--v3-ink);
+}
+
+.landing-v3__primary-action svg {
+	width: 1.65rem;
+	height: 1.65rem;
+}
+
+.landing-v3__quote-sheet header,
+.landing-v3__quote-sheet dl div,
+.landing-v3__quote-total,
+.landing-v3__quote-sheet footer,
+.landing-v3__production-board header,
+.landing-v3__production-board li,
+.landing-v3__production-board footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.landing-v3__disclosure {
+	position: absolute;
+	z-index: 3;
+	top: auto;
+	bottom: 1.5rem;
+	left: 4.1%;
+	margin: 0;
+	color: rgb(247 242 231 / 0.76);
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+.landing-v3__scene-photo,
+.landing-v3__scene-shade {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.landing-v3__scene-photo {
+	object-position: center;
+}
+
+.landing-v3__scene-shade {
+	z-index: 1;
+	background: rgb(17 11 8 / 0.58);
+	pointer-events: none;
+}
+
+.landing-v3__scene--quote .landing-v3__scene-shade {
+	clip-path: polygon(0 0, 62% 0, 48% 100%, 0 100%);
+}
+
+.landing-v3__scene--production .landing-v3__scene-shade {
+	background: rgb(17 11 8 / 0.5);
+}
+
+.landing-v3__scene-copy {
+	position: absolute;
+	z-index: 3;
+	top: 24%;
+	left: 4.25%;
+	width: min(40rem, 42%);
+}
+
+.landing-v3__scene-copy h2 {
+	font-size: clamp(3.5rem, 5.1vw, 5.3rem);
+}
+
+.landing-v3__scene-copy p {
+	max-width: 35rem;
+	margin: 1.5rem 0 0;
+	color: rgb(247 242 231 / 0.88);
+	font-size: clamp(1rem, 1.3vw, 1.3rem);
+	line-height: 1.55;
+}
+
+.landing-v3__quote-sheet,
+.landing-v3__production-board {
+	position: absolute;
+	z-index: 3;
+	right: 4.25%;
+	top: 23%;
+	width: min(31rem, 36vw);
+	background: var(--v3-ivory);
+	color: var(--v3-ink);
+	box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.36);
+}
+
+.landing-v3__quote-sheet header,
+.landing-v3__production-board header {
+	padding: 1.5rem 1.6rem;
+	border-bottom: 1px solid rgb(32 24 17 / 0.2);
+}
+
+.landing-v3__quote-sheet header div,
+.landing-v3__production-board header div {
+	display: grid;
+	gap: 0.3rem;
+}
+
+.landing-v3__quote-sheet header span,
+.landing-v3__production-board header span {
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.landing-v3__quote-sheet header strong,
+.landing-v3__production-board header strong {
+	font-size: 1.5rem;
+}
+
+.landing-v3__quote-sheet header b {
+	padding: 0.48rem 0.75rem;
+	background: #dbe7d5;
+	color: #23401c;
+	font-size: 0.78rem;
+}
+
+.landing-v3__quote-sheet dl {
+	margin: 0;
+	padding: 1rem 1.6rem;
+}
+
+.landing-v3__quote-sheet dl div {
+	min-height: 2.55rem;
+}
+
+.landing-v3__quote-sheet dt {
+	color: rgb(32 24 17 / 0.72);
+}
+
+.landing-v3__quote-sheet dd {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+}
+
+.landing-v3__quote-total {
+	padding: 1.25rem 1.6rem;
+	background: var(--v3-red);
+	color: var(--v3-ivory);
+}
+
+.landing-v3__quote-total strong {
+	font-size: 1.85rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.landing-v3__quote-sheet footer {
+	padding: 1rem 1.6rem;
+	color: rgb(32 24 17 / 0.66);
+	font-size: 0.72rem;
+}
+
+.landing-v3__approval-bridge {
+	position: absolute;
+	z-index: 4;
+	right: 4.25%;
+	bottom: 8%;
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	width: min(38rem, 46vw);
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem 1.2rem;
+	background: var(--v3-ochre);
+	color: var(--v3-ink);
+}
+
+.landing-v3__approval-bridge > svg {
+	width: 2rem;
+	height: 2rem;
+}
+
+.landing-v3__approval-bridge div {
+	display: grid;
+	gap: 0.2rem;
+}
+
+.landing-v3__approval-bridge span {
+	font-size: 0.86rem;
+}
+
+.landing-v3__approval-bridge a {
+	display: grid;
+	width: 3rem;
+	aspect-ratio: 1;
+	place-items: center;
+	background: var(--v3-ink);
+	color: var(--v3-ivory);
+}
+
+.landing-v3__production-board {
+	top: 25%;
+	background: rgb(21 16 13 / 0.94);
+	color: var(--v3-ivory);
+}
+
+.landing-v3__production-board header {
+	border-color: rgb(247 242 231 / 0.18);
+}
+
+.landing-v3__production-board header > svg {
+	width: 2rem;
+	height: 2rem;
+	color: var(--v3-ochre);
+}
+
+.landing-v3__production-board ol {
+	margin: 0;
+	padding: 0 1.6rem;
+	list-style: none;
+}
+
+.landing-v3__production-board li {
+	justify-content: flex-start;
+	gap: 0.85rem;
+	min-height: 4rem;
+	border-bottom: 1px solid rgb(247 242 231 / 0.16);
+}
+
+.landing-v3__production-board li svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+.landing-v3__production-board li[data-done] svg {
+	color: #a9c79d;
+}
+
+.landing-v3__production-board li[data-current] {
+	color: var(--v3-ochre);
+	font-weight: 700;
+}
+
+.landing-v3__production-board footer {
+	align-items: flex-start;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 1.35rem 1.6rem;
+	background: var(--v3-red);
+}
+
+.landing-v3__production-board footer span {
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.landing-v3__closing {
+	display: grid;
+	min-height: 100svh;
+	grid-template-columns: 1.35fr 0.65fr;
+	align-items: center;
+	gap: 8vw;
+	padding: 8vw;
+	background: var(--v3-ivory);
+	color: var(--v3-ink);
+}
+
+/*
+ * The workshop story moves in planes: the photographic bench drifts behind the
+ * interface while the useful information settles into place. Content remains
+ * fully visible when scroll-driven animations are not supported.
+ */
+@supports (animation-timeline: view()) {
+	.landing-v3__hero,
+	.landing-v3__scene,
+	.landing-v3__closing {
+		view-timeline-axis: block;
+		view-timeline-name: --v3-scene;
+	}
+
+	.landing-v3__hero-photo,
+	.landing-v3__scene-photo {
+		animation: v3-workshop-depth linear both;
+		animation-timeline: --v3-scene;
+		animation-range: entry 0% exit 100%;
+		will-change: transform;
+	}
+
+	.landing-v3__hero-copy,
+	.landing-v3__scene-copy,
+	.landing-v3__quote-sheet,
+	.landing-v3__production-board,
+	.landing-v3__closing > div {
+		animation: v3-information-plane linear both;
+		animation-timeline: --v3-scene;
+		animation-range: entry 4% exit 96%;
+		will-change: opacity, transform;
+	}
+
+	.landing-v3__progress {
+		animation: v3-progress-plane linear both;
+		animation-timeline: --v3-scene;
+		animation-range: entry 0% exit 100%;
+	}
+
+	.landing-v3__approval-bridge,
+	.landing-v3__disclosure {
+		animation: v3-handoff-plane linear both;
+		animation-timeline: --v3-scene;
+		animation-range: entry 10% exit 90%;
+	}
+}
+
+@keyframes v3-workshop-depth {
+	0% {
+		transform: scale(1.16) translate3d(0, -8%, 0);
+	}
+	50% {
+		transform: scale(1.035) translate3d(0, 0, 0);
+	}
+	100% {
+		transform: scale(1.16) translate3d(0, 8%, 0);
+	}
+}
+
+@keyframes v3-information-plane {
+	0% {
+		opacity: 0;
+		transform: translate3d(0, 14vh, 0) scale(0.94);
+	}
+	32%,
+	72% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	100% {
+		opacity: 0.08;
+		transform: translate3d(0, -10vh, 0) scale(0.97);
+	}
+}
+
+@keyframes v3-progress-plane {
+	0%,
+	100% {
+		opacity: 0.58;
+		transform: translate3d(0, -0.8rem, 0);
+	}
+	25%,
+	75% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes v3-handoff-plane {
+	0% {
+		opacity: 0;
+		transform: translate3d(0, 8vh, 0);
+	}
+	35%,
+	78% {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	100% {
+		opacity: 0.55;
+		transform: translate3d(0, -1rem, 0);
+	}
+}
+
+.landing-v3__closing h2 {
+	max-width: 48rem;
+	font-size: clamp(4rem, 7vw, 6rem);
+}
+
+.landing-v3__closing p {
+	max-width: 36rem;
+	margin: 1.5rem 0 0;
+	font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+	line-height: 1.55;
+}
+
+.landing-v3__closing-actions {
+	display: grid;
+	gap: 1.25rem;
+}
+
+.landing-v3__closing-primary,
+.landing-v3__closing-secondary {
+	display: flex;
+	min-height: 4.75rem;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0 1.5rem;
+	font-weight: 800;
+	text-decoration: none;
+}
+
+.landing-v3__closing-primary {
+	background: var(--v3-red);
+	color: var(--v3-ivory);
+}
+
+.landing-v3__closing-secondary {
+	border-bottom: 1px solid var(--v3-ink);
+	color: var(--v3-ink);
+}
+
+@media (max-width: 950px) {
+	.landing-v3__scene-copy {
+		top: 19%;
+		width: 48%;
+	}
+
+	.landing-v3__quote-sheet,
+	.landing-v3__production-board {
+		top: 37%;
+		width: 43%;
+	}
+}
+
+@media (max-width: 800px) {
+	.landing-v3__hero-photo {
+		inset-block-end: 0;
+		height: 100%;
+		background-position: 61% center;
+	}
+
+	.landing-v3__hero::after {
+		inset-block-end: 0;
+		background: rgb(15 10 7 / 0.62);
+		clip-path: none;
+	}
+
+	.landing-v3__brand {
+		top: 1.25rem;
+		left: 1.25rem;
+		height: 5rem;
+		font-size: 1.75rem;
+	}
+
+	.landing-v3__progress {
+		top: 4.8rem;
+		left: 1.25rem;
+		width: calc(100% - 2.5rem);
+		height: 5.5rem;
+	}
+
+	.landing-v3__progress-rule {
+		top: 0.1rem;
+	}
+
+	.landing-v3__stage {
+		min-width: 0;
+		gap: 0.3rem;
+		padding-top: 0;
+		font-size: 0.7rem;
+	}
+
+	.landing-v3__stage span {
+		width: 2.55rem;
+	}
+
+	.landing-v3__hero-copy,
+	.landing-v3__scene-copy {
+		top: 29%;
+		left: 1.25rem;
+		width: calc(100% - 2.5rem);
+	}
+
+	.landing-v3__headline,
+	.landing-v3__scene-copy h2 {
+		font-size: clamp(3.25rem, 14vw, 4.8rem);
+	}
+
+	.landing-v3__scene-copy p {
+		max-width: 32rem;
+		margin-top: 1rem;
+		font-size: 0.98rem;
+		line-height: 1.45;
+	}
+
+	.landing-v3__primary-action {
+		min-width: min(19rem, 100%);
+		height: 3.75rem;
+		margin-top: 1.2rem;
+	}
+
+	.landing-v3__disclosure {
+		top: auto;
+		bottom: 1rem;
+		left: 1.25rem;
+		font-size: 0.7rem;
+	}
+
+	.landing-v3__scene-photo {
+		object-position: 44% center;
+	}
+
+	.landing-v3__scene-shade,
+	.landing-v3__scene--quote .landing-v3__scene-shade {
+		background: rgb(17 11 8 / 0.68);
+		clip-path: none;
+	}
+
+	.landing-v3__scene-copy {
+		top: 22%;
+	}
+
+	.landing-v3__quote-sheet,
+	.landing-v3__production-board {
+		top: auto;
+		right: 1.25rem;
+		bottom: 6%;
+		width: calc(100% - 2.5rem);
+	}
+
+	.landing-v3__quote-sheet header,
+	.landing-v3__production-board header {
+		padding: 1rem 1.15rem;
+	}
+
+	.landing-v3__quote-sheet header strong,
+	.landing-v3__production-board header strong {
+		font-size: 1.2rem;
+	}
+
+	.landing-v3__quote-sheet dl {
+		padding: 0.65rem 1.15rem;
+	}
+
+	.landing-v3__quote-sheet dl div {
+		min-height: 2rem;
+		font-size: 0.86rem;
+	}
+
+	.landing-v3__quote-total {
+		padding: 0.8rem 1.15rem;
+	}
+
+	.landing-v3__quote-total strong {
+		font-size: 1.4rem;
+	}
+
+	.landing-v3__quote-sheet footer {
+		padding: 0.65rem 1.15rem;
+	}
+
+	.landing-v3__approval-bridge {
+		display: none;
+	}
+
+	.landing-v3__production-board ol {
+		padding: 0 1.15rem;
+	}
+
+	.landing-v3__production-board li {
+		min-height: 3rem;
+		font-size: 0.9rem;
+	}
+
+	.landing-v3__production-board footer {
+		padding: 0.9rem 1.15rem;
+	}
+
+	.landing-v3__closing {
+		min-height: 90svh;
+		grid-template-columns: 1fr;
+		align-content: center;
+		gap: 3rem;
+		padding: 5rem 1.25rem;
+	}
+
+	.landing-v3__closing h2 {
+		font-size: clamp(3.5rem, 16vw, 5rem);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.landing-v3 {
+		scroll-behavior: auto;
+	}
+
+	.landing-v3__primary-action,
+	.landing-v3__stage span {
+		transition: none;
+	}
+
+	.landing-v3 *,
+	.landing-v3 *::before,
+	.landing-v3 *::after {
+		animation: none !important;
+		scroll-behavior: auto !important;
+	}
+}
