@@ -202,7 +202,7 @@
    * Tailwind's `font-display` (Fraunces stack). Inter and Fraunces are the
    * documented design-system voices in DESIGN.md; the overused-font detector
    * warning is accepted as a residual for these two voices. */
-  .font-display { @apply font-display; letter-spacing: -0.01em; }
+  .font-display { font-family: 'Fraunces', 'Newsreader', 'Crimson Text', Georgia, serif; letter-spacing: -0.01em; }
   .font-mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum"; }
 
   /* Redesign surface/text/border tokens */
