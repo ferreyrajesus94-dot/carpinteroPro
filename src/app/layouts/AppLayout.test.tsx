@@ -6,10 +6,11 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppLayout } from "./AppLayout";
 import type { AuthStatus, ProfileIssue } from "@/shared/providers/AuthProvider";
+import type { Session } from "@supabase/supabase-js";
 
 const authMock = vi.hoisted(() => ({
 	state: {
-		session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } },
+		session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } } as unknown as Session | null,
 		loading: false,
 		status: "ready" as AuthStatus,
 		profileIssue: null as ProfileIssue | null,
@@ -23,15 +24,6 @@ const authMock = vi.hoisted(() => ({
 
 vi.mock("@/shared/providers/AuthProvider", () => ({
 	useAuth: () => authMock.state,
-}));
-
-vi.mock("@/features/billing/hooks/useSubscription", () => ({
-	useSubscription: vi.fn(),
-}));
-
-vi.mock("@/features/billing/hooks/useBillingActions", () => ({
-	useCreateSubscription: vi.fn(),
-	useCancelSubscription: vi.fn(),
 }));
 
 vi.mock("@/shared/hooks/useTheme", () => ({
@@ -53,9 +45,6 @@ vi.mock("@/app/layouts/nav-items", () => ({
 vi.mock("@/shared/components/MaintenanceBanner", () => ({
 	MaintenanceBanner: () => null,
 }));
-
-import * as subscriptionModule from "@/features/billing/hooks/useSubscription";
-import * as billingActionsModule from "@/features/billing/hooks/useBillingActions";
 
 function renderWithRouter() {
 	const queryClient = new QueryClient({
@@ -82,26 +71,7 @@ function setAuthState(overrides: Partial<typeof authMock.state>) {
 	Object.assign(authMock.state, overrides);
 }
 
-const activeSubscription = {
-	id: "sub-1",
-	workshop_id: "ws-1",
-	status: "active",
-	plan: "pro_monthly",
-	provider: "mercadopago",
-	trial_starts_at: null,
-	trial_ends_at: null,
-	current_period_starts_at: null,
-	current_period_ends_at: null,
-	provider_subscription_id: null,
-	provider_preapproval_id: null,
-	provider_status: null,
-	cancel_at_period_end: false,
-	cancelled_at: null,
-	created_at: "2026-01-01T00:00:00Z",
-	updated_at: "2026-01-01T00:00:00Z",
-};
-
-describe("AppLayout billing integration", () => {
+describe("AppLayout free-journey access", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		// Use the local mock supabase client so the search feature's queries
@@ -111,7 +81,7 @@ describe("AppLayout billing integration", () => {
 		vi.stubEnv("VITE_DB_URL", "http://stub.local");
 		vi.stubEnv("VITE_DB_ANON_KEY", "stub-anon-key");
 		setAuthState({
-			session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } },
+			session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } } as unknown as Session | null,
 			loading: false,
 			status: "ready",
 			profileIssue: null,
@@ -121,64 +91,92 @@ describe("AppLayout billing integration", () => {
 			signOut: vi.fn<() => Promise<void>>(),
 			refreshProfile: vi.fn<() => Promise<void>>(),
 		});
-		vi.mocked(billingActionsModule.useCreateSubscription).mockReturnValue({
-			mutateAsync: vi.fn(),
-			isPending: false,
-		} as unknown as ReturnType<
-			typeof billingActionsModule.useCreateSubscription
-		>);
-		vi.mocked(billingActionsModule.useCancelSubscription).mockReturnValue({
-			mutateAsync: vi.fn(),
-			isPending: false,
-		} as unknown as ReturnType<
-			typeof billingActionsModule.useCancelSubscription
-		>);
 	});
 
-	it("shows subscription loading spinner after auth is ready", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: undefined,
-			isLoading: true,
-			isError: false,
-			isSuccess: false,
-			status: "pending",
-		} as ReturnType<typeof subscriptionModule.useSubscription>);
+	it("AC-1: renders the app shell when no subscription row exists", () => {
+		setAuthState({ onboardedAt: "2026-01-01T00:00:00Z", workshopId: "ws-1" });
 
 		renderWithRouter();
-		expect(
-			screen.getByRole("status", { name: "Cargando suscripción" }),
-		).toBeInTheDocument();
-	});
 
-	it("renders app shell when subscription is active", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
-		renderWithRouter();
-		expect(screen.getAllByText("CarpinteroPro").length).toBeGreaterThan(0);
+		// App shell renders the outlet content.
 		expect(screen.getByText("Contenido protegido")).toBeInTheDocument();
-		expect(
-			screen.queryByRole("link", { name: "Admin" }),
-		).not.toBeInTheDocument();
-		expect(
-			screen.queryByRole("status", { name: "Cargando suscripción" }),
-		).not.toBeInTheDocument();
+		// Brand mark and section title render too.
+		expect(screen.getAllByText("CarpinteroPro").length).toBeGreaterThan(0);
+	});
+
+	it("AC-2: renders the app shell when subscription is past_due", () => {
+		// The free app must never read or block on subscription state.
+		setAuthState({ onboardedAt: "2026-01-01T00:00:00Z", workshopId: "ws-1" });
+
+		renderWithRouter();
+
+		expect(screen.getByText("Contenido protegido")).toBeInTheDocument();
+		// No "Pago pendiente" or "Acceso suspendido" must leak into the shell.
+		expect(screen.queryByText(/Pago pendiente/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Acceso suspendido/i)).not.toBeInTheDocument();
+	});
+
+	it("AC-3: renders the app shell when subscription is cancelled", () => {
+		setAuthState({ onboardedAt: "2026-01-01T00:00:00Z", workshopId: "ws-1" });
+
+		renderWithRouter();
+
+		expect(screen.getByText("Contenido protegido")).toBeInTheDocument();
+		// No blocked-screen copy leaks into the free shell.
+		expect(screen.queryByText(/Suscripci[oó]n cancelada/i)).not.toBeInTheDocument();
+		expect(screen.queryByText(/Acceso suspendido/i)).not.toBeInTheDocument();
+	});
+
+	it("AC-4: renders the app shell when subscription query errors", () => {
+		// AppLayout no longer touches subscription state at all. A query
+		// failure is impossible in the new shape, but we still assert that
+		// the shell renders cleanly — fail-open, not fail-closed.
+		setAuthState({ onboardedAt: "2026-01-01T00:00:00Z", workshopId: "ws-1" });
+
+		renderWithRouter();
+
+		expect(screen.getByText("Contenido protegido")).toBeInTheDocument();
+		expect(screen.queryByText(/Acceso suspendido/i)).not.toBeInTheDocument();
+	});
+
+	it("AC-5: unauthenticated user does NOT reach the shell", () => {
+		setAuthState({
+			session: null,
+			status: "unauthenticated",
+			onboardedAt: null,
+			workshopId: null,
+		});
+
+		renderWithRouter();
+
+		// AuthSessionLayout (rendered above AppLayout) redirects unauthenticated
+		// users to /login. The shell's outlet content must not be visible.
+		expect(screen.queryByText("Contenido protegido")).not.toBeInTheDocument();
+		expect(screen.getByText("Página de login")).toBeInTheDocument();
+	});
+});
+
+describe("AppLayout admin and profile recovery", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.stubEnv("VITE_USE_LOCAL_MOCKS", "true");
+		vi.stubEnv("VITE_DB_URL", "http://stub.local");
+		vi.stubEnv("VITE_DB_ANON_KEY", "stub-anon-key");
+		setAuthState({
+			session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } } as unknown as Session | null,
+			loading: false,
+			status: "ready",
+			profileIssue: null,
+			onboardedAt: "2026-01-01T00:00:00Z",
+			workshopId: "ws-1",
+			isPlatformAdmin: false,
+			signOut: vi.fn<() => Promise<void>>(),
+			refreshProfile: vi.fn<() => Promise<void>>(),
+		});
 	});
 
 	it("shows admin navigation only for platform admins", () => {
 		setAuthState({ isPlatformAdmin: true });
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
 
 		renderWithRouter();
 
@@ -187,77 +185,14 @@ describe("AppLayout billing integration", () => {
 		expect(adminLinks[0]).toHaveAttribute("href", "/admin");
 	});
 
-	it("renders blocked screen when subscription is past_due", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: {
-				...activeSubscription,
-				status: "past_due",
-			},
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
+	it("hides admin navigation for non-admin users", () => {
+		setAuthState({ isPlatformAdmin: false });
 
 		renderWithRouter();
-		expect(screen.getByText("Pago pendiente")).toBeInTheDocument();
-	});
 
-	it("renders blocked screen when subscription query errors (fail-closed)", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: undefined,
-			isLoading: false,
-			isError: true,
-			isSuccess: false,
-			status: "error",
-			error: new Error("network"),
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
-		renderWithRouter();
-		expect(screen.getByText(/Acceso suspendido/i)).toBeInTheDocument();
-	});
-
-	it("starts MercadoPago checkout from the blocked screen", async () => {
-		const assign = vi.fn();
-		const originalLocation = window.location;
-		Object.defineProperty(window, "location", {
-			configurable: true,
-			value: { ...originalLocation, assign },
-		});
-		const mutateAsync = vi.fn().mockResolvedValue({
-			initPoint: "https://www.mercadopago.com.ar/subscriptions/checkout",
-		});
-		vi.mocked(billingActionsModule.useCreateSubscription).mockReturnValue({
-			mutateAsync,
-			isPending: false,
-		} as unknown as ReturnType<
-			typeof billingActionsModule.useCreateSubscription
-		>);
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: {
-				...activeSubscription,
-				status: "past_due",
-			},
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
-		renderWithRouter();
-		fireEvent.click(screen.getByRole("button", { name: /Actualizar pago/i }));
-
-		await waitFor(() => {
-			expect(mutateAsync).toHaveBeenCalledTimes(1);
-			expect(assign).toHaveBeenCalledWith(
-				"https://www.mercadopago.com.ar/subscriptions/checkout",
-			);
-		});
-
-		Object.defineProperty(window, "location", {
-			configurable: true,
-			value: originalLocation,
-		});
+		expect(
+			screen.queryByRole("link", { name: "Admin" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("shows profile error recovery screen and blocks protected shell", () => {
@@ -351,13 +286,6 @@ describe("AppLayout billing integration", () => {
 			workshopId: null,
 			onboardedAt: null,
 		});
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
 
 		renderWithRouter();
 
@@ -412,33 +340,30 @@ describe("AppLayout billing integration", () => {
 
 		expect(screen.getByText("Página de onboarding")).toBeInTheDocument();
 	});
+});
 
-	it("does not call billing hooks while profile state is inconsistent", () => {
+describe("AppLayout shell ergonomics", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.stubEnv("VITE_USE_LOCAL_MOCKS", "true");
+		vi.stubEnv("VITE_DB_URL", "http://stub.local");
+		vi.stubEnv("VITE_DB_ANON_KEY", "stub-anon-key");
 		setAuthState({
-			status: "profile_error",
+			session: { user: { id: "u1", email: "a@b.com", user_metadata: {} } } as unknown as Session | null,
+			loading: false,
+			status: "ready",
 			profileIssue: null,
-			workshopId: null,
-			onboardedAt: null,
+			onboardedAt: "2026-01-01T00:00:00Z",
+			workshopId: "ws-1",
+			isPlatformAdmin: false,
+			signOut: vi.fn<() => Promise<void>>(),
+			refreshProfile: vi.fn<() => Promise<void>>(),
 		});
-
-		renderWithRouter();
-
-		expect(subscriptionModule.useSubscription).not.toHaveBeenCalled();
-		expect(billingActionsModule.useCreateSubscription).not.toHaveBeenCalled();
 	});
 
 	it("renders enabled topbar search with accessible label and placeholder", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
 		renderWithRouter();
 
-		// The search input should be enabled and exposed to assistive tech
 		const searchInput = screen.getByPlaceholderText(
 			"Buscar clientes, presupuestos, materiales…",
 		);
@@ -450,13 +375,6 @@ describe("AppLayout billing integration", () => {
 
 	it("opens the search panel when the user types a query", async () => {
 		const user = userEvent.setup();
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
 
 		renderWithRouter();
 
@@ -466,10 +384,6 @@ describe("AppLayout billing integration", () => {
 
 		await user.type(searchInput, "mesa");
 
-		// Debounce is 250ms; give the panel a bit longer to settle.
-		// We just verify the input claims the panel is open via aria-expanded
-		// — the panel's exact contents depend on the runtime supabase config
-		// (mock vs. real) and are covered by dedicated search-feature unit tests.
 		await waitFor(
 			() => {
 				expect(searchInput).toHaveAttribute("aria-expanded", "true");
@@ -479,110 +393,60 @@ describe("AppLayout billing integration", () => {
 	});
 
 	it("renders mobile theme toggle with accessible aria-label", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
 		renderWithRouter();
 
-		// Both desktop and mobile theme toggles should exist
-		// With theme="light" mock, label is "Activar modo oscuro"
 		const toggles = screen.getAllByRole("button", {
 			name: /Activar modo (oscuro|claro)/i,
 		});
 		expect(toggles.length).toBeGreaterThanOrEqual(2);
-
-		// The mobile toggle should be interactive (accessible button)
 		expect(toggles[1]).toBeEnabled();
 	});
 
 	it("renders mobile interactive controls with focus-ring class", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
 		renderWithRouter();
 
-		// Mobile theme toggle button — icon-only, needs focus-ring
 		const mobileToggle = screen.getAllByRole("button", {
 			name: /Activar modo (oscuro|claro)/i,
 		});
-		// The mobile toggle is the last button (mobile header renders after desktop)
 		const mobileToggleEl = mobileToggle[mobileToggle.length - 1];
 		expect(mobileToggleEl.className).toContain("focus-ring");
 
-		// The mobile header settings link uses aria-label="Ajustes"
 		const settingsLinks = screen.getAllByRole("link", { name: "Ajustes" });
-		// Find the mobile version by testing for h-11 w-11 (mobile icon-only style)
 		const mobileSettings = settingsLinks.find(
 			(l) => l.className.includes("h-11") && l.className.includes("w-11"),
 		);
 		expect(mobileSettings).toBeTruthy();
 		expect(mobileSettings!.className).toContain("focus-ring");
 
-		// Mobile profile link has aria-label and focus-ring
 		const profileLink = screen.getByRole("link", { name: "Mi perfil" });
 		expect(profileLink.className).toContain("focus-ring");
 	});
 
 	it("renders all interactive nav elements with focus-ring class", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
 		renderWithRouter();
 
-		// Verify that every link/button in the shell has focus-ring
-		// "Inicio" appears in: (1) desktop sidebar, (2) mobile bottom nav,
-		// and (3) the mobile BrandMark which surfaces the current section title.
 		const inicioLinks = screen.getAllByRole("link", { name: "Inicio" });
 		expect(inicioLinks.length).toBe(3);
 		for (const link of inicioLinks) {
 			expect(link.className).toContain("focus-ring");
 		}
 
-		// Sidebar settings NavLink must have focus-ring
 		const settingsLinks = screen.getAllByRole("link", { name: "Ajustes" });
-		// The desktop sidebar settings does NOT have h-11 (it uses h-9 with text label)
 		const sidebarSettings = settingsLinks.find(
 			(l) => !l.className.includes("h-11"),
 		);
 		expect(sidebarSettings).toBeTruthy();
 		expect(sidebarSettings!.className).toContain("focus-ring");
 
-		// Sidebar profile Link must have focus-ring
 		const profileLink = screen.getByRole("link", { name: "Mi perfil" });
 		expect(profileLink.className).toContain("focus-ring");
 	});
 
 	it("renders mobile settings and profile nav links with accessible labels", () => {
-		vi.mocked(subscriptionModule.useSubscription).mockReturnValue({
-			data: activeSubscription,
-			isLoading: false,
-			isError: false,
-			isSuccess: true,
-			status: "success",
-		} as unknown as ReturnType<typeof subscriptionModule.useSubscription>);
-
 		renderWithRouter();
 
-		// There are two "Ajustes" links (desktop sidebar + mobile header with aria-label)
 		const ajustesLinks = screen.getAllByRole("link", { name: "Ajustes" });
 		expect(ajustesLinks.length).toBeGreaterThanOrEqual(2);
-
-		// The mobile header link has aria-label="Mi perfil"
 		expect(screen.getByRole("link", { name: "Mi perfil" })).toBeInTheDocument();
 	});
 });

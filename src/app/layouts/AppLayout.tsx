@@ -16,9 +16,6 @@ import { BrandMark } from "@/shared/ui/brand-mark";
 import { SidebarNavLink } from "@/shared/ui/sidebar-nav-link";
 import { useAuth, type ProfileIssue } from "@/shared/providers/AuthProvider";
 import { getSupportMailtoHref } from "@/shared/lib/supportContact";
-import { useSubscription } from "@/features/billing/hooks/useSubscription";
-import { useCreateSubscription } from "@/features/billing/hooks/useBillingActions";
-import { BillingGate } from "@/features/billing/components/BillingGate";
 import { GlobalSearch } from "@/features/search";
 import { NAV_ITEMS, type NavItem } from "./nav-items";
 import { dispatchFab } from "@/shared/lib/fab";
@@ -69,8 +66,6 @@ export function AppLayout() {
 	return (
 		<AuthenticatedAppShell
 			session={auth.session}
-			onboardedAt={auth.onboardedAt}
-			workshopId={auth.workshopId}
 			isPlatformAdmin={auth.isPlatformAdmin}
 		/>
 	);
@@ -151,20 +146,13 @@ function AuthProfileRecoveryScreen({
 
 interface AuthenticatedAppShellProps {
 	session: Session;
-	onboardedAt: string;
-	workshopId: string | null;
 	isPlatformAdmin: boolean;
 }
 
 function AuthenticatedAppShell({
 	session,
-	onboardedAt,
-	workshopId,
 	isPlatformAdmin,
 }: AuthenticatedAppShellProps) {
-	const { data: subscription, isLoading: subscriptionLoading } =
-		useSubscription(workshopId, onboardedAt);
-	const createSubscription = useCreateSubscription();
 	const location = useLocation();
 	const navigate = useNavigate();
 
@@ -181,11 +169,6 @@ function AuthenticatedAppShell({
 			: location.pathname.startsWith("/profile")
 				? "Mi perfil"
 				: "CarpinteroPro");
-
-	async function handleStartPayment() {
-		const result = await createSubscription.mutateAsync();
-		if (result.initPoint) window.location.assign(result.initPoint);
-	}
 
 	function handleFab() {
 		if (!current) return;
@@ -411,14 +394,5 @@ function AuthenticatedAppShell({
 		</div>
 	);
 
-	return (
-		<BillingGate
-			subscription={subscription ?? null}
-			isLoading={subscriptionLoading}
-			onStartPayment={handleStartPayment}
-			isPaymentLoading={createSubscription.isPending}
-		>
-			{shell}
-		</BillingGate>
-	);
+	return shell;
 }

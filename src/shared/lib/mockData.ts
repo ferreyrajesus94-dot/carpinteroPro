@@ -11,10 +11,8 @@ import type { Database } from "@/shared/types/database";
 
 const MOCK_USER_ID = "00000000-0000-0000-0000-000000000001" as const;
 const MOCK_WORKSHOP_ID = "00000000-0000-0000-0000-000000000010" as const;
-const MOCK_SUBSCRIPTION_ID = "00000000-0000-0000-0000-000000000020" as const;
 
 const MOCK_NOW = "2026-06-20T12:00:00Z";
-const MOCK_FUTURE = "2026-09-20T12:00:00Z";
 
 export const MOCK_USER: User = {
 	id: MOCK_USER_ID,
@@ -65,28 +63,12 @@ export const MOCK_WORKSHOP: Database["public"]["Tables"]["workshops"]["Row"] = {
 };
 
 // ─── Subscription ────────────────────────────────────────────────────────────
-
-export const MOCK_SUBSCRIPTION: Database["public"]["Tables"]["subscriptions"]["Row"] =
-	{
-		id: MOCK_SUBSCRIPTION_ID,
-		workshop_id: MOCK_WORKSHOP_ID,
-		status: "trialing",
-		plan: "pro",
-		provider: "mercadopago",
-		trial_starts_at: "2026-06-01T00:00:00Z",
-		trial_ends_at: MOCK_FUTURE,
-		current_period_starts_at: null,
-		current_period_ends_at: null,
-		provider_subscription_id: null,
-		provider_preapproval_id: null,
-		provider_status: null,
-		cancel_at_period_end: false,
-		cancelled_at: null,
-		first_period_discount_pct: null,
-		referred_by_referral_code_id: null,
-		created_at: "2026-06-01T00:00:00Z",
-		updated_at: "2026-06-01T00:00:00Z",
-	};
+//
+// The app is free. There is no active subscription seed for the demo
+// workshop. The `subscriptions` table still exists for historical rows
+// produced before the free launch; admin tools continue to read it.
+// Keeping the table key in MOCK_DATA_MAP below preserves the lookup shape
+// for any test that wires mocks through the table-name switch.
 
 // ─── Clients ─────────────────────────────────────────────────────────────────
 
@@ -438,12 +420,7 @@ export const MOCK_DATA_MAP: Record<
 	workshops: {
 		[MOCK_WORKSHOP_ID]: MOCK_WORKSHOP as unknown as Record<string, unknown>,
 	},
-	subscriptions: {
-		[MOCK_SUBSCRIPTION_ID]: MOCK_SUBSCRIPTION as unknown as Record<
-			string,
-			unknown
-		>,
-	},
+	subscriptions: {},
 	clients: Object.fromEntries(
 		MOCK_CLIENTS.map((c) => [c.id, c as unknown as Record<string, unknown>]),
 	),

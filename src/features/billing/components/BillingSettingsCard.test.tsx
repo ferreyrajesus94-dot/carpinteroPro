@@ -1,32 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { BillingSettingsCard, FIRST_PERIOD_BUFFER_DAYS } from "./BillingSettingsCard";
+import { describe, it, expect, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { BillingSettingsCard } from "./BillingSettingsCard";
 import type { SubscriptionRow } from "@/features/billing/types";
-
-const createMutateAsync = vi.fn();
-const cancelMutateAsync = vi.fn();
-let createIsPending = false;
-let createError: Error | null = null;
-let cancelError: Error | null = null;
-
-vi.mock("@/features/billing/hooks/useBillingActions", () => ({
-	useCreateSubscription: () => ({
-		mutateAsync: createMutateAsync,
-		isPending: createIsPending,
-		error: createError,
-	}),
-	useCancelSubscription: () => ({
-		mutateAsync: cancelMutateAsync,
-		isPending: false,
-		error: cancelError,
-	}),
-}));
 
 function makeSub(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
 	return {
 		id: "sub-1",
 		workshop_id: "ws-1",
-		status: "trialing",
+		status: "cancelled",
 		plan: "pro_monthly",
 		provider: "mercadopago",
 		trial_starts_at: "2026-01-01T00:00:00Z",
@@ -46,182 +27,108 @@ function makeSub(overrides: Partial<SubscriptionRow> = {}): SubscriptionRow {
 	};
 }
 
+const FORBIDDEN_CTA_REGEX = /(suscrib|cancelar|empezar|actualizar pago|mercadopago)/i;
+
 beforeEach(() => {
-	createMutateAsync.mockReset();
-	cancelMutateAsync.mockReset();
-	createIsPending = false;
-	createError = null;
-	cancelError = null;
-	vi.stubGlobal(
-		"confirm",
-		vi.fn(() => true),
-	);
-	Object.defineProperty(window, "location", {
-		value: { assign: vi.fn() },
-		writable: true,
-	});
+	// Confirm the regex actually catches the strings we promise it catches.
+	// This makes the negative assertion below honest — if someone weakens
+	// the regex, this guard fails first.
+	expect("Suscribirse").toMatch(FORBIDDEN_CTA_REGEX);
+	expect("Empezar suscripción").toMatch(FORBIDDEN_CTA_REGEX);
+	expect("Actualizar pago").toMatch(FORBIDDEN_CTA_REGEX);
+	expect("Cancelar").toMatch(FORBIDDEN_CTA_REGEX);
 });
 
-describe("BillingSettingsCard", () => {
-	it("documents the first-period discount buffer as a named constant", () => {
-		expect(FIRST_PERIOD_BUFFER_DAYS).toBe(45);
+function assertNoForbiddenCta(container: HTMLElement) {
+	const buttons = Array.from(container.querySelectorAll("button"));
+	for (const button of buttons) {
+		expect(button.textContent ?? "").not.toMatch(FORBIDDEN_CTA_REGEX);
+	}
+	// Defence in depth: also walk every text node so even a non-button
+	// interactive element cannot smuggle a CTA in.
+	const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+	let node = walker.nextNode();
+	while (node) {
+		expect(node.nodeValue ?? "").not.toMatch(FORBIDDEN_CTA_REGEX);
+		node = walker.nextNode();
+	}
+}
+
+describe("BillingSettingsCard (read-only)", () => {
+	it("renders the Facturación section heading", () => {
+		const { container } = render(<BillingSettingsCard subscription={null} />);
+		expect(screen.getByText("Facturación")).toBeInTheDocument();
+		assertNoForbiddenCta(container);
 	});
 
-	it("shows trial, active, blocked, and scheduled-cancel states", () => {
-		const { rerender } = render(
-			<BillingSettingsCard subscription={makeSub()} />,
+	it("shows the historical status badge when a subscription row exists", () => {
+		const { container } = render(
+			<BillingSettingsCard subscription={makeSub({ status: "cancelled" })} />,
 		);
-		expect(screen.getByText("Período de prueba")).toBeInTheDocument();
-		expect(screen.getByText(/Finaliza el 15\/1\/2026/)).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /Empezar suscripción/i }),
-		).toBeInTheDocument();
-
-		rerender(
-			<BillingSettingsCard
-				subscription={makeSub({
-					status: "active",
-					current_period_starts_at: "2026-02-01T00:00:00Z",
-					current_period_ends_at: "2026-03-01T00:00:00Z",
-				})}
-			/>,
-		);
-		expect(screen.getByText("Suscripción activa")).toBeInTheDocument();
-		expect(
-			screen.getByText(/Período actual: 1\/2\/2026 al 1\/3\/2026/),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(/Próximo cargo: ARS 4,990\/mes/),
-		).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /Cancelar/i }),
-		).toBeInTheDocument();
-
-		rerender(
-			<BillingSettingsCard subscription={makeSub({ status: "past_due" })} />,
-		);
-		expect(screen.getByText("Pago requerido")).toBeInTheDocument();
-		expect(screen.getByText(/Actualizá el medio de pago/i)).toBeInTheDocument();
-		expect(
-			screen.getByRole("button", { name: /Actualizar pago/i }),
-		).toBeInTheDocument();
-
-		rerender(
-			<BillingSettingsCard
-				subscription={makeSub({
-					status: "active",
-					current_period_ends_at: "2026-03-01T00:00:00Z",
-					cancel_at_period_end: true,
-				})}
-			/>,
-		);
-		expect(screen.getByText("Cancelación programada")).toBeInTheDocument();
-		expect(
-			screen.getByText(/Acceso disponible hasta el 1\/3\/2026/),
-		).toBeInTheDocument();
+		const badge = screen.getByTestId("billing-status-badge");
+		expect(badge).toHaveTextContent(/canc/i);
+		expect(screen.getByText(/CarpinteroPro es gratuito/i)).toBeInTheDocument();
+		assertNoForbiddenCta(container);
 	});
 
-	it("starts checkout, cancels with confirmation, handles pending state, and shows errors", async () => {
-		createMutateAsync.mockResolvedValue({
-			initPoint: "https://mp.test/checkout",
-		});
-		const { rerender } = render(
-			<BillingSettingsCard subscription={makeSub()} />,
-		);
-		fireEvent.click(
-			screen.getByRole("button", { name: /Empezar suscripción/i }),
-		);
-		await waitFor(() => expect(createMutateAsync).toHaveBeenCalledTimes(1));
-		expect(window.location.assign).toHaveBeenCalledWith(
-			"https://mp.test/checkout",
-		);
-
-		cancelMutateAsync.mockResolvedValue({ status: "active" });
-		rerender(
-			<BillingSettingsCard subscription={makeSub({ status: "active" })} />,
-		);
-		fireEvent.click(screen.getByRole("button", { name: /Cancelar/i }));
-		await waitFor(() => expect(cancelMutateAsync).toHaveBeenCalledTimes(1));
-		expect(window.confirm).toHaveBeenCalledWith(
-			expect.stringContaining("¿Querés cancelar"),
-		);
-
-		createIsPending = true;
-		rerender(<BillingSettingsCard subscription={makeSub()} />);
-		expect(
-			screen.getByRole("button", { name: /Abriendo pago/i }),
-		).toBeDisabled();
-
-		createIsPending = false;
-		createMutateAsync.mockRejectedValue(new Error("MercadoPago no disponible"));
-		rerender(<BillingSettingsCard subscription={makeSub()} />);
-		fireEvent.click(
-			screen.getByRole("button", { name: /Empezar suscripción/i }),
-		);
-		expect(
-			await screen.findByText("MercadoPago no disponible"),
-		).toBeInTheDocument();
+	it("renders one status badge for every historical subscription status", () => {
+		const statuses: SubscriptionRow["status"][] = [
+			"active",
+			"trialing",
+			"past_due",
+			"unpaid",
+			"cancelled",
+		];
+		for (const status of statuses) {
+			const { unmount } = render(
+				<BillingSettingsCard subscription={makeSub({ status })} />,
+			);
+			expect(screen.getByTestId("billing-status-badge")).toBeInTheDocument();
+			assertNoForbiddenCta(document.body);
+			unmount();
+		}
 	});
 
-	it("shows discount message during first period (trialing)", () => {
-		const sub = makeSub({
-			first_period_discount_pct: 20,
-			status: "trialing",
-			created_at: "2026-01-01T00:00:00Z",
-			trial_starts_at: "2026-01-01T00:00:00Z",
-			trial_ends_at: "2026-01-15T00:00:00Z",
-		});
-		render(<BillingSettingsCard subscription={sub} />);
-
-		// Discount message should appear
-		expect(
-			screen.getByText(/Descuento aplicado.*?20%.*?primer período/i),
-		).toBeInTheDocument();
+	it("shows 'Sin suscripción activa' when no subscription row exists", () => {
+		const { container } = render(
+			<BillingSettingsCard subscription={null} isLoading={false} />,
+		);
+		expect(screen.getByTestId("billing-no-subscription")).toHaveTextContent(
+			/Sin suscripci[oó]n activa/,
+		);
+		assertNoForbiddenCta(container);
 	});
 
-	it("shows discount message during first period (active)", () => {
-		const sub = makeSub({
-			first_period_discount_pct: 20,
-			status: "active",
-			created_at: "2026-01-01T00:00:00Z",
-			current_period_starts_at: "2026-01-01T00:00:00Z",
-			current_period_ends_at: "2026-02-01T00:00:00Z",
-		});
-		render(<BillingSettingsCard subscription={sub} />);
-
-		expect(
-			screen.getByText(/Descuento aplicado.*?20%.*?primer período/i),
-		).toBeInTheDocument();
+	it("never renders subscribe/cancel/start/update CTA in any state", () => {
+		const states: Array<Parameters<typeof BillingSettingsCard>[0]> = [
+			{ subscription: null, isLoading: false },
+			{ subscription: null, isLoading: true },
+			{ subscription: makeSub({ status: "active" }) },
+			{ subscription: makeSub({ status: "trialing" }) },
+			{ subscription: makeSub({ status: "past_due" }) },
+			{ subscription: makeSub({ status: "unpaid" }) },
+			{ subscription: makeSub({ status: "cancelled" }) },
+			{ subscription: makeSub({ status: "active", cancel_at_period_end: true }) },
+		];
+		for (const props of states) {
+			const { unmount, container } = render(<BillingSettingsCard {...props} />);
+			assertNoForbiddenCta(container);
+			unmount();
+		}
 	});
 
-	it("hides discount message when first period has ended", () => {
-		// current_period_starts_at is 60 days after created_at = second period
-		const sub = makeSub({
-			first_period_discount_pct: 20,
-			status: "active",
-			created_at: "2026-01-01T00:00:00Z",
-			current_period_starts_at: "2026-03-02T00:00:00Z",
-			current_period_ends_at: "2026-04-01T00:00:00Z",
-		});
-		render(<BillingSettingsCard subscription={sub} />);
-
-		expect(
-			screen.queryByText(/Descuento aplicado.*?primer período/i),
-		).not.toBeInTheDocument();
-	});
-
-	it("does not show discount message when first_period_discount_pct is null", () => {
-		const sub = makeSub({
-			first_period_discount_pct: null,
-			status: "active",
-			created_at: "2026-01-01T00:00:00Z",
-			current_period_starts_at: "2026-01-01T00:00:00Z",
-			current_period_ends_at: "2026-02-01T00:00:00Z",
-		});
-		render(<BillingSettingsCard subscription={sub} />);
-
-		expect(
-			screen.queryByText(/Descuento aplicado/i),
-		).not.toBeInTheDocument();
+	it("does not render ARS pricing or any MercadoPago hint in any state", () => {
+		const states: Array<Parameters<typeof BillingSettingsCard>[0]> = [
+			{ subscription: null },
+			{ subscription: makeSub({ status: "active" }) },
+			{ subscription: makeSub({ status: "trialing" }) },
+		];
+		for (const props of states) {
+			const { unmount } = render(<BillingSettingsCard {...props} />);
+			expect(screen.queryByText(/ARS/i)).not.toBeInTheDocument();
+			expect(screen.queryByText(/4\.? ?990/i)).not.toBeInTheDocument();
+			expect(screen.queryByText(/MercadoPago/i)).not.toBeInTheDocument();
+			unmount();
+		}
 	});
 });
