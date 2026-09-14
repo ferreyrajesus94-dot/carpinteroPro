@@ -29,6 +29,7 @@ import type { Database } from "../../../src/shared/types/database";
 test.describe("synthetic free journey", () => {
 	let user: SyntheticUser | null = null;
 	const stamp = Date.now();
+	const stampSuffix = `${stamp}-${Math.random().toString(36).slice(2, 8)}`;
 	let workshopId: string | null = null;
 	let userId: string | null = null;
 

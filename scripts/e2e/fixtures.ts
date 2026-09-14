@@ -714,18 +714,15 @@ export async function simulateMercadoPagoWebhook(
 	// Deno-flavoured Edge Function helper that is not in the Node-side
 	// build graph; the dynamic-import path was unreliable in CI. The
 	// mapping mirrors `supabase/functions/_shared/billing.ts` at the
-	// commit this spec is pinned to. Falling back to the raw provider
-	// status (when the input does not match any branch) keeps
-	// behaviour backwards-compatible with the older fixtures that
-	// drove the row directly with a `subscriptions.status` enum value.
+	// commit this spec is pinned to. Falling back to `past_due` (when
+	// the input does not match any positive branch) matches the
+	// production mapper exactly -- both production and fixture treat
+	// any unrecognised provider status as `past_due`.
 	const mapProviderStatusToSubscriptionStatus = (
 		providerStatus: string,
 	): SubscriptionStatus => {
 		const s = providerStatus.toLowerCase();
 		if (s === "authorized" || s === "active") return "active";
-		if (s === "pending" || s === "paused") return "past_due";
-		if (s === "rejected" || s === "failure") return "unpaid";
-		if (s === "cancelled") return "cancelled";
 		return "past_due";
 	};
 	const mappedStatus: SubscriptionStatus =

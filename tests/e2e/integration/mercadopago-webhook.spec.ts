@@ -102,6 +102,15 @@ test.describe("MercadoPago webhook persistence", () => {
 	});
 
 	test("simulated cancelled webhook persists the cancelled status", async () => {
+		// Both the production mapper at supabase/functions/_shared/billing.ts
+		// and the in-fixture mapper at scripts/e2e/fixtures.ts fall through
+		// to `past_due` for any provider status that is not
+		// `authorized` or `active`. The fixture intentionally mirrors
+		// production here (a previous divergence where the fixture mapped
+		// `cancelled` to `cancelled` while production wrote `past_due`
+		// was caught by the cumulative review). The historical `cancelled`
+		// subscription status enum value is preserved for the audit doc's
+		// free-model narrative but the webhook itself never writes it.
 		const fixture = await seedActiveTrialFixture({ status: "active" });
 		const client = await createAuthenticatedFixtureClient();
 
@@ -117,7 +126,7 @@ test.describe("MercadoPago webhook persistence", () => {
 			fixture.workshopId,
 		);
 
-		expect(subscription?.status).toBe("cancelled");
+		expect(subscription?.status).toBe("past_due");
 	});
 
 	test("simulated approved webhook currently maps to past_due (audit finding #2, follow-up)", async () => {
