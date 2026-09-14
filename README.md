@@ -1,271 +1,232 @@
 # CarpinteroPro
 
+Free open-source workshop management for carpenters. Quote, build, and track jobs from any device.
+
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-Open-source workshop management for carpenters — materials, recipes, quotes, production, and CRM in one place.
-
-## The problem it solves
-
-Running a carpentry workshop means juggling a dozen moving parts: what wood do I have in stock, what does that bookshelf actually cost me to build, how much should I charge, did the client approve the quote, and when production starts, do I have enough material to actually start?
-
-Most carpenters track this with paper notebooks, a stack of WhatsApp messages, and a spreadsheet they hope doesn't break. The sharper ones build a custom Excel. The lucky ones pay for a generic SaaS that was made for a different industry and try to force-fit it.
-
-CarpinteroPro is built for the workshop floor, not the spreadsheet. It's the tool the carpenter wishes they had: a single place to record materials, define a furniture recipe once and quote it many times, send a quote to a client, and once approved, start production — which automatically deducts the right amount of material from stock. Every movement is logged, so you always know what you have, what you spent, and what you sold.
-
-The app is open source and free. The end-user product is Spanish-only because the target audience is Spanish-speaking carpenters who don't want to fight technology — they want to make furniture.
-
-## Who it's for
-
-**Primary user — the carpenter or workshop owner:**
-- Define a furniture recipe once (wood, hardware, finish, cut pieces) with live cost calculation.
-- Quote any recipe with margin rules, export to PDF or WhatsApp, and track approval status on a Kanban board.
-- Start production from an approved quote; material is deducted from stock automatically and a movement is logged.
-- Keep a clean CRM of clients with quote history.
-- See real numbers on a dashboard: revenue, materials in stock, quotes in flight.
-
-**Secondary user — the developer who forks or contributes:**
-- Multi-tenant React 19 + Vite + TypeScript app on Supabase.
-- Feature-sliced architecture: every feature is self-contained under `src/features/<name>/`, no cross-feature imports, ESLint enforces it.
-- Edge Functions in Deno for the platform admin surface.
-- Tests at every layer: Vitest for units, Playwright for business-critical flows.
+---
 
 ## Live demo
 
-A demo deployment is available at https://carpintero-pro.vercel.app.
+A demo deployment is available at:
 
-Demo access is granted on request — open an issue tagged `demo` with your
-GitHub username and we'll add you to the demo workshop.
+> **https://carpintero-pro.vercel.app**
 
-## Key features
+The demo runs the same build that ships from `main` and uses the in-app mock data backend (see [Demo data + safety](#demo-data--safety)) so anyone can explore the full workflow without an admin credential.
 
-Verified against the source under `src/features/`:
+### Screenshots
 
-- **Materials inventory** — workshop-scoped CRUD, unit-of-measure, price-per-unit, minimum stock, price history with charts.
-- **Stock movements ledger** — every change recorded as an immutable row (purchase, consumption, shrinkage, adjustment, quote discount). Reversals are first-class.
-- **Furniture recipes (BOM)** — bill of materials with cut pieces and live cost calculation against current material prices.
-- **Quotes with recipe snapshots** — picking a recipe freezes the cost at quote time so price changes don't retroactively alter sent quotes.
-- **Production orders** — Kanban board, state machine, automatic stock deduction on start via a Postgres trigger.
-- **Global search** — cross-feature search across the app.
-- **CRM** — clients with quote history and stats.
-- **Dashboard** — workshop metrics and recent activity.
-- **Workshop settings** — workshop-wide preferences (auto stock discount, etc.).
-- **Onboarding** — guided signup flow that creates the workshop + profile.
-- **Multi-tenant** — every row carries `workshop_id uuid NOT NULL`, every query is RLS-scoped via `get_current_workshop_id()`.
-- **Role-based access** — Supabase Auth + RLS policies; platform admin routes gated behind a separate Edge Function surface.
-- **Platform admin** — Edge Functions for diagnostics, force-onboarding, toggle workshop, toggle maintenance, youtuber program, etc.
-- **Billing surface (parked)** — MercadoPago integration code is present for a future paid tier that isn't currently offered; the app is free.
+Seven screenshots cover the end-to-end journey. The image files are deferred to a follow-up W6 commit; this README lists the expected slots so reviewers know where each screenshot will land. The capture plan lives in `docs/portfolio/README.md` (also a follow-up commit).
+
+| # | Screen | What it shows |
+| --- | --- | --- |
+| 01 | Signup | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+| 02 | Onboarding | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+| 03 | Inventory | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+| 04 | Quote wizard | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+| 05 | Contract PDF | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+| 06 | Production | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+| 07 | Settings | *Screenshot deferred — see `docs/portfolio/README.md` in a follow-up commit.* |
+
+---
+
+## What it does
+
+- **Signup → onboarding** — Create an account, accept terms and privacy, and provision a workshop in a single guided flow.
+- **Inventory** — Workshop-scoped materials with units, prices, minimum stock, and a full price-history chart.
+- **Quote wizard with PDF contract** — Pick a client and a furniture recipe, configure margin rules, freeze the recipe cost at quote time, render a contract, and export to PDF or share via WhatsApp.
+- **Production (state machine + reversal)** — Move approved quotes through a Kanban board; starting production automatically deducts the right amount of material from stock and writes an immutable ledger row. Reversals are first-class and idempotent.
+- **CRM clients + tasks + global search** — Clients carry quote history and stats, tasks track follow-ups, and a cross-feature search hits every domain table.
+- **Free, forever** — No trial, no subscription, no payment prompt. Historical `subscriptions` rows are preserved for audit but never gate access.
+
+The application is Spanish-only because the target audience is Spanish-speaking carpenters who don't want to fight technology — they want to make furniture.
+
+---
 
 ## Tech stack
 
-**Frontend**
+- **Frontend:** React 19 + Vite 8 + TypeScript + TanStack Query 5 + React Router 7 + Tailwind CSS 3 + Radix UI primitives + React Hook Form + Zod + Recharts + jspdf + vite-plugin-pwa.
+- **Backend:** Supabase — Postgres, Row Level Security, Auth, and Edge Functions in Deno 2. 75+ SQL migrations and 16 Edge Functions live in `supabase/`.
+- **Testing:** Vitest + Testing Library (unit/component), Playwright (browser/integration), pgTAP (SQL).
+- **CI:** Node 24 in CI; Node ≥ 20.0.0 locally. `engines.node: ">=20.0.0"` is pinned in `package.json`.
 
-- React 19 + Vite 8 + TypeScript
-- Tailwind CSS 3 (with `shadcn/ui`-style components in `src/shared/ui/`)
-- TanStack Query 5 for server state
-- Zustand for client state
-- React Hook Form + Zod for forms and validation
-- Radix UI primitives (Dialog, Select, RadioGroup, Tooltip, Switch, Label, Separator, Slot)
-- React Router 7 with lazy-loaded per-feature routes
-- Recharts for charts, jspdf for PDF exports, sonner for toasts
-- PWA via `vite-plugin-pwa`
+---
 
-**Backend**
+## Architecture overview
 
-- Supabase — Postgres, Auth, Storage, Realtime, and Edge Functions (Deno)
-- 75+ SQL migrations under `supabase/migrations/`
-- 16 Edge Functions under `supabase/functions/` (admin tools, billing webhooks, public APIs)
-- RLS enabled on every domain table; workshop identity is server-derived through `auth.uid() → profiles.workshop_id`
-
-**Deploy**
-
-- Vercel auto-deploys the frontend from `main` (catch-all SPA rewrite + CSP / HSTS / `X-Content-Type-Options` / `Referrer-Policy` / `Permissions-Policy` headers in `vercel.json`; see `docs/operations/vercel-config-decision.md`)
-- Supabase Cloud runs the database, auth, and Edge Functions
-
-**Testing**
-
-- Vitest + Testing Library for unit and component tests
-- Playwright for business-critical end-to-end flows
-
-## Quick start
-
-### Prerequisites
-
-- Node.js 20 or newer
-- npm (the project uses `legacy-peer-deps=true` via `.npmrc`; pnpm should also work)
-- Supabase CLI (`npx supabase` works if you don't want a global install)
-- Docker, if you want to run Supabase locally via `supabase start`
-
-### Steps
-
-1. Clone the repo and install dependencies:
-
-   ```bash
-   git clone <your-fork-url> carpinteroPro
-   cd carpinteroPro
-   npm install
-   ```
-
-2. Copy the env template and fill the public Supabase values:
-
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   At minimum you need `VITE_DB_URL` and `VITE_DB_ANON_KEY`. Server-only secrets (service role, MercadoPago) belong in Supabase Edge Function secrets, not in `.env.local` — see `docs/operations/environment-setup.md`.
-
-3. Start Supabase locally and apply migrations:
-
-   ```bash
-   npx supabase start
-   npx supabase db reset
-   ```
-
-4. Run the dev server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. (Optional) Run the tests:
-
-   ```bash
-   npm test          # Vitest, one-shot
-   npm run test:watch # Vitest in watch mode
-   npm run test:e2e  # Playwright business-critical flows
-   ```
-
-6. (Optional) Type-check and lint:
-
-   ```bash
-   npm run lint
-   npm run build
-   ```
-
-A demo `VITE_USE_LOCAL_MOCKS=true` flag in `.env.example` lets you skip the backend and inspect the UI with a fake session, materials, and quotes. Useful for design review without a running Supabase.
-
-## Architecture
-
-The short version:
-
-- **Multi-tenant.** Every domain table has `workshop_id uuid NOT NULL`. RLS is enabled on every table; the active workshop is resolved server-side via `get_current_workshop_id()` (which reads `auth.uid() → profiles.workshop_id`). Clients never get to choose or pass a workshop id.
-- **Feature-sliced frontend.** Each feature lives under `src/features/<name>/` with its own `api/`, `hooks/`, `components/`, and `types.ts`. Cross-feature imports are forbidden by ESLint (`eslint-plugin-import` `import/no-restricted-paths`). Shared code lives only under `src/shared/`. `src/app/` composes the public APIs of features.
-- **Stock deduction ledger.** Stock mutations flow through the trusted `apply_stock_movement` RPC. Production start writes to a `quote_production_stock_deductions` audit row; an `AFTER INSERT` trigger writes one `stock_movements` row per approved BOM line and updates `materials.stock` atomically. Reversals are first-class and idempotent.
-- **Snapshotted quotes.** A quote captures recipe cost at quote time so future material price changes don't alter sent quotes.
-- **Edge Functions for the platform admin.** Platform-admin work — diagnostics, toggling workshops, toggling maintenance, the referral system — runs in Deno Edge Functions under `supabase/functions/`. All Edge Functions share a `_shared/` directory for CORS and Supabase admin clients.
-- **Lazy-loaded routes.** Per-feature routes are wrapped in `React.lazy()` and exported as `<Name>Routes`. The root renders `AppLayout` (sidebar on desktop, bottom tabs on mobile) and redirects `/` to `/dashboard`.
-
-There is no `ARCHITECTURE.md` file in the repo yet — the canonical architecture lives in `openspec/specs/` (per-domain specs) and `CLAUDE.md` (developer conventions). The OpenSpec change directory `openspec/changes/archive/` is the historical record of past changes.
-
-## Self-hosting
-
-The app is open source; nothing about the Supabase backend is hosted-only. To run your own copy:
-
-1. Create a free-tier Supabase project at https://supabase.com.
-2. Copy the project URL and anon key into `.env.local` (see Quick Start).
-3. Apply the migrations from `supabase/migrations/` either via `supabase db push` (against a linked remote) or by running them directly in the Supabase SQL editor in order.
-4. Deploy the Edge Functions from `supabase/functions/` via `supabase functions deploy <name>` for each function.
-5. Configure the Edge Function secrets listed in `docs/operations/environment-setup.md` (`SUPABASE_SERVICE_ROLE_KEY`, MercadoPago tokens if you use the billing surface, etc.).
-6. Deploy the frontend to Vercel, Netlify, or any static host. The `vercel.json` SPA rewrite is needed for any non-root path to work — if you don't use Vercel, port the `*` → `/index.html` rewrite to your host.
-
-The free Supabase tier is enough for a single workshop's personal use.
-
-## Project structure
-
-A bird's-eye view for new contributors:
+Three tiers, no monolith:
 
 ```text
-carpinteroPro/
-├── src/
-│   ├── app/                  # Entry point, router, AppLayout
-│   ├── features/             # 15 self-contained features
-│   │   ├── admin/            # Platform admin tooling (post-auth)
-│   │   ├── auth/             # Login / signup / password reset
-│   │   ├── billing/          # MercadoPago surface (parked)
-│   │   ├── crm/              # Clients, quote history
-│   │   ├── dashboard/        # Workshop metrics
-│   │   ├── inventory/        # Materials + stock movements
-│   │   ├── landing/          # Public marketing site
-│   │   ├── legal/            # Privacy / terms pages
-│   │   ├── onboarding/       # First-run workshop creation
-│   │   ├── production/       # Production orders + Kanban
-│   │   ├── quotes/           # Quotes, contracts, Kanban
-│   │   ├── recipes/          # Furniture templates (BOM)
-│   │   ├── search/           # Global search
-│   │   ├── settings/         # Workshop settings
-│   │   └── tasks/            # Tasks
-│   └── shared/               # Cross-feature primitives only
-│       ├── lib/              # supabase client, queryClient, utils
-│       ├── types/            # database.ts (regenerated, do not edit)
-│       └── ui/               # shadcn-style components
-├── supabase/
-│   ├── migrations/           # 75+ SQL migrations, applied in order
-│   ├── functions/            # 16 Deno Edge Functions
-│   └── config.toml
-├── openspec/
-│   ├── specs/                # Canonical per-domain specs
-│   └── changes/              # Active + archived change proposals
-├── docs/
-│   ├── operations/           # Env, migrations, rollback, Vercel
-│   ├── testing/              # E2E runbook
-│   └── mercadopago-webhook-checklist.md
-├── tests/                    # Playwright specs
-├── AGENTS.md                 # Code review rules
-├── CLAUDE.md                 # Developer conventions
-├── CHANGELOG.md              # Per-version change log
-└── package.json
+  ┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
+  │ Browser SPA                              │    │ Supabase (per-region free tier)         │
+  │  React 19 + Vite 8 + TanStack Query      │    │  Postgres + RLS + Auth                  │
+  │  React Router 7 (lazy per feature)       │◀──▶│  Storage + Edge Functions (Deno 2)      │
+  │  vite-plugin-pwa (service worker)        │    │  Realtime (WebSocket)                   │
+  │  VITE_DB_URL / VITE_DB_ANON_KEY only     │    │  Row-level security on every table       │
+  └──────────────────────────────────────────┘    └──────────────────────────────────────────┘
+                          ▲                                       ▲
+                          │ static SPA build (dist/)              │ Edge Function secrets
+                          ▼                                       ▼
+  ┌──────────────────────────────────────────┐    ┌──────────────────────────────────────────┐
+  │ Vercel (static hosting)                  │    │ Edge Functions (Deno 2)                 │
+  │  Auto-deploy from main                   │    │  mercadopago-webhook (parked for free)  │
+  │  SPA rewrite + CSP + security headers    │    │  admin-* tools (platform admin)         │
+  │  vercel.json owns rewrites + headers     │    │  shared/_shared/ CORS + admin client    │
+  └──────────────────────────────────────────┘    └──────────────────────────────────────────┘
 ```
 
-Each feature folder follows the same shape (`api/`, `hooks/`, `components/`, `types.ts`, optional `lib/`, `index.ts`). When in doubt, follow an existing feature.
+**Workshop identity is server-derived.** Every domain table carries `workshop_id uuid NOT NULL`. The active workshop is resolved through `auth.uid() → profiles.workshop_id` (via `get_current_workshop_id()`). Clients never choose or pass a workshop id.
 
-## Useful docs
+**Feature-sliced frontend.** Each feature lives under `src/features/<name>/` with its own `api/`, `hooks/`, `components/`, `routes.tsx`. Cross-feature imports are forbidden by ESLint (`eslint-plugin-import` `import/no-restricted-paths`). Shared code lives only under `src/shared/`. `src/app/` composes the public APIs of features.
 
-The repo has more documentation than fits in a README. Worth reading:
+**Stock deduction ledger.** Production start writes to `quote_production_stock_deductions`; an `AFTER INSERT` trigger writes one immutable `stock_movements` row per approved BOM line and updates `materials.stock` atomically. Reversals are first-class.
 
-- [`AGENTS.md`](AGENTS.md) — code review rules every PR must satisfy.
-- [`CLAUDE.md`](CLAUDE.md) — developer conventions, troubleshooting, and unwritten rules worth knowing (shadcn install quirk, manual `database.ts` caveats, RHF + Zod coerce caveat).
-- [`CHANGELOG.md`](CHANGELOG.md) — what shipped in each version (currently `v0.1.0-beta.1`).
-- [`docs/operations/environment-setup.md`](docs/operations/environment-setup.md) — authoritative env guide for local, preview, and production.
-- [`docs/operations/migration-deployment.md`](docs/operations/migration-deployment.md) — how to ship database changes safely.
-- [`docs/operations/rollback-runbook.md`](docs/operations/rollback-runbook.md) — what to do when a release goes wrong.
-- [`docs/operations/supabase-production-checklist.md`](docs/operations/supabase-production-checklist.md) — pre-production checklist.
-- [`docs/testing/runbook.md`](docs/testing/runbook.md) — Playwright E2E setup, fixtures, cleanup.
-- [`openspec/`](openspec/) — canonical product specs and the historical record of every change.
+**Snapshotted quotes.** A quote freezes recipe cost at quote time so future price changes never retroactively alter sent quotes.
 
-## Contributing
+**Edge Functions are conditional for the free launch.** The historical `mercadopago-webhook` and `admin-*` Edge Functions remain deployed but are not exercised by the free user journey. They are kept for any future optional paid feature.
 
-The project treats contribution rules as non-negotiable. Read [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) before opening a PR — they document the conventions the maintainers enforce.
+---
 
-**Non-negotiable rules:**
+## Tradeoffs
 
-- **Feature-sliced architecture.** A feature is self-contained under `src/features/<name>/`. Features import only their own files and `src/shared/**`. Shared code never imports from a feature. ESLint enforces this with `eslint-plugin-import` `import/no-restricted-paths`. If you find yourself wanting to import across features, expose it through the feature's `index.ts` instead.
-- **Multi-tenant by default.** Every new database table must include `workshop_id uuid NOT NULL` and have RLS enabled. Don't reintroduce client-controlled tenant selection.
-- **Server role key is never in the frontend.** The Supabase service role key belongs only in Supabase Edge Function secrets. All client queries go through the typed Supabase client in `src/shared/lib/supabase`.
-- **No more `any`.** TypeScript is strict. No `any`, no `var`, no unused imports.
-- **Hooks follow the Rules of Hooks.** Functional components with named exports only.
-- **Generated types stay generated.** `src/shared/types/database.ts` is produced by `supabase gen types`. If you don't have a personal access token, maintain it by hand but always include `Relationships: []` (supabase-js v2 requires it to infer row types).
+The free-launch scope is honest about what is in and what is out:
 
-**Process:**
+- **Vite 8 + `'unsafe-inline'` CSP.** Vite injects inline scripts for its bootstrap and the PWA service-worker registration needs `unsafe-inline` for `script-src` and `style-src`. Tightening to hashed or nonced CSP requires a Vite plugin that emits the matching nonces; it is documented as a future enhancement in `docs/operations/vercel-config-decision.md` and is out of scope for this launch.
+- **Playwright + pgTAP require Docker.** The browser/integration suites and the SQL suite both depend on a disposable Supabase stack (`supabase start` + `supabase db reset`). A contributor who only wants to run unit tests does not need Docker; the Vitest suite (131 files / 999 tests) does not.
+- **Hosted services unverified.** SMTP delivery, hosted backups/restore, Sentry end-to-end, and a real support inbox are listed as **unverified** in [Known limitations](#known-limitations-unverified-hosted-checks). They require operator-side wiring (project, secrets, DNS) that is out of scope for local implementation.
+- **`mercadopago-webhook` audit finding #2 (`approved` → `past_due`) is documented, not fixed.** The status mapper in `supabase/functions/_shared/billing.ts:8` falls through `approved` to `past_due`. The mismatch is asserted as a follow-up in `tests/e2e/integration/mercadopago-webhook.spec.ts`. Repairing the mapper would change behavior in the live webhook handler and is intentionally deferred; the free journey does not depend on it.
+- **Free model = no revenue stream.** The app is free, with no trial, no subscription, and no in-app payment prompt. Historical billing rows are preserved for audit; future optional paid features, if added, would live behind the existing Edge Function surface and the `subscriptions` table — they do not affect free access.
 
-- **Issue-first PRs.** Every PR must close an issue with `status:approved`. Open an issue first, get a maintainer to approve it, then open the PR. Branch name must match `^(feat|fix|chore|docs|refactor|perf|test|build|ci)/[a-z0-9._-]+$`.
-- **OpenSpec for medium and large changes.** Anything beyond a small fix goes through the OpenSpec workflow under `openspec/` — proposal, design, tasks, apply, verify, archive. Read the existing specs in `openspec/specs/` and historical changes in `openspec/changes/archive/` to learn the format.
-- **Tests and lint must pass.** Run `npm test` and `npm run lint` before pushing. New behaviour ships with a test. Business-critical user flows ship with a Playwright spec.
-- **Version every change.** This is a pre-1.0 project; every completed change bumps the version. Use the `release-versioning` skill to assess the bump.
+---
 
-There is no `CONTRIBUTING.md` file yet (this section is the draft). A standalone `CONTRIBUTING.md` will be split out of this README as the contributor base grows.
+## Tests
 
-## License
+The suite is layered by purpose. All counts below are measured against the current `main` branch on a local disposable database after `supabase db reset`.
 
-CarpinteroPro is released under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). The full text lives in the [`LICENSE`](LICENSE) file at the root of this repository.
+| Layer | Tool | Count | Local command |
+| --- | --- | --- | --- |
+| Unit + component | Vitest + Testing Library | 131 files / 999 tests | `npm run test:coverage` |
+| SQL assertions | pgTAP (Supabase test runner) | 19 files / 565 assertions (all green locally) | `supabase test db --local` |
+| Browser + integration | Playwright | 21 spec files / 60 tests (compile-clean; execution requires `supabase start` + a disposable stack) | `npm run test:e2e` |
 
-In plain terms: anyone who runs a modified version as a network service — including as a hosted SaaS — must publish the source of their modifications to the people who use that service. Internal use inside a single organization is not affected.
+Key proofs worth naming explicitly:
 
-## Maintainers
+- `supabase/tests/cross_tenant_full_coverage.test.sql` — cross-tenant read/write denial for every workshop-scoped table (the cross-tenant RLS proof).
+- `supabase/tests/tenant_isolation.test.sql` — historical cross-tenant isolation contract that `cross_tenant_full_coverage` extends.
+- `supabase/tests/workshop_is_active_protection.test.sql` — `workshops.is_active` cannot be self-reactivated by an authenticated workshop member.
+- `supabase/tests/profile_admin_field_escalation.test.sql` — `is_platform_admin` and `workshop_role` cannot be escalated by the row owner.
+- `tests/e2e/integration/subscription-state.spec.ts` — historical-subscription proof: a workshop with `past_due` / expired-trial / cancelled history still reaches the free dashboard.
+- `tests/e2e/browser/free-journey.spec.ts` — the end-to-end happy path: login → onboarding → inventory → quote → contract PDF → production.
+- `tests/e2e/browser/signup-journey.spec.ts` — synthetic-account signup reaches the dashboard without admin credentials.
 
-- **GitHub:** https://github.com/ferreyrajesus94-dot/carpinteroPro
-- **Production deployment:** https://carpintero-pro.vercel.app
-- **Supabase project:** `revbbzqjglqnphjrasvv` (canonical hosting; self-hosting instructions above)
-- **Support channel:** the issue tracker on GitHub. For security issues, do not open a public issue — contact the maintainers directly via the GitHub profile.
+---
 
-## Acknowledgements
+## Run locally
 
-CarpinteroPro is built on the shoulders of generous open-source work: React, Vite, Tailwind, TanStack Query, Radix UI, Supabase, Vitest, Playwright, and many others. Thank you to the maintainers and contributors of those projects.
+Prerequisites: Node ≥ 20.0.0 (the repo pins Node 24 in CI; `.nvmrc` ships with `24`), npm 10+, and Docker if you want to run the Supabase local stack and the pgTAP / Playwright suites.
+
+```bash
+nvm use         # or ensure Node >=20.0.0
+npm ci
+npm run lint
+npm run test:coverage
+npm run build
+# Optional: disposable DB + pgTAP + e2e
+supabase start
+supabase db reset
+supabase test db --local
+npm run test:e2e -- tests/e2e/browser/free-journey.spec.ts
+```
+
+### Environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values you need. The runtime contract is **`VITE_DB_URL` / `VITE_DB_ANON_KEY`** — that is what `src/shared/lib/supabase.ts` reads.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `VITE_DB_URL` | yes | Supabase project URL. |
+| `VITE_DB_ANON_KEY` | yes | Supabase anon key (browser-safe). |
+| `VITE_USE_LOCAL_MOCKS` | no | Set to `true` to preview the UI without a Supabase stack. See [Demo data + safety](#demo-data--safety). |
+| `VITE_SENTRY_DSN` | no | If set, `@sentry/react` is loaded dynamically and reports are sent to that project. |
+| `VITE_SUPPORT_EMAIL` | no | Operator support inbox displayed in the legal pages and the error boundary. See [Known limitations](#known-limitations-unverified-hosted-checks). |
+
+Server-only secrets (`SUPABASE_SERVICE_ROLE_KEY`, MercadoPago tokens, etc.) belong in Supabase Edge Function secrets, never in `.env.local`. See `docs/operations/environment-setup.md`.
+
+---
+
+## Deploy
+
+Vercel hosts the frontend, Supabase hosts the backend.
+
+1. Link a Supabase project at https://supabase.com (the free tier is sufficient for a single workshop's personal use).
+2. Push the migrations from `supabase/migrations/` via `supabase db push` against the linked remote, or apply them in the Supabase SQL editor in order.
+3. Build the frontend: `npm run build` produces `dist/` (Vite static SPA, PWA precache).
+4. Vercel auto-deploys from `main` per `.github/workflows/release.yml` (a `workflow_run` gate deploys the exact SHA CI tested).
+5. Configure the Vercel project environment:
+
+   | Variable | Value |
+   | --- | --- |
+   | `VITE_DB_URL` | your Supabase project URL |
+   | `VITE_DB_ANON_KEY` | your Supabase anon key |
+   | `VITE_USE_LOCAL_MOCKS` | `false` (production) |
+   | `VITE_SENTRY_DSN` | (optional) Sentry project DSN |
+   | `VITE_SUPPORT_EMAIL` | (optional) operator support inbox |
+
+6. (Optional) Deploy the historical Edge Functions via `supabase functions deploy <name>` for each function under `supabase/functions/`. They are not exercised by the free user journey.
+
+`vercel.json` defines the SPA catch-all rewrite plus a conservative set of security headers (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `X-Frame-Options`). See `docs/operations/vercel-config-decision.md` for the rationale.
+
+---
+
+## Known limitations (unverified hosted checks)
+
+These checks require operator-side wiring (SMTP, DNS, hosted project, secrets) that is not exercised by the local implementation. Each row records the precise missing input. Resolve before claiming production-ready.
+
+| Check | Status | Missing input |
+| --- | --- | --- |
+| Signup email delivery | unverified | SMTP wiring at hosted Supabase + `enable_confirmations=true` in `supabase/config.toml`. |
+| Reset email delivery | unverified | Reset UI not implemented (out of scope) + SMTP wiring at hosted Supabase. |
+| Staging backup restore | unverified | Hosted Supabase PITR or scheduled backups not configured. |
+| Error reporter end-to-end | unverified | Sentry project + DSN not configured at hosted environment. `@sentry/react` is wired and tree-shakes when no DSN is set; an end-to-end test requires a real project. |
+| Support inbox | unverified | A real operator inbox must be set via `VITE_SUPPORT_EMAIL`. The legal pages and error boundary fall back to a non-routable placeholder (`example.com`); this README does not reproduce the placeholder text — it is a documented fallback, not a chosen email. |
+| Hosted ledger diff vs local | unverified | `supabase migration list --linked` not inspected against the committed migration history. |
+| Playwright suite executed against hosted | unverified | Browser suite compiles locally (`npx playwright test --list` → 60 tests); full execution requires `supabase start` + Docker + a hosted preview environment. |
+| Edge Function secrets at hosted | unverified | `mercadopago-webhook` and `admin-*` secrets are not configured at hosted Supabase; the free journey does not depend on them. |
+
+The README does not list a real email address for support. The default placeholder used by the legal pages is intentionally non-routable; configure `VITE_SUPPORT_EMAIL` before launch.
+
+---
+
+## Demo data + safety
+
+The default `src/shared/lib/mockData.ts` ships a workshop named **"Carpintería El Ñandú"** with the email `taller@demo.carpintero.pro`, four synthetic clients (`@ejemplo.com`), sample materials, recipes, quotes, and an empty `subscriptions` array. There are no admin credentials and no real customer data.
+
+The mock data is **never bundled into production builds.** `src/shared/lib/supabase.ts` gates the dynamic `import("./mockSupabase")` behind two conditions:
+
+```text
+import.meta.env.DEV && import.meta.env.VITE_USE_LOCAL_MOCKS === "true"
+```
+
+Vite tree-shakes the dynamic import away when the conditions are false. Setting `VITE_USE_LOCAL_MOCKS=true` in `.env.local` lets you preview the UI without a Supabase stack — useful for design review — and is the only way the mock path runs.
+
+---
+
+## License + acknowledgments
+
+CarpinteroPro is released under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0). The full text lives in the [`LICENSE`](LICENSE) file at the root of this repository. In plain terms: anyone who runs a modified version as a network service — including as a hosted SaaS — must publish the source of their modifications to the people who use that service. Internal use inside a single organization is not affected.
+
+**Maintainer:** the `carpintero-pro` GitHub handle (see the repository's commit history).
+
+**Funding:** none. The app is free, has no revenue stream, and no sponsorships.
+
+**Built on the shoulders of:** React, Vite, Tailwind CSS, TanStack Query, Radix UI, Supabase, Vitest, Playwright, pgTAP, and many other open-source projects. Thank you to the maintainers and contributors of those projects.
+
+---
+
+## Audit + verification
+
+The full free-launch readiness audit lives at [`docs/operations/production-readiness-audit-2026-09-13.md`](docs/operations/production-readiness-audit-2026-09-13.md). It covers W1 (build restore), W2 (free-access decoupling), W3 (database grants + RLS protection), W4 (dependency and CI gate), W5 (user journey + Sentry + a11y), and W6 (portfolio + release handoff, of which this README is the first commit).
+
+All W1–W6 acceptance criteria are satisfied locally (Vitest, pgTAP, Playwright compile, lint, build, audit). Hosted checks remain **unverified** until a hosted environment is exercised end-to-end — see the [Known limitations](#known-limitations-unverified-hosted-checks) table for the precise missing inputs.
+
+The portfolio walkthrough (`docs/portfolio/README.md`), the remaining W6 docs (PRODUCT.md, CONTRIBUTING.md, runbook.md, CHANGELOG.md, screenshots), and the demo-data safety verification ship in follow-up W6 commits. The audit completion record for this README commit is appended to the audit document as **W6 — phase 1**.
