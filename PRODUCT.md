@@ -27,7 +27,7 @@ The defensible mechanism is the combination of four things a neighboring product
 - **Snapshotted quotes.** A quote freezes the cost at quote time, so future material price changes never retroactively alter a sent quote.
 - **Automatic stock deduction on production start.** An approved quote moving into production writes an immutable row per BOM line and updates `materials.stock` atomically through a single trusted RPC (`apply_stock_movement`); an `AFTER INSERT` trigger does the work.
 - **Reversal-first ledger.** Every stock movement is a row; nothing is edited in place; reversals are first-class and idempotent.
-- **Free and AGPL-3.0.** Open source, no paid tier gates the core workflow; modifications deployed as a network service must publish source.
+- **Free and AGPL-3.0.** Open source, gratis para siempre, sin tarjeta, sin costo; modifications deployed as a network service must publish source.
 
 The product positioning line, used as a binding commitment: "built for the workshop floor, not the spreadsheet."
 
@@ -62,7 +62,7 @@ Constraints (binding):
 - **Spanish-only, Rioplatense register with voseo.** The OG tag copy "Presupuestá, organizá y vendé mejor tus trabajos de carpintería" is binding. Future copy uses voseo imperative and Rioplatense spelling (e.g. "vos" forms, not "tú"). No English toggle exists; none is planned.
 - **WCAG 2.1 AA.** Contrast, keyboard, focus visibility, touch-target size, and ARIA basics are required on every shippable surface.
 - **AGPL-3.0.** Source must remain open; no copyleft migration.
-- **No paid tier.** The MercadoPago billing surface (`src/features/billing/`) is parked and is not offered.
+- **Gratis para siempre.** No paid tier, no período de prueba, no tarjeta. The historical MercadoPago billing surface (`src/features/billing/`) is parked and is not offered to new signups.
 - **Workshop id is server-derived.** The frontend never accepts a `workshop_id` parameter; it is resolved through `auth.uid() → profiles.workshop_id` server-side.
 - **Service role key never reaches the frontend.** All client queries go through the typed Supabase client in `src/shared/lib/supabase`; admin secrets live in Edge Function secrets.
 - **Strict TypeScript.** No `any`, no `var`, no unused imports.
@@ -74,6 +74,14 @@ Open / undecided facts:
 - Mobile-native shells (iOS/Android wrappers) are not committed. The product is a PWA today.
 - Visual identity (typography, palette, illustration style) is not committed at the product layer; whatever the incumbent CSS uses is incumbent evidence, not a pinned system.
 - A formal content/security/privacy review schedule is not committed.
+
+## Free launch
+
+This product launches as a free, open-source application. No tarjeta de crédito, no período de prueba, no suscripción oculta: a valid authenticated user can use the core app — inventory, recipes, quotes, production, CRM — without ever seeing a payment prompt. The historical MercadoPago billing surface remains in the codebase for the audit trail of any pre-launch subscription rows but is not offered to new users.
+
+The audit completion record at
+[`docs/operations/production-readiness-audit-2026-09-13.md`](docs/operations/production-readiness-audit-2026-09-13.md)
+documents the verification of this commitment end-to-end: the build pipeline, the database, the free-journey browser tests, the demo-data safety check, and the remaining hosted-only checks (signup/reset email delivery, staging backup restore, support inbox wiring) are recorded there with the precise missing input for every unverified row.
 
 ## Brand Commitments
 
@@ -102,7 +110,7 @@ Future work must not invent testimonials, customers, benchmarks, pricing tiers, 
 2. **Log everything, never edit.** Stock movements are immutable rows; quotes are snapshotted; reversals are first-class. Anything that mutates past truth in place is a bug.
 3. **One workshop, one tenant.** The workshop id is server-derived. The client never picks it, never sends it, never sees a tenant chooser.
 4. **Solo owner-operator scope.** UI flows assume one human; team views and per-user audit trails are explicitly out of scope until committed otherwise.
-5. **Free and open source.** No paid feature gates the core workflow. A future MercadoPago tier, if it ever ships, must not lock material, recipes, quotes, or production behind it.
+5. **Gratis y open source.** No paid feature gates the core workflow. The product is gratis para siempre, sin tarjeta, sin costo. Historical billing data is preserved for audit only and never blocks access.
 6. **Spanish, Rioplatense, voseo.** No English. No language toggle. Copy is written once, in Spanish, with voseo.
 
 ## Accessibility & Inclusion

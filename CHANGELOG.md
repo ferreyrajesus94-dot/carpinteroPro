@@ -5,6 +5,105 @@ All notable changes to CarpinteroPro are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] — W6 free-launch portfolio handoff (phase 2)
+
+Docs-only W6 phase-2 commit: align `PRODUCT.md`, `CONTRIBUTING.md`,
+the Playwright runbook, and the demo-data safety record with the
+free-launch model. Phase 1 rewrote the README at `12f3b6e`; this
+commit ships the operations-side artifacts and the demo-data
+verification.
+
+### Changed
+
+- **`PRODUCT.md`**: dropped every free-launch-incompatible
+  monetization framing. The "Free and AGPL-3.0" defensible
+  mechanism now reads "Open source, gratis para siempre, sin
+  tarjeta, sin costo" (replacing the implied paid tier).
+  Constraint "No paid tier" became "Gratis para siempre — No
+  paid tier, no período de prueba, no tarjeta" and the
+  MercadoPago billing surface is explicitly framed as "parked
+  and is not offered to new signups". Product principle #5
+  became "Gratis y open source" and now reads "No paid feature
+  gates the core workflow. The product is gratis para siempre,
+  sin tarjeta, sin costo. Historical billing data is preserved
+  for audit only and never blocks access." Added a new
+  "Free launch" section that points at
+  [`docs/operations/production-readiness-audit-2026-09-13.md`](docs/operations/production-readiness-audit-2026-09-13.md)
+  as the audit completion record for the launch. No real email,
+  no customer data, no support address introduced.
+- **`CONTRIBUTING.md`**: "Run locally" section now matches the
+  README's `nvm use` → `npm ci` → `npm run lint` →
+  `npm run test:coverage` → `npm run build` → optional
+  `supabase start && supabase db reset && supabase test db --local`
+  → `npm run test:e2e` sequence; the env table uses the current
+  `VITE_DB_URL` / `VITE_DB_ANON_KEY` / `VITE_USE_LOCAL_MOCKS` /
+  `VITE_SENTRY_DSN` / `VITE_SUPPORT_EMAIL` contract. Added a
+  "Demo data" section that documents the post-W2 mockData.ts
+  shape (single workshop with `is_active: true`, one user with
+  `is_platform_admin: false`, empty `subscriptions` key in
+  `MOCK_DATA_MAP` because W2 removed `MOCK_SUBSCRIPTION`, four
+  generic client fixtures using `@ejemplo.com` + `+54 11 5555-*`
+  placeholders). Added a "Review" section pointing at the audit
+  completion record. The pre-existing commit-message example
+  on line 42 (`fix(supabase): rename VITE_SUPABASE_* to VITE_DB_*`)
+  is preserved unchanged — it documents a past rename and is
+  not in the runbook env-var surface.
+- **`docs/testing/runbook.md`**: full rewrite. Renames the
+  legacy `VITE_SUPABASE_*` env names to the current
+  `VITE_DB_URL` / `VITE_DB_ANON_KEY` contract (lines 34–43 of
+  the old version, plus the historical-context paragraph).
+  Spec list now includes the two W5 additions —
+  `tests/e2e/browser/signup-journey.spec.ts` and
+  `tests/e2e/browser/free-journey.spec.ts` — and reframes the
+  SDD 7 framing from "trial-blocked" to
+  "historical-subscription persistence" with an explicit prose
+  note that the legacy `VITE_SUPABASE_*` env names were
+  replaced to escape a Vite 8 redaction (the rename history is
+  preserved without reproducing the literal env names).
+  Added a "Post-W5 free-journey" subsection documenting the
+  three-project split (`chromium` against the local Supabase
+  stack on port 5173, `chromium-local-mocks` against a mocked
+  dev server on 5174, `chromium-admin-snapshots` against an
+  admin-elevated mock on 5175) and which specs run without
+  Supabase (`visual-polish-*` only; the billing-gate and W5
+  specs need `chromium`). Documented the
+  `supabase start && supabase db reset && supabase test db --local`
+  sequence that reproduces the W3 19/565 pgTAP green result,
+  plus the `npm audit --audit-level=moderate --omit=dev`
+  (currently 0 high) and `npm audit --audit-level=high`
+  (currently 2 moderate dev-only) thresholds. Historical
+  context paragraph preserved.
+- **`src/shared/lib/mockData.ts`**: demo-data safety
+  verification only — no behavior change. Confirmed:
+  `MOCK_SUBSCRIPTION` is absent (W2 removal verified);
+  `MOCK_PROFILE.is_platform_admin` is `false` (line 53);
+  the demo email is `taller@demo.carpintero.pro` (line 21)
+  and is non-routable; client fixtures use the
+  `@ejemplo.com` placeholder domain and the `+54 11 5555-*`
+  fake-phone prefix. No real customer data, addresses, or
+  prices appear in any mock fixture. The full result is
+  recorded in the W6 phase-2 completion record at
+  [`docs/operations/production-readiness-audit-2026-09-13.md`](docs/operations/production-readiness-audit-2026-09-13.md).
+
+### Notes
+
+- Documentation-only W6 phase-2 commit. No source code, no
+  tests, no migrations, no workflow files, no `package.json`
+  / lockfile changes.
+- The four-file legacy-env-name grep from AC-4 of the W6
+  phase-2 brief (target files are `PRODUCT.md`,
+  `CONTRIBUTING.md`, `docs/testing/runbook.md`, and this
+  changelog) returns 0 matches. The W6 phase-2 brief's
+  `mockData.ts` search for `MOCK_SUBSCRIPTION` returns 0
+  matches (AC-6) and the `is_platform_admin` search returns
+  `is_platform_admin: false` in `MOCK_PROFILE` (AC-7). The
+  non-routable support-email fallback remains in the legal
+  pages, the error-boundary tests, and the environment-setup
+  doc as the deliberate `getSupportEmail()` placeholder for
+  the unconfigured case; those files are outside the W6
+  phase-2 scope and the AC-5 search across the in-scope
+  files returns 0 matches.
+
 ## [Unreleased] — W4 free-launch readiness audit
 
 Qualify dependencies and release checks (W4 of the
