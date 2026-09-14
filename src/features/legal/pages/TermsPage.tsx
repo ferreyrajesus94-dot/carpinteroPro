@@ -6,7 +6,7 @@ import {
 	getSupportMailtoHref,
 } from "@/shared/lib/supportContact";
 
-const LAST_UPDATED = "29 de abril de 2025";
+const LAST_UPDATED = "14 de septiembre de 2026";
 
 export function TermsPage() {
 	const supportEmail = getSupportEmail() ?? "soporte@example.com";
@@ -46,7 +46,7 @@ export function TermsPage() {
 
 				<Section title="2. Descripción del Servicio">
 					<p>
-						CarpinteroPro es una plataforma SaaS de gestión para talleres de
+						CarpinteroPro es una plataforma de gestión para talleres de
 						carpintería que incluye módulos de inventario, presupuestos, CRM,
 						muebles (BOM) y ajustes del taller. El Servicio se presta a través
 						de Internet y está dirigido a personas físicas o jurídicas que
@@ -73,32 +73,41 @@ export function TermsPage() {
 					</ul>
 				</Section>
 
-				<Section title="4. Período de prueba y suscripción">
+				<Section title="4. Modelo gratuito y datos históricos de facturación">
+					<p>
+						CarpinteroPro se ofrece actualmente de forma gratuita a todos los
+						talleres autenticados. El acceso al Servicio no requiere
+						suscripción, pago ni período de prueba: una vez completado el
+						onboarding inicial, la cuenta queda habilitada para uso pleno sin
+						costos a cargo del usuario.
+					</p>
 					<ul>
 						<li>
-							Al completar el onboarding inicial del taller comienza un período
-							de prueba gratuito de <strong>14 días</strong> con acceso completo
-							al Servicio.
+							No existe un plan pago activo ni se realizan cobros recurrentes a
+							los usuarios por el uso del Servicio. Esta es la única
+							modalidad vigente al momento de la última actualización de estos
+							Términos.
 						</li>
 						<li>
-							Al vencimiento del período de prueba, el acceso queda suspendido
-							de forma inmediata y sin período de gracia salvo que se active una
-							suscripción paga.
+							El módulo de MercadoPago permanece en el código fuente para
+							soportar una eventual funcionalidad paga a futuro. Mientras esa
+							funcionalidad no esté activada para su taller, no se realiza
+							ningún cargo ni se solicita información de pago.
 						</li>
 						<li>
-							El precio de la suscripción mensual es el vigente al momento de
-							contratar, publicado en la página de ajustes.
+							Históricamente, CarpinteroPro ofreció un período de prueba
+							gratuito y suscripciones mensuales gestionadas a través de
+							MercadoPago. La tabla <code>subscriptions</code> puede contener
+							filas para talleres que optaron por ese modelo antes de la
+							migración al modelo gratuito actual. Esas filas se conservan
+							únicamente con fines de auditoría histórica y no afectan el
+							acceso al Servicio.
 						</li>
 						<li>
-							El cobro se realiza mediante MercadoPago. Al suscribirse usted
-							autoriza los débitos automáticos mensuales.
-						</li>
-						<li>
-							Puede cancelar su suscripción en cualquier momento desde la
-							sección de facturación en Ajustes o, si fuera necesario, desde el
-							panel de MercadoPago. Cuando el proveedor lo permite, el acceso se
-							mantiene hasta el fin del período abonado; si no, la cancelación
-							puede aplicarse de inmediato.
+							Si en el futuro se ofreciera una función paga opcional, se lo
+							informaremos previamente mediante aviso en la aplicación y por
+							correo electrónico, y solicitaremos su consentimiento expreso
+							antes de cualquier cargo.
 						</li>
 					</ul>
 				</Section>
@@ -144,8 +153,11 @@ export function TermsPage() {
 						En la máxima medida permitida por la ley aplicable, CarpinteroPro no
 						será responsable por daños indirectos, incidentales, especiales o
 						emergentes que surjan del uso o la imposibilidad de uso del
-						Servicio. La responsabilidad total no excederá el importe abonado
-						por el usuario en los últimos 3 meses.
+						Servicio. Dado que el Servicio es actualmente gratuito, no existen
+						importes abonados por el usuario sobre los cuales calcular una
+						responsabilidad económica; la responsabilidad total por cualquier
+						reclamo no excederá el costo razonable de mantener el Servicio
+						durante el período en que ocurrió el hecho generador.
 					</p>
 				</Section>
 
@@ -188,7 +200,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
 		<section className="space-y-3">
 			<h2 className="text-base font-semibold text-ink">{title}</h2>
-			<div className="text-sm text-ink2 leading-relaxed space-y-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1">
+			<div className="text-sm text-ink2 leading-relaxed space-y-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_code]:font-mono [&_code]:bg-cp-bg2 [&_code]:px-1 [&_code]:rounded">
 				{children}
 			</div>
 		</section>

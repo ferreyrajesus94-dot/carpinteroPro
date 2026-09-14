@@ -26,7 +26,26 @@ export interface ErrorReporterConfig {
 	dsn?: string;
 }
 
-const defaultClient: ErrorReporterClient = {
+interface SentryLike {
+	init(options: {
+		dsn: string;
+		environment?: string;
+		tracesSampleRate?: number;
+		integrations?: unknown[];
+	}): void;
+	captureException(
+		error: unknown,
+		context?: { tags?: Record<string, string>; extra?: Record<string, unknown> },
+	): void;
+}
+
+/**
+ * No-op fallback used when no `VITE_SENTRY_DSN` is configured. Keeps
+ * the production bundle working in environments where Sentry is not
+ * adopted (local dev, preview deploys, or operators that prefer a
+ * different reporter) and during tests.
+ */
+export const defaultClient: ErrorReporterClient = {
 	init: () => undefined,
 	captureException: () => undefined,
 };
@@ -79,6 +98,65 @@ export function resetErrorReporterForTests() {
 	client = defaultClient;
 	initializedDsn = null;
 	enabled = false;
+}
+
+/**
+ * Build an `ErrorReporterClient` that wraps a Sentry-shaped SDK.
+ *
+ * Exported separately so the unit tests can construct the wrapper
+ * with an in-memory fake and avoid relying on the dynamic-import
+ * mocking path (which is unreliable for the lazy `import("@sentry/react")`
+ * resolved from inside a non-test module).
+ */
+export function createSentryClient(Sentry: SentryLike): ErrorReporterClient {
+	return {
+		init(dsn) {
+			Sentry.init({
+				dsn,
+				environment: import.meta.env.MODE,
+				tracesSampleRate: 0,
+				integrations: [],
+			});
+		},
+		captureException(error, context) {
+			const tags: Record<string, string> = {};
+			if (context.source) tags.source = context.source;
+			if (context.boundary) tags.boundary = context.boundary;
+			if (context.route) tags.route = context.route;
+
+			const extra: Record<string, unknown> = {};
+			if (context.appVersion) extra.appVersion = context.appVersion;
+			if (context.workshopId) extra.workshopId = context.workshopId;
+			if (context.userId) extra.userId = context.userId;
+
+			Sentry.captureException(error, { tags, extra });
+		},
+	};
+}
+
+/**
+ * Lazily construct a real Sentry-backed reporter.
+ *
+ * The `@sentry/react` module is loaded via a dynamic `import()` so
+ * production bundles that do not set `VITE_SENTRY_DSN` (and therefore
+ * never need the SDK at runtime) tree-shake the dependency away.
+ *
+ * Returns the no-op `defaultClient` when the dynamic import is
+ * unavailable (e.g. SSR, jsdom in vitest) so `initErrorReporter` is
+ * safe to call from any environment.
+ */
+export async function loadSentryClient(): Promise<ErrorReporterClient> {
+	try {
+		const mod = await import("@sentry/react");
+		const Sentry = ((mod as unknown as { default?: unknown }).default ??
+			mod) as SentryLike;
+		return createSentryClient(Sentry);
+	} catch {
+		// Sentry is intentionally optional; fall back to the no-op so the
+		// rest of the app keeps working in environments where the SDK is
+		// not available (test runners, restricted networks, etc.).
+		return defaultClient;
+	}
 }
 
 function normalizeDsn(dsn: string | undefined) {

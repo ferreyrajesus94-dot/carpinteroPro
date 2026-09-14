@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { getBillingAccess } from "../../../src/features/billing/lib/access";
 import { isValidSignature } from "../../../supabase/functions/_shared/billing";
 import {
 	cleanupSdd7Fixtures,
@@ -7,9 +6,9 @@ import {
 	fetchFixtureSubscription,
 	fetchWebhookEvent,
 	insertDuplicateWebhookEvent,
-	simulateMercadoPagoWebhook,
 	mutateFixtureSubscriptionStatus,
 	seedActiveTrialFixture,
+	simulateMercadoPagoWebhook,
 } from "../../../scripts/e2e/fixtures";
 
 async function signatureHeader(
@@ -38,12 +37,28 @@ async function signatureHeader(
 	return `ts=${timestamp},v1=${hash}`;
 }
 
+/**
+ * Integration coverage for the MercadoPago webhook path after the
+ * free-launch cut-over. The browser-facing gate is gone, but the
+ * `subscriptions` row and the `billing_webhook_events` audit table
+ * must still record what the provider sent and how the status
+ * mapper resolves it. These assertions cover the rows directly —
+ * no React predicate is involved (the previous `getBillingAccess(...)`
+ * import was removed when the gate was deleted in W2, commit 430c80b).
+ *
+ * W5 audit follow-up (NOT fixed in this scope): `mapMercadoPagoStatusToAppStatus`
+ * in `supabase/functions/_shared/billing.ts:8` maps `authorized` /
+ * `active` to `active`, but `approved` falls through to `past_due`
+ * because no branch handles it explicitly. The assertion below for
+ * the `approved` value therefore documents the current behavior;
+ * fixing the mapper is tracked as a follow-up.
+ */
 test.describe("MercadoPago webhook persistence", () => {
 	test.afterEach(async () => {
 		await cleanupSdd7Fixtures();
 	});
 
-	test("simulated authorized webhook activates subscription and records event", async () => {
+	test("simulated authorized webhook activates the subscription via the status mapper", async () => {
 		const fixture = await seedActiveTrialFixture({ status: "past_due" });
 		const client = await createAuthenticatedFixtureClient();
 
@@ -51,7 +66,7 @@ test.describe("MercadoPago webhook persistence", () => {
 			providerEventId: "e2e_sdd7_webhook_authorized",
 			eventType: "subscription_preapproval.updated",
 			providerResourceId: "e2e_sdd7_preapproval_authorized",
-			providerStatus: "active",
+			providerStatus: "authorized",
 		});
 
 		const subscription = await fetchFixtureSubscription(
@@ -61,12 +76,11 @@ test.describe("MercadoPago webhook persistence", () => {
 		const event = await fetchWebhookEvent("e2e_sdd7_webhook_authorized");
 
 		expect(subscription?.status).toBe("active");
-		expect(getBillingAccess(subscription, new Date())).toBe("allowed");
 		expect(event?.workshop_id).toBe(fixture.workshopId);
 		expect(event?.event_type).toBe("subscription_preapproval.updated");
 	});
 
-	test("simulated failed charge marks subscription past_due", async () => {
+	test("simulated failed charge marks the subscription past_due", async () => {
 		const fixture = await seedActiveTrialFixture({ status: "active" });
 		const client = await createAuthenticatedFixtureClient();
 
@@ -74,7 +88,52 @@ test.describe("MercadoPago webhook persistence", () => {
 			providerEventId: "e2e_sdd7_webhook_failed_charge",
 			eventType: "payment.updated",
 			providerResourceId: "e2e_sdd7_payment_failed",
-			providerStatus: "past_due",
+			providerStatus: "failed",
+		});
+
+		const subscription = await fetchFixtureSubscription(
+			client,
+			fixture.workshopId,
+		);
+
+		// `failed` is not in the mapper's allow-list; it falls through
+		// to the default branch which returns `past_due`.
+		expect(subscription?.status).toBe("past_due");
+	});
+
+	test("simulated cancelled webhook persists the cancelled status", async () => {
+		const fixture = await seedActiveTrialFixture({ status: "active" });
+		const client = await createAuthenticatedFixtureClient();
+
+		await simulateMercadoPagoWebhook(fixture.workshopId, {
+			providerEventId: "e2e_sdd7_webhook_cancelled",
+			eventType: "subscription_preapproval.cancelled",
+			providerResourceId: "e2e_sdd7_preapproval_cancelled",
+			providerStatus: "cancelled",
+		});
+
+		const subscription = await fetchFixtureSubscription(
+			client,
+			fixture.workshopId,
+		);
+
+		expect(subscription?.status).toBe("cancelled");
+	});
+
+	test("simulated approved webhook currently maps to past_due (audit finding #2, follow-up)", async () => {
+		// The mapper at supabase/functions/_shared/billing.ts:8 has
+		// no branch for `approved` — the `authorized` / `active`
+		// branches handle the live statuses, but `approved` falls
+		// through to the default `past_due`. This assertion documents
+		// the current behavior so any future mapper fix is caught.
+		const fixture = await seedActiveTrialFixture({ status: "active" });
+		const client = await createAuthenticatedFixtureClient();
+
+		await simulateMercadoPagoWebhook(fixture.workshopId, {
+			providerEventId: "e2e_sdd7_webhook_approved",
+			eventType: "subscription_authorized_payment",
+			providerResourceId: "e2e_sdd7_preapproval_approved",
+			providerStatus: "approved",
 		});
 
 		const subscription = await fetchFixtureSubscription(
@@ -83,7 +142,6 @@ test.describe("MercadoPago webhook persistence", () => {
 		);
 
 		expect(subscription?.status).toBe("past_due");
-		expect(getBillingAccess(subscription, new Date())).toBe("blocked");
 	});
 
 	test("duplicate webhook event is idempotent through unique provider event id", async () => {

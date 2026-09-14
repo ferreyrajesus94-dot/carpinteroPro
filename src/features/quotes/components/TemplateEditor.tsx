@@ -103,7 +103,17 @@ export function TemplateEditor() {
             <div
               key={t.id}
               className={`flex items-center justify-between rounded-md border px-3 py-2 cursor-pointer text-sm ${selected?.id === t.id ? 'border-cp-accent bg-cp-accent-soft' : 'hover:bg-cp-bg2'}`}
+              role="button"
+              tabIndex={0}
+              aria-label={`Editar plantilla ${t.name}`}
+              aria-pressed={selected?.id === t.id}
               onClick={() => handleSelect(t)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSelect(t);
+                }
+              }}
             >
               <span className="truncate">{t.name}{t.is_default ? ' ★' : ''}</span>
               <button

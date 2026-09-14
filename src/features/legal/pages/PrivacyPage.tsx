@@ -6,7 +6,7 @@ import {
 	getSupportMailtoHref,
 } from "@/shared/lib/supportContact";
 
-const LAST_UPDATED = "29 de abril de 2025";
+const LAST_UPDATED = "14 de septiembre de 2026";
 
 export function PrivacyPage() {
 	const supportEmail = getSupportEmail() ?? "soporte@example.com";
@@ -76,11 +76,13 @@ export function PrivacyPage() {
 							clientes).
 						</li>
 						<li>
-							<strong>Datos de pago y suscripción:</strong> estado de
-							suscripción, período vigente, identificadores de preaprobación y
-							eventos de facturación. Los datos sensibles de pago son procesados
-							exclusivamente por MercadoPago; CarpinteroPro no almacena datos de
-							tarjetas ni cuentas bancarias.
+							<strong>Historial de facturación (solo auditoría):</strong>{" "}
+							identificadores de suscripción anteriores y eventos de webhook
+							de MercadoPago registrados antes de la migración al modelo
+							gratuito. Estos datos se conservan únicamente con fines de
+							auditoría histórica; CarpinteroPro no los utiliza para cobrar
+							ni para condicionar el acceso al Servicio, y no almacena datos
+							de tarjetas ni cuentas bancarias.
 						</li>
 					</ul>
 				</Section>
@@ -102,8 +104,8 @@ export function PrivacyPage() {
 
 				<Section title="4. Base legal">
 					<p>
-						El tratamiento se basa en: (a) ejecución del contrato de
-						suscripción, (b) consentimiento explícito prestado al registrarse, y
+						El tratamiento se basa en: (a) ejecución del contrato de prestación
+						del Servicio, (b) consentimiento explícito prestado al registrarse, y
 						(c) interés legítimo para mejorar el Servicio y prevenir fraudes.
 					</p>
 				</Section>
@@ -126,8 +128,17 @@ export function PrivacyPage() {
 							<strong>Resend:</strong> envío de emails transaccionales.
 						</li>
 						<li>
-							<strong>MercadoPago:</strong> procesamiento de pagos recurrentes y
-							gestión de suscripciones.
+							<strong>Sentry (opcional):</strong> reportero de errores de
+							frontend. Solo se activa si el operador configura{" "}
+							<code>VITE_SENTRY_DSN</code>; en ese caso Sentry recibe
+							eventos de error sin contenido personal identificable.
+						</li>
+						<li>
+							<strong>MercadoPago (solo histórico):</strong> la integración
+							con MercadoPago permanece en el código fuente únicamente para
+							soportar una eventual funcionalidad paga a futuro. Hoy no se
+							realizan pagos ni se gestionan suscripciones activas a través de
+							MercadoPago desde el Servicio.
 						</li>
 					</ul>
 					<p>

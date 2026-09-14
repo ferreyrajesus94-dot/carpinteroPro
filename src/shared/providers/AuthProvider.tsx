@@ -214,7 +214,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		// Suscribirse a cambios de sesión (login / logout / refresh)
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, nextSession) => {
+		} = supabase.auth.onAuthStateChange((event, nextSession) => {
+			// The library auto-refreshes the access token, so we do
+			// NOT add a periodic timer — see audit W5 #7. We only
+			// react to state-machine transitions:
+			//   - SIGNED_OUT / USER_DELETED: clear local session and
+			//     purge sensitive browser state.
+			//   - TOKEN_REFRESH_FAILED: the library could not refresh
+			//     the access token; fall back to unauthenticated so
+			//     the UI re-prompts instead of operating on a stale
+			//     session. The TypeScript union does not include
+			//     these last two strings, so we widen to a string for
+			//     the runtime check.
+			//   - TOKEN_REFRESHED / SIGNED_IN / INITIAL_SESSION:
+			//     re-run the profile loader against the new session.
+			//   - USER_UPDATED: re-load the profile because the
+			//     upstream row may have changed (email, name, etc.).
+			const eventName = event as string;
+			if (
+				eventName === "SIGNED_OUT" ||
+				eventName === "USER_DELETED" ||
+				eventName === "TOKEN_REFRESH_FAILED"
+			) {
+				void applyUnauthenticatedWithPurge();
+				return;
+			}
+
+			if (eventName === "USER_UPDATED" && nextSession) {
+				void loadProfileForSession(nextSession);
+				return;
+			}
+
 			if (nextSession) {
 				void applyAuthenticatedSession(nextSession);
 				return;
@@ -226,7 +256,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 			cancelled = true;
 			subscription.unsubscribe();
 		};
-	}, [applyAuthenticatedSession, applyUnauthenticatedWithPurge]);
+	}, [
+		applyAuthenticatedSession,
+		applyUnauthenticatedWithPurge,
+		loadProfileForSession,
+	]);
 
 	async function signOut() {
 		try {

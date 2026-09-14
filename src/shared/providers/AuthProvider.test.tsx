@@ -546,4 +546,47 @@ describe("AuthProvider", () => {
 			"useAuth must be used inside <AuthProvider>",
 		);
 	});
+
+	it("transitions to unauthenticated and purges state when TOKEN_REFRESH_FAILED fires", async () => {
+		const session = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQuery(WORKSHOP_ID);
+		const sub = makeSubscription();
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+
+		sub.fire("TOKEN_REFRESH_FAILED", null);
+
+		await waitFor(() => {
+			expect(result.current.status).toBe("unauthenticated");
+			expect(result.current.session).toBeNull();
+			expect(result.current.workshopId).toBeNull();
+			expect(result.current.profileIssue).toBeNull();
+		});
+		expect(mockPurgeSensitiveBrowserState).toHaveBeenCalledWith(
+			"session-removed",
+		);
+	});
+
+	it("reloads the profile when USER_UPDATED fires with a new session", async () => {
+		const session = { user: { id: USER_ID } };
+		const updatedSession = { user: { id: USER_ID } };
+		mockAuth.getSession.mockResolvedValue({ data: { session } });
+		mockProfileQueryResults([
+			profileSuccess(makeProfileRow(WORKSHOP_ID, ONBOARDED_AT, false)),
+			profileSuccess(
+				makeProfileRow(WORKSHOP_ID, ONBOARDED_AT, true),
+			),
+		]);
+		const sub = makeSubscription();
+
+		const { result } = renderHook(() => useAuth(), { wrapper: makeWrapper() });
+		await waitFor(() => expect(result.current.status).toBe("ready"));
+		expect(result.current.isPlatformAdmin).toBe(false);
+
+		sub.fire("USER_UPDATED", updatedSession);
+
+		await waitFor(() => expect(result.current.isPlatformAdmin).toBe(true));
+	});
 });

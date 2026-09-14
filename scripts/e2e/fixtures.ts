@@ -178,6 +178,60 @@ async function ensureUser(client: TestClient, fixtureUser: FixtureUser) {
 	return data.user.id;
 }
 
+/**
+ * Synthetic-account helpers used by the W5 browser journeys
+ * (`signup-journey.spec.ts`, `free-journey.spec.ts`). The user is
+ * created server-side via `supabase.auth.admin.createUser`, which
+ * requires the `E2E_SUPABASE_SERVICE_ROLE_KEY` secret. The secret
+ * never leaves the test runner — the browser context authenticates
+ * by submitting the email/password to the `/login` page.
+ */
+export interface SyntheticUserOptions {
+	email: string;
+	workshopName?: string;
+}
+
+export interface SyntheticUser {
+	userId: string;
+	email: string;
+	workshopName: string;
+}
+
+export async function createSyntheticUser(
+	options: SyntheticUserOptions,
+): Promise<SyntheticUser> {
+	const client = adminClient();
+	const workshopName = options.workshopName ?? "E2E Synthetic Workshop";
+	const password = readRequiredEnv("E2E_TEST_PASSWORD");
+	const existingId = await findUserIdByEmail(client, options.email);
+	let userId: string;
+	if (existingId) {
+		const { error } = await client.auth.admin.updateUserById(existingId, {
+			password,
+			email_confirm: true,
+			user_metadata: { workshop_name: workshopName },
+		});
+		if (error) throw error;
+		userId = existingId;
+	} else {
+		const { data, error } = await client.auth.admin.createUser({
+			email: options.email,
+			password,
+			email_confirm: true,
+			user_metadata: { workshop_name: workshopName },
+		});
+		if (error) throw error;
+		userId = data.user.id;
+	}
+	return { userId, email: options.email, workshopName };
+}
+
+export async function deleteSyntheticUser(userId: string): Promise<void> {
+	const client = adminClient();
+	const { error } = await client.auth.admin.deleteUser(userId);
+	if (error) throw error;
+}
+
 export async function cleanupSdd7Fixtures(): Promise<void> {
 	const client = adminClient();
 	const userIds = (
@@ -402,8 +456,10 @@ export async function seedMaterialIsolationFixtures(): Promise<MaterialFixture> 
 	};
 }
 
-export async function seedQuoteWorkflowFixture(): Promise<QuoteWorkflowFixture> {
-	const fixture = await seedActiveTrialFixture();
+export async function seedQuoteWorkflowFixture(
+	options: SeedOptions = {},
+): Promise<QuoteWorkflowFixture> {
+	const fixture = await seedActiveTrialFixture(options);
 	const client = adminClient();
 	const now = new Date().toISOString();
 
@@ -651,17 +707,34 @@ export async function simulateMercadoPagoWebhook(
 		.single();
 	if (insertError) throw insertError;
 
+	// Map the simulated provider status through the same mapper the
+	// real webhook handler uses, so the persisted row reflects what
+	// production would write. Falling back to the raw provider status
+	// (when the mapper does not know the input) keeps behaviour
+	// backwards-compatible with the older fixtures that drove the row
+	// directly with a `subscriptions.status` enum value.
+	let mappedStatus: SubscriptionStatus = options.providerStatus;
+	try {
+		const { mapMercadoPagoStatusToAppStatus } = await import(
+			"../../supabase/functions/_shared/billing"
+		);
+		mappedStatus = mapMercadoPagoStatusToAppStatus(options.providerStatus);
+	} catch {
+		// The Edge Function helper is not available in this test
+		// runner — leave the provider status as the subscription
+		// status so older fixtures still work.
+	}
+
+	const isActive = mappedStatus === "active";
 	const { error: updateError } = await client
 		.from("subscriptions")
 		.update({
-			status: options.providerStatus,
+			status: mappedStatus,
 			provider_status: options.providerStatus,
-			current_period_starts_at:
-				options.providerStatus === "active" ? now : undefined,
-			current_period_ends_at:
-				options.providerStatus === "active"
-					? new Date(Date.now() + 30 * 86_400_000).toISOString()
-					: undefined,
+			current_period_starts_at: isActive ? now : undefined,
+			current_period_ends_at: isActive
+				? new Date(Date.now() + 30 * 86_400_000).toISOString()
+				: undefined,
 			updated_at: now,
 		})
 		.eq("workshop_id", fixtureWorkshopId);

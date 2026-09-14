@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Zap } from "lucide-react";
 import type { PainPoint } from "../data/landingContent";
 import { Eyebrow } from "@/shared/ui/eyebrow";
@@ -16,19 +16,26 @@ export function PainPointsSection({ pains }: PainPointsSectionProps) {
 	const [activeIdx, setActiveIdx] = useState(() =>
 		getReducedMotion() ? pains.length - 1 : -1,
 	);
+	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	useEffect(() => {
 		if (getReducedMotion()) return;
 		let i = 0;
-		const interval = setInterval(() => {
+		intervalRef.current = setInterval(() => {
 			if (i < pains.length) {
 				setActiveIdx(i);
 				i++;
-			} else {
-				clearInterval(interval);
+			} else if (intervalRef.current !== null) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
 			}
 		}, 600);
-		return () => clearInterval(interval);
+		return () => {
+			if (intervalRef.current !== null) {
+				clearInterval(intervalRef.current);
+				intervalRef.current = null;
+			}
+		};
 	}, [pains.length]);
 
 	return (

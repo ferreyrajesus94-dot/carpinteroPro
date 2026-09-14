@@ -14,12 +14,23 @@ async function login(page: Page) {
 	await page.getByRole("button", { name: "Ingresar" }).click();
 }
 
-test.describe("billing gate blocked browser access", () => {
+/**
+ * Browser coverage for the historical-subscription / free-launch
+ * regression: the React `BillingBlockedScreen` gate was removed in
+ * W2 (commit 430c80b). These tests prove that a workshop whose
+ * `subscriptions` row was previously mutated to a `past_due` status
+ * — or whose `trial_ends_at` is already in the past — can still log
+ * in and reach the free dashboard, because the historical row does
+ * not gate access. The new assertions check for the dashboard
+ * heading, the absence of the legacy block copy, and the absence of
+ * any subscribe / update-payment CTA.
+ */
+test.describe("billing gate removed — historical rows do not block free access", () => {
 	test.afterEach(async () => {
 		await cleanupSdd7Fixtures();
 	});
 
-	test("expired trial user sees billing block instead of dashboard", async ({
+	test("user with expired trial reaches the free dashboard without a billing block", async ({
 		page,
 	}) => {
 		await seedActiveTrialFixture({
@@ -30,20 +41,20 @@ test.describe("billing gate blocked browser access", () => {
 
 		await expect(page).toHaveURL(/\/dashboard/);
 		await expect(
-			page.getByText("Período de prueba", { exact: true }).first(),
+			page.getByRole("heading", { name: "Inicio" }),
+		).toBeVisible();
+		await expect(
+			page.getByRole("navigation", { name: "Navegación principal" }).first(),
 		).toBeVisible();
 		await expect(
 			page.getByText(/Tu acceso a la app está suspendido/i),
-		).toBeVisible();
+		).toHaveCount(0);
 		await expect(
 			page.getByRole("button", { name: /Empezar suscripción/i }),
-		).toBeVisible();
-		await expect(page.getByRole("heading", { name: "Dashboard" })).toHaveCount(
-			0,
-		);
+		).toHaveCount(0);
 	});
 
-	test("past-due user sees payment-required billing block", async ({
+	test("user with past_due historical row still reaches the free dashboard", async ({
 		page,
 	}) => {
 		await seedActiveTrialFixture();
@@ -53,16 +64,33 @@ test.describe("billing gate blocked browser access", () => {
 
 		await expect(page).toHaveURL(/\/dashboard/);
 		await expect(
-			page.getByText("Pago pendiente", { exact: true }).first(),
+			page.getByRole("heading", { name: "Inicio" }),
 		).toBeVisible();
 		await expect(
-			page.getByText(/Tu acceso a la app está suspendido/i),
-		).toBeVisible();
+			page.getByText("Pago pendiente", { exact: true }),
+		).toHaveCount(0);
+		await expect(
+			page.getByText("Suscripción cancelada", { exact: true }),
+		).toHaveCount(0);
 		await expect(
 			page.getByRole("button", { name: /Actualizar pago/i }),
+		).toHaveCount(0);
+	});
+
+	test("user with cancelled historical row still reaches the free dashboard", async ({
+		page,
+	}) => {
+		await seedActiveTrialFixture();
+		await mutateFixtureSubscriptionStatus("cancelled");
+
+		await login(page);
+
+		await expect(page).toHaveURL(/\/dashboard/);
+		await expect(
+			page.getByRole("heading", { name: "Inicio" }),
 		).toBeVisible();
-		await expect(page.getByRole("heading", { name: "Dashboard" })).toHaveCount(
-			0,
-		);
+		await expect(
+			page.getByText(/Suscripción cancelada|Pago pendiente/i),
+		).toHaveCount(0);
 	});
 });

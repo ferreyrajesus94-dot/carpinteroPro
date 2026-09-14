@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Download, Share2, Copy, Pencil, Check } from "lucide-react";
 import { Button } from "@/shared/ui/button";
@@ -32,6 +32,9 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 	const { data: templates = [] } = useContractTemplates(workshopId);
 	const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 	const [copied, setCopied] = useState(false);
+	const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+		null,
+	);
 	const [editState, setEditState] = useState<{
 		templateId: string;
 		contract: string | null;
@@ -41,6 +44,15 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 		contract: null,
 		isEditing: false,
 	});
+
+	useEffect(() => {
+		return () => {
+			if (copyResetTimeoutRef.current !== null) {
+				clearTimeout(copyResetTimeoutRef.current);
+				copyResetTimeoutRef.current = null;
+			}
+		};
+	}, []);
 
 	const defaultTemplate = templates.find((t) => t.is_default);
 	const activeTemplateId = selectedTemplateId || defaultTemplate?.id || "";
@@ -114,7 +126,13 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 	async function handleCopy() {
 		await navigator.clipboard.writeText(buildWhatsAppText());
 		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+		if (copyResetTimeoutRef.current !== null) {
+			clearTimeout(copyResetTimeoutRef.current);
+		}
+		copyResetTimeoutRef.current = setTimeout(() => {
+			setCopied(false);
+			copyResetTimeoutRef.current = null;
+		}, 2000);
 	}
 
 	function handleDownloadPDF() {

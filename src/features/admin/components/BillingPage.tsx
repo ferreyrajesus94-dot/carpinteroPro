@@ -186,7 +186,23 @@ export function BillingPage() {
 							<TableRow>
 								<TableHead
 									className="cursor-pointer select-none hover:text-ink"
+									role="button"
+									tabIndex={0}
+									aria-sort={
+										sortKey === "workshopName"
+											? sortDir === "asc"
+												? "ascending"
+												: "descending"
+											: "none"
+									}
+									aria-label="Ordenar por taller"
 									onClick={() => toggleSort("workshopName")}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											toggleSort("workshopName");
+										}
+									}}
 								>
 									Taller{" "}
 									{sortKey === "workshopName" &&
@@ -194,27 +210,91 @@ export function BillingPage() {
 								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none hover:text-ink"
+									role="button"
+									tabIndex={0}
+									aria-sort={
+										sortKey === "plan"
+											? sortDir === "asc"
+												? "ascending"
+												: "descending"
+											: "none"
+									}
+									aria-label="Ordenar por plan"
 									onClick={() => toggleSort("plan")}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											toggleSort("plan");
+										}
+									}}
 								>
 									Plan {sortKey === "plan" && (sortDir === "asc" ? "↑" : "↓")}
 								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none hover:text-ink"
+									role="button"
+									tabIndex={0}
+									aria-sort={
+										sortKey === "provider"
+											? sortDir === "asc"
+												? "ascending"
+												: "descending"
+											: "none"
+									}
+									aria-label="Ordenar por proveedor"
 									onClick={() => toggleSort("provider")}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											toggleSort("provider");
+										}
+									}}
 								>
 									Proveedor{" "}
 									{sortKey === "provider" && (sortDir === "asc" ? "↑" : "↓")}
 								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none hover:text-ink"
+									role="button"
+									tabIndex={0}
+									aria-sort={
+										sortKey === "status"
+											? sortDir === "asc"
+												? "ascending"
+												: "descending"
+											: "none"
+									}
+									aria-label="Ordenar por estado"
 									onClick={() => toggleSort("status")}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											toggleSort("status");
+										}
+									}}
 								>
 									Estado{" "}
 									{sortKey === "status" && (sortDir === "asc" ? "↑" : "↓")}
 								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none hover:text-ink"
+									role="button"
+									tabIndex={0}
+									aria-sort={
+										sortKey === "currentPeriodEnd"
+											? sortDir === "asc"
+												? "ascending"
+												: "descending"
+											: "none"
+									}
+									aria-label="Ordenar por vencimiento"
 									onClick={() => toggleSort("currentPeriodEnd")}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											toggleSort("currentPeriodEnd");
+										}
+									}}
 								>
 									Vence{" "}
 									{sortKey === "currentPeriodEnd" &&
@@ -222,7 +302,23 @@ export function BillingPage() {
 								</TableHead>
 								<TableHead
 									className="cursor-pointer select-none hover:text-ink"
+									role="button"
+									tabIndex={0}
+									aria-sort={
+										sortKey === "updatedAt"
+											? sortDir === "asc"
+												? "ascending"
+												: "descending"
+											: "none"
+									}
+									aria-label="Ordenar por fecha de actualización"
 									onClick={() => toggleSort("updatedAt")}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											toggleSort("updatedAt");
+										}
+									}}
 								>
 									Actualizado{" "}
 									{sortKey === "updatedAt" && (sortDir === "asc" ? "↑" : "↓")}
@@ -240,6 +336,16 @@ export function BillingPage() {
 										<TableRow
 											onClick={() => setExpandedId(isExpanded ? null : sub.id)}
 											className="cursor-pointer"
+											role="button"
+											tabIndex={0}
+											aria-expanded={isExpanded}
+											aria-label={`${isExpanded ? "Contraer" : "Expandir"} suscripción de ${sub.workshopName}`}
+											onKeyDown={(e) => {
+												if (e.key === "Enter" || e.key === " ") {
+													e.preventDefault();
+													setExpandedId(isExpanded ? null : sub.id);
+												}
+											}}
 										>
 											<TableCell className="font-medium text-ink">
 												{sub.workshopName}

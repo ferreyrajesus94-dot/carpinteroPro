@@ -24,7 +24,7 @@ test.describe("billing gate active-trial browser access", () => {
 			page.getByRole("navigation", { name: "Navegación principal" }).first(),
 		).toBeVisible();
 		await expect(
-			page.getByRole("heading", { name: "Dashboard" }),
+			page.getByRole("heading", { name: "Inicio" }),
 		).toBeVisible();
 
 		await page.goto("/quotes");
@@ -33,7 +33,7 @@ test.describe("billing gate active-trial browser access", () => {
 			page.getByRole("heading", { name: /Presupuestos/i }),
 		).toBeVisible();
 		await expect(
-			page.getByText(/Pago pendiente|Suscripción suspendida/i),
+			page.getByText(/Pago pendiente|Suscripción suspendida|Suscripción cancelada/i),
 		).toHaveCount(0);
 	});
 });
