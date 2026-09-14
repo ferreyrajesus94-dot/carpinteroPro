@@ -5,7 +5,11 @@ on:
     branches: [main, "feature/**", "feat/**"]
     # Release pipeline depends on CI passing for the tag's commit SHA.
     # See .github/workflows/release.yml for the workflow_run gate.
-    tags: ['/v[0-9]+.[0-9]+.[0-9]+.*/']
+    # GitHub Actions `tags` filter uses glob patterns (not regex), per
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushbranchestagsbranches.
+    # The pattern `v[0-9]+.[0-9]+.[0-9]+*` matches v1.0.0, v1.0.0-beta,
+    # v1.2.3-rc.1, etc. A leading or trailing `/` does NOT activate regex.
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
   pull_request:
     branches: [main]
 

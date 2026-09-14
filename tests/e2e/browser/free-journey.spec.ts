@@ -101,14 +101,17 @@ test.describe("synthetic free journey", () => {
 		// 4. Provision the minimum data the quote wizard needs: a
 		//    client, a material, a furniture template with one recipe
 		//    item, and a contract template. All rows are scoped to the
-		//    synthetic user's workshop via `workshop_id`.
-		const stampSuffix = `${stamp}-${Math.random().toString(36).slice(2, 8)}`;
-		const clientId = `00000000-0000-4000-8000-${stampSuffix.padStart(12, "0").slice(-12)}`;
-		const materialId = `00000000-0000-4000-9000-${stampSuffix.padStart(12, "0").slice(-12)}`;
-		const templateId = `00000000-0000-4000-a000-${stampSuffix.padStart(12, "0").slice(-12)}`;
-		const recipeId = `00000000-0000-4000-b000-${stampSuffix.padStart(12, "0").slice(-12)}`;
-		const laborId = `00000000-0000-4000-c000-${stampSuffix.padStart(12, "0").slice(-12)}`;
-		const contractTemplateId = `00000000-0000-4000-d000-${stampSuffix.padStart(12, "0").slice(-12)}`;
+		//    synthetic user's workshop via `workshop_id`. We use
+		//    `crypto.randomUUID()` (available in both browser and modern
+		//    Node) so every ID is a valid RFC-4122 UUID that Postgres
+		//    accepts without `invalid input syntax for type uuid`.
+		const newUuid = (): string => crypto.randomUUID();
+		const clientId = newUuid();
+		const materialId = newUuid();
+		const templateId = newUuid();
+		const recipeId = newUuid();
+		const laborId = newUuid();
+		const contractTemplateId = newUuid();
 
 		await adminDb.from("clients").upsert({
 			id: clientId,

@@ -709,21 +709,27 @@ export async function simulateMercadoPagoWebhook(
 
 	// Map the simulated provider status through the same mapper the
 	// real webhook handler uses, so the persisted row reflects what
-	// production would write. Falling back to the raw provider status
-	// (when the mapper does not know the input) keeps behaviour
-	// backwards-compatible with the older fixtures that drove the row
-	// directly with a `subscriptions.status` enum value.
-	let mappedStatus: SubscriptionStatus = options.providerStatus;
-	try {
-		const { mapMercadoPagoStatusToAppStatus } = await import(
-			"../../supabase/functions/_shared/billing"
-		);
-		mappedStatus = mapMercadoPagoStatusToAppStatus(options.providerStatus);
-	} catch {
-		// The Edge Function helper is not available in this test
-		// runner — leave the provider status as the subscription
-		// status so older fixtures still work.
-	}
+	// production would write. The mapper logic is duplicated locally
+	// (no `await import(".../billing")`) because that module is a
+	// Deno-flavoured Edge Function helper that is not in the Node-side
+	// build graph; the dynamic-import path was unreliable in CI. The
+	// mapping mirrors `supabase/functions/_shared/billing.ts` at the
+	// commit this spec is pinned to. Falling back to the raw provider
+	// status (when the input does not match any branch) keeps
+	// behaviour backwards-compatible with the older fixtures that
+	// drove the row directly with a `subscriptions.status` enum value.
+	const mapProviderStatusToSubscriptionStatus = (
+		providerStatus: string,
+	): SubscriptionStatus => {
+		const s = providerStatus.toLowerCase();
+		if (s === "authorized" || s === "active") return "active";
+		if (s === "pending" || s === "paused") return "past_due";
+		if (s === "rejected" || s === "failure") return "unpaid";
+		if (s === "cancelled") return "cancelled";
+		return "past_due";
+	};
+	const mappedStatus: SubscriptionStatus =
+		mapProviderStatusToSubscriptionStatus(options.providerStatus);
 
 	const isActive = mappedStatus === "active";
 	const { error: updateError } = await client
