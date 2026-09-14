@@ -1,28 +1,64 @@
 name: Release
 
+# The release workflow triggers on `workflow_run` from the CI workflow. This
+# enforces "release requires evidence for the same revision" — the tag push
+# alone is not enough; CI must have completed successfully for the tag's
+# commit SHA. See docs/operations/production-readiness-audit-2026-09-13.md W4
+# for the rationale and AC-6 in the implementation brief.
+#
+# Required wiring:
+#   1. The CI workflow must be configured to run on tag pushes
+#      (see `.github/workflows/ci.yml` `tags:` filter).
+#   2. `workflow_run.conclusion == 'success'` is required for the deploy job
+#      to run, enforced via the job-level `if:`.
+#   3. `workflow_run.head_branch` must start with `v` so non-tag CI runs
+#      (branches / PRs) silently no-op this workflow.
+#
+# Note: `secrets.*` is intentionally never referenced in job-level `if:`
+# expressions because GitHub Actions disallows that context for that key
+# (https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability).
+# The empty-secret check is moved to a step inside the job (see
+# "Verify Vercel secrets are configured" below).
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'  # Matches v0.2.0-beta.1, v1.0.0, v1.2.3-rc.1, etc.
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.workflow }}-${{ github.ref }}
+  group: release-${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}
   cancel-in-progress: false  # don't cancel an in-flight deploy
 
 jobs:
   deploy-production:
     name: Deploy to Vercel production
     runs-on: ubuntu-latest
-    # Only run if a VERCEL_TOKEN secret is configured. Skip silently otherwise
-    # so contributors' forks don't fail their CI on tag pushes.
-    if: ${{ secrets.VERCEL_TOKEN != '' }}
+    # Deploy ONLY when CI passed AND the CI run was for a version tag.
+    # For non-tag CI runs (branches and PRs) this workflow silently no-ops.
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch =~ '^v[0-9]+\.[0-9]+\.[0-9]+'
 
     steps:
+      - name: Log release gate inputs
+        # Diagnostic step: surfaces the exact values that the job-level `if:`
+        # was evaluated against, so a no-op deploy (or a wrong-deploy) is
+        # diagnosable from the Actions UI without re-running CI. The CI
+        # workflow_run event fires for branches, PRs, and tags; only tag runs
+        # satisfy the regex `^v[0-9]+\.[0-9]+\.[0-9]+` and reach the deploy.
+        run: |
+          echo "workflow_run.conclusion = ${{ github.event.workflow_run.conclusion }}"
+          echo "workflow_run.head_branch  = ${{ github.event.workflow_run.head_branch }}"
+          echo "workflow_run.head_sha     = ${{ github.event.workflow_run.head_sha }}"
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Use the exact commit SHA that CI tested. For a tag push this is
+          # the commit the tag points at.
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,22 +66,42 @@ jobs:
           node-version: 24
           cache: npm
 
+      - name: Verify Vercel secrets are configured
+        id: check-creds
+        # `secrets.*` is allowed inside `run:` and `env:` blocks but not
+        # inside job-level `if:`. Skip the deploy silently when any
+        # required Vercel secret is missing so forks don't fail CI.
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "${VERCEL_TOKEN}" ] || [ -z "${VERCEL_ORG_ID}" ] || [ -z "${VERCEL_PROJECT_ID}" ]; then
+            echo "::warning::One or more Vercel secrets are unset; skipping deploy silently."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Install Vercel CLI
+        if: steps.check-creds.outputs.skip != 'true'
         run: npm install -g vercel@latest
 
       - name: Pull Vercel project info
-        run: vercel pull --yes --token="${{ secrets.VERCEL_TOKEN }}"
+        if: steps.check-creds.outputs.skip != 'true'
+        run: vercel pull --yes --token="${VERCEL_TOKEN}"
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to production
-        run: vercel deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
+        if: steps.check-creds.outputs.skip != 'true'
+        run: vercel deploy --prod --yes --token="${VERCEL_TOKEN}"
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Summary
-        if: success()
+        if: success() && steps.check-creds.outputs.skip != 'true'
         run: |
-          echo "✅ Deployed v${{ github.ref_name }} to Vercel production"
+          echo "✅ Deployed ${{ github.event.workflow_run.head_branch }} (SHA ${{ github.event.workflow_run.head_sha }}) to Vercel production"

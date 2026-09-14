@@ -78,7 +78,7 @@ Verified against the source under `src/features/`:
 
 **Deploy**
 
-- Vercel auto-deploys the frontend from `main` (catch-all SPA rewrite in `vercel.json`)
+- Vercel auto-deploys the frontend from `main` (catch-all SPA rewrite + CSP / HSTS / `X-Content-Type-Options` / `Referrer-Policy` / `Permissions-Policy` headers in `vercel.json`; see `docs/operations/vercel-config-decision.md`)
 - Supabase Cloud runs the database, auth, and Edge Functions
 
 **Testing**
@@ -111,7 +111,7 @@ Verified against the source under `src/features/`:
    cp .env.example .env.local
    ```
 
-   At minimum you need `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. Server-only secrets (service role, MercadoPago) belong in Supabase Edge Function secrets, not in `.env.local` — see `docs/operations/environment-setup.md`.
+   At minimum you need `VITE_DB_URL` and `VITE_DB_ANON_KEY`. Server-only secrets (service role, MercadoPago) belong in Supabase Edge Function secrets, not in `.env.local` — see `docs/operations/environment-setup.md`.
 
 3. Start Supabase locally and apply migrations:
 

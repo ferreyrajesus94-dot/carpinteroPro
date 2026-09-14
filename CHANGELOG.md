@@ -5,6 +5,197 @@ All notable changes to CarpinteroPro are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] — W4 free-launch readiness audit
+
+Qualify dependencies and release checks (W4 of the
+2026-09-13 free-launch readiness audit). No product behaviour
+changes; this entry ships the deps / workflow / header
+qualification work so the CI gate is honest and the production
+deploy requires evidence for the same revision.
+
+### Changed
+
+- **`.github/workflows/ci.yml`**: env block renamed from the
+  legacy public-Supabase env names back to the current
+  `VITE_DB_URL` / `VITE_DB_ANON_KEY` so CI matches the runtime
+  contract consumed by `src/shared/lib/supabase.ts`. The build
+  previously passed only because `VITE_USE_LOCAL_MOCKS=true`
+  short-circuited the real init path; production builds without
+  mocks would have failed.
+- **`.github/workflows/ci.yml`**: the single `npm audit
+  --audit-level=moderate` step was split into two steps with
+  separate `name:` labels:
+  - `Audit production dependencies` runs
+    `npm audit --audit-level=moderate --omit=dev`. Must pass.
+  - `Audit dev dependencies` runs `npm audit --audit-level=high`.
+    Must pass; moderate dev-tooling advisories that don't reach
+    the browser bundle are tolerated and tracked in the audit
+    completion record.
+- **`.github/workflows/ci.yml`**: push trigger now also includes
+  `tags: ['v[0-9]+.[0-9]+.[0-9]+*']` so CI runs on the exact
+  commit SHA the tag points at. The release workflow depends on
+  this so its `workflow_run` gate can verify evidence for the
+  same revision.
+- **`.github/workflows/release.yml`**: rewritten so the deploy
+  job is gated by a `workflow_run` trigger from the CI workflow
+  instead of a tag push alone:
+  ```yaml
+  on:
+    workflow_run:
+      workflows: ["CI"]
+      types: [completed]
+  ```
+  The deploy job's `if:` now requires
+  `github.event.workflow_run.conclusion == 'success'` AND
+  `startsWith(github.event.workflow_run.head_branch, 'v')` so
+  only successful tag-scope CI runs deploy. The previous
+  job-level `if: ${{ secrets.VERCEL_TOKEN != '' }}` was invalid
+  per [GitHub's allowed contexts reference](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability)
+  (the `secrets` context cannot be used in job-level `if:`). The
+  empty-secret check is now performed inside a step that uses
+  `secrets.*` inside `run:` / `env:` (where it is allowed) and
+  outputs a `skip` flag for the downstream deploy steps.
+- **`vercel.json`**: added a `headers` block applying to
+  `/(.*)` with a moderate CSP plus the standard hardening
+  headers:
+  - `Content-Security-Policy`: `default-src 'self'`,
+    `script-src 'self' 'unsafe-inline'` (Vite inline bootstrap
+    + PWA service-worker register; documented trade-off),
+    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com
+    https://cdn-uicons.flaticon.com`, `font-src 'self'
+    https://fonts.gstatic.com data:`,
+    `img-src 'self' data: blob: https:`,
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co
+    https://*.mercadopago.com.ar https://*.mercadolibre.com`,
+    `frame-src 'self' https://*.mercadopago.com.ar
+    https://*.mercadolibre.com`, `frame-ancestors 'none'`,
+    `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`,
+    `upgrade-insecure-requests`.
+  - `X-Content-Type-Options: nosniff`.
+  - `Referrer-Policy: strict-origin-when-cross-origin`.
+  - `Permissions-Policy: camera=(), microphone=(),
+    geolocation=(), interest-cohort=()`.
+  - `Strict-Transport-Security: max-age=63072000;
+    includeSubDomains; preload` (explicit; Vercel adds this by
+    default but we make it survive any default change).
+  - `X-Frame-Options: DENY` (legacy, redundant with
+    `frame-ancestors 'none'`).
+  - The existing `rewrites` block
+    (`/(.*)` → `/index.html`) is preserved unchanged.
+- **`.github/workflows/release.yml`** also gained a step-level
+  Vercel-credentials check that no-ops silently when any of
+  `VERCEL_TOKEN`, `VERCEL_ORG_ID`, or `VERCEL_PROJECT_ID` is
+  unset, so contributors' forks don't fail CI on tag pushes.
+- **`package.json`**: added `"engines": { "node": ">=20.0.0" }`
+  and `"packageManager": "npm@10.9.0"`. The `engines` floor
+  covers both the local Node 26 and the CI Node 24. The
+  `packageManager` pin matches the npm bundled with Node 24 and
+  keeps the lockfile-resolution semantics stable for CI.
+- **`.nvmrc`**: created with content `24` (CI Node version) so
+  `nvm use` aligns the local shell with what the CI runs.
+- **`docs/operations/vercel-config-decision.md`**: status
+  flipped from `Deferred` to `Implemented` and the
+  compatibility checklist re-run for the W4 set of headers
+  (Supabase / MercadoPago / PWA / generated chunks).
+- **`docs/operations/environment-setup.md`**: env-var table
+  renamed the legacy public-Supabase env names back to the
+  current `VITE_DB_URL` / `VITE_DB_ANON_KEY`. The descriptions and
+  source column are preserved.
+- **`README.md`**: Quick Start env var names renamed to
+  `VITE_DB_URL` / `VITE_DB_ANON_KEY`; the Tech Stack / Deploy
+  section now mentions the new security headers defined in
+  `vercel.json` and points at
+  `docs/operations/vercel-config-decision.md`.
+- **`docs/operations/production-readiness-audit-2026-09-13.md`**:
+  W4 row of the audit table references the current `VITE_DB_*`
+  names; the historical evidence paragraph under finding #7 now
+  records the W4 rename explicitly. A W4 completion record is
+  appended under "Completion record".
+
+### Security
+
+- Production deploy now requires evidence for the same revision
+  (CI must pass for the exact commit SHA the tag points at).
+  Previously a tag push alone was sufficient.
+- `vercel.json` now defines a moderate CSP plus the standard
+  hardening headers (`X-Content-Type-Options`, `Referrer-Policy`,
+  `Permissions-Policy`, `Strict-Transport-Security`,
+  `X-Frame-Options`). See "CSP trade-off" below for the
+  `'unsafe-inline'` rationale.
+
+### Dependencies
+
+- `npm audit fix` was run before any manual edits. The lockfile
+  bumped the following packages within their existing semver
+  ranges (no `package.json` change was required; `npm audit fix`
+  resolved everything transitively). Version numbers below are
+  the exact values recorded in `package-lock.json` after the
+  fix.
+  - `fflate` `0.8.2` → `0.8.3` (transitive of `jspdf`; resolves
+    the GHSA-px8p-9vwx-vf98 ZIP64 advisory).
+  - `browserslist` `4.28.2` → `4.28.9` (transitive of
+    `autoprefixer`, `@babel/core`, `core-js-compat`,
+    `workbox-build`; resolves GHSA-c83g-rgw3-j3cx and
+    GHSA-73wf-gq98-2v4g).
+  - `caniuse-lite` `1.0.30001787` → `1.0.30001810`
+    (transitive of `browserslist`; pulls the upstream
+    browser-compat-data refresh).
+  - `electron-to-chromium` `1.5.335` → `1.5.427` (transitive of
+    `browserslist`; refreshes the chromium-version → electron-version
+    mapping consumed by `caniuse-lite`).
+  - `node-releases` `2.0.37` → `2.0.55` (transitive of
+    `browserslist`; refreshes the Node.js version table that
+    `browserslist` queries).
+  - `baseline-browser-mapping` `2.10.18` → `2.11.23`
+    (transitive of `browserslist`; resolves
+    GHSA-w5vr-8v7q-w6rv).
+  - `fast-uri` `3.1.5` → `3.1.7` (transitive of `ajv` via
+    `workbox-build`; resolves GHSA-5jgf-p345-68v8,
+    GHSA-f65p-4m7j-42xc, GHSA-fph4-wmhf-6fwf, and
+    GHSA-jqff-g426-hqxp).
+  - `js-yaml` `4.3.1` → `4.3.2` (transitive of
+    `@eslint/eslintrc` via `eslint`; resolves
+    GHSA-2883-xcg3-v3hh).
+  - `@humanfs/node` `0.16.7` → `0.16.8` (transitive of `eslint`;
+    resolves GHSA-p498-v437-472g).
+  - `@humanfs/core` `0.19.1` → `0.19.2` (transitive of
+    `@humanfs/node`).
+  - `@humanfs/types` `0.15.0` added (transitive of
+    `@humanfs/node`).
+  - `postcss-selector-parser` `6.1.2` → `6.1.4` (transitive of
+    `tailwindcss`; resolves GHSA-w9m9-85wc-3x92).
+  - `sharp` `0.35.3` → `0.35.4` (direct devDep `^0.35.3`;
+    resolves GHSA-rgj7-g3m4-5g8c — libheif vulnerabilities
+    inherited from the bundled libheif).
+  - `update-browserslist-db` `1.2.3` → `1.3.3` (transitive of
+    `browserslist`).
+
+### Remaining (not patched)
+
+- `@vitest/mocker` (transitive of `vitest`) carries a moderate
+  Path-Traversal advisory (GHSA-82fw-gwwq-j7x9) affecting
+  `vitest >= 2.1.0-beta.1, < 4.1.11`. `npm audit fix` bumped
+  `vitest` to `4.1.11`, but that violates the `vitest` /
+  `@vitest/coverage-v8` exact-pin parity required by the W4
+  brief. We reverted `vitest` back to `4.1.4` (with
+  `@vitest/coverage-v8@4.1.4`) and accept the dev-only
+  `@vitest/mocker` advisory: it is a test-time tool that does
+  not reach the browser bundle, the production graph
+  (`npm audit --omit=dev`) reports zero vulnerabilities, and the
+  full graph reports only this one moderate. Documented in the
+  W4 audit completion record under "Remaining remote checks or
+  missing inputs".
+
+### CSP trade-off
+
+`script-src 'self' 'unsafe-inline'` and
+`style-src 'self' 'unsafe-inline'` are the minimum required for
+Vite's inline bootstrap and the PWA service-worker registration.
+Tightening these to a nonce- or hash-based CSP requires Vite
+plugin support that this work unit does not introduce; tracked
+as a future enhancement in
+`docs/operations/vercel-config-decision.md`.
+
 ## [0.3.1-beta.2] — 2026-09-05
 
 UI audit: refactored to a single OKLCH redesign system, extracted

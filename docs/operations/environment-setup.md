@@ -24,16 +24,16 @@ These values are exposed to the browser by Vite. They are safe to configure in `
 
 | Variable | Source | Purpose |
 | --- | --- | --- |
-| `VITE_SUPABASE_URL` | Supabase dashboard → Project settings → API | Frontend Supabase project URL. |
-| `VITE_SUPABASE_ANON_KEY` | Supabase dashboard → Project settings → API | Public anon key used with RLS. |
+| `VITE_DB_URL` | Supabase dashboard → Project settings → API | Frontend Supabase project URL. |
+| `VITE_DB_ANON_KEY` | Supabase dashboard → Project settings → API | Public anon key used with RLS. |
 | `VITE_SENTRY_DSN` | Sentry project settings, if observability is enabled | Optional browser error reporting DSN; leave blank to keep reporting no-op. |
 | `VITE_SUPPORT_EMAIL` | Product/support inbox | Optional support address used to build safe `mailto:` links in recovery screens. |
 
 Example:
 
 ```dotenv
-VITE_SUPABASE_URL=<your-supabase-project-url>
-VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+VITE_DB_URL=<your-supabase-project-url>
+VITE_DB_ANON_KEY=<your-supabase-anon-key>
 VITE_SENTRY_DSN=
 VITE_SUPPORT_EMAIL=soporte@example.com
 ```
@@ -82,7 +82,7 @@ Checklist:
 
 | Symptom | Check |
 | --- | --- |
-| App cannot connect to Supabase | Confirm `VITE_SUPABASE_URL` matches the project URL and includes the protocol. |
+| App cannot connect to Supabase | Confirm `VITE_DB_URL` matches the project URL and includes the protocol. |
 | Auth succeeds but data is empty | Confirm the user has a profile with the expected `workshop_id`; do not add client tenant overrides. |
 | Browser reports CORS issues from functions | Confirm `APP_ORIGIN` matches the frontend origin and the function was redeployed after secret changes if needed. |
 | Billing sandbox flow fails | Confirm MercadoPago sandbox token, webhook secret, and sandbox payer email belong to the same test setup. |

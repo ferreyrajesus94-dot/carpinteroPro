@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: [main, "feature/**", "feat/**"]
+    # Release pipeline depends on CI passing for the tag's commit SHA.
+    # See .github/workflows/release.yml for the workflow_run gate.
+    tags: ['/v[0-9]+.[0-9]+.[0-9]+.*/']
   pull_request:
     branches: [main]
 
@@ -20,8 +23,8 @@ jobs:
 
     env:
       VITE_USE_LOCAL_MOCKS: "true"
-      VITE_SUPABASE_URL: "http://stub.local"
-      VITE_SUPABASE_ANON_KEY: "stub-anon-key"
+      VITE_DB_URL: "http://stub.local"
+      VITE_DB_ANON_KEY: "stub-anon-key"
 
     steps:
       - name: Checkout
@@ -36,8 +39,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit dependencies
-        run: npm audit --audit-level=moderate
+      - name: Audit production dependencies
+        # Production dependency graph (no devDeps). Must pass at moderate+.
+        # See docs/operations/production-readiness-audit-2026-09-13.md W4.
+        run: npm audit --audit-level=moderate --omit=dev
+
+      - name: Audit dev dependencies
+        # Full graph including devDeps. Must pass at high+. Moderate dev-tooling
+        # advisories that don't reach the browser bundle are tolerated and
+        # recorded in the audit completion record.
+        run: npm audit --audit-level=high
 
       - name: Run tests
         run: npm test
