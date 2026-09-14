@@ -35,11 +35,22 @@ jobs:
   deploy-production:
     name: Deploy to Vercel production
     runs-on: ubuntu-latest
-    # Deploy ONLY when CI passed AND the CI run was for a version tag.
-    # For non-tag CI runs (branches and PRs) this workflow silently no-ops.
+    # Deploy ONLY when:
+    #   - CI passed (conclusion == 'success')
+    #   - the upstream CI run was a *push*, not a *pull_request*
+    #     (workflow_run.event == 'push' excludes PRs)
+    #   - the upstream CI run was for a tag whose name starts with 'v'
+    #     and contains '.' (semver-shape guard so branch names like
+    #     'v-feat' or 'version-bump' cannot trigger a deploy)
+    # Note: `=~` is NOT a GitHub Actions expression operator; the previous
+    # attempt used it and silently no-op'd every tag push because the
+    # expression evaluated to false. The new gate uses only operators
+    # documented for the `if:` context.
     if: >
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch =~ '^v[0-9]+\.[0-9]+\.[0-9]+'
+      github.event.workflow_run.event == 'push' &&
+      startsWith(github.event.workflow_run.head_branch, 'v') &&
+      contains(github.event.workflow_run.head_branch, '.')
 
     steps:
       - name: Log release gate inputs
