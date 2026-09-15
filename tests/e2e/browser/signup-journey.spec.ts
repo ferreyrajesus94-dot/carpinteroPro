@@ -53,6 +53,15 @@ test.describe("synthetic signup journey", () => {
 		);
 		await page.getByRole("button", { name: "Ingresar" }).click();
 
+		// Synthetic user has no profile → the auth bootstrap
+		// redirects to /onboarding (step 1). The wizard's only
+		// visible "Saltar" button at step 1 calls
+		// `finish("/dashboard")`, which sets onboarded_at via
+		// markOnboarded and navigates to /dashboard. Clicking it is
+		// the user-driven onboarding skip — no `onboarded_at` write
+		// is performed from the test itself.
+		await expect(page).toHaveURL(/\/onboarding/);
+		await page.getByRole("button", { name: "Saltar" }).click();
 		await expect(page).toHaveURL(/\/dashboard/);
 		await expect(
 			page.getByRole("heading", { name: "Inicio" }),

@@ -74,15 +74,18 @@ test.describe("synthetic free journey", () => {
 		);
 		await page.getByRole("button", { name: "Ingresar" }).click();
 
-		// 2. The synthetic user has no profile → onboarding flow.
-		//    The wizard's `Saltar` button routes to the dashboard.
-		await page.waitForURL(/\/onboarding/);
-		await page.getByRole("button", { name: "Saltar" }).first().click();
-		const skipRemaining = page.getByRole("button", { name: "Saltar" });
-		const remainingCount = await skipRemaining.count();
-		if (remainingCount > 1) {
-			await skipRemaining.last().click();
-		}
+		// 2. The synthetic user has no profile → onboarding wizard
+		//    (step 1). Step 1's "Saltar" button is the only visible
+		//    one at this point and calls `finish("/dashboard")`,
+		//    which sets onboarded_at via markOnboarded and navigates
+		//    to /dashboard. Step 2's "Saltar" advances to step 3 but
+		//    never renders here because onboarding completes on this
+		//    single click. The previous speculative remainingCount
+		//    conditional/multiple-click path is gone: the wizard has
+		//    exactly one "Saltar" button visible at step 1, so a
+		//    plain `.click()` is deterministic.
+		await expect(page).toHaveURL(/\/onboarding/);
+		await page.getByRole("button", { name: "Saltar" }).click();
 		await expect(page).toHaveURL(/\/dashboard/);
 
 		// 3. Fetch the workshop_id that onboarding just provisioned.
@@ -206,7 +209,14 @@ test.describe("synthetic free journey", () => {
 				name: new RegExp(`E2E Free Mueble ${stampSuffix}`),
 			})
 			.click();
-		await expect(page.getByLabel("Costo base ($)")).toHaveValue("220");
+		// Expected recipe cost = materials (price_per_unit 100 × quantity 2
+		//                          × waste 1.10 = 220)
+		//                      + labor     (hours 3 × rate 50 = 150)
+		//                      = 370. Hard-coded here (not derived
+		//                      from the production computeRecipeCost)
+		//                      so the assertion is independent of the
+		//                      implementation under test.
+		await expect(page.getByLabel("Costo base ($)")).toHaveValue("370");
 		await page.getByRole("button", { name: "Siguiente" }).click();
 		await page.getByRole("button", { name: "Siguiente" }).click();
 		await page.getByRole("button", { name: "Crear" }).click();
