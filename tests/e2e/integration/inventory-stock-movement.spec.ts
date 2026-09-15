@@ -10,6 +10,21 @@ import {
 } from "../../../scripts/e2e/fixtures";
 
 test.describe("inventory stock movement integration", () => {
+	test.beforeEach(async () => {
+		// The fixture seeds the SDD7 workshop via hard-coded UUIDs
+		// (`materialAId`, `workshopId`). A previous run's
+		// stock_movements rows persist across `supabase db reset`-
+		// less CI lanes and contaminate the very first test in the
+		// describe block. The strict `toEqual([{...}])` movement
+		// assertion below would see the historical row and fail.
+		// The existing `afterEach` keeps the suite tidy; the
+		// `beforeEach` makes each test order-independent and lets
+		// the strict array assertion keep catching real
+		// duplicate-ledger regressions (the failure mode the parent
+		// flagged: extra ledger rows that do NOT change stock).
+		await cleanupSdd7Fixtures();
+	});
+
 	test.afterEach(async () => {
 		await cleanupSdd7Fixtures();
 	});
