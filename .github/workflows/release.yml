@@ -1,24 +1,33 @@
 name: Release
 
-# The release workflow triggers on `workflow_run` from the CI workflow. This
-# enforces "release requires evidence for the same revision" — the tag push
-# alone is not enough; CI must have completed successfully for the tag's
-# commit SHA. See docs/operations/production-readiness-audit-2026-09-13.md W4
-# for the rationale and AC-6 in the implementation brief.
+# Release pipeline: triggers on workflow_run from CI and proves a real Git
+# tag (lightweight or annotated, peeled) points at workflow_run.head_sha.
+# See docs/operations/production-readiness-audit-2026-09-13.md W4 / AC-6.
 #
-# Required wiring:
-#   1. The CI workflow must be configured to run on tag pushes
-#      (see `.github/workflows/ci.yml` `tags:` filter).
-#   2. `workflow_run.conclusion == 'success'` is required for the deploy job
-#      to run, enforced via the job-level `if:`.
-#   3. `workflow_run.head_branch` must start with `v` so non-tag CI runs
-#      (branches / PRs) silently no-op this workflow.
+# Trust flow (fail closed):
+#   1. Helper is checked out from default_branch BEFORE any candidate.
+#      persist-credentials:false so GITHUB_TOKEN never reaches .git/config.
+#   2. Setup Node runs BEFORE the gate. No npm cache here: the only
+#      cache-dependency-path that would speed up install points at
+#      app/package-lock.json, but `app/` does not exist yet (the candidate
+#      checkout is later). Adding the cache step after the candidate
+#      checkout would be a perf optimisation only; intentionally skipped.
+#   3. Helper (verify-release.mjs) validates trusted repo, no fork, push
+#      event (not PR), upstream CI success, all deploy secrets present,
+#      and a real Git tag peels to head_sha. Helper calls
+#      `git ls-remote --tags <url>` using the URL derived from the trusted
+#      GITHUB_REPOSITORY context -- a PUBLIC https://github.com/<o>/<r>.git
+#      call that carries no credentials. Private-repo auth is out of scope;
+#      production deploys are intentionally limited to public repos.
+#   4. Only after verified=true do we check out the candidate and run
+#      vercel pull/deploy. The gate reduces (does not eliminate) the trust
+#      boundary, and workflow_run can be manually rerun from the UI so
+#      this job is NOT exactly-once delivery.
 #
-# Note: `secrets.*` is intentionally never referenced in job-level `if:`
-# expressions because GitHub Actions disallows that context for that key
-# (https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability).
-# The empty-secret check is moved to a step inside the job (see
-# "Verify Vercel secrets are configured" below).
+# head_branch is non-authoritative for tag push triggers; logged for
+# diagnostics only -- a branch named v1.2.3 with no real tag MUST NOT deploy.
+# `secrets.*` is not used in job-level `if:` (Actions disallows that context).
+
 on:
   workflow_run:
     workflows: ["CI"]
@@ -35,84 +44,79 @@ jobs:
   deploy-production:
     name: Deploy to Vercel production
     runs-on: ubuntu-latest
-    # Deploy ONLY when:
-    #   - CI passed (conclusion == 'success')
-    #   - the upstream CI run was a *push*, not a *pull_request*
-    #     (workflow_run.event == 'push' excludes PRs)
-    #   - the upstream CI run was for a tag whose name starts with 'v'
-    #     and contains '.' (semver-shape guard so branch names like
-    #     'v-feat' or 'version-bump' cannot trigger a deploy)
-    # Note: `=~` is NOT a GitHub Actions expression operator; the previous
-    # attempt used it and silently no-op'd every tag push because the
-    # expression evaluated to false. The new gate uses only operators
-    # documented for the `if:` context.
+    # Exclude PR runs and unsuccessful CI at the job level. Detailed
+    # tag/peel/secrets/foreign-repo validation lives in verify-release.mjs,
+    # which runs BEFORE any candidate checkout.
     if: >
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      startsWith(github.event.workflow_run.head_branch, 'v') &&
-      contains(github.event.workflow_run.head_branch, '.')
+      github.event.workflow_run.event == 'push'
 
     steps:
-      - name: Log release gate inputs
-        # Diagnostic step: surfaces the exact values that the job-level `if:`
-        # was evaluated against, so a no-op deploy (or a wrong-deploy) is
-        # diagnosable from the Actions UI without re-running CI. The CI
-        # workflow_run event fires for branches, PRs, and tags; only tag runs
-        # satisfy the regex `^v[0-9]+\.[0-9]+\.[0-9]+` and reach the deploy.
-        run: |
-          echo "workflow_run.conclusion = ${{ github.event.workflow_run.conclusion }}"
-          echo "workflow_run.head_branch  = ${{ github.event.workflow_run.head_branch }}"
-          echo "workflow_run.head_sha     = ${{ github.event.workflow_run.head_sha }}"
-
-      - name: Checkout
+      - name: Checkout trusted helper from default branch
         uses: actions/checkout@v4
         with:
-          # Use the exact commit SHA that CI tested. For a tag push this is
-          # the commit the tag points at.
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          path: helper
 
       - name: Setup Node.js
+        # Runs BEFORE the gate so the helper executes on Node 24. No
+        # npm cache here (see header note 2).
         uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
 
-      - name: Verify Vercel secrets are configured
-        id: check-creds
-        # `secrets.*` is allowed inside `run:` and `env:` blocks but not
-        # inside job-level `if:`. Skip the deploy silently when any
-        # required Vercel secret is missing so forks don't fail CI.
+      - name: Verify release eligibility (repo, fork, push, CI, tag, secrets)
+        id: gate
+        # Event values pass via env so the shell never interpolates raw
+        # workflow_run context into run:. secrets.* is allowed in env:.
+        env:
+          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          VERIFY_TRUSTED_REPO: ${{ github.repository }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: node helper/scripts/release/verify-release.mjs
+
+      - name: Checkout deploy candidate
+        if: steps.gate.outputs.verified == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.gate.outputs.head_sha }}
+          persist-credentials: false
+          path: app
+
+      - name: Install Vercel CLI
+        if: steps.gate.outputs.verified == 'true'
+        working-directory: app
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel project info
+        if: steps.gate.outputs.verified == 'true'
+        working-directory: app
+        run: vercel pull --yes --token="${VERCEL_TOKEN}"
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          if [ -z "${VERCEL_TOKEN}" ] || [ -z "${VERCEL_ORG_ID}" ] || [ -z "${VERCEL_PROJECT_ID}" ]; then
-            echo "::warning::One or more Vercel secrets are unset; skipping deploy silently."
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "skip=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Install Vercel CLI
-        if: steps.check-creds.outputs.skip != 'true'
-        run: npm install -g vercel@latest
-
-      - name: Pull Vercel project info
-        if: steps.check-creds.outputs.skip != 'true'
-        run: vercel pull --yes --token="${VERCEL_TOKEN}"
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Deploy to production
-        if: steps.check-creds.outputs.skip != 'true'
+        if: steps.gate.outputs.verified == 'true'
+        working-directory: app
+        # VERCEL_TOKEN is forwarded via the env block below using safe
+        # shell expansion; the value is set from secrets.* inside the
+        # step env, not interpolated into run:.
         run: vercel deploy --prod --yes --token="${VERCEL_TOKEN}"
         env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Summary
-        if: success() && steps.check-creds.outputs.skip != 'true'
+        if: success() && steps.gate.outputs.verified == 'true'
+        env:
+          TAG: ${{ steps.gate.outputs.tag }}
+          TAG_KIND: ${{ steps.gate.outputs.tag_kind }}
+          HEAD_SHA: ${{ steps.gate.outputs.head_sha }}
         run: |
-          echo "✅ Deployed ${{ github.event.workflow_run.head_branch }} (SHA ${{ github.event.workflow_run.head_sha }}) to Vercel production"
+          echo "::notice::Deployed ${TAG} (${TAG_KIND}, SHA ${HEAD_SHA}) to Vercel production"
