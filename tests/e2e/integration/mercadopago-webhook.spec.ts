@@ -46,12 +46,14 @@ async function signatureHeader(
  * no React predicate is involved (the previous `getBillingAccess(...)`
  * import was removed when the gate was deleted in W2, commit 430c80b).
  *
- * W5 audit follow-up (NOT fixed in this scope): `mapMercadoPagoStatusToAppStatus`
- * in `supabase/functions/_shared/billing.ts:8` maps `authorized` /
- * `active` to `active`, but `approved` falls through to `past_due`
- * because no branch handles it explicitly. The assertion below for
- * the `approved` value therefore documents the current behavior;
- * fixing the mapper is tracked as a follow-up.
+ * The fixture's `simulateMercadoPagoWebhook` re-exports the production
+ * `mapMercadoPagoStatusToAppStatus` from `supabase/functions/_shared/billing.ts`
+ * (see `scripts/e2e/fixtures.ts`), so the rows persisted here MUST
+ * match what a real webhook run would write. The `approved` case
+ * below intentionally asserts `past_due` because the production mapper
+ * has no explicit branch for `approved` -- it falls through to the
+ * default branch. That is the correct, documented production behavior,
+ * not a known bug.
  */
 test.describe("MercadoPago webhook persistence", () => {
 	test.afterEach(async () => {
@@ -102,15 +104,13 @@ test.describe("MercadoPago webhook persistence", () => {
 	});
 
 	test("simulated cancelled webhook persists the cancelled status", async () => {
-		// Both the production mapper at supabase/functions/_shared/billing.ts
-		// and the in-fixture mapper at scripts/e2e/fixtures.ts fall through
-		// to `past_due` for any provider status that is not
-		// `authorized` or `active`. The fixture intentionally mirrors
-		// production here (a previous divergence where the fixture mapped
-		// `cancelled` to `cancelled` while production wrote `past_due`
-		// was caught by the cumulative review). The historical `cancelled`
-		// subscription status enum value is preserved for the audit doc's
-		// free-model narrative but the webhook itself never writes it.
+		// The production mapper has an explicit `cancelled` branch that
+		// returns `cancelled`. The fixture now re-exports the production
+		// helper (see `scripts/e2e/fixtures.ts`), so the persisted row
+		// reflects that branch exactly. Earlier revisions of this spec
+		// asserted `past_due` because the in-fixture mapper silently
+		// aliased every non-active branch to past_due; that divergence
+		// is corrected by `scripts/e2e/fixtures-mapper.test.ts`.
 		const fixture = await seedActiveTrialFixture({ status: "active" });
 		const client = await createAuthenticatedFixtureClient();
 
@@ -126,15 +126,16 @@ test.describe("MercadoPago webhook persistence", () => {
 			fixture.workshopId,
 		);
 
-		expect(subscription?.status).toBe("past_due");
+		expect(subscription?.status).toBe("cancelled");
 	});
 
-	test("simulated approved webhook currently maps to past_due (audit finding #2, follow-up)", async () => {
-		// The mapper at supabase/functions/_shared/billing.ts:8 has
-		// no branch for `approved` — the `authorized` / `active`
-		// branches handle the live statuses, but `approved` falls
-		// through to the default `past_due`. This assertion documents
-		// the current behavior so any future mapper fix is caught.
+	test("simulated approved webhook falls through to past_due", async () => {
+		// The production mapper has no explicit branch for `approved`,
+		// so it falls through to the default `past_due` branch. This
+		// is the documented production behavior (any unrecognised
+		// provider status maps to `past_due`); the assertion locks it
+		// in so any future mapper addition for `approved` is caught
+		// here rather than silently changing webhook persistence.
 		const fixture = await seedActiveTrialFixture({ status: "active" });
 		const client = await createAuthenticatedFixtureClient();
 

@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "../../src/shared/types/database";
+import { mapMercadoPagoStatusToAppStatus } from "../../supabase/functions/_shared/billing";
 
 type TestClient = SupabaseClient<Database>;
 type SubscriptionRow = Database["public"]["Tables"]["subscriptions"]["Row"];
@@ -709,24 +710,13 @@ export async function simulateMercadoPagoWebhook(
 
 	// Map the simulated provider status through the same mapper the
 	// real webhook handler uses, so the persisted row reflects what
-	// production would write. The mapper logic is duplicated locally
-	// (no `await import(".../billing")`) because that module is a
-	// Deno-flavoured Edge Function helper that is not in the Node-side
-	// build graph; the dynamic-import path was unreliable in CI. The
-	// mapping mirrors `supabase/functions/_shared/billing.ts` at the
-	// commit this spec is pinned to. Falling back to `past_due` (when
-	// the input does not match any positive branch) matches the
-	// production mapper exactly -- both production and fixture treat
-	// any unrecognised provider status as `past_due`.
-	const mapProviderStatusToSubscriptionStatus = (
-		providerStatus: string,
-	): SubscriptionStatus => {
-		const s = providerStatus.toLowerCase();
-		if (s === "authorized" || s === "active") return "active";
-		return "past_due";
-	};
-	const mappedStatus: SubscriptionStatus =
-		mapProviderStatusToSubscriptionStatus(options.providerStatus);
+	// production would write. `mapFixtureProviderStatus` is the
+	// production helper re-exported at module scope (see top of file);
+	// any change to `supabase/functions/_shared/billing.ts` propagates
+	// here by reference, so fixture and production can never disagree.
+	const mappedStatus: SubscriptionStatus = mapFixtureProviderStatus(
+		options.providerStatus,
+	);
 
 	const isActive = mappedStatus === "active";
 	const { error: updateError } = await client
@@ -761,6 +751,20 @@ export async function insertDuplicateWebhookEvent(
 	});
 	return error?.code ?? null;
 }
+
+// Re-export the production mapper so the fixture path and any
+// regression test share the exact same function reference. The
+// production helper has zero Deno-only dependencies (it uses
+// TextEncoder + crypto.subtle, both available on Node 18+) and is
+// imported successfully by `tests/supabase/functions/billingHelpers.test.ts`
+// and by `tests/e2e/integration/mercadopago-webhook.spec.ts`, so the
+// historical "dynamic import was unreliable in CI" rationale no longer
+// applies. Keeping the fixture aligned with production by reference
+// makes future drift impossible: any divergence becomes a compile-time
+// mismatch, not a silent runtime behaviour bug.
+export const mapFixtureProviderStatus: (
+	providerStatus: string,
+) => SubscriptionStatus = mapMercadoPagoStatusToAppStatus;
 
 export async function fetchWebhookEvent(
 	providerEventId: string,
