@@ -5,6 +5,68 @@ All notable changes to CarpinteroPro are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] — single production route (tag + CI → reusable release workflow)
+
+Production deploy now has exactly one route: Vercel's git integration is
+disabled for `main` via `vercel.json` `git.deploymentEnabled`, so plain
+main pushes cannot deploy. The release pipeline is the only production
+path: CI runs on every push, and a new `tag-deploy` job (depends on
+`verify`, fires only when `startsWith(github.ref, 'refs/tags/')`)
+proves the GitHub event was a tag push and calls `release.yml` as a
+reusable workflow with `secrets: inherit`.
+
+### Changed
+
+- **`vercel.json`**: added `"git": { "deploymentEnabled": { "main": false } }`.
+  Unspecified branches (e.g. `feature/**`, `feat/**`) remain auto-
+  deployed as previews. Explicit CLI `vercel deploy --prod` is
+  unaffected. `ignoredBuild` exitcode sentinels were rejected — they
+  invert the gate and are unreliable.
+- **`.github/workflows/ci.yml`**: restored the `on.push.tags: ['v*']`
+  filter (without it, GitHub does NOT trigger CI on tag pushes; only
+  branches are matched). The tag-deploy job was rewritten as a proper
+  JOB-LEVEL reusable-workflow call (`uses:` + `with:` + `secrets: inherit`
+  on the job; NO `runs-on:`, NO `steps:`, NO step-level `uses:`).
+  `needs: verify` + `if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')`
+  remain. The helper does strict semver validation so a broad `v*`
+  glob cannot be exploited via a tag like `v-feat`.
+- **`.github/workflows/release.yml`**: trigger changed from
+  `on: workflow_run` (could not reliably prove the event was a tag
+  push) to `on: workflow_call` with required inputs `tag` + `head_sha`.
+  Added a job-level `if: github.workflow == 'CI'` so a same-repo
+  workflow_call caller that is NOT the CI tag-deploy job cannot skip
+  the lint+test+build gate. Gate helper step now exports `VERIFY_TAG`
+  and `VERIFY_HEAD_SHA`. Trusted helper checkout, secrets check,
+  real-remote `git ls-remote --tags` peel validation, candidate
+  checkout, `vercel pull`, `vercel deploy --prod`, and summary step
+  are unchanged.
+- **`scripts/release/verify-release.mjs`**: added
+  `verifyReleaseCallInputs({ tag, head_sha, repository }, options)` for
+  the `workflow_call` path with strict semver shape enforcement
+  (`/^v\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$/`). Performs
+  the same trusted-repo / fork / secrets / real-remote peel validations
+  as the legacy `verifyRelease(payload, options)` path, but takes
+  explicit inputs. CLI bootstrap mode selection: `VERIFY_TAG` +
+  `VERIFY_HEAD_SHA` (workflow_call) wins over `VERIFY_EVENT_PATH`
+  (legacy workflow_run); neither set fails closed.
+- **`scripts/release/verify-release.test.mjs`** +
+  **`scripts/release/verify-release-workflow.test.mjs`**: new tests
+  cover the `workflow_call` helper path, CI tag-deploy job structure
+  (JOB-LEVEL uses, no runs-on/steps, secrets: inherit at job level),
+  release.yml reusable-workflow trigger shape, strict semver shape
+  enforcement in the helper, and the locked-in policy that no `vercel`
+  CLI calls live in CI. The legacy `workflow_run` helper path tests
+  are preserved.
+
+### Security
+
+- Main branch pushes cannot accidentally deploy to production. The only
+  deploy path is `release.yml` when called by the CI `tag-deploy` job,
+  which fires only for tag pushes that pass the full `verify` job
+  (lint + tests + coverage + build + production dependency audit). This
+  eliminates the previous `head_branch-startsWith-v` heuristic, which
+  could be bypassed by pushing a branch named `v-feat`.
+
 ## [Unreleased] — W6 free-launch portfolio handoff (phase 2)
 
 Docs-only W6 phase-2 commit: align `PRODUCT.md`, `CONTRIBUTING.md`,

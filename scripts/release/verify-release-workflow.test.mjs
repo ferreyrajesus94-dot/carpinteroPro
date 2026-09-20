@@ -35,6 +35,7 @@ catch (err) {
 }
 
 const WORKFLOW = resolve('.github/workflows/release.yml');
+const CI = resolve('.github/workflows/ci.yml');
 const HELPER = resolve('scripts/release/verify-release.mjs');
 const GATED = "steps.gate.outputs.verified == 'true'";
 
@@ -48,12 +49,74 @@ const findStep = (steps, re) => steps.find((s) => re.test(s.name));
 const idxOf = (steps, re) => steps.findIndex((s) => re.test(s.name));
 
 describe('release.yml: trigger + structural shape', () => {
-  it('triggers on workflow_run from CI completion', () => {
+  it('triggers on workflow_call from CI tag-deploy job with required tag + head_sha inputs', () => {
     const { doc } = loadJob();
-    const trigger = doc.on; // js-yaml 4.x is YAML 1.2; `on:` stays the literal string key (not coerced to boolean true as in YAML 1.1)
-    assert.ok(trigger && trigger.workflow_run, 'expected workflow_run trigger');
-    assert.deepEqual(trigger.workflow_run.workflows, ['CI']);
-    assert.deepEqual(trigger.workflow_run.types, ['completed']);
+    const trigger = doc.on;
+    assert.ok(trigger && trigger.workflow_call, 'expected workflow_call trigger (replaces workflow_run)');
+    assert.ok(trigger.workflow_call.inputs, 'workflow_call must declare inputs');
+    assert.equal(trigger.workflow_call.inputs.tag.required, true);
+    assert.equal(trigger.workflow_call.inputs.tag.type, 'string');
+    assert.equal(trigger.workflow_call.inputs.head_sha.required, true);
+    assert.equal(trigger.workflow_call.inputs.head_sha.type, 'string');
+  });
+});
+
+describe('ci.yml: tag-deploy job gating (single production route)', () => {
+  function loadCiJob(name) {
+    const doc = loadYaml(readFileSync(CI, 'utf8'));
+    const job = doc && doc.jobs && doc.jobs[name];
+    if (!job) throw new Error(`ci.yml missing jobs.${name}`);
+    return { doc, job };
+  }
+  it('push trigger includes an explicit tags: filter so CI runs on tag pushes', () => {
+    const push = loadYaml(readFileSync(CI, 'utf8')).on.push;
+    assert.ok(push, 'expected on.push');
+    assert.ok(Array.isArray(push.tags) && push.tags.length > 0,
+      `on.push.tags MUST be specified; without it, GitHub does NOT trigger CI on tag pushes (got ${JSON.stringify(push.tags)})`);
+  });
+  it('declares a tag-deploy job that depends on the upstream verify job', () => {
+    const { job } = loadCiJob('tag-deploy');
+    assert.ok(job.needs && (job.needs === 'verify' || (Array.isArray(job.needs) && job.needs.includes('verify'))),
+      `tag-deploy must depend on verify (got ${JSON.stringify(job.needs)})`);
+  });
+  it('tag-deploy only fires for tag pushes (not branch pushes)', () => {
+    const { job } = loadCiJob('tag-deploy');
+    assert.match(job.if, /github\.event_name\s*==\s*['"]push['"]/);
+    assert.match(job.if, /startsWith\(github\.ref,\s*['"]refs\/tags\/['"]\)/);
+    assert.doesNotMatch(job.if, /startsWith\(.*,\s*['"]v['"]\)/);
+  });
+  it('tag-deploy is a JOB-LEVEL reusable-workflow call (uses, no runs-on, no steps)', () => {
+    const { job } = loadCiJob('tag-deploy');
+    assert.match(job.uses || '', /^\.\/\.github\/workflows\/release\.yml$/,
+      `tag-deploy must declare JOB-LEVEL uses: ./.github/workflows/release.yml (got ${JSON.stringify(job.uses)})`);
+    assert.equal(job['runs-on'], undefined,
+      `tag-deploy must NOT declare runs-on (job-level uses replaces it; got ${JSON.stringify(job['runs-on'])})`);
+    assert.equal(job.steps, undefined,
+      `tag-deploy must NOT declare steps (job-level uses replaces them; got ${JSON.stringify(job.steps)})`);
+  });
+  it('tag-deploy forwards tag + head_sha via job-level with: and secrets: inherit', () => {
+    const { job } = loadCiJob('tag-deploy');
+    assert.equal(job.with.tag, '${{ github.ref_name }}',
+      'tag input must come from github.ref_name');
+    assert.equal(job.with.head_sha, '${{ github.sha }}',
+      'head_sha input must come from github.sha');
+    assert.equal(job.secrets, 'inherit',
+      `tag-deploy must forward secrets: inherit at the JOB level (not step level; got ${JSON.stringify(job.secrets)})`);
+  });
+  it('ci.yml has NO step-level uses of the reusable workflow (invalid GitHub schema)', () => {
+    const doc = loadYaml(readFileSync(CI, 'utf8'));
+    for (const [jobName, job] of Object.entries(doc.jobs || {})) {
+      for (const step of (job.steps || [])) {
+        assert.doesNotMatch(step.uses || '',
+          /\.github\/workflows\/release\.yml/,
+          `step-level uses of release.yml is invalid GitHub schema; found in job "${jobName}" step "${step.name || ''}"`);
+      }
+    }
+  });
+  it('ci.yml has NO inline vercel CLI calls anywhere (single production route)', () => {
+    const src = readFileSync(CI, 'utf8');
+    assert.doesNotMatch(src, /^\s*run:\s*.*vercel\s+(pull|deploy)/m,
+      'ci.yml must not run `vercel pull` or `vercel deploy` inline; only release.yml owns the deploy');
   });
 });
 
@@ -67,6 +130,32 @@ describe('release.yml: ordering invariants (fail closed)', () => {
     assert.ok([iHelper, iNode, iGate, iCandidate].every((i) => i >= 0), 'missing required step');
     assert.ok(iHelper < iNode && iNode < iGate && iGate < iCandidate,
       `ordering wrong: helper=${iHelper} node=${iNode} gate=${iGate} candidate=${iCandidate}`);
+  });
+  it('gate step forwards workflow_call tag + head_sha inputs to the helper env', () => {
+    const { steps } = loadJob();
+    const gate = findStep(steps, /Verify release eligibility/i);
+    assert.match(gate.env.VERIFY_TAG || '', /inputs\.tag/,
+      'gate must export VERIFY_TAG from inputs.tag');
+    assert.match(gate.env.VERIFY_HEAD_SHA || '', /inputs\.head_sha/,
+      'gate must export VERIFY_HEAD_SHA from inputs.head_sha');
+  });
+  it('deploy-production job refuses calls from non-CI workflows (malicious caller cannot skip verify)', () => {
+    const { job } = loadJob();
+    // Primary boundary: only CI's tag-deploy job (which itself depends on
+    // verify) may invoke release.yml. Any other caller would skip the
+    // lint+test+build gate; refuse it.
+    assert.match(job.if || '', /github\.workflow\s*==\s*['"]CI['"]/,
+      `release.yml deploy-production if must require github.workflow == 'CI' to refuse non-CI callers (got ${JSON.stringify(job.if)})`);
+  });
+  it('declares permissions and uses a minimal token scope (least privilege)', () => {
+    const { doc, job } = loadJob();
+    assert.ok(doc.permissions || job.permissions,
+      'release.yml must declare permissions: at the workflow or job level (least privilege)');
+    const perms = job.permissions || doc.permissions;
+    assert.equal(perms.contents, 'read',
+      `permissions.contents must be 'read' (least privilege for deploy; got ${JSON.stringify(perms)})`);
+    assert.equal(perms.actions, undefined,
+      'release.yml must NOT request actions: write (CI tag-deploy owns the call)');
   });
 
   it('Setup Node has no npm cache referencing a not-yet-checked-out path', () => {
@@ -187,13 +276,16 @@ describe('release.yml: untested hosted limits (documented)', () => {
     assert.match(wfSrc, /github\.repository|GITHUB_REPOSITORY/);
   });
 
-  it('workflow_run may rerun; production is NOT exactly once per SHA (honest claim)', () => {
-    // The hosted runner allows manual reruns of workflow_run from the UI;
-    // the workflow does not enforce once-only delivery. This assertion
-    // locks that policy in by failing if anyone reintroduces an
-    // "exactly once" comment.
-    const wfSrc = readFileSync(WORKFLOW, 'utf8');
-    assert.doesNotMatch(wfSrc, /exactly once per workflow_run/i);
-    assert.match(wfSrc, /rerun/i);
+  it('does NOT use ignoredBuild / vercel.json sentinel (single production route is the release workflow)', () => {
+    // The release path is the ONLY production route. ignoredBuild / sentinel
+    // patterns were considered and rejected because they are inverted /
+    // unreliable for git-push deployments. This assertion locks that policy.
+    const vercelJson = JSON.parse(readFileSync(resolve('vercel.json'), 'utf8'));
+    assert.ok(vercelJson.git && vercelJson.git.deploymentEnabled,
+      'vercel.json must declare git.deploymentEnabled to disable main auto-deploy');
+    assert.equal(vercelJson.git.deploymentEnabled.main, false,
+      'main must be explicitly disabled (CLI deploy --prod is unaffected)');
+    assert.doesNotMatch(JSON.stringify(vercelJson), /ignoredBuild/i,
+      'vercel.json must not use the inverted ignoredBuild exitcode sentinel');
   });
 });

@@ -1,55 +1,64 @@
 name: Release
 
-# Release pipeline: triggers on workflow_run from CI and proves a real Git
-# tag (lightweight or annotated, peeled) points at workflow_run.head_sha.
-# See docs/operations/production-readiness-audit-2026-09-13.md W4 / AC-6.
+# Release pipeline: called as a reusable workflow from the CI tag-deploy
+# job. The upstream CI job proves the GitHub event was a tag push via
+# `startsWith(github.ref, 'refs/tags/')` (GitHub-provided event ref is
+# authoritative; v-prefix / SHA-has-tag heuristics are unreliable). The
+# helper still performs every other check (trusted repo, fork, push, head
+# SHA shape, secrets, real-remote ls-remote tag peel).
 #
 # Trust flow (fail closed):
 #   1. Helper is checked out from default_branch BEFORE any candidate.
 #      persist-credentials:false so GITHUB_TOKEN never reaches .git/config.
-#   2. Setup Node runs BEFORE the gate. No npm cache here: the only
-#      cache-dependency-path that would speed up install points at
-#      app/package-lock.json, but `app/` does not exist yet (the candidate
-#      checkout is later). Adding the cache step after the candidate
-#      checkout would be a perf optimisation only; intentionally skipped.
-#   3. Helper (verify-release.mjs) validates trusted repo, no fork, push
-#      event (not PR), upstream CI success, all deploy secrets present,
-#      and a real Git tag peels to head_sha. Helper calls
-#      `git ls-remote --tags <url>` using the URL derived from the trusted
-#      GITHUB_REPOSITORY context -- a PUBLIC https://github.com/<o>/<r>.git
-#      call that carries no credentials. Private-repo auth is out of scope;
-#      production deploys are intentionally limited to public repos.
+#   2. Setup Node runs BEFORE the gate so the helper executes on Node 24.
+#   3. Helper (verify-release.mjs) verifies trusted repo, no fork, head
+#      SHA shape, all deploy secrets present, and a real Git tag peels to
+#      the input head_sha via `git ls-remote --tags <url>` using the URL
+#      derived from the trusted GITHUB_REPOSITORY context -- a PUBLIC
+#      https://github.com/<o>/<r>.git call that carries no credentials.
+#      Private-repo auth is out of scope; production deploys are
+#      intentionally limited to public repos.
 #   4. Only after verified=true do we check out the candidate and run
 #      vercel pull/deploy. The gate reduces (does not eliminate) the trust
-#      boundary, and workflow_run can be manually rerun from the UI so
-#      this job is NOT exactly-once delivery.
+#      boundary.
 #
-# head_branch is non-authoritative for tag push triggers; logged for
-# diagnostics only -- a branch named v1.2.3 with no real tag MUST NOT deploy.
 # `secrets.*` is not used in job-level `if:` (Actions disallows that context).
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  workflow_call:
+    inputs:
+      tag:
+        description: 'Tag name from the upstream CI tag-deploy job (event was a tag push)'
+        required: true
+        type: string
+      head_sha:
+        description: 'Commit SHA the tag points at (from the upstream CI push event)'
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}
+  group: release-${{ github.workflow }}-${{ inputs.head_sha }}
   cancel-in-progress: false  # don't cancel an in-flight deploy
 
 jobs:
   deploy-production:
     name: Deploy to Vercel production
     runs-on: ubuntu-latest
-    # Exclude PR runs and unsuccessful CI at the job level. Detailed
-    # tag/peel/secrets/foreign-repo validation lives in verify-release.mjs,
-    # which runs BEFORE any candidate checkout.
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push'
+    # Primary boundary against a malicious reusable-workflow caller:
+    # refuse any invocation that did NOT come from the CI workflow's
+    # tag-deploy job (which itself depends on the verify job). Without
+    # this, a same-repo workflow with workflow_call permissions could
+    # skip lint+test+build by calling release.yml directly. In a
+    # workflow_call callee, `github.workflow` is the caller's workflow
+    # name (per
+    # https://docs.github.com/en/actions/using-workflows/reusing-workflows#github-context)
+    # so this rejects everyone except CI.
+    if: github.workflow == 'CI'
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout trusted helper from default branch
@@ -61,17 +70,20 @@ jobs:
 
       - name: Setup Node.js
         # Runs BEFORE the gate so the helper executes on Node 24. No
-        # npm cache here (see header note 2).
+        # npm cache here (the cache-dependency-path that would speed up
+        # install points at app/package-lock.json, but `app/` does not
+        # exist yet; the candidate checkout is later).
         uses: actions/setup-node@v4
         with:
           node-version: 24
 
-      - name: Verify release eligibility (repo, fork, push, CI, tag, secrets)
+      - name: Verify release eligibility (tag input peels to head_sha via real remote)
         id: gate
         # Event values pass via env so the shell never interpolates raw
-        # workflow_run context into run:. secrets.* is allowed in env:.
+        # workflow_call context into run:. secrets.* is allowed in env:.
         env:
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
+          VERIFY_TAG: ${{ inputs.tag }}
+          VERIFY_HEAD_SHA: ${{ inputs.head_sha }}
           VERIFY_TRUSTED_REPO: ${{ github.repository }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
