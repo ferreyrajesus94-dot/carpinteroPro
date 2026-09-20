@@ -29,6 +29,12 @@ const REMOTE_URL = process.env.VERIFY_REMOTE_URL
 const REQUIRED_SECRETS = (process.env.VERIFY_REQUIRED_SECRETS
   || 'VERCEL_TOKEN,VERCEL_ORG_ID,VERCEL_PROJECT_ID')
   .split(',').map((s) => s.trim()).filter(Boolean);
+// workflow_call path: the CI tag-deploy job forwards the event's tag name
+// and commit SHA as explicit inputs. Using github.ref == refs/tags/* in CI
+// proves the GitHub event was a tag push (not a branch push to a SHA that
+// happens to have a tag).
+const CALL_TAG = process.env.VERIFY_TAG || '';
+const CALL_HEAD_SHA = process.env.VERIFY_HEAD_SHA || '';
 
 class GateError extends Error {
   constructor(title, detail) { super(title); this.name = 'GateError'; this.detail = detail; }
@@ -164,6 +170,68 @@ export function verifyRelease(payload, options = {}) {
   return { tag: match.name, kind: match.kind, head_sha: headSha, repository: repoName };
 }
 
+// workflow_call path: the calling CI job proves the GitHub event was a
+// tag push via `startsWith(github.ref, 'refs/tags/')` and forwards the
+// tag name and commit SHA as explicit inputs. The helper still performs
+// every other check (trusted repo, fork, secrets, real-remote ls-remote
+// peel verification), so the only thing that changes is the source of
+// truth for tag + head_sha: explicit inputs instead of workflow_run.
+// Strict SemVer 2.0.0 shape (vX.Y.Z with optional -prerelease / +build)
+// is required so a tag named `v-feat` (which would still peel to its
+// head_sha at the public remote) cannot deploy. The official grammar
+// is used (with a leading `v`): major/minor/patch are `(0|[1-9]\d*)`
+// so leading zeros are rejected; prerelease identifiers are
+// `(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)` joined by single dots so
+// numeric identifiers reject leading zeros and empty identifier slots
+// (`..`) are impossible; build identifiers are `[0-9A-Za-z-]+` joined
+// by single dots, which is more permissive (leading-zero numeric build
+// identifiers are allowed by §10).
+const SEMVER_RE = /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
+export function verifyReleaseCallInputs({ tag, head_sha, repository }, options = {}) {
+  if (typeof tag !== 'string' || !tag.trim()) {
+    fail('tag input is missing or empty');
+  }
+  const cleanTag = tag.trim();
+  if (!SEMVER_RE.test(cleanTag)) {
+    fail(`tag "${cleanTag}" is not a strict semver tag (expected vX.Y.Z with optional -prerelease / +build)`,
+      { tag: cleanTag });
+  }
+  if (typeof head_sha !== 'string' || !/^[0-9a-f]{40}$/.test(head_sha)) {
+    fail('head_sha input is missing or malformed', { head_sha });
+  }
+  const trusted = options.trustedRepo !== undefined ? options.trustedRepo : TRUSTED_REPO;
+  const required = options.requiredSecrets || REQUIRED_SECRETS;
+  const env = options.env || process.env;
+  const remoteUrl = options.remoteUrl || REMOTE_URL;
+  const lsRemote = options.lsRemote || (() => {
+    if (!remoteUrl) fail('no remote URL configured for tag lookup');
+    return runLsRemoteWithRetry(remoteUrl, {
+      exec: options.exec,
+      sleep: options.sleep,
+      attempts: options.lsRemoteAttempts,
+      timeoutMs: options.lsRemoteTimeoutMs,
+      backoffMs: options.lsRemoteBackoffMs,
+    });
+  });
+  const repoPayload = repository || (trusted ? { full_name: trusted, fork: false } : null);
+  const repoName = checkTrustedRepo(repoPayload, trusted);
+  checkSecrets(required, env);
+  const tagMap = parseLsRemote(lsRemote());
+  const entry = tagMap.get(cleanTag);
+  if (!entry) {
+    fail(`tag "${cleanTag}" not found in remote`, { tag: cleanTag, head_sha });
+  }
+  if (entry.commitSha !== head_sha.toLowerCase()) {
+    fail(`tag "${cleanTag}" does not peel to head_sha`,
+      { tag: cleanTag, expected_head_sha: head_sha, tag_peels_to: entry.commitSha });
+  }
+  const kind = entry.kind || 'lightweight';
+  if (options.outputPath !== undefined) {
+    emitOutputs(options.outputPath, { tag: cleanTag, tag_kind: kind, head_sha, verified: 'true' });
+  }
+  return { tag: cleanTag, kind, head_sha, repository: repoName };
+}
+
 function readPayload(path) {
   if (!path || !existsSync(path)) fail('event payload not readable', { path });
   try { return JSON.parse(readFileSync(path, 'utf8')); }
@@ -171,7 +239,20 @@ function readPayload(path) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  try { verifyRelease(readPayload(EVENT_PATH), { outputPath: process.env.GITHUB_OUTPUT }); }
+  try {
+    // Mode selection: workflow_call (VERIFY_TAG + VERIFY_HEAD_SHA) wins over
+    // workflow_run (VERIFY_EVENT_PATH). The two paths are exclusive.
+    if (CALL_TAG && CALL_HEAD_SHA) {
+      verifyReleaseCallInputs(
+        { tag: CALL_TAG, head_sha: CALL_HEAD_SHA },
+        { outputPath: process.env.GITHUB_OUTPUT },
+      );
+    } else if (EVENT_PATH) {
+      verifyRelease(readPayload(EVENT_PATH), { outputPath: process.env.GITHUB_OUTPUT });
+    } else {
+      fail('no release inputs provided: set VERIFY_TAG + VERIFY_HEAD_SHA (workflow_call) or VERIFY_EVENT_PATH (workflow_run)');
+    }
+  }
   catch (err) {
     if (!(err instanceof GateError)) console.error(`::error::${err && err.message ? err.message : String(err)}`);
     process.exit(1);

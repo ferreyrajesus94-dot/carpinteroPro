@@ -15,7 +15,7 @@ import { mkdtempSync, writeFileSync, rmSync, readFileSync, mkdirSync } from 'nod
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseLsRemote, findTagForSha, checkTrustedRepo, checkRun,
-  checkSecrets, verifyRelease } from './verify-release.mjs';
+  checkSecrets, verifyRelease, verifyReleaseCallInputs } from './verify-release.mjs';
 
 const SHA = (ch) => ch.repeat(40);
 const A = SHA('a'), B = SHA('b'), C = SHA('c');
@@ -326,5 +326,223 @@ describe('CLI integration (real git, isolated temp remotes)', () => {
     rmSync(tmpRoot, { recursive: true, force: true });
     assert.notEqual(proc.status, 0,
       `CLI body was skipped silently: status=${proc.status}, stderr=${proc.stderr}`);
+  });
+});
+
+// workflow_call path: explicit tag + head_sha inputs from a CI tag-deploy
+// job. Used when the upstream CI proves the event was a tag push via
+// `startsWith(github.ref, 'refs/tags/')`, eliminating the v-prefix /
+// SHA-has-tag ambiguity of the workflow_run path.
+describe('verifyReleaseCallInputs (workflow_call path)', () => {
+  const T = 'v1.2.3';
+  const inputs = (o = {}) => ({ tag: T, head_sha: A, repository: { full_name: 'owner/repo', fork: false }, ...o });
+  const callOpts = (e) => ({ trustedRepo: 'owner/repo', requiredSecrets: ['VERCEL_TOKEN'],
+    env: { VERCEL_TOKEN: 'fake-token' }, ...e });
+
+  it('lightweight tag input that peels to head_sha succeeds and writes outputs', () => {
+    const dir = tmpDir(); const out = mkOut(dir);
+    const result = verifyReleaseCallInputs(inputs(),
+      { ...callOpts({ lsRemote: () => lsLight(A, T), outputPath: out }) });
+    assert.deepEqual(result, { tag: T, kind: 'lightweight', head_sha: A, repository: 'owner/repo' });
+    const content = readFileSync(out, 'utf8');
+    for (const n of [`tag=${T}\n`, `tag_kind=lightweight\n`, `verified=true\n`, `head_sha=${A}\n`]) assert.ok(content.includes(n), `missing ${n} in ${JSON.stringify(content)}`);
+    rmSync(dir, { recursive: true, force: true });
+  });
+  it('annotated tag input that peels to head_sha succeeds', () => {
+    const dir = tmpDir(); const out = mkOut(dir);
+    const result = verifyReleaseCallInputs(inputs({ tag: 'v2.0.0' }),
+      { ...callOpts({ lsRemote: () => lsAnnot(B, A, 'v2.0.0'), outputPath: out }) });
+    assert.equal(result.kind, 'annotated');
+    assert.ok(readFileSync(out, 'utf8').includes('tag_kind=annotated\n'));
+    rmSync(dir, { recursive: true, force: true });
+  });
+  it('tag input that points to a DIFFERENT commit than head_sha is rejected', () => {
+    assert.throws(() => verifyReleaseCallInputs(inputs(),
+      { ...callOpts({ lsRemote: () => lsLight(C, T) }) }),
+      /does not peel to head_sha/i);
+  });
+  it('tag input that does not exist in the real remote is rejected', () => {
+    assert.throws(() => verifyReleaseCallInputs(inputs({ tag: 'v9.9.9' }),
+      { ...callOpts({ lsRemote: () => lsLight(A, T) }) }),
+      /not found in remote/i);
+  });
+  it('empty/missing tag input is rejected', () => {
+    for (const bad of ['', null, undefined, 42, ' ']) {
+      assert.throws(() => verifyReleaseCallInputs(inputs({ tag: bad }),
+        { ...callOpts({ lsRemote: () => lsLight(A, T) }) }),
+        /tag input/i, `expected throw for tag=${JSON.stringify(bad)}`);
+    }
+  });
+  it('malformed head_sha input is rejected', () => {
+    for (const bad of ['not-a-sha', 'a'.repeat(39), 'g'.repeat(40), null, undefined, 42]) {
+      assert.throws(() => verifyReleaseCallInputs(inputs({ head_sha: bad }),
+        { ...callOpts({ lsRemote: () => lsLight(A, T) }) }),
+        /head_sha input is missing or malformed/i,
+        `expected throw for head_sha=${JSON.stringify(bad)}`);
+    }
+  });
+  it('foreign repository is rejected', () => {
+    assert.throws(() => verifyReleaseCallInputs(inputs({ repository: { full_name: 'attacker/repo', fork: false } }),
+      { ...callOpts({ lsRemote: () => lsLight(A, T) }) }),
+      /repository does not match trusted repo/i);
+  });
+  it('forked repository is rejected even when names match', () => {
+    assert.throws(() => verifyReleaseCallInputs(inputs({ repository: { full_name: 'owner/repo', fork: true } }),
+      { ...callOpts({ lsRemote: () => lsLight(A, T) }) }),
+      /fork/i);
+  });
+  it('missing secrets abort before any tag query (no ls-remote call)', () => {
+    let queried = false;
+    assert.throws(() => verifyReleaseCallInputs(inputs(),
+      { trustedRepo: 'owner/repo', requiredSecrets: ['VERCEL_TOKEN'], env: {},
+        lsRemote: () => { queried = true; return ''; } }),
+      /secrets are not configured/i);
+    assert.equal(queried, false, 'must not query remote before secret check');
+  });
+  it('ls-remote exhaustion fails closed and never emits verified=true', () => {
+    const dir = tmpDir(); const out = mkOut(dir);
+    const fakeExec = () => { throw new Error('persistent network error'); };
+    assert.throws(() => verifyReleaseCallInputs(inputs(),
+      { trustedRepo: 'owner/repo', requiredSecrets: ['VERCEL_TOKEN'],
+        env: { VERCEL_TOKEN: 'fake-token' },
+        exec: fakeExec, sleep: () => {},
+        lsRemoteAttempts: 2,
+        remoteUrl: 'https://example.com/owner/repo.git',
+        outputPath: out }),
+      /lookup failed/i);
+    const content = readFileSync(out, 'utf8');
+    assert.ok(!content.includes('verified=true'),
+      `must NOT emit verified=true on exhaustion, got ${JSON.stringify(content)}`);
+    rmSync(dir, { recursive: true, force: true });
+  });
+  it('strict semver shape is required (v-prefix alone or v-feat must NOT pass)', () => {
+    // The CI tags: glob is intentionally broad (e.g. 'v*') so the
+    // minimatch gotcha can't block legitimate tag pushes. The helper
+    // enforces strict semver shape so a branch-pushed tag named
+    // 'v-feat' (which would still peel to its head_sha at the public
+    // remote) cannot deploy.
+    const badTags = ['v', 'v-feat', 'v1', 'v1.0', 'V1.0.0', 'version-1.0.0',
+      'refs/tags/v1.0.0', '1.0.0', 'v1.0.0.0'];
+    for (const bad of badTags) {
+      assert.throws(() => verifyReleaseCallInputs(inputs({ tag: bad }),
+        { ...callOpts({ lsRemote: () => lsLight(A, bad) }) }),
+        /not a strict semver tag/i,
+        `expected strict-semver rejection for tag=${JSON.stringify(bad)}`);
+    }
+  });
+  it('strict semver tags are accepted (plain + pre-release + build metadata)', () => {
+    const goodTags = ['v1.0.0', 'v1.0.0-beta.1', 'v1.2.3-rc.1', 'v1.0.0+build.123',
+      'v1.0.0-rc.1+build.123', 'v10.20.30', 'v0.0.1'];
+    for (const good of goodTags) {
+      const result = verifyReleaseCallInputs(inputs({ tag: good }),
+        { ...callOpts({ lsRemote: () => `${A}\trefs/tags/${good}` }) });
+      assert.equal(result.tag, good);
+    }
+  });
+  // Strict SemVer 2.0.0 regression: the original `SEMVER_RE` accepted
+  // leading zeros in major/minor/patch, leading zeros in numeric
+  // prerelease identifiers, and empty identifiers inside the
+  // dot-separated prerelease/build sections (e.g. `..`). The official
+  // SemVer 2.0.0 grammar prohibits all three; these cases must be
+  // rejected.
+  it('strict SemVer 2.0.0 rejects leading zeros and empty dot-separated identifiers (regression)', () => {
+    // Tags the BNF rejects even though every char is in the previous
+    // over-broad character class `[0-9A-Za-z.-]`. Each MUST fail closed.
+    const badTags = [
+      // Leading zeros in major/minor/patch (SemVer 2.0.0 §2).
+      'v01.2.3', 'v1.02.3', 'v1.2.03', 'v00.0.0', 'v0.0.01',
+      // Numeric prerelease identifier with a leading zero (SemVer 2.0.0 §9).
+      'v1.2.3-01', 'v1.2.3-007', 'v1.2.3-1.02.0',
+      // Empty dot-separated identifier in prerelease (§9: identifiers MUST NOT be empty).
+      'v1.2.3-alpha..1', 'v1.2.3-.alpha', 'v1.2.3-alpha.', 'v1.2.3-1..0',
+      // Empty dot-separated identifier in build metadata (§10).
+      'v1.2.3+build..x', 'v1.2.3+.meta', 'v1.2.3+meta.', 'v1.2.3+1..0',
+    ];
+    for (const bad of badTags) {
+      assert.throws(() => verifyReleaseCallInputs(inputs({ tag: bad }),
+        { ...callOpts({ lsRemote: () => lsLight(A, bad) }) }),
+        /not a strict semver tag/i,
+        `expected strict-SemVer-2.0.0 rejection for tag=${JSON.stringify(bad)}`);
+    }
+  });
+  it('strict SemVer 2.0.0 accepts legitimate prerelease (0, alnum, hyphen) and leading-zero build (regression)', () => {
+    // Tags the BNF still allows. These guard against an over-tight fix
+    // that would invalidate legitimate prerelease/build identifiers.
+    const goodTags = [
+      'v1.0.0', 'v0.0.1', 'v10.20.30',
+      // Numeric prerelease `0` is allowed (no leading-zero rule against the literal 0).
+      'v1.0.0-0', 'v1.0.0-0.1.0',
+      // Alphanumeric/hyphen prerelease identifiers.
+      'v1.0.0-alpha', 'v1.0.0-alpha.1', 'v1.0.0-x-y-z', 'v1.0.0-rc.2',
+      // Numeric build identifiers with leading zeros are allowed (build
+      // is more permissive than prerelease per §10).
+      'v1.0.0+001', 'v1.0.0+x.7.z.92', 'v1.0.0+0', 'v1.0.0+build.0',
+      // Combined prerelease + build.
+      'v1.0.0-rc.1+build.123', 'v1.0.0-alpha+001',
+    ];
+    for (const good of goodTags) {
+      const result = verifyReleaseCallInputs(inputs({ tag: good }),
+        { ...callOpts({ lsRemote: () => `${A}\trefs/tags/${good}` }) });
+      assert.equal(result.tag, good);
+    }
+  });
+});
+
+// CLI bootstrap mode selection: workflow_call uses VERIFY_TAG + VERIFY_HEAD_SHA;
+// workflow_run (legacy) uses VERIFY_EVENT_PATH. The two paths are exclusive.
+describe('CLI bootstrap mode selection (workflow_call vs workflow_run)', () => {
+  const SCRUB_CALL_KEYS = SCRUB_KEYS.concat(['VERIFY_TAG', 'VERIFY_HEAD_SHA']);
+  function runCliMode(env, payloadObj = null) {
+    const dir = mkdtempSync(join(tmpdir(), 'vr-cli-mode-'));
+    const eventPath = join(dir, 'event.json');
+    const outPath = join(dir, 'gh-output');
+    if (payloadObj) writeFileSync(eventPath, JSON.stringify(payloadObj));
+    writeFileSync(outPath, '');
+    const baseEnv = { ...process.env };
+    for (const k of SCRUB_CALL_KEYS) delete baseEnv[k];
+    const proc = spawnSync('node', [HELPER], {
+      env: { ...baseEnv, ...env, GITHUB_OUTPUT: outPath },
+      encoding: 'utf8', timeout: 30000,
+    });
+    const output = readFileSync(outPath, 'utf8');
+    rmSync(dir, { recursive: true, force: true });
+    return { status: proc.status, output, stderr: proc.stderr };
+  }
+
+  it('VERIFY_TAG + VERIFY_HEAD_SHA selects the workflow_call path (exit 0 on match)', () => {
+    const { remote, sha } = makeRemote([{ name: 'v1.2.3', kind: 'lightweight' }]);
+    const { status, output } = runCliMode({
+      VERIFY_TAG: 'v1.2.3', VERIFY_HEAD_SHA: sha,
+      VERIFY_TRUSTED_REPO: 'owner/repo', VERIFY_REMOTE_URL: remote, ...SECRETS,
+    });
+    assert.equal(status, 0);
+    for (const n of [`tag=v1.2.3\n`, `tag_kind=lightweight\n`, `verified=true\n`]) {
+      assert.ok(output.includes(n), `missing ${n} in ${JSON.stringify(output)}`);
+    }
+  });
+  it('VERIFY_TAG without VERIFY_HEAD_SHA fails closed', () => {
+    const { remote } = makeRemote([{ name: 'v1.2.3', kind: 'lightweight' }]);
+    const { status } = runCliMode({
+      VERIFY_TAG: 'v1.2.3',
+      VERIFY_TRUSTED_REPO: 'owner/repo', VERIFY_REMOTE_URL: remote, ...SECRETS,
+    });
+    assert.equal(status, 1);
+  });
+  it('legacy VERIFY_EVENT_PATH still works when VERIFY_TAG is unset (backward compat)', () => {
+    const { remote, sha } = makeRemote([{ name: 'v1.2.3', kind: 'lightweight' }]);
+    const { status, output } = runCliMode({
+      VERIFY_TRUSTED_REPO: 'owner/repo', VERIFY_REMOTE_URL: remote, ...SECRETS,
+      VERIFY_EVENT_PATH: (() => {
+        const p = join(tmpdir(), `vr-legacy-${Date.now()}.json`);
+        writeFileSync(p, JSON.stringify(payload({ head_sha: sha })));
+        return p;
+      })(),
+    });
+    assert.equal(status, 0);
+    assert.ok(output.includes('tag=v1.2.3\n'));
+  });
+  it('neither inputs nor event payload: fails closed', () => {
+    const { status } = runCliMode({ ...SECRETS });
+    assert.equal(status, 1);
   });
 });
