@@ -5,15 +5,71 @@ All notable changes to CarpinteroPro are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased] — single production route (tag + CI → reusable release workflow)
+## [Unreleased]
 
-Production deploy now has exactly one route: Vercel's git integration is
-disabled for `main` via `vercel.json` `git.deploymentEnabled`, so plain
-main pushes cannot deploy. The release pipeline is the only production
-path: CI runs on every push, and a new `tag-deploy` job (depends on
-`verify`, fires only when `startsWith(github.ref, 'refs/tags/')`)
-proves the GitHub event was a tag push and calls `release.yml` as a
-reusable workflow with `secrets: inherit`.
+## [0.3.1-beta.3] — 2026-09-21
+
+Free-launch candidate. Subscriptions no longer gate user access;
+historical billing data and administrative tooling remain available.
+CI and the release gate require same-revision evidence (CI must pass
+for the exact commit SHA the tag points at); Vercel security headers
+(moderate CSP + `X-Content-Type-Options` + `Referrer-Policy` +
+`Permissions-Policy` + HSTS + `X-Frame-Options`) shipped; database
+grants and `workshops.is_active` self-reactivation protection landed.
+The existing OKLCH design system gains the lino + nogal + escarlata
+palette and Fraunces display font, with further migration of feature
+surfaces away from legacy HSL tokens. Sentry is wired behind the
+`VITE_SENTRY_DSN` flag; portfolio-grade documentation shipped; and
+the production deploy path is consolidated into a single reusable
+release workflow triggered only by tag pushes. Three new Supabase
+migrations are required for production parity — see Upgrade notes.
+
+This release consolidates three in-flight work streams
+(release-pipeline hardening, W6 free-launch portfolio handoff phase 2,
+and W4 free-launch readiness audit) plus all work between
+`v0.3.1-beta.2` and `41be7e5`. The substance of every entry below is
+sourced from the git log and the
+[`docs/operations/production-readiness-audit-2026-09-13.md`](docs/operations/production-readiness-audit-2026-09-13.md)
+cumulative record. The W4 and W6 records below retain their historical
+notes; the release-pipeline changes above them supersede the earlier
+W4 tag filter and `workflow_run` deployment design.
+
+### Added
+
+- **`@sentry/react` ^9.47.1** as a production dependency (lockfile:
+  `9.47.1`). The app loads the SDK dynamically only when a non-empty
+  `VITE_SENTRY_DSN` is configured; otherwise reporting uses a no-op
+  client. This is a runtime configuration guarantee, not a claim
+  about SDK exclusion from every emitted bundle or PWA precache.
+- **ARIA affordances on shared UI primitives**: `chip-toggle`
+  accepts an optional `role` prop (`'button' | 'radio'`); when
+  `'radio'`, emits `role='radio'` + `aria-checked={active}`
+  instead of the native button role + `aria-pressed` (default preserved
+  for filter/tab/category usages). `section-howto` emits
+  `aria-expanded={open}` and `aria-controls={'howto-' +
+  storageKey}` with a matching panel id and focus ring.
+- **Helper-path tests**: `scripts/release/verify-release-workflow.test.mjs`
+  and extensions to `verify-release.test.mjs` cover the
+  `workflow_call` helper path, CI tag-deploy job structure
+  (JOB-LEVEL `uses:`, no `runs-on:`/`steps:`, `secrets: inherit`
+  at job level), `release.yml` reusable-workflow trigger shape,
+  strict semver shape enforcement, and the locked-in policy
+  that no `vercel` CLI calls live in CI. The legacy
+  `workflow_run` helper path tests are preserved.
+- **Two new synthetic-user browser journeys** under
+  `tests/e2e/browser/`: `signup-journey.spec.ts` drives
+  `/login → /dashboard` and asserts the `Inicio` heading plus
+  the absence of any billing CTA; `free-journey.spec.ts`
+  exercises login → onboarding `Saltar` → inventory → quote
+  wizard (client + recipe → `Crear`) → contract preview + PDF
+  download (`presupuesto-*.pdf` filename) → production board →
+  `StartProductionDialog` → new order in the `Planificado`
+  column.
+- **Placeholder screenshots** `public/screenshots/01-signup.svg`
+  through `07-settings.svg` (7 SVGs, viewBox 0 0 1200 720, each
+  <1 KB) shipped in the PWA precache; `docs/portfolio/README.md`
+  documents the Playwright command for replacing each
+  placeholder post-deploy.
 
 ### Changed
 
@@ -67,7 +123,7 @@ reusable workflow with `secrets: inherit`.
   eliminates the previous `head_branch-startsWith-v` heuristic, which
   could be bypassed by pushing a branch named `v-feat`.
 
-## [Unreleased] — W6 free-launch portfolio handoff (phase 2)
+### W6 free-launch portfolio handoff (phase 2)
 
 Docs-only W6 phase-2 commit: align `PRODUCT.md`, `CONTRIBUTING.md`,
 the Playwright runbook, and the demo-data safety record with the
@@ -166,7 +222,7 @@ verification.
   phase-2 scope and the AC-5 search across the in-scope
   files returns 0 matches.
 
-## [Unreleased] — W4 free-launch readiness audit
+### W4 free-launch readiness audit
 
 Qualify dependencies and release checks (W4 of the
 2026-09-13 free-launch readiness audit). No product behaviour
@@ -356,6 +412,31 @@ Tightening these to a nonce- or hash-based CSP requires Vite
 plugin support that this work unit does not introduce; tracked
 as a future enhancement in
 `docs/operations/vercel-config-decision.md`.
+
+### Upgrade notes
+
+Three new Supabase migrations landed since `v0.3.1-beta.2` and are
+required for production parity. Filenames are listed below; they
+were verified by
+`git diff --name-only v0.3.1-beta.2..HEAD -- supabase/migrations`
+on the release branch:
+
+- `supabase/migrations/20260913000001_grants_and_workshop_active_protection.sql`
+- `supabase/migrations/20260913000002_billing_webhook_events_service_role_grant.sql`
+- `supabase/migrations/20260913000003_workshop_founder_role.sql`
+
+The frontend release does not automatically apply database migrations.
+A read-only `supabase migration list --linked` check found the local
+and linked remote migration histories aligned, including all three
+migrations above. This verifies the linked project's migration ledger;
+it does not independently establish that project's production identity
+or prove full schema parity.
+
+Before upgrading, operators must confirm the intended production
+project and its migration state. Apply only missing migrations through
+the separately authorized database deployment process; do not reapply
+files already recorded as applied. No migrations were applied during
+this release preparation.
 
 ## [0.3.1-beta.2] — 2026-09-05
 
@@ -696,3 +777,4 @@ release-stage authorization.
   project's release matrix.
 
 [0.1.0-beta.1]: https://github.com/ferreyrajesus94-dot/carpinteroPro/releases/tag/v0.1.0-beta.1
+[0.3.1-beta.3]: https://github.com/ferreyrajesus94-dot/carpinteroPro/releases/tag/v0.3.1-beta.3

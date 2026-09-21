@@ -1,7 +1,7 @@
 {
   "name": "carpintero-pro",
   "private": true,
-  "version": "0.3.1-beta.2",
+  "version": "0.3.1-beta.3",
   "type": "module",
   "engines": {
     "node": ">=20.0.0"
