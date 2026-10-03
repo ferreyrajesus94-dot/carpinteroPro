@@ -25,7 +25,7 @@ Preserve the user's existing landing: no redesign or replacement. Clarify whethe
 - Delivery strategy: `ask-on-risk`.
 - Initial forecast: approximately 150-300 authored changed lines for tracking, bounded operational evidence, and capture/docs wiring; generated PNG bytes are excluded. A pipeline redesign is not included and requires a separate scope decision.
 - Proposed work units: Supabase reactivation evidence; deployment/readiness evidence; isolated smoke/capture wiring and assets. Keep applicable checks and docs with each unit.
-- Local closure authorization: up to two commits, evidence first and real-hash task closure second. Keep A1/B1/T1 unclosed until actual commit evidence is observed; no push/deploy or further mutation.
+- Local closure authorization: up to two commits, evidence first and real-hash task closure second. Evidence commit `6ce089324657615b519398fa030350b6e619b03b` is observed; this bounded closure metadata records that real identity. Any further commit beyond the authorized pair requires fresh permission; no push/deploy.
 - Documentation checks: structural readback and whitespace/index scope checks; no deterministic local RED or app test/build applies. Already observed Supabase functional evidence is retained, not rerun.
 - Rollback boundary: only the two documentation files; reverting documentation does not pause, restore, migrate or otherwise change the remote backend.
 
@@ -35,24 +35,24 @@ Preserve the user's existing landing: no redesign or replacement. Clarify whethe
 - [x] Relay the worker's closed choice between establishing supported secure authentication and deferring T1; do not ask for resume authorization again.
 - [x] Establish a documented existing CLI/API authentication mechanism through a protected channel without credential disclosure; the human explicitly selected continuation.
 - [x] Reconcile the decision and authenticated read-only evidence before restarting T1.
-- [ ] Record the work-unit commit identity when explicitly authorized.
-- Status: pending observed Git closure — authentication and exact-target API access are verified; local documentation commit permission is now granted, actual hash still pending.
+- [x] Record the observed shared work-unit commit `6ce089324657615b519398fa030350b6e619b03b`.
+- Status: done — secure authentication and exact-target API access verified; actual shared evidence commit observed and recorded.
 - Route: exact first-choice response was forwarded once. Worker continuation `musp24x1-8-cmgj` verified current-profile system keyring / Linux Secret Service reuse from official version-matched source, then exact-project GET 200 and restore-versions GET 200 with secrets kept in process memory. Restore POST count remains zero at this boundary.
 - Trigger evidence: worker returned `interaction_required` after safe authentication reuse could not be established. This is an authentication-method blocker, not missing resume consent.
 - Checks: credentials never appear in chat, logs, argv, source, or report files; no unsupported token-storage assumptions; selected continuation recorded honestly.
-- Commit: pending; intended to share the coherent T1 operational evidence unit when explicitly authorized.
+- Commit: `6ce089324657615b519398fa030350b6e619b03b` — shared verified Supabase readiness evidence.
 
 ### B1 — Verify services with a corrected read-only health request
 - [x] Diagnose the HTTP 400 query-validation failure independently of the accepted restore; verify the documented health query shape.
 - [x] Query exact-target Auth/DB health without the optional `timeout_ms` URL parameter; use a client/socket timeout instead and no restore replay.
 - [x] If services are healthy, run only literal `SELECT 1 AS ready` through the documented `/database/query/read-only` transport, or record its exact unavailability.
 - [x] Reconcile observed verification evidence.
-- [ ] Record the coherent T1 work-unit commit identity when explicitly authorized.
-- Status: pending commit closure only — independent functional verification is complete, without a second restore.
+- [x] Record the observed shared work-unit commit `6ce089324657615b519398fa030350b6e619b03b`.
+- Status: done — independent read-only Auth/DB/query verification and shared evidence commit observed; no second restore.
 - Route: `gentle-ai-verify` task `musq86vr-a-lzw3` completed read-only checks, no source/index writes. Parent performed one bounded CLI state spot check and mechanically reconciled the passive operational record.
 - Trigger evidence: writer reported partial due to external health-request failure; independent command-running functional verification applied despite passive source-doc risk.
 - Checks observed: exact-project GET 200 / `ACTIVE_HEALTHY`; health GET `services=auth%2Cdb` with no `timeout_ms` and 15-second client timeout returned 200, Auth/DB both `ACTIVE_HEALTHY` / `healthy: true`. Read-only query POST containing only `SELECT 1 AS ready` returned 201 / exactly `ready=1`. No retry, restore, data writes or credential output. Parent CLI spot check exited 0 and matched exact healthy target after correcting a local JSON-envelope parser assumption.
-- Commit: pending; group verified evidence with T1 when explicitly authorized.
+- Commit: `6ce089324657615b519398fa030350b6e619b03b` — shared verified Supabase readiness evidence.
 
 ### T1 — Resume and verify linked Supabase
 - [x] Reconfirm the exact project and fresh status through authenticated read-only evidence.
@@ -60,14 +60,14 @@ Preserve the user's existing landing: no redesign or replacement. Clarify whethe
 - [x] Observe terminal `ACTIVE_HEALTHY` project status and database/Auth service health; record blockers without claiming readiness or replaying a mutation.
 - [x] Write a bounded sanitized operational record at `docs/operations/supabase-reactivation-2026-10-03.md`.
 - [x] Obtain explicit authorization for up to two local evidence/closure documentation commits, excluding push/deploy.
-- [ ] Observe the work-unit commit and record its actual identity before closing T1.
-- Status: in progress — authorized local documentation closure; commit identity not yet observed. Operationally, backend project, Auth, DB and literal read-only query are verified; operational record includes the independent follow-up. No frontend or production readiness is inferred.
+- [x] Observe the actual work-unit commit `6ce089324657615b519398fa030350b6e619b03b` and record its identity.
+- Status: done — actual documentation evidence commit observed and recorded. Operationally, backend project, Auth, DB and literal read-only query are verified; operational record includes the independent follow-up. No frontend or production readiness is inferred.
 - Route: worker `muspg4vp-9-0dej` executed exactly one accepted restore; verifier `musq86vr-a-lzw3` resolved the health-request incident through read-only checks. Parent's bounded CLI spot check confirmed current state and reconciled the report from observed facts.
 - Trigger evidence: coordinated external operation and command-running verification; parent owns target authorization and task reconciliation.
 - Checks observed: exactly one bodyless restore POST 200; project progressed `COMING_UP` 4 / `RESTORING` 2 / `ACTIVE_HEALTHY` 14. Initial health requests returned 400 due to `timeout_ms` query typing; independent omission of that optional parameter succeeded with Auth/DB healthy 200 and literal read-only query 201 / `ready=1`. Parent CLI comparison exit 0 confirmed exact healthy target; initial local JSON parser failure was corrected without remote mutation. No unavailable backend readiness check remains.
 - Reconciled source assessment reports `passive`, 2 paths / 145 lines, `reviewDue: false`, structural parent readback-only; final operational record was read back. No source tests/separate verifier are required for passive docs. Historical source-doc targets received low-risk native approval/acknowledgement burns (`review-5419378aa9056eb6`, then `review-950261bfcbc59218`); neither approval covers later report changes or grants delivery.
 - Test-first exception: operational recovery/passive evidence has no deterministic local RED/GREEN. Actual before/after state, service health and read-only query were observed; no test-suite/build claim is made.
-- Commit: pending hash; human explicitly authorized up to two local documentation commits for A1/B1/T1 only.
+- Commit: `6ce089324657615b519398fa030350b6e619b03b` — `docs(ops): record verified hosted readiness checks`; parent `9e6a705800c8a4910b83622cc667ce4c8be559fb`, 2 docs / 154 insertions. Whitespace, staged-path scope, exact staged-tree match and clean post-commit worktree observed; no app suite/build applies to passive docs.
 
 ### T2 — Establish deployment state and resolve only authorized blockers
 - [x] Inspect the existing production deployment/alias and beta.3 preview; distinguish their commit identities and environments.
@@ -117,10 +117,9 @@ Preserve the user's existing landing: no redesign or replacement. Clarify whethe
 - Beta.3 preview `https://carpintero-de2mphion-ferreyrajesus94-dots-projects.vercel.app` is `READY`, target `preview`, linked by listing to release commit `9e6a705800c8a4910b83622cc667ce4c8be559fb`.
 - Production alias `https://carpintero-pro.vercel.app` resolves to `https://carpintero-59wtxn3l2-ferreyrajesus94-dots-projects.vercel.app`, `READY`/production at `7443d08d68ac1aafc80580faaf2c777b943530dc`, created 2026-09-15. Beta.3 is confirmed only on its separate `READY` preview. Read-only diagnosis found no `src/`/migration delta, but project-token compatibility and an applicable published fix remain unproven; no production readiness is inferred.
 - Hosted portfolio journeys create synthetic Auth users and fixture rows with a privileged client. Browser base URL and backend credentials are independent configuration boundaries.
-- Exactly one authorized paused-project restore was accepted HTTP 200; independent exact-project GET and Auth/DB health GET both returned 200/healthy, and literal read-only `SELECT 1 AS ready` returned 201/`ready=1`. No deployment, workflow rerun, migration, fixture/business-data write, engine/plan change, test suite/build, commit or push occurred.
+- Exactly one paused-project restore was accepted HTTP 200; independent project/Auth/DB health GETs returned 200/healthy, and literal read-only `SELECT 1 AS ready` returned 201/`ready=1`. No deployment, workflow rerun, migration, fixture/business-data write, engine/plan change, app test/build or push occurred. The separately authorized local documentation evidence commit is recorded above.
 
 ## Progress and next step
-T1 local closure is active, under the human's explicit two-commit documentation limit. T2 awaits a separate production scope decision; both read-only verifier tasks have finished. Preserve the current landing without redesign/replacement. Clarify whether the user also wants production left at its current deployment or wants a separate safe beta.3 publication path; do not interpret that choice as broad-token/deploy permission. Given no `src/`/migration delta and no verified minimum-permission CI fix, recommend keeping production unchanged for now rather than broadening credentials merely to chase a release label. A1/B1/T1 operational outcomes remain verified and local commit permission is granted; actual commit identity and closing evidence remain pending. NEVER repeat the single Supabase restore. T3 isolated-target/fixture/cleanup authorization remains unresolved; T4 depends on verified safe journeys. Native source-doc approval grants no production, fixture or Git delivery authority.
-
+A1/B1/T1 are done: functional outcomes and the actual shared local evidence commit `6ce089324657615b519398fa030350b6e619b03b` are verified and recorded. The user asked to finish this unit and leave a clean tree before other work. T2 production/CI remediation, T3 hosted fixture journeys and T4 genuine captures are deferred, not completed. No agent remains running. Preserve the current landing and production state; no push, deploy, broader token, fixture or migration permission is granted. NEVER repeat the single Supabase restore. This authorized closure metadata records the real evidence hash; no application code or deploy fix is included.
 ## Persistence
 Repository document is authoritative alongside the full Engram mirror at topic `odd/beta3-hosted-validation/tasks`. Visible todo is only a projection. Update and read back both durable copies at each task transition or material plan change; preserve unverified/commit-pending checkboxes.
