@@ -212,15 +212,30 @@ describe('release.yml: trusted + candidate checkouts', () => {
 });
 
 describe('release.yml: pull/deploy Vercel steps', () => {
-  it('both declare VERCEL_TOKEN from secrets.VERCEL_TOKEN, run in app/, with safe env expansion', () => {
+  it('pins the Vercel CLI to the verified owner-lookup fix', () => {
+    const install = findStep(loadJob().steps, /Install Vercel CLI/i);
+    assert.ok(install, 'Install Vercel CLI step missing');
+    assert.equal(install.run, 'npm install -g vercel@62.2.0');
+  });
+
+  it('pulls the production environment explicitly without a token argument', () => {
+    const pull = findStep(loadJob().steps, /Pull Vercel/i);
+    assert.ok(pull, 'Pull Vercel step missing');
+    assert.equal(pull.run, 'vercel pull --yes --environment=production');
+    assert.doesNotMatch(pull.run, /--token/);
+  });
+
+  it('both declare VERCEL_TOKEN from secrets.VERCEL_TOKEN, run in app/, with safe env wiring', () => {
     const { steps } = loadJob();
     for (const step of [findStep(steps, /Pull Vercel/i), findStep(steps, /Deploy to production/i)]) {
       assert.ok(step && step.env && step.env.VERCEL_TOKEN, `${step.name}: missing env.VERCEL_TOKEN`);
       assert.equal(step.env.VERCEL_TOKEN, '${{ secrets.VERCEL_TOKEN }}');
+      assert.equal(step.env.VERCEL_ORG_ID, '${{ secrets.VERCEL_ORG_ID }}');
+      assert.equal(step.env.VERCEL_PROJECT_ID, '${{ secrets.VERCEL_PROJECT_ID }}');
       assert.equal(step['working-directory'], 'app');
-      // Safe expansion: ${VERCEL_TOKEN} inside `run:` resolved from
-      // step `env:`, not from a hardcoded value or workflow context.
-      assert.match(step.run, /\$\{VERCEL_TOKEN\}/);
+      // The CLI must receive credentials only through the step env block.
+      assert.doesNotMatch(step.run, /\$\{VERCEL_TOKEN\}|--token/,
+        `${step.name}: token must not be expanded into CLI arguments`);
       assert.doesNotMatch(step.run, /secrets\.VERCEL_TOKEN/,
         `${step.name}: must not interpolate secrets.* inside run:`);
     }
@@ -250,19 +265,22 @@ describe('release.yml: pull/deploy shell expansion emulator (bash + fake vercel)
     return { status: proc.status, dump: out };
   }
 
-  it('pull command forwards the dummy token via --token without a network call', () => {
+  it('pull receives only production flags in argv and the dummy token in child env', () => {
     const pull = findStep(loadJob().steps, /Pull Vercel/i);
     const { status, dump } = runWithFake(pull.run);
     assert.equal(status, 0);
-    assert.match(dump, /ARGV\npull\n--yes\n--token=dummy-vercel-token-for-workflow-test\nEND/);
+    assert.match(dump, /ARGV\npull\n--yes\n--environment=production\nEND/);
+    assert.doesNotMatch(dump.split('END')[0], /dummy-vercel-token|--token/);
     assert.match(dump, /TOKEN=dummy-vercel-token-for-workflow-test/);
   });
 
-  it('deploy command forwards the dummy token with --prod without a network call', () => {
+  it('deploy receives production flags in argv and the dummy token only in child env', () => {
     const deploy = findStep(loadJob().steps, /Deploy to production/i);
     const { status, dump } = runWithFake(deploy.run);
     assert.equal(status, 0);
-    assert.match(dump, /ARGV\ndeploy\n--prod\n--yes\n--token=dummy-vercel-token-for-workflow-test\nEND/);
+    assert.match(dump, /ARGV\ndeploy\n--prod\n--yes\nEND/);
+    assert.doesNotMatch(dump.split('END')[0], /dummy-vercel-token|--token/);
+    assert.match(dump, /TOKEN=dummy-vercel-token-for-workflow-test/);
   });
 });
 
