@@ -19,14 +19,14 @@ Restore the existing high-severity audit gate and build pipeline while preservin
 - Previously approved CI/source work units remain closed; their authority is not reused for this new candidate.
 
 ## Work unit H1
-- [ ] Restore an audit-clean, UI-preserving dependency toolchain and close its verified commit.
-- Status: in_progress — final independent functional and preserved-UI acceptance passed. Exact work-unit commit and its fresh native review remain pending; remote CI/merge are separate delivery checkpoints.
+- [x] Restore an audit-clean, UI-preserving dependency toolchain and close its verified commit.
+- Status: done — functional and preserved-UI acceptance passed; exact work-unit commit observed. Human explicitly left only this commit natively unreviewed after consent expiry, while preserving RDD and all verification gates. Remote CI/merge remain separate delivery checkpoints.
 - Coherent scope: dependency graph, existing PostCSS integration, explicit legacy Tailwind configuration/theme compatibility, global stylesheet and focused regression coverage.
 - Allowed writer paths: `package.json`, `package-lock.json`, `postcss.config.js`, `tailwind.config.ts`, `src/index.css`, `scripts/release/verify-tailwind-toolchain.test.mjs`. Parent owns this task file.
 - Verified targets: official Tailwind and PostCSS integration 4.3.3; high-severity transitive patch floors `brace-expansion` 1.1.21/2.1.7/5.0.12 (preserve each major), `undici` 7.29.1. Verify target engines and complete resolved graph before claiming security clearance.
 - Visual baseline: `/tmp/carpinteroPro-pr134-baseline/`, eight local screenshots and `baseline.json`; desktop 1440x1000/mobile 390x844, light/dark and normal/reduced motion. External fonts/icons were blocked; compare like for like.
 - No landing component/content redesign is required by the current map.
-- Commit: pending; record the actual behavior work-unit hash only after verification and Git commit observation.
+- Commit: `4b914dc1856aae00c704f6f8a7f59e2462fc2413` — `fix(build): migrate to an audited Tailwind 4 toolchain`; parent `e823f6e004d3dd212b16c029fec6ab8908e23c96`, verified tree `c0007847b26cefba419dce958aed2dda3aafac43`, seven paths / 571 additions / 872 deletions.
 - Rollback: revert this repair work unit's dependency/config/CSS/test changes without reverting the earlier Vercel CI fix or backend evidence.
 
 ### Required evidence
@@ -40,8 +40,8 @@ Restore the existing high-severity audit gate and build pipeline while preservin
 - [x] Final eight-state local preserved-UI acceptance passed; original shadow restored, no overflow/errors, mobile menu/anchors/focus worked. Reduced-motion changed channel fractions 0.0042% desktop / 0.0102% mobile. Normal heights initially matched baseline, then increased 28px after 500ms with eight landing-float/landing-grow animations: phase overflow, not a stable layout regression. Baseline phase timestamps are unavailable; exact normal-motion pixel parity is not claimed. Artifacts: `/tmp/pr134-final-confirm/`.
 - [x] Local checks blocked external fonts/icons and backend/non-root navigation; menu, anchors and visible keyboard focus passed. No hosted journeys, fixture/customer writes or CTA activation. External-font/icon rendering remains a limitation.
 - [x] Source hashes/scope stayed unchanged through independent verification; whitespace passed, generated lockfile 396 additions / 851 deletions.
-- [ ] Native review closes for the exact new work-unit candidate under RDD; no inherited receipts.
-- [ ] Parent commits exact verified scope with a Conventional Commit and records its real identity.
+- [x] Human explicitly left only `4b914dc` without native review after three expired consent attempts created no lineage or mutation. No native approval, receipt or consumption is claimed; RDD remains on. Scoped ASSESS reports medium risk, a large runtime writer, explicit declined outcome, `candidate.consumed: false` and `reviewDue: true`; its RDD-off-equivalent plan retains writer self-verification. The completed independent verifier exceeds that plan. No inherited receipts.
+- [x] Parent committed the exact seven-path verified scope with root/branch/base/index/allowed-path/source-hash/whitespace/staged-tree/committed-tree/parent guards and observed a clean post-commit state.
 
 ## Routing and review burden
 - Static mapping: `mutck5p1-6-ey7p` completed, CodeGraph first.
@@ -54,7 +54,7 @@ Restore the existing high-severity audit gate and build pipeline while preservin
 - Keep the migration graph/config/CSS/tests coherent; report or slice actual review overage before delivery.
 
 ## Delivery continuation
-Publication P1 is already done. P2 waits for this repair and exact-head GitHub CI. P3 merges only a green PR and verifies a clean local state.
+Publication P1 is already done. This document closes the local H1 checkpoint, not remote delivery. P2 now publishes the repair and waits for exact-head GitHub CI. P3 merges only a green PR and verifies a clean local state; subsequent immutable delivery evidence is recorded in Engram rather than creating self-referential documentation commits.
 The published beta.3 tag keeps its old workflow; do not rerun it blindly. No production delivery is authorized.
 The earlier `odd/tasks/beta3-hosted-validation.md` remains a historical local closure checkpoint; T3/T4 remain deferred.
 
