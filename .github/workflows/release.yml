@@ -101,12 +101,13 @@ jobs:
       - name: Install Vercel CLI
         if: steps.gate.outputs.verified == 'true'
         working-directory: app
-        run: npm install -g vercel@latest
+        # 62.2.0 skips linked-project owner lookup during `vercel pull`.
+        run: npm install -g vercel@62.2.0
 
       - name: Pull Vercel project info
         if: steps.gate.outputs.verified == 'true'
         working-directory: app
-        run: vercel pull --yes --token="${VERCEL_TOKEN}"
+        run: vercel pull --yes --environment=production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -115,10 +116,8 @@ jobs:
       - name: Deploy to production
         if: steps.gate.outputs.verified == 'true'
         working-directory: app
-        # VERCEL_TOKEN is forwarded via the env block below using safe
-        # shell expansion; the value is set from secrets.* inside the
-        # step env, not interpolated into run:.
-        run: vercel deploy --prod --yes --token="${VERCEL_TOKEN}"
+        # The CLI reads VERCEL_TOKEN from the step environment.
+        run: vercel deploy --prod --yes
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

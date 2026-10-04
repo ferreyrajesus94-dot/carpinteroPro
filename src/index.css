@@ -1,8 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 requires Safari 16.4+, Chrome 111+, or Firefox 128+. */
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+@source "../index.html";
+@source "./**/*.{ts,tsx}";
+
+@theme {
+  --default-ring-width: 3px;
+  --default-ring-color: hsl(var(--ring));
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
 
 @layer base {
+  /* Preserve Tailwind 3's neutral border baseline across the v4 Preflight. */
+  *,
+  ::before,
+  ::after,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: hsl(var(--border));
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
   /* === DEPRECATED — shadcn legacy HSL tokens ===
    * These tokens will be removed once all features migrate to the OKLCH redesign system.
    * Use bg-cp-bg / text-ink / bg-cp-accent / border-line / etc. instead of
@@ -181,10 +203,12 @@
 
 @layer base {
   * {
-    @apply border-line;
+    border-color: var(--line);
   }
   body {
-    @apply bg-cp-bg text-ink font-sans;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: Inter, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 }
