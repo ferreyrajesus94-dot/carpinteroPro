@@ -7,9 +7,10 @@ import type { QuoteWithExtras } from '../types'
 export interface QuotePDFData {
   quote: QuoteWithExtras
   settings: WorkshopSettings | null
+  contract?: string
 }
 
-export function generateQuotePDF({ quote, settings }: QuotePDFData): void {
+export function generateQuotePDF({ quote, settings, contract }: QuotePDFData): void {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const margin = 15
   const pageWidth = 210
@@ -118,5 +119,23 @@ export function generateQuotePDF({ quote, settings }: QuotePDFData): void {
   doc.text('Total', col1 + 3, y)
   doc.text(formatCurrency(calcResult.salePrice), col2, y, { align: 'right' })
 
+  if (contract) {
+    doc.addPage()
+    doc.setFontSize(13)
+    doc.setFont('helvetica', 'bold')
+    doc.text(`Contrato - ${quote.quote_number}`, margin, margin + 5)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'normal')
+    const lines: string[] = doc.splitTextToSize(contract.replace(/\*\*/g, ''), contentWidth)
+    let contractY = margin + 15
+    for (const line of lines) {
+      if (contractY > 282) {
+        doc.addPage()
+        contractY = margin
+      }
+      doc.text(line, margin, contractY)
+      contractY += 5
+    }
+  }
   doc.save(`presupuesto-${quote.quote_number}.pdf`)
 }

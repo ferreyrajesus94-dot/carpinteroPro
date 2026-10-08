@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Download, Share2, Copy, Pencil, Check } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
+import { Input } from "@/shared/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -13,7 +14,10 @@ import {
 import { useWorkshopId } from "@/shared/hooks/useWorkshopId";
 import type { WorkshopSettings } from "@/shared/types/workshopSettings";
 import { useQuote } from "../hooks/useQuotes";
-import { useContractTemplates } from "../hooks/useContractTemplates";
+import {
+	useContractTemplates,
+	useCreateContractTemplate,
+} from "../hooks/useContractTemplates";
 import { renderContract } from "../lib/contractRenderer";
 import { generateQuotePDF } from "../lib/pdf";
 import { calculateQuote, type CalcExtra } from "../lib/calculator";
@@ -29,8 +33,16 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 	const { id } = useParams<{ id: string }>();
 	const workshopId = useWorkshopId();
 	const { data: quote } = useQuote(id ?? null);
-	const { data: templates = [] } = useContractTemplates(workshopId);
-	const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+	const {
+		data: templates = [],
+		isLoading: templatesLoading,
+		isError: templatesError,
+	} = useContractTemplates(workshopId);
+	const createTemplate = useCreateContractTemplate(workshopId);
+	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+	const [showTemplateForm, setShowTemplateForm] = useState(false);
+	const [templateName, setTemplateName] = useState("");
+	const [templateBody, setTemplateBody] = useState("");
 	const [copied, setCopied] = useState(false);
 	const copyResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
 		null,
@@ -55,7 +67,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 	}, []);
 
 	const defaultTemplate = templates.find((t) => t.is_default);
-	const activeTemplateId = selectedTemplateId || defaultTemplate?.id || "";
+	const activeTemplateId = selectedTemplateId ?? defaultTemplate?.id ?? "";
 	const activeTemplate = templates.find((t) => t.id === activeTemplateId);
 	const editedContract =
 		editState.templateId === activeTemplateId ? editState.contract : null;
@@ -136,13 +148,34 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 	}
 
 	function handleDownloadPDF() {
-		generateQuotePDF({ quote: quote!, settings: workshopSettings ?? null });
+		generateQuotePDF({
+			quote: quote!,
+			settings: workshopSettings ?? null,
+			contract: renderedContract || undefined,
+		});
 	}
 
-	function markdownToHtml(md: string): string {
-		return md
-			.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-			.replace(/\n/g, "<br />");
+	async function handleCreateTemplate(event: React.FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		if (
+			!templateName.trim() ||
+			!templateBody.trim() ||
+			createTemplate.isPending
+		) return;
+		try {
+			const template = await createTemplate.mutateAsync({
+				workshop_id: workshopId,
+				name: templateName.trim(),
+				body_markdown: templateBody.trim(),
+				is_default: templates.length === 0,
+			});
+			setSelectedTemplateId(template.id);
+			setShowTemplateForm(false);
+			setTemplateName("");
+			setTemplateBody("");
+		} catch {
+			// The mutation displays the error; preserve the draft for retry.
+		}
 	}
 
 	return (
@@ -156,15 +189,15 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 				<h1 className="text-2xl font-bold">Contrato — {quote.quote_number}</h1>
 			</div>
 
-			<div className="flex items-center gap-3">
-				<span className="text-sm text-ink3">Plantilla:</span>
+			<div className="flex flex-wrap items-center gap-3">
+				<label id="contract-template-label" className="text-sm text-ink3">Plantilla:</label>
 				<Select
 					value={activeTemplateId || "__none__"}
 					onValueChange={(v) =>
 						setSelectedTemplateId(v === "__none__" ? "" : v)
 					}
 				>
-					<SelectTrigger className="w-64">
+					<SelectTrigger className="w-64" aria-labelledby="contract-template-label" disabled={templatesLoading || templatesError}>
 						<SelectValue placeholder="Sin contrato" />
 					</SelectTrigger>
 					<SelectContent>
@@ -177,7 +210,33 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 						))}
 					</SelectContent>
 				</Select>
+				<Button variant="outline" onClick={() => setShowTemplateForm(true)} disabled={templatesLoading || templatesError}>
+					Nueva plantilla
+				</Button>
 			</div>
+			{templatesError ? <p role="alert" className="text-sm text-cp-danger">No se pudieron cargar las plantillas. Recargá la página para reintentar.</p> : null}
+			{!templatesLoading && !templatesError && templates.length === 0 && !showTemplateForm ? (
+				<p className="text-sm text-ink3">Todavía no hay plantillas de contrato. Creá una con el texto que uses en tu taller.</p>
+			) : null}
+			{showTemplateForm ? (
+				<form onSubmit={handleCreateTemplate} className="space-y-3 rounded-lg border border-line p-4">
+					<h2 className="text-lg font-semibold">Nueva plantilla de contrato</h2>
+					<label className="block space-y-1">
+						<span className="text-sm">Nombre de la plantilla</span>
+						<Input value={templateName} onChange={(event) => setTemplateName(event.target.value)} required maxLength={120} />
+					</label>
+					<label className="block space-y-1">
+						<span className="text-sm">Texto del contrato</span>
+						<Textarea value={templateBody} onChange={(event) => setTemplateBody(event.target.value)} required rows={8} />
+					</label>
+					<p className="text-sm text-ink3">Variables disponibles: {"{{client_name}}, {{quote_number}}, {{total}}, {{furniture_name}}, {{workshop_name}}, {{date}}"}.</p>
+					{createTemplate.isError ? <p role="alert" className="text-sm text-cp-danger">No se pudo guardar la plantilla. Tu texto se conserva; intentá de nuevo.</p> : null}
+					<div className="flex gap-2">
+						<Button type="submit" disabled={!templateName.trim() || !templateBody.trim() || createTemplate.isPending}>{createTemplate.isPending ? "Guardando..." : "Guardar plantilla"}</Button>
+						<Button type="button" variant="outline" onClick={() => setShowTemplateForm(false)} disabled={createTemplate.isPending}>Cancelar</Button>
+					</div>
+				</form>
+			) : null}
 
 			<div className="flex flex-wrap gap-2">
 				<Button onClick={handleWhatsApp}>
@@ -186,7 +245,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 				</Button>
 				<Button onClick={handleDownloadPDF} variant="outline">
 					<Download className="h-4 w-4 mr-2" />
-					Descargar PDF
+					{renderedContract ? "Descargar presupuesto y contrato" : "Descargar presupuesto PDF"}
 				</Button>
 				<Button onClick={handleCopy} variant="outline">
 					<Copy className="h-4 w-4 mr-2" />
@@ -233,6 +292,7 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 					</div>
 					{isEditing ? (
 						<Textarea
+							aria-label="Texto del contrato editado"
 							value={editedContract ?? ""}
 							onChange={(e) =>
 								setEditState({
@@ -245,12 +305,8 @@ export function ContractPreview({ workshopSettings }: ContractPreviewProps) {
 							className="font-mono text-sm"
 						/>
 					) : (
-						<div className="rounded-lg border p-6 bg-cp-surface text-ink text-sm leading-relaxed">
-							<div
-								dangerouslySetInnerHTML={{
-									__html: markdownToHtml(renderedContract),
-								}}
-							/>
+						<div className="whitespace-pre-wrap break-words rounded-lg border p-6 bg-cp-surface text-ink text-sm leading-relaxed">
+							{renderedContract.split(/\*\*(.*?)\*\*/g).map((part, index) => index % 2 === 1 ? <strong key={index}>{part}</strong> : part)}
 						</div>
 					)}
 				</div>

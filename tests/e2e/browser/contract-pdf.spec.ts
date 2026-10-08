@@ -29,7 +29,7 @@ test.describe("contract and PDF browser surface", () => {
 		await expect(page.getByText(/481/)).toBeVisible();
 
 		const downloadPromise = page.waitForEvent("download");
-		await page.getByRole("button", { name: "Descargar PDF" }).click();
+		await page.getByRole("button", { name: "Descargar presupuesto y contrato" }).click();
 		const download = await downloadPromise;
 		expect(download.suggestedFilename()).toBe(
 			`presupuesto-${fixture.quoteNumber}.pdf`,
