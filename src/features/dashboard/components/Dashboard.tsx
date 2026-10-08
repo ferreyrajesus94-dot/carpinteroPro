@@ -243,7 +243,7 @@ export function Dashboard({
 			{stats.byStatus.length > 0 && (
 				<div className="rounded-xl border border-line bg-cp-surface p-4">
 					<Eyebrow as="p" variant="mono" className="text-[10.5px] mb-3">
-						Pipeline · presupuestos activos
+						Presupuestos por estado
 					</Eyebrow>
 					<div className="space-y-2">
 						{ALL_STATUSES.map((status) => {

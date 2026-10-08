@@ -163,6 +163,17 @@ describe("SearchResultsPage", () => {
 		expect(input.value).toBe("Ricardo");
 	});
 
+	it("keeps typed text when the debounce catches up and mirrors it to the URL", async () => {
+		renderPage({ initialEntry: "/buscar" });
+		const input = screen.getByRole("searchbox", { name: "Buscar en tu taller" });
+		fireEvent.change(input, { target: { value: "QA" } });
+		await waitFor(() => expect(screen.getByTestId("current-search")).toHaveTextContent("q=QA"));
+		expect(input).toHaveValue("QA");
+		fireEvent.change(input, { target: { value: "QA mesa" } });
+		await waitFor(() => expect(screen.getByTestId("current-search")).toHaveTextContent("q=QA+mesa"));
+		expect(input).toHaveValue("QA mesa");
+	});
+
 	it("clearing the input shows the empty state and clears the visible input", async () => {
 		// Note: asserting the URL update after clearing in jsdom is brittle
 		// (MemoryRouter's setSearchParams timing varies). The end-to-end

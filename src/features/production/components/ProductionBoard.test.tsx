@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { ProductionBoard } from "./ProductionBoard";
 
 vi.mock("../hooks/useProductionOrders", () => ({
@@ -37,13 +38,13 @@ function noop() {}
 
 describe("ProductionBoard kanban overflow", () => {
 	it("renders the kanban container with overflow-x-auto so the page never scrolls horizontally", () => {
-		render(<ProductionBoard onStartProduction={noop} />);
+		render(<MemoryRouter><ProductionBoard onStartProduction={noop} /></MemoryRouter>);
 		const board = screen.getByTestId("production-board-kanban");
 		expect(board.className).toContain("overflow-x-auto");
 	});
 
 	it("sets min-w-0 on the kanban container so flex overflow falls back to internal scroll", () => {
-		render(<ProductionBoard onStartProduction={noop} />);
+		render(<MemoryRouter><ProductionBoard onStartProduction={noop} /></MemoryRouter>);
 		const board = screen.getByTestId("production-board-kanban");
 		expect(board.className).toContain("min-w-0");
 	});
@@ -57,4 +58,14 @@ describe("ProductionBoard kanban overflow", () => {
 		).toString();
 		expect(source.includes("min-w-[260px] flex-1")).toBe(false);
 	});
+});
+
+
+it("opens the order detail from a named board link", () => {
+	render(<MemoryRouter initialEntries={["/production"]}><Routes>
+		<Route path="/production" element={<ProductionBoard onStartProduction={noop} />} />
+		<Route path="/production/:id" element={<h1>Order detail</h1>} />
+	</Routes></MemoryRouter>);
+	fireEvent.click(screen.getByRole("link", { name: "Abrir orden OP-TEST-1" }));
+	expect(screen.getByRole("heading", { name: "Order detail" })).toBeInTheDocument();
 });

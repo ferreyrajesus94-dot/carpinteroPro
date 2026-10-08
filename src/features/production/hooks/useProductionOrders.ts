@@ -186,7 +186,14 @@ export function useTransitionProductionOrder() {
 				...input,
 				requestId: input.requestId ?? generateRequestId(),
 			}),
-		onSuccess: () => {
+		onSuccess: async () => {
+			// Starting or cancelling an order can change stock through the RPC.
+			// Invalidate shared cache keys without importing another feature.
+			await Promise.all([
+				queryClient.invalidateQueries({ queryKey: ["materials"] }),
+				queryClient.invalidateQueries({ queryKey: ["stock_movements"] }),
+				queryClient.invalidateQueries({ queryKey: ["global-search"] }),
+			]);
 			queryClient.invalidateQueries({ queryKey: PRODUCTION_ORDERS_LIST_KEY });
 			queryClient.invalidateQueries({
 				queryKey: PRODUCTION_ORDERS_DETAIL_KEY,

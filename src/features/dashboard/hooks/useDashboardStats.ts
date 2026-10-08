@@ -47,7 +47,7 @@ function inRange(dateStr: string, start: Date, end: Date): boolean {
   return !isBefore(d, start) && !isAfter(d, end)
 }
 
-const REVENUE_STATUSES: QuoteStatus[] = ['aprobado', 'entregado']
+const REVENUE_STATUSES: QuoteStatus[] = ['aprobado', 'en_produccion', 'entregado']
 const ALL_STATUSES: QuoteStatus[] = [
   'presupuesto', 'enviado', 'aprobado', 'en_produccion', 'entregado', 'cancelado',
 ]
@@ -81,7 +81,7 @@ export function computeDashboardStats(quotes: DashboardQuote[], period: Period):
     .filter(s => s.count > 0)
 
   const activeQuotes = quotes
-    .filter(q => q.status === 'enviado' || q.status === 'en_produccion')
+    .filter(q => q.status === 'enviado' || q.status === 'aprobado' || q.status === 'en_produccion')
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
     .slice(0, 20)
 
