@@ -70,7 +70,7 @@ describe('computeDashboardStats', () => {
     expect(stats.quoteCount).toBe(0)
   })
 
-  it('activeQuotes incluye solo enviado y en_produccion, sin filtro de período', () => {
+  it('activeQuotes incluye enviado, aprobado y en_produccion, sin filtro de período', () => {
     const oldDate = new Date(2020, 0, 1).toISOString()
     const quotes: DashboardQuote[] = [
       makeQuote({ id: 'q1', status: 'enviado', created_at: oldDate }),
@@ -78,8 +78,8 @@ describe('computeDashboardStats', () => {
       makeQuote({ id: 'q3', status: 'aprobado', created_at: oldDate }),
     ]
     const stats = computeDashboardStats(quotes, 'current_month')
-    expect(stats.activeQuotes).toHaveLength(2)
-    expect(stats.activeQuotes.map(q => q.id)).toEqual(expect.arrayContaining(['q1', 'q2']))
+    expect(stats.activeQuotes).toHaveLength(3)
+    expect(stats.activeQuotes.map(q => q.id)).toEqual(expect.arrayContaining(['q1', 'q2', 'q3']))
   })
 
   it('revenueByMonth tiene exactamente 12 entradas', () => {
@@ -102,4 +102,12 @@ describe('computeDashboardStats', () => {
     const stats = computeDashboardStats(quotes, 'current_month')
     expect(stats.totalRevenue).toBe(1500)
   })
+ it('keeps converted revenue while an approved quote is in production', () => {
+  const quotes = [makeQuote({status: 'en_produccion', recipe_cost: 1500})];
+  const stats = computeDashboardStats(quotes, 'current_month');
+  expect(stats.totalRevenue).toBe(1500);
+  expect(stats.conversionRate).toBe(100);
+  expect(stats.averageTicket).toBe(1500);
+ });
+
 })

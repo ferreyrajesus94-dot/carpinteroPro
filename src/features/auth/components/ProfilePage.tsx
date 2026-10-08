@@ -1,14 +1,16 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
 import { Avatar } from '@/shared/ui/avatar'
+import { useWorkshopSettings } from '@/shared/hooks/useWorkshopSettings'
 
 export function ProfilePage() {
   const { session, workshopId, signOut } = useAuth()
   const navigate = useNavigate()
+  const { data: workshopSettings } = useWorkshopSettings(workshopId ?? '')
 
   const user = session?.user
   const email = user?.email ?? ''
-  const workshopName = user?.user_metadata?.workshop_name ?? 'Mi Taller'
+  const workshopName = workshopSettings?.name ?? user?.user_metadata?.workshop_name ?? 'Mi Taller'
   const displayName = user?.user_metadata?.full_name ?? ''
 
   async function handleSignOut() {
