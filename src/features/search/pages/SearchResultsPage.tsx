@@ -67,6 +67,7 @@ export function SearchResultsPage() {
 	// it to the URL once the user stops typing (debounced). This keeps the
 	// address bar in sync without triggering a query refetch on every keystroke.
 	const [draftQuery, setDraftQuery] = useState(urlQuery);
+	const [previousUrlQuery, setPreviousUrlQuery] = useState(urlQuery);
 	const debouncedDraft = useDebouncedValue(draftQuery, 250);
 	// Defer the actual search query so typing stays responsive even when
 	// results render is heavy. React 19 prioritises the controlled input
@@ -74,21 +75,10 @@ export function SearchResultsPage() {
 	const trimmedDraft = draftQuery.trim();
 	const deferredQuery = useDeferredValue(trimmedDraft);
 
-	// Bidirectional sync between local input state and the URL ?q= param,
-	// coordinated by the existing values rather than a shared "last synced"
-	// ref. Both branches self-skip when the other side is already in sync,
-	// so there is no race when an external URL change happens during a
-	// debounce in flight.
-	//
-	// 1. URL → input (render-phase, React 19 "adjusting state to a prop"
-	//    pattern). Runs immediately when `urlQuery` changes from outside
-	//    (back/forward / address bar / link).
-	// 2. Input → URL (`useEffect` because setParams performs a router
-	//    navigation that React explicitly warns against during render). We
-	//    skip the write when the user is mid-typing (draftQuery !=
-	//    debouncedDraft) so a stale debounce still in flight does not
-	//    overwrite an external URL change.
-	if (urlQuery !== debouncedDraft && urlQuery !== draftQuery) {
+	// Only a changed URL can replace the draft. A debounce catching up
+	// with typing is not an external navigation.
+	if (urlQuery !== previousUrlQuery) {
+		setPreviousUrlQuery(urlQuery);
 		setDraftQuery(urlQuery);
 	}
 	useEffect(() => {
