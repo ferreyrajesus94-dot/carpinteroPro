@@ -393,6 +393,18 @@ describe("useTransitionProductionOrder", () => {
 		);
 	});
 
+	it("marks inactive inventory caches stale after a production transition", async () => {
+		vi.mocked(api.transitionProductionOrderState).mockResolvedValue(SAMPLE_LIST_ROW);
+		const { useTransitionProductionOrder } = await import("./useProductionOrders");
+		const client = new QueryClient();
+		const keys = [["materials", WORKSHOP_ID], ["stock_movements", "ledger"], ["global-search", WORKSHOP_ID, "melamina"]];
+		for (const key of keys) client.setQueryData(key, { stock: 3 });
+		const wrapper = ({ children }: { children: React.ReactNode }) => createElement(QueryClientProvider, { client }, children);
+		const { result } = renderHook(() => useTransitionProductionOrder(), { wrapper });
+		await act(async () => { await result.current.mutateAsync({ orderId: ORDER_ID, toState: "in_progress" }); });
+		for (const key of keys) expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+	});
+
 	it("preserves a caller-supplied requestId for cross-process idempotency", async () => {
 		vi.mocked(api.transitionProductionOrderState).mockResolvedValue(
 			SAMPLE_LIST_ROW,

@@ -1,4 +1,6 @@
 import { memo, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { buildProductionOrderDeepLink } from "../lib/productionOrderLinks";
 import { PageHeader } from "@/shared/ui/page-header";
 import { Button } from "@/shared/ui/button";
 import { EmptyState, ErrorState, LoadingState } from "@/shared/ui/feedback-state";
@@ -59,7 +61,13 @@ const OrderCard = memo(function OrderCard({ order }: { order: ProductionOrderLis
 			data-testid="production-order-card"
 			className="rounded-md border border-line bg-cp-bg2 p-3 shadow-sm"
 		>
-			<p className="font-mono text-xs text-ink3">{order.production_number}</p>
+			<Link
+				to={buildProductionOrderDeepLink(order.id)}
+				className="block rounded-sm py-2 font-mono text-sm font-medium text-cp-accent underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cp-accent"
+				aria-label={`Abrir orden ${order.production_number}`}
+			>
+				{order.production_number}
+			</Link>
 			<p className="mt-1 text-sm font-medium text-ink">{order.quote_furniture_name}</p>
 			{order.planned_start_date && (
 				<p className="mt-1 text-xs text-ink2">
