@@ -31,3 +31,6 @@
 ## Supabase
 - Never expose service role key in frontend
 - All client queries go through the typed `supabase` client from `@/shared/lib/supabase`
+
+## Project Skills
+- For CarpinteroPro releases, tags, CI, production deployment or release migrations, read `.agents/skills/carpinteropro-release/SKILL.md` and follow the current repository workflow.
