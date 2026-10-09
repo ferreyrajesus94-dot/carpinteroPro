@@ -112,7 +112,7 @@ No real customer data, addresses, or prices are bundled. Phone numbers use the s
 
 ## Review
 
-Every change — no matter how small — is reviewed before merge. PRs are gated by the CI workflow (`.github/workflows/ci.yml`) which runs Vitest, ESLint, the coverage threshold, `vite build`, and `npm audit` split into production / dev sweeps. Vercel auto-deploys only on tag pushes whose `workflow_run` conclusion is `success` for the same commit SHA, so the released revision always matches the revision CI tested.
+Every change — no matter how small — is reviewed before merge. PRs are gated by the CI workflow (`.github/workflows/ci.yml`) which runs Vitest, ESLint, the coverage threshold, `vite build`, and `npm audit` split into production / dev sweeps. Production deployment runs only after the CI verification job succeeds for a `v*` tag push, via the reusable `release.yml` workflow and its release gate. Vercel Git auto-deployment is disabled for `main`; feature branches retain previews. Hosted Supabase migrations are a separate reviewed operation. Follow `.agents/skills/carpinteropro-release/SKILL.md` for the current project release procedure.
 
 The free-launch verification surface — build / lint / coverage / Playwright list / pgTAP count / demo-data safety / env-name rename — is consolidated in the audit completion record at
 [`docs/operations/production-readiness-audit-2026-09-13.md`](docs/operations/production-readiness-audit-2026-09-13.md). Reviewers and contributors alike should treat the "Remaining remote checks or missing inputs" table in that document as the authoritative backlog for hosted-only work (signup email delivery, staging backup restore, support inbox wiring, hosted Supabase ledger diff, browser preview CSP smoke check).
