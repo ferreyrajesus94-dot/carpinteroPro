@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { LoginPage } from "./LoginPage";
 
@@ -31,6 +31,33 @@ function renderLogin() {
 		</MemoryRouter>,
 	);
 }
+
+describe("LoginPage bundled password icons", () => {
+	it("toggles password visibility and decorative eye SVG without changing names", () => {
+		renderLogin();
+		const input = screen.getByLabelText("Contraseña");
+		const show = screen.getByRole("button", { name: "Mostrar contraseña" });
+		expect(input).toHaveAttribute("type", "password");
+		expect(show.querySelector("svg")).toHaveClass("lucide-eye");
+		expect(show.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+		fireEvent.click(show);
+		expect(input).toHaveAttribute("type", "text");
+		const hide = screen.getByRole("button", { name: "Ocultar contraseña" });
+		expect(hide.querySelector("svg")).toHaveClass("lucide-eye-off");
+		fireEvent.click(hide);
+		expect(input).toHaveAttribute("type", "password");
+	});
+	it("renders both failed and passed password requirements as SVGs", () => {
+		renderLogin();
+		fireEvent.click(screen.getByRole("button", { name: "Registrarse" }));
+		fireEvent.change(screen.getByLabelText("Contraseña"), { target: { value: "abc" } });
+		const passed = screen.getByText("Al menos una minúscula").closest("li");
+		const failed = screen.getByText("Mínimo 8 caracteres").closest("li");
+		expect(passed?.querySelector("svg")).toHaveClass("lucide-check");
+		expect(failed?.querySelector("svg")).toHaveClass("lucide-x");
+		expect(failed?.querySelector("svg")).toHaveAttribute("width", "12");
+	});
+});
 
 describe("LoginPage Google login feature flag", () => {
 	beforeEach(() => {

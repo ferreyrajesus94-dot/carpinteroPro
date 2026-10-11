@@ -290,7 +290,7 @@ La forma dominante es el rectángulo con radio controlado. Sin píldoras decorat
 
 ### Clipping
 
-- Sin clipping decorativo. La geometría de la página no usa wave / blob / SVG masks. Las únicas formas no rectangulares del sistema son los iconos (`fi fi-rr-*` / `fi fi-br-*` Flaticon, `lucide-react`).
+- Sin clipping decorativo. La geometría de la página no usa wave / blob / SVG masks. Las únicas formas no rectangulares del sistema son los iconos (SVG locales de `lucide-react`, sin fuentes de iconos externas).
 
 ## Components
 
@@ -334,7 +334,7 @@ Variantes sin shadow: paneles admin densos (`OverviewPage.tsx`, `WorkshopDetailP
 
 **Estilo:** sidebar `w-60` desktop con `bg-cp-surface border-r border-line`, topbar `h-14` con `bg-cp-surface/85 backdrop-blur sticky top-0 z-10`. Bottom-tabs mobile `bg-cp-surface/95 backdrop-blur` con FAB contextual encima (`shadow-xl`).
 
-- **Sidebar item (`row-icon`):** `flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink`. Activo: `bg-cp-accent-soft text-cp-accent`. Iconos `fi fi-rr-*` (Flaticon Uicons regular-rounded, `text-base leading-none shrink-0`).
+- **Sidebar item (`row-icon`):** `flex items-center gap-3 rounded-md px-3 h-9 text-[13.5px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink`. Activo: `bg-cp-accent-soft text-cp-accent`. Iconos SVG de `lucide-react` con dimensiones explícitas de 16 × 16 px, `inline-block align-middle shrink-0` y `aria-hidden="true"`.
 - **Bottom-tab mobile:** `flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium`. Mismo tratamiento de activo.
 - **Mobile header:** `h-12 px-4 border-b bg-cp-surface/85 backdrop-blur lg:hidden sticky top-0 z-10`. Title brand con `truncate flex-1 text-[14px]`. Square nav buttons `h-11 w-11`.
 - **Skip links:** dos skip-to-content (`Saltar al contenido`) anclados a `#main`. WCAG 2.1 AA obligatorios; `focus-visible` los muestra.
@@ -370,7 +370,7 @@ Variantes sin shadow: paneles admin densos (`OverviewPage.tsx`, `WorkshopDetailP
 
 ### Brand mark (signature)
 
-**Forma:** cuadrado `bg-cp-accent text-cp-accent-ink` con icono `fi fi-br-hammer` (Flaticon bold-rounded). Tamaños `xs h-6 w-6 text-[11px]` / `sm h-7 w-7 text-sm` / `md h-9 w-9 text-base` / `lg h-10 w-10 text-lg`. Shape `square` (`rounded-md`) o `rounded` (`rounded-xl`).
+**Forma:** cuadrado `bg-cp-accent text-cp-accent-ink` con icono SVG `Hammer` de `lucide-react`, `strokeWidth={3}` y `aria-hidden="true"`. Tamaños de contenedor e icono: `xs h-6 w-6` / 11 px, `sm h-7 w-7` / 14 px, `md h-9 w-9` / 16 px, `lg h-10 w-10` / 18 px. Shape `square` (`rounded-md`) o `rounded` (`rounded-xl`).
 
 - **Wordmark:** `font-display font-semibold tracking-[-0.02em] text-ink text-[15px]`. Solo visible en `sm+`.
 - En mobile, la wordmark se reemplaza por el `sectionTitle` derivado de la nav activa (mono eyebrow pequeño).

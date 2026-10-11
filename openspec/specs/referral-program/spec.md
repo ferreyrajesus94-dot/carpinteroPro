@@ -409,7 +409,7 @@ Surface the admin APIs in `/admin/referidos` with two tabs: Youtubers (CRUD) and
 
 ### Requirement: Referidos Route Registration
 
-The system MUST add `{ to: "/admin/referidos", label: "Referidos", icon: "fi-rr-megaphone" }` to `ADMIN_NAV_ITEMS` and a `ReferidosPage` route to `src/features/admin/routes.tsx`. The route MUST be lazy-loaded like other admin routes and protected by `AdminGuard`.
+The system MUST add `{ to: "/admin/referidos", label: "Referidos", icon: Megaphone }` to `ADMIN_NAV_ITEMS`, with `Megaphone` directly imported from `lucide-react`, and a `ReferidosPage` route to `src/features/admin/routes.tsx`. The route MUST be lazy-loaded like other admin routes and protected by `AdminGuard`.
 
 #### Scenario: Nav item visible to platform admin
 

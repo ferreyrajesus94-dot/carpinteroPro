@@ -1,3 +1,4 @@
+import { ArrowLeft, Search, CircleAlert } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useAdminWorkshopDetail } from "../hooks/useAdminWorkshops";
 import { useToggleWorkshop, useForceOnboarding } from "../hooks/useAdminActions";
@@ -48,6 +49,7 @@ export function WorkshopDetailPage() {
 		const isNotFound =
 			detail.error instanceof Error &&
 			detail.error.message.includes("no encontrado");
+		const StatusIcon = isNotFound ? Search : CircleAlert;
 
 		return (
 			<section
@@ -55,8 +57,9 @@ export function WorkshopDetailPage() {
 				aria-label={isNotFound ? undefined : "Error al cargar el detalle"}
 				className="rounded-xl border border-line bg-cp-surface p-8 text-center"
 			>
-				<i
-					className={`fi ${isNotFound ? "fi-rr-search-alt" : "fi-rr-exclamation-circle"} mb-3 block text-3xl ${isNotFound ? "text-ink3" : "text-cp-danger"}`}
+				<StatusIcon
+					size={30}
+					className={`mx-auto mb-3 block ${isNotFound ? "text-ink3" : "text-cp-danger"}`}
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">
@@ -73,7 +76,7 @@ export function WorkshopDetailPage() {
 					to="/admin/workshops"
 					className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-cp-accent hover:underline"
 				>
-					<i className="fi fi-rr-arrow-left text-xs" aria-hidden="true" />
+					<ArrowLeft size={12} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 					Volver a talleres
 				</Link>
 			</section>
@@ -90,7 +93,7 @@ export function WorkshopDetailPage() {
 					to="/admin/workshops"
 					className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-cp-accent hover:underline"
 				>
-					<i className="fi fi-rr-arrow-left text-xs" aria-hidden="true" />
+					<ArrowLeft size={12} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 					Volver a talleres
 				</Link>
 			</section>
@@ -104,7 +107,7 @@ export function WorkshopDetailPage() {
 					to="/admin/workshops"
 					className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-ink2 hover:text-ink transition-colors"
 				>
-					<i className="fi fi-rr-arrow-left text-xs" aria-hidden="true" />
+					<ArrowLeft size={12} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 					Volver a talleres
 				</Link>
 

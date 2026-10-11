@@ -1,3 +1,4 @@
+import { Building, Sparkles, CreditCard, TriangleAlert, CircleAlert, BellRing, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 import { useAdminOverview } from "../hooks/useAdminOverview";
 import { useToggleMaintenance } from "../hooks/useAdminActions";
@@ -40,11 +41,11 @@ function OverviewSkeleton() {
 interface KpiCardProps {
 	label: string;
 	value: number;
-	icon: string;
+	icon: LucideIcon;
 	variant?: "default" | "warning";
 }
 
-function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
+function KpiCard({ label, value, icon: Icon, variant = "default" }: KpiCardProps) {
 	return (
 		<article
 			className={cn(
@@ -66,8 +67,9 @@ function KpiCard({ label, value, icon, variant = "default" }: KpiCardProps) {
 						{value}
 					</p>
 				</div>
-				<i
-					className={`fi ${icon} text-2xl leading-none ${
+				<Icon
+					size={24}
+					className={`inline-block shrink-0 align-middle ${
 						variant === "warning" ? "text-cp-warn" : "text-cp-accent"
 					}`}
 					aria-hidden="true"
@@ -97,8 +99,9 @@ export function OverviewPage() {
 				aria-label="Error al cargar el resumen"
 				className="rounded-xl border border-cp-danger/20 bg-cp-danger/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-cp-danger"
+				<CircleAlert
+					size={24}
+					className="mx-auto mb-3 block text-cp-danger"
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">
@@ -147,22 +150,22 @@ export function OverviewPage() {
 				<KpiCard
 					label="Talleres totales"
 					value={data.workshops.total}
-					icon="fi-rr-building"
+					icon={Building}
 				/>
 				<KpiCard
 					label="Nuevos (30 días)"
 					value={data.workshops.createdLast30Days}
-					icon="fi-rr-stars"
+					icon={Sparkles}
 				/>
 				<KpiCard
 					label="Suscripciones"
 					value={data.subscriptions.total}
-					icon="fi-rr-credit-card"
+					icon={CreditCard}
 				/>
 				<KpiCard
 					label="Fallos webhook"
 					value={data.support.recentWebhookFailures}
-					icon="fi-rr-triangle-warning"
+					icon={TriangleAlert}
 					variant={
 						data.support.recentWebhookFailures > 0 ? "warning" : "default"
 					}
@@ -175,8 +178,9 @@ export function OverviewPage() {
 					aria-label="Alerta de webhook"
 					className="rounded-xl border border-cp-warn/40 bg-cp-warn/10 p-4 text-sm text-cp-warn"
 				>
-					<i
-						className="fi fi-rr-bell-ring mr-2 align-middle"
+					<BellRing
+						size={14}
+						className="inline-block shrink-0 mr-2 align-middle"
 						aria-hidden="true"
 					/>
 					{data.support.recentWebhookFailures} errores de webhook en los últimos

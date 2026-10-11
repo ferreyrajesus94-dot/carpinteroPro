@@ -1,3 +1,4 @@
+import { Download, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@/shared/ui/page-header";
@@ -142,13 +143,14 @@ export function WorkshopsPage() {
 								}
 								className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 							>
-								<i className="fi fi-rr-download text-sm leading-none" aria-hidden="true" />
+								<Download size={14} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 								Exportar
 							</button>
 						)}
 					<div className="relative">
-						<i
-							className="fi fi-rr-search absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink3"
+						<Search
+							size={14}
+							className="absolute left-3 top-1/2 -translate-y-1/2 text-ink3"
 							aria-hidden="true"
 						/>
 						<input

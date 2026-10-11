@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { BrandMark } from "@/shared/ui/brand-mark";
@@ -18,7 +19,7 @@ export function TermsPage() {
 					to="/login"
 					className="flex items-center gap-2 text-sm text-ink3 hover:text-ink transition-colors"
 				>
-					<i className="fi fi-rr-arrow-left text-sm leading-none" />
+					<ArrowLeft size={14} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 					Volver
 				</Link>
 				<div className="flex items-center gap-2">

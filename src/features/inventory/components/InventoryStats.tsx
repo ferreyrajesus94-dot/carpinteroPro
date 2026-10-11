@@ -1,3 +1,4 @@
+import { Package, TriangleAlert, Layers, Star, type LucideIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { Skeleton } from '@/shared/ui/skeleton'
 import { formatCurrency } from '@/shared/lib/formatters'
@@ -8,7 +9,7 @@ import { computeInventoryStats } from '../lib/computeInventoryStats'
 interface CardConfig {
   label: string
   value: string
-  icon: string
+  icon: LucideIcon
   iconBg: string
   iconColor: string
   accentBg: string
@@ -34,7 +35,7 @@ export function InventoryStats() {
     {
       label: 'Valor total de inventario',
       value: formatCurrency(stats.totalValue),
-      icon: 'fi-rr-box',
+      icon: Package,
       iconBg: 'bg-cp-success/10',
       iconColor: 'text-cp-success',
       accentBg: 'bg-cp-success',
@@ -42,7 +43,7 @@ export function InventoryStats() {
     {
       label: 'Items con stock bajo',
       value: stats.lowStockCount.toString(),
-      icon: 'fi-rr-triangle-warning',
+      icon: TriangleAlert,
       iconBg: 'bg-cp-danger/10',
       iconColor: 'text-cp-danger',
       accentBg: 'bg-cp-danger',
@@ -50,7 +51,7 @@ export function InventoryStats() {
     {
       label: 'Total de materiales',
       value: stats.totalMaterials.toString(),
-      icon: 'fi-rr-layers',
+      icon: Layers,
       iconBg: 'bg-cp-info/10',
       iconColor: 'text-cp-info',
       accentBg: 'bg-cp-info',
@@ -58,7 +59,7 @@ export function InventoryStats() {
     {
       label: 'Categoría con más valor',
       value: stats.topCategory,
-      icon: 'fi-rr-star',
+      icon: Star,
       iconBg: 'bg-cp-accent-soft',
       iconColor: 'text-cp-accent',
       accentBg: 'bg-cp-accent',
@@ -67,7 +68,7 @@ export function InventoryStats() {
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      {cards.map(({ label, value, icon, iconBg, iconColor, accentBg }) => (
+      {cards.map(({ label, value, icon: Icon, iconBg, iconColor, accentBg }) => (
         <div
           key={label}
           className="relative overflow-hidden rounded-lg border border-line bg-cp-surface p-5 shadow-sm"
@@ -79,7 +80,7 @@ export function InventoryStats() {
           <div className="flex items-start justify-between pl-2">
             <p className="text-sm font-medium text-ink3 leading-snug">{label}</p>
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${iconBg}`}>
-              <i className={`fi ${icon} text-base leading-none ${iconColor}`} />
+              <Icon size={16} className={`inline-block shrink-0 align-middle ${iconColor}`} aria-hidden="true" />
             </div>
           </div>
           <p className="mt-3 text-2xl font-bold tracking-tight pl-2">{value}</p>

@@ -1,7 +1,9 @@
+import { ChartPie, Building, CreditCard, Megaphone, LifeBuoy, type LucideIcon } from "lucide-react";
+
 export const ADMIN_NAV_ITEMS = [
-	{ to: "/admin", label: "Resumen", icon: "fi-rr-chart-pie-alt" },
-	{ to: "/admin/workshops", label: "Talleres", icon: "fi-rr-building" },
-	{ to: "/admin/billing", label: "Billing", icon: "fi-rr-credit-card" },
-	{ to: "/admin/referidos", label: "Referidos", icon: "fi-rr-megaphone" },
-	{ to: "/admin/support", label: "Soporte", icon: "fi-rr-life-ring" },
-] as const;
+	{ to: "/admin", label: "Resumen", icon: ChartPie },
+	{ to: "/admin/workshops", label: "Talleres", icon: Building },
+	{ to: "/admin/billing", label: "Billing", icon: CreditCard },
+	{ to: "/admin/referidos", label: "Referidos", icon: Megaphone },
+	{ to: "/admin/support", label: "Soporte", icon: LifeBuoy },
+] as const satisfies readonly { to: string; label: string; icon: LucideIcon }[];

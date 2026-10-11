@@ -1,3 +1,4 @@
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/shared/hooks/useTheme";
 import { cn } from "@/shared/lib/utils";
 
@@ -9,6 +10,7 @@ interface ThemeToggleProps {
 export function ThemeToggle({ variant = "icon", className }: ThemeToggleProps) {
   const { theme, toggle } = useTheme();
   const isDark = theme === "dark";
+  const Icon = isDark ? Sun : Moon;
 
   if (variant === "label") {
     return (
@@ -21,7 +23,7 @@ export function ThemeToggle({ variant = "icon", className }: ThemeToggleProps) {
         )}
         aria-label={isDark ? "Activar modo claro" : "Activar modo oscuro"}
       >
-        <i className={cn("fi text-base leading-none", isDark ? "fi-rr-sun" : "fi-rr-moon")} aria-hidden="true" />
+        <Icon size={16} className="inline-block shrink-0 align-middle" aria-hidden="true" />
         {isDark ? "Modo claro" : "Modo oscuro"}
       </button>
     );
@@ -37,7 +39,7 @@ export function ThemeToggle({ variant = "icon", className }: ThemeToggleProps) {
         className
       )}
     >
-      <i className={cn("fi text-base leading-none", isDark ? "fi-rr-sun" : "fi-rr-moon")} aria-hidden="true" />
+      <Icon size={16} className="inline-block shrink-0 align-middle" aria-hidden="true" />
     </button>
   );
 }
