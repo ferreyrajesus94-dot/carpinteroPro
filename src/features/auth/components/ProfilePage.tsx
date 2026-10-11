@@ -1,3 +1,4 @@
+import { LogOut } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
 import { Avatar } from '@/shared/ui/avatar'
@@ -67,7 +68,7 @@ export function ProfilePage() {
         onClick={handleSignOut}
         className="flex w-full items-center justify-center gap-2 rounded-md border border-cp-danger/40 px-4 py-2.5 text-sm font-medium text-cp-danger transition-colors hover:bg-cp-danger/10 cursor-pointer"
       >
-        <i className="fi fi-rr-sign-out text-base leading-none" />
+        <LogOut size={16} className="inline-block shrink-0 align-middle" aria-hidden="true" />
         Cerrar sesión
       </button>
     </div>

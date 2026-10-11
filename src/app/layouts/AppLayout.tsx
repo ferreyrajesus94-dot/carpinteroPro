@@ -1,3 +1,4 @@
+import { TriangleAlert, ShieldCheck, Settings, ChevronRight, Search, Plus } from "lucide-react";
 import {
 	Outlet,
 	Navigate,
@@ -95,8 +96,9 @@ function AuthProfileRecoveryScreen({
 		<main className="flex min-h-screen items-center justify-center bg-cp-bg px-4 py-8">
 			<section className="w-full max-w-md rounded-xl border border-line bg-cp-surface p-6 text-center shadow-sm">
 				<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cp-accent-soft text-cp-accent">
-					<i
-						className="fi fi-rr-triangle-warning text-xl leading-none"
+					<TriangleAlert
+						size={20}
+						className="inline-block shrink-0 align-middle"
 						aria-hidden="true"
 					/>
 				</div>
@@ -216,14 +218,14 @@ function AuthenticatedAppShell({
 						<SidebarNavLink
 							to="/admin"
 							label="Admin"
-							icon="fi-rr-shield-check"
+							icon={ShieldCheck}
 							variant="row-icon"
 						/>
 					)}
 					<SidebarNavLink
 						to="/settings"
 						label="Ajustes"
-						icon="fi-rr-settings"
+						icon={Settings}
 						variant="row-icon"
 					/>
 					<Link
@@ -275,7 +277,7 @@ function AuthenticatedAppShell({
 				<header className="hidden lg:flex h-14 items-center gap-3 px-6 border-b border-line bg-cp-surface/85 backdrop-blur sticky top-0 z-10">
 					<Eyebrow variant="mono" className="flex items-center gap-1.5 text-[11px]">
 						<span>CarpinteroPro</span>
-						<i className="fi fi-rr-angle-small-right text-[10px]" />
+						<ChevronRight size={10} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 						<span className="text-ink2">{sectionTitle}</span>
 					</Eyebrow>
 					<div className="flex-1" />
@@ -303,7 +305,7 @@ function AuthenticatedAppShell({
 							)
 						}
 					>
-						<i className="fi fi-rr-search text-base leading-none shrink-0" aria-hidden="true" />
+						<Search size={16} className="inline-block align-middle shrink-0" aria-hidden="true" />
 					</NavLink>
 					<ThemeToggle
 						variant="icon"
@@ -320,7 +322,7 @@ function AuthenticatedAppShell({
 								)
 							}
 						>
-							<i className="fi fi-rr-shield-check text-base leading-none shrink-0" aria-hidden="true" />
+							<ShieldCheck size={16} className="inline-block align-middle shrink-0" aria-hidden="true" />
 						</NavLink>
 					)}
 					<NavLink
@@ -333,7 +335,7 @@ function AuthenticatedAppShell({
 							)
 						}
 					>
-						<i className="fi fi-rr-settings text-base leading-none shrink-0" aria-hidden="true" />
+						<Settings size={16} className="inline-block align-middle shrink-0" aria-hidden="true" />
 					</NavLink>
 					<Link
 						to="/profile"
@@ -369,7 +371,7 @@ function AuthenticatedAppShell({
 							bottom: "calc(72px + env(safe-area-inset-bottom) + 14px)",
 						}}
 					>
-						<i className="fi fi-rr-plus text-sm leading-none" />
+						<Plus size={14} className="inline-block shrink-0 align-middle" aria-hidden="true" />
 						{current.fabLabel}
 					</button>
 				)}

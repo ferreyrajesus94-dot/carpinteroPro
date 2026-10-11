@@ -1,3 +1,4 @@
+import { Eye, EyeOff, Mail, Check, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useNavigate, Navigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/shared/providers/AuthProvider'
@@ -40,6 +41,7 @@ function PasswordInput({
   showPassword: boolean
   onToggleShow: () => void
 }) {
+  const VisibilityIcon = showPassword ? EyeOff : Eye
   return (
     <div className="relative">
       <Input
@@ -58,7 +60,7 @@ function PasswordInput({
         aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
         className="absolute right-3 top-1/2 -translate-y-1/2 text-ink3 hover:text-ink transition-colors"
       >
-        <i className={`fi ${showPassword ? 'fi-rr-eye-crossed' : 'fi-rr-eye'} text-sm leading-none`} />
+        <VisibilityIcon size={14} className="inline-block shrink-0 align-middle" aria-hidden="true" />
       </button>
     </div>
   )
@@ -307,7 +309,7 @@ export function LoginPage() {
                   <div className="space-y-4 text-center">
                     <div className="flex justify-center">
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cp-accent/10">
-                        <i className="fi fi-rr-envelope text-2xl text-cp-accent leading-none" />
+                        <Mail size={24} className="inline-block shrink-0 align-middle text-cp-accent" aria-hidden="true" />
                       </div>
                     </div>
                     <div className="space-y-1">
@@ -378,19 +380,21 @@ export function LoginPage() {
 
                           {/* Checklist de requisitos */}
                           <ul className="space-y-1">
-                            {checks.map(c => (
-                              <li key={c.id} className="flex items-center gap-2 text-xs">
-                                <i className={cn(
-                                  'fi leading-none shrink-0',
-                                  c.passed
-                                    ? 'fi-rr-check text-green-500'
-                                    : 'fi-rr-cross text-ink3'
-                                )} />
-                                <span className={c.passed ? 'text-ink' : 'text-ink3'}>
-                                  {c.label}
-                                </span>
-                              </li>
-                            ))}
+                            {checks.map(c => {
+                              const RuleIcon = c.passed ? Check : X
+                              return (
+                                <li key={c.id} className="flex items-center gap-2 text-xs">
+                                  <RuleIcon
+                                    size={12}
+                                    className={cn('inline-block align-middle shrink-0', c.passed ? 'text-green-500' : 'text-ink3')}
+                                    aria-hidden="true"
+                                  />
+                                  <span className={c.passed ? 'text-ink' : 'text-ink3'}>
+                                    {c.label}
+                                  </span>
+                                </li>
+                              )
+                            })}
                           </ul>
                         </div>
                       )}

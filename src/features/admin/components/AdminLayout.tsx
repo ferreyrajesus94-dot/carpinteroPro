@@ -1,3 +1,4 @@
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Outlet, Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ThemeToggle } from "@/shared/components/ThemeToggle";
@@ -43,8 +44,9 @@ export function AdminLayout() {
 						to="/dashboard"
 						className="flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 					>
-						<i
-							className="fi fi-rr-arrow-left text-sm leading-none"
+						<ArrowLeft
+							size={14}
+							className="inline-block shrink-0 align-middle"
 							aria-hidden="true"
 						/>
 						Volver a la app
@@ -97,8 +99,9 @@ export function AdminLayout() {
 							aria-label="Actualizar datos"
 							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 						>
-							<i
-								className="fi fi-rr-refresh text-base leading-none"
+							<RefreshCw
+								size={16}
+								className="inline-block shrink-0 align-middle"
 								aria-hidden="true"
 							/>
 						</button>
@@ -107,8 +110,9 @@ export function AdminLayout() {
 							aria-label="Volver a la app"
 							className="grid h-9 w-9 place-items-center rounded-md text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 						>
-							<i
-								className="fi fi-rr-arrow-left text-base leading-none"
+							<ArrowLeft
+								size={16}
+								className="inline-block shrink-0 align-middle"
 								aria-hidden="true"
 							/>
 						</Link>

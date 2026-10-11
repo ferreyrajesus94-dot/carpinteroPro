@@ -44,14 +44,15 @@ Status, feedback, and chart UI MUST consume Sawdust tokens (`--cp-*`, `bg-cp-*`,
 
 ### Requirement: Icon System Boundary & Brand Mark
 
-Flaticon MUST be used for navigation, brand, and decorative glyphs. Lucide MUST be used for interactive controls and icons needing per-instance sizing. The landing brand mark MUST switch from Lucide `Zap` to Flaticon `fi-br-hammer` to match the app.
+Bundled Lucide SVGs MUST be used for navigation, brand, decorative glyphs and interactive controls. Icons MUST use direct named imports and explicit dimensions matching their incumbent sizes. Component-valued icon data and props MUST use `LucideIcon`; remote icon fonts and string-class compatibility dictionaries MUST NOT be used. The shared brand mark MUST use `Hammer` with `strokeWidth={3}` to match the app.
 
 #### Scenario: Boundary is enforced
 
 - GIVEN a brand, nav, control, or feature icon renders
 - WHEN it mounts
-- THEN brand/nav uses Flaticon and controls/actions use Lucide
-- AND no `fi fi-rr-*` class appears inside `src/shared/ui/*` or form/row controls
+- THEN brand/nav and controls/actions use bundled Lucide SVGs
+- AND decorative SVGs are hidden from assistive technology without changing accessible control names
+- AND no live icon-font classes or remote icon-font stylesheets remain
 - AND no Lucide `Zap` import remains in landing brand positions
 
 ### Requirement: Disabled & Unavailable Affordances

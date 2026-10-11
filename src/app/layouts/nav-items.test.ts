@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
+import { Wrench } from "lucide-react";
 import { NAV_ITEMS } from "./nav-items";
 
 // PR 6 blocker-fix (WARNING): the production feature was wired in
 // `src/app/router.tsx` (lazy `ProductionRoutes` mounted at
 // `/production/*`) and in `src/app/layouts/nav-items.ts` (a
-// `Producción` entry with the `fi-rr-tools` icon). Neither wiring
+// `Producción` entry with the bundled Wrench icon). Neither wiring
 // had an app-level test; this file adds a small, focused unit test
 // for the nav-items surface (the `ProductionRoutes` component is
 // already covered by `src/features/production/routes.test.tsx`).
@@ -16,9 +17,9 @@ describe("NAV_ITEMS — PR 6 wiring", () => {
 		expect(production?.label).toBe("Producción");
 	});
 
-	it("uses the fi-rr-tools icon for the production entry", () => {
+	it("uses the bundled Wrench icon for the production entry", () => {
 		const production = NAV_ITEMS.find((item) => item.to === "/production");
-		expect(production?.icon).toBe("fi-rr-tools");
+		expect(production?.icon).toBe(Wrench);
 	});
 
 	it("does not expose a contextual FAB label for the production entry (the board has its own on-page trigger)", () => {

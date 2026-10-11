@@ -1,3 +1,4 @@
+import { CircleAlert, Download, TriangleAlert, Receipt } from "lucide-react";
 import { useRef, useState, useMemo } from "react";
 import { useAdminCommissions, useAdminYoutubers } from "../hooks/useReferrals";
 import { exportCommissionsCsv } from "../api/referrals";
@@ -84,8 +85,9 @@ export function CommissionsTab() {
 				aria-label="Error al cargar comisiones"
 				className="rounded-xl border border-cp-danger/20 bg-cp-danger/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-cp-danger"
+				<CircleAlert
+					size={24}
+					className="mx-auto mb-3 block text-cp-danger"
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">
@@ -154,8 +156,9 @@ export function CommissionsTab() {
 					onClick={handleExportCsv}
 					className="inline-flex h-9 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 				>
-					<i
-						className="fi fi-rr-download text-sm leading-none"
+					<Download
+						size={14}
+						className="inline-block shrink-0 align-middle"
 						aria-hidden="true"
 					/>
 					Exportar CSV
@@ -169,8 +172,9 @@ export function CommissionsTab() {
 					aria-label={`${staleCount} comisiones vencidas`}
 					className="flex items-center gap-2 rounded-lg border border-cp-danger/30 bg-cp-danger/10 px-3 py-2 text-sm text-cp-danger"
 				>
-					<i
-						className="fi fi-rr-exclamation-triangle text-sm leading-none"
+					<TriangleAlert
+						size={14}
+						className="inline-block shrink-0 align-middle"
 						aria-hidden="true"
 					/>
 					<span className="font-medium">
@@ -182,8 +186,9 @@ export function CommissionsTab() {
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
-					<i
-						className="fi fi-rr-receipt mb-3 block text-3xl text-ink3"
+					<Receipt
+						size={30}
+						className="mx-auto mb-3 block text-ink3"
 						aria-hidden="true"
 					/>
 					<p className="text-sm font-medium text-ink2">

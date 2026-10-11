@@ -18,7 +18,7 @@ This decision follows the SDD 5 Production Ops design: `openspec/changes/2026-06
 
 1. **`rewrites`** — the same `/(.*)` → `/index.html` catch-all that has been in the repo since `0.1.0-beta.1`.
 2. **`headers`** applied to `/(.*)`:
-   - `Content-Security-Policy` — `default-src 'self'`, `script-src 'self' 'unsafe-inline'` (Vite injects inline scripts in dev and the PWA service-worker bootstrap needs `unsafe-inline` in prod), `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn-uicons.flaticon.com`, `font-src 'self' https://fonts.gstatic.com data:`, `img-src 'self' data: blob: https:`, `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.mercadopago.com.ar https://*.mercadolibre.com`, `frame-src 'self' https://*.mercadopago.com.ar https://*.mercadolibre.com`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`.
+   - `Content-Security-Policy` — `default-src 'self'`, `script-src 'self' 'unsafe-inline'` (Vite injects inline scripts in dev and the PWA service-worker bootstrap needs `unsafe-inline` in prod), `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`, `font-src 'self' https://fonts.gstatic.com data:`, `img-src 'self' data: blob: https:`, `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.mercadopago.com.ar https://*.mercadolibre.com`, `frame-src 'self' https://*.mercadopago.com.ar https://*.mercadolibre.com`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, `object-src 'none'`, `upgrade-insecure-requests`.
    - `X-Content-Type-Options: nosniff`
    - `Referrer-Policy: strict-origin-when-cross-origin`
    - `Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()`

@@ -34,13 +34,10 @@ vi.mock("@/shared/lib/fab", () => ({
 	dispatchFab: vi.fn(),
 }));
 
-const navItemsMock = vi.hoisted(() => [
-	{ to: "/dashboard", label: "Inicio", icon: "fi-rr-apps" },
-]);
-
-vi.mock("@/app/layouts/nav-items", () => ({
-	NAV_ITEMS: navItemsMock,
-}));
+vi.mock("@/app/layouts/nav-items", async () => {
+	const { LayoutGrid } = await import("lucide-react");
+	return { NAV_ITEMS: [{ to: "/dashboard", label: "Inicio", icon: LayoutGrid }] };
+});
 
 vi.mock("@/shared/components/MaintenanceBanner", () => ({
 	MaintenanceBanner: () => null,

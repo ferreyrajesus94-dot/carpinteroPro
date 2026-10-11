@@ -1,3 +1,4 @@
+import { X, CircleAlert, Banknote, Send, ChevronDown, ChevronRight } from "lucide-react";
 import { Fragment, useState } from "react";
 import {
 	usePayoutHistory,
@@ -104,8 +105,9 @@ function PayoutModal({ open, onClose }: PayoutModalProps) {
 						className="text-ink3 hover:text-ink transition-colors"
 						aria-label="Cerrar"
 					>
-						<i
-							className="fi fi-rr-cross text-lg leading-none"
+						<X
+							size={18}
+							className="inline-block shrink-0 align-middle"
 							aria-hidden="true"
 						/>
 					</button>
@@ -266,8 +268,9 @@ export function PayoutsTab() {
 				aria-label="Error al cargar pagos"
 				className="rounded-xl border border-cp-danger/20 bg-cp-danger/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-cp-danger"
+				<CircleAlert
+					size={24}
+					className="mx-auto mb-3 block text-cp-danger"
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">
@@ -299,8 +302,9 @@ export function PayoutsTab() {
 					onClick={() => setModalOpen(true)}
 					className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 				>
-					<i
-						className="fi fi-rr-money-bill-wave text-sm leading-none"
+					<Banknote
+						size={14}
+						className="inline-block shrink-0 align-middle"
 						aria-hidden="true"
 					/>
 					Nuevo pago
@@ -309,8 +313,9 @@ export function PayoutsTab() {
 
 			{runs.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
-					<i
-						className="fi fi-rr-inbox-out mb-3 block text-3xl text-ink3"
+					<Send
+						size={30}
+						className="mx-auto mb-3 block text-ink3"
 						aria-hidden="true"
 					/>
 					<p className="text-sm font-medium text-ink2">
@@ -337,6 +342,7 @@ export function PayoutsTab() {
 						<TableBody>
 							{runs.map((run) => {
 								const isExpanded = expandedRunId === run.id;
+								const ExpandIcon = isExpanded ? ChevronDown : ChevronRight;
 								return (
 									<Fragment key={run.id}>
 										<TableRow
@@ -354,8 +360,9 @@ export function PayoutsTab() {
 											}}
 										>
 											<TableCell>
-												<i
-													className={`fi fi-rr-${isExpanded ? "chevron-down" : "chevron-right"} text-xs text-ink3 transition-transform`}
+												<ExpandIcon
+													size={12}
+													className="inline-block shrink-0 align-middle text-ink3 transition-transform"
 													aria-hidden="true"
 												/>
 											</TableCell>

@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
@@ -11,7 +12,7 @@ export type SidebarNavVariant =
 interface SidebarNavLinkProps {
 	to: string;
 	label?: ReactNode;
-	icon?: string;
+	icon?: LucideIcon;
 	end?: boolean;
 	variant: SidebarNavVariant;
 	badge?: { count: number; tone: "danger" | "warn" | "info" };
@@ -52,7 +53,7 @@ const badgeStyle: Record<"danger" | "warn" | "info", string> = {
 export function SidebarNavLink({
 	to,
 	label,
-	icon,
+	icon: Icon,
 	end,
 	variant,
 	badge,
@@ -61,8 +62,8 @@ export function SidebarNavLink({
 	className,
 }: SidebarNavLinkProps) {
 	const styles = variantStyles[variant];
-	const iconEl = icon && (
-		<i className={cn("fi text-base leading-none shrink-0", icon)} aria-hidden="true" />
+	const iconEl = Icon && (
+		<Icon size={16} className="inline-block align-middle shrink-0" aria-hidden="true" />
 	);
 
 	const classNameFor = ({ isActive }: { isActive: boolean }) =>

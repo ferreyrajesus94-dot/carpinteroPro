@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import { Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 import { useAuth } from "@/shared/providers/AuthProvider";
@@ -34,8 +35,9 @@ export function AdminGuard({ children }: AdminGuardProps) {
 			<main className="flex min-h-screen items-center justify-center bg-cp-bg2 px-4 py-8">
 				<section className="w-full max-w-md rounded-xl border border-line bg-cp-surface p-6 text-center shadow-sm">
 					<div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-cp-danger/10 text-cp-danger">
-						<i
-							className="fi fi-rr-lock text-xl leading-none"
+						<Lock
+							size={20}
+							className="inline-block shrink-0 align-middle"
 							aria-hidden="true"
 						/>
 					</div>

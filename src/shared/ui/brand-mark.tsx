@@ -1,3 +1,4 @@
+import { Hammer } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/shared/lib/utils";
 
@@ -29,12 +30,7 @@ export function BrandMark({
 		md: "h-9 w-9",
 		lg: "h-10 w-10",
 	}[size];
-	const iconTextClass = {
-		xs: "text-[11px]",
-		sm: "text-sm",
-		md: "text-base",
-		lg: "text-lg",
-	}[size];
+	const iconSize = { xs: 11, sm: 14, md: 16, lg: 18 }[size];
 	const shapeClass = {
 		square: "rounded-md",
 		rounded: "rounded-xl",
@@ -49,11 +45,10 @@ export function BrandMark({
 					shapeClass,
 				)}
 			>
-				<i
-					className={cn(
-						"fi fi-br-hammer leading-none",
-						iconTextClass,
-					)}
+				<Hammer
+					size={iconSize}
+					strokeWidth={3}
+					className="inline-block shrink-0 align-middle"
 					aria-hidden="true"
 				/>
 			</span>

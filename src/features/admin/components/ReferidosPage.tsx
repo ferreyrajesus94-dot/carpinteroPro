@@ -1,3 +1,4 @@
+import { CircleAlert, UserPlus, Megaphone } from "lucide-react";
 import { useState } from "react";
 import {
 	useAdminYoutubers,
@@ -102,8 +103,9 @@ function YoutubersTab() {
 				aria-label="Error al cargar youtubers"
 				className="rounded-xl border border-cp-danger/20 bg-cp-danger/5 p-6 text-center"
 			>
-				<i
-					className="fi fi-rr-exclamation-circle mb-3 block text-2xl text-cp-danger"
+				<CircleAlert
+					size={24}
+					className="mx-auto mb-3 block text-cp-danger"
 					aria-hidden="true"
 				/>
 				<h2 className="font-display text-lg font-semibold text-ink">
@@ -138,8 +140,9 @@ function YoutubersTab() {
 					}}
 					className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-cp-surface px-3 text-xs font-medium text-ink2 hover:bg-cp-bg2 hover:text-ink transition-colors"
 				>
-					<i
-						className="fi fi-rr-user-add text-sm leading-none"
+					<UserPlus
+						size={14}
+						className="inline-block shrink-0 align-middle"
 						aria-hidden="true"
 					/>
 					Crear YouTuber
@@ -148,8 +151,9 @@ function YoutubersTab() {
 
 			{data.length === 0 ? (
 				<section className="rounded-xl border border-line bg-cp-surface p-8 text-center">
-					<i
-						className="fi fi-rr-megaphone mb-3 block text-3xl text-ink3"
+					<Megaphone
+						size={30}
+						className="mx-auto mb-3 block text-ink3"
 						aria-hidden="true"
 					/>
 					<p className="text-sm font-medium text-ink2">
