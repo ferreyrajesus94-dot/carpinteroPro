@@ -4,13 +4,13 @@
 Replace live Flaticon icon-font usage with bundled Lucide SVGs so icons remain visible when remote fonts are blocked or unavailable.
 
 ## Authorization and scope
-User authorized the SVG replacement. Preserve current Spanish UI, layout, colors, accessibility and behavior. User subsequently explicitly authorized commit, push and merge of the icon change, including the repository-required PR. Production release/tag remains unauthorized. Double-scroll report is withdrawn from this scope. Branch: `fix/bundled-svg-icons`.
+User authorized the SVG replacement. Preserve current Spanish UI, layout, colors, accessibility and behavior. User subsequently explicitly authorized commit, push and merge of the icon change, including the repository-required PR. User subsequently authorized production deployment through the next release tag; database migrations remain unauthorized. Double-scroll report is withdrawn from this scope. Branch: `fix/bundled-svg-icons`.
 
 Exploration found 64 logical icon choices/configurations across 23 source files. Lucide is already installed. Update active design/spec/CSP documentation; leave historical evidence and archived changes untouched.
 
 ## Work unit
 - [x] U1 — Replace external icon fonts with bundled SVGs, regression tests and current documentation.
-  - Status: implementation and work-unit commit complete; PR delivery in progress.
+  - Status: delivered — PR #143 merged into main after passing CI and preview checks.
   - Test-first: add regression tests for shared brand/navigation/theme SVG rendering and absence of live Flaticon references; observe RED before implementation and GREEN afterwards.
   - Acceptance: all live icon choices use statically imported SVG components; explicit dimensions and decorative accessibility preserved; remove Flaticon stylesheet links and only its CSP allowances.
   - Checks: focused tests, full unit suite, lint, build, whitespace; visible desktop/mobile browser checks with external icon fonts blocked when available; native review under enabled RDD.
@@ -23,12 +23,24 @@ Writer `mv36e917-3-adyi` completed replacement across 30 tracked files and four 
 Only the SVG migration, affected tests, current documentation and Flaticon-loading/CSP removal. Do not alter Google typography, auth/backend configuration or historical records.
 
 ## Progress and next step
-Implementation, native review and independent verification finished. User approved local visual appearance; work-unit commit is recorded. Next: push feature branch, open PR under CarpinteroPro CONTRIBUTING.md (business-need linkage accepted), observe CI and merge only when controls pass. Mobile Admin overflow is a disclosed limitation, not authorized follow-up.
+Implementation, native review and independent verification finished. User approved local visual appearance; work-unit commit is recorded. PR #143 was pushed and merged with squash commit `9c43404e799502a4309e6d3bf20fc840fd46dc28` at 2026-10-11T02:26:37Z. CI run `38104981323` test/lint/build passed; Vercel preview passed. Final committed PR slice received native approval and exact acknowledgement for `review-654f5be65c97373c`. Production release was initially deferred; subsequently authorized beta.5 release is tracked below. This final delivery-record update is local only, not part of the already merged PR. Mobile Admin overflow is a disclosed limitation, not authorized follow-up.
+
+## Production release — beta.5
+- [x] R1 — Publish annotated unused `v0.3.1-beta.5` on reviewed remote-main commit `9c43404e799502a4309e6d3bf20fc840fd46dc28`.
+  - Status: done — remote annotated tag `975abc45be8a0687b4a2312ff64ee6e282376295` published and peeled to the exact approved SHA.
+- [x] R2 — Observe exact tag CI and gated production workflow; do not retry blindly on failure.
+  - Status: done — run `38113876076` succeeded, including production deployment and release gate.
+- [x] R3 — Confirm deployed SHA and production alias, report migration scope separately.
+  - Status: done — deployment output confirms `9c43404e799502a4309e6d3bf20fc840fd46dc28` and https://carpinteropro.com.ar. Public `/` and `/login` return HTTP 200; HTML/CSP have no Flaticon references; icon implementation chunks return 200.
+
+Release evidence: https://github.com/ferreyrajesus94-dot/carpinteroPro/actions/runs/38113876076. Tests passed 142 files; coverage passed (68.11% statements); production/dev audits report zero vulnerabilities; lint/build/gate/deployment succeeded. No rendered-browser or authenticated production smoke was repeated. No database migrations or backend changes were made. Final evidence is retained in this local task document and memory; no additional documentation commit is included in the release.
+
+Preflight: remote main matches PR143 merge; full remote tag inventory confirms beta.5 unused. Current release gate accepts strict SemVer beta tags for production without package-version equality. Local HEAD is not the release target. Preserve pending local tracker changes; no source/config changes or migrations. No deterministic RED applies to operational tagging: verify remote tag peeling, observed CI/build and production evidence instead.
 
 ## Remaining checks and follow-ups
 - Mobile Admin header overflows at 390px: observed, attribution to SVG migration unproven; unchanged flex/chip structure. Follow-up requires separate scope decision.
 - Data-dependent Admin icons not browser-verified because external Edge Functions were intentionally blocked; existing component tests pass.
-- Zen itself and production deployment were not tested; headed Chromium checked local app with external hosts denied, including an actually blocked Google font request.
+- Zen itself and authenticated production browser rendering were not tested; headed Chromium checked local app with external hosts denied, including an actually blocked Google font request. Production deployment, alias and public resources were subsequently verified under R3.
 - Browser evidence: 22 screenshots retained privately outside the repository; no browser storage, credentials or screenshots are committed.
 - Final lint has six known warnings; detector has 29 retained-typography advisories. No outstanding build or unit-test failures; initial test typing failure was corrected and build rerun successfully.
 - ASSESS was unavailable due untracked declaration; conservative independent verification completed. Native approved acknowledgement is observed, not inferred from ASSESS.
